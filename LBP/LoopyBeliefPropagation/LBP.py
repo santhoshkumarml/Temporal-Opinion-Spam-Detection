@@ -50,22 +50,33 @@ class node(object):
         self.messages[(self,node)] = message
         
     def calculateMessageForNeighbor(self, neighbor):
-        allNeighborMessageMultiplication = 1;
+        allOtherNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
             if messageKey != (self,neighbor):
                 message= self.messages[messageKey]
-                allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
+                allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
         scoreAddition =0
         if self.nodeType == USER:
             for userType in USER_TYPES:
-                scoreAddition+= (self.score[userType]*allNeighborMessageMultiplication)
+                scoreAddition+= (self.score[userType]*allOtherNeighborMessageMultiplication)
         else:
             for productType in PRODUCT_TYPES:
-                scoreAddition+= (self.score[productType]*allNeighborMessageMultiplication)
+                scoreAddition+= (self.score[productType]*allOtherNeighborMessageMultiplication)
         return scoreAddition
     
     def calculateBeliefVals(self):
-        pass
+        allNeighborMessageMultiplication = 1;
+        for messageKey in self.messages.keys():
+            message= self.messages[messageKey]
+            allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
+        scoreAddition =(0,0)
+        if self.nodeType == USER:
+            scoreAddition[USER_TYPE_HONEST]+= (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication)
+            scoreAddition[USER_TYPE_FRAUD]+= (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication)
+        else:
+            scoreAddition[PRODUCT_TYPE_GOOD]+= (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication)
+            scoreAddition[PRODUCT_TYPE_BAD]+= (self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication)
+        return scoreAddition
     
     def calculateAndSendMessagesToNeighBors(self):
         for neighbor in self.getNeighbors():
