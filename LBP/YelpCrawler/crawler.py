@@ -2,7 +2,7 @@ YELP_COM_URL = 'http://www.yelp.com'
 __author__ = 'S.R'
 __date__ = 'Oct 27th, 2014'
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import urllib2
 import argparse
 import re
