@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 This example illustrates the sudden appearance of a
 giant connected component in a binomial random graph.
