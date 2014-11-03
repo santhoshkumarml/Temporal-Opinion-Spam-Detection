@@ -1,3 +1,4 @@
+from LoopyBeliefPropagation.SIAObject import business,user,review,CustomGraph
 __author__ = 'rami'
 
 from math import *
@@ -5,32 +6,8 @@ import re
 import networkx as nx
 import matplotlib.pyplot as plt
 
-class customGraph(nx.Graph):
-    pass
-
-class user:
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-
-class business:
-    def __init__(self, id, name, rating=2.5, url=None):
-        self.id = id
-        self.name = name
-        self.rating = rating
-        self.url = url
-
-class review:
-    def __init__(self, id, rating, usr, bn, txt='', recommended=True):
-        self.id = id
-        self.rating = rating
-        self.usr = usr
-        self.bn = bn
-        self.text = txt
-        self.recommended = recommended
-
 ######################################################### Initializers
-G=customGraph()
+G=CustomGraph()
 B = []
 R = []
 NR = []
