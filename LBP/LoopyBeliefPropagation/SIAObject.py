@@ -8,8 +8,8 @@ import networkx as nx
 '''
 Node Types
 '''
-USER = 0
-PRODUCT = 1
+USER = 'USER'
+PRODUCT = 'PRODUCT'
 
 '''
 User Types
@@ -74,7 +74,7 @@ class user(SIAObject):
     def calculateMessageForNeighbor(self, neighbor):
         allOtherNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
-            if messageKey != (self,neighbor):
+            if messageKey != (self,neighbor): #leaving the neighbor for which we are going to send message
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
         scoreAddition=0
