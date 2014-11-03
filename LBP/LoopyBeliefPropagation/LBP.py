@@ -30,7 +30,7 @@ REVIEW_TYPE_REAL = 1
 '''
   Class Node to be used in Graph
 '''
-class node(object):
+class Node(object):
     def __init__(self, score=(0.5, 0.5), neighbors=[], NODE_TYPE = USER):
         self.score = score
         self.neighbors=neighbors
@@ -55,7 +55,7 @@ class node(object):
             if messageKey != (self,neighbor):
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
-        scoreAddition =0
+        scoreAddition=0
         if self.nodeType == USER:
             for userType in USER_TYPES:
                 scoreAddition+= (self.score[userType]*allOtherNeighborMessageMultiplication)
@@ -69,7 +69,7 @@ class node(object):
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
             allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
-        scoreAddition =(0,0)
+        scoreAddition=(0,0)
         if self.nodeType == USER:
             scoreAddition[USER_TYPE_HONEST]+= (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication)
             scoreAddition[USER_TYPE_FRAUD]+= (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication)
