@@ -1,7 +1,6 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
-from math import exp
 
 '''
 Node Types
@@ -12,30 +11,31 @@ PRODUCT = 1
 '''
 User Types
 '''
-USER_TYPE_FRAUD = -1
+USER_TYPE_FRAUD = 0
 USER_TYPE_HONEST = 1
-
+USER_TYPES = {USER_TYPE_HONEST, USER_TYPE_FRAUD}
 '''
 Product Types
 '''
-PRODUCT_TYPE_BAD = -1
+PRODUCT_TYPE_BAD = 0
 PRODUCT_TYPE_GOOD = 1
+PRODUCT_TYPES = {PRODUCT_TYPE_GOOD, PRODUCT_TYPE_BAD}
 
 '''
 Review Types
 '''
-REVIEW_TYPE_FAKE = -1
+REVIEW_TYPE_FAKE = 0
 REVIEW_TYPE_REAL = 1
 
 '''
-  Node Util to be used in Graph
+  Class Node to be used in Graph
 '''
 class node(object):
-    def __init__(self, score=1, neighbors=[], NODE_TYPE = USER):
+    def __init__(self, score=(0.5, 0.5), neighbors=[], NODE_TYPE = USER):
         self.score = score
         self.neighbors=neighbors
         self.nodeType = NODE_TYPE
-        self.beliefVals = []
+        self.messages = dict()
         
     def getNeighbors(self):
         return self.neighbors
@@ -46,19 +46,31 @@ class node(object):
     def removeNeighbor(self, node2):
         self.neighbors.remove(node2)
     
-    def addBeliefVals(self, node, val):
-        self.beliefVals[(self,node)] = val
+    def addMessages(self, node, message):
+        self.messages[(self,node)] = message
         
-    def calculateBelief(self, neighbor):
-        beliefVal = 1
-        #beliefVal = alpha
-        
-        return beliefVal
+    def calculateMessageForNeighbor(self, neighbor):
+        allNeighborMessageMultiplication = 1;
+        for messageKey in self.messages.keys():
+            if messageKey != (self,neighbor):
+                message= self.messages[messageKey]
+                allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
+        scoreAddition =0
+        if self.nodeType == USER:
+            for userType in USER_TYPES:
+                scoreAddition+= (self.score[userType]*allNeighborMessageMultiplication)
+        else:
+            for productType in PRODUCT_TYPES:
+                scoreAddition+= (self.score[productType]*allNeighborMessageMultiplication)
+        return scoreAddition
     
-    def calculateAndSendBeliefsToNeighBors(self):
+    def calculateBeliefVals(self):
+        pass
+    
+    def calculateAndSendMessagesToNeighBors(self):
         for neighbor in self.getNeighbors():
-            beliefVal = self.calculateBelief(neighbor);
-            neighbor.addBeliefVals(beliefVal)
+            message = self.calculateMessageForNeighbor(neighbor);
+            neighbor.addMessages(self, message)
             
     def getScore(self):
         return self.score
@@ -67,7 +79,7 @@ class node(object):
         return self.nodeType
     
 '''
- Directed Graph Util to run Loopy Belief Propagation
+ Class UnDirected Graph to run Loopy Belief Propagation
 '''
 class UnDirectedGraph(object):
     def __init__(self, nodes=[], edges=[]):
@@ -77,9 +89,8 @@ class UnDirectedGraph(object):
     def add_node(self, node):
         self.nodes.append(node)
     
-    def add_edge(self, user, product, score=1):
-        self.edges[(user,product)]=score
-        #self.edges[(product,user)]=score
+    def add_edge(self, user, product):
+        self.edges.append((user,product))
         user.addNeighbor(product)
         product.addNeighbor(user)
         
@@ -87,7 +98,7 @@ class UnDirectedGraph(object):
         self.nodes.remove(node)
     
     def delete_edge(self, user, product):
-        del(self.edges[(user,product)])
+        self.edges.remove((user,product))
         user.removeNeighbor(product)
         product.removeNeighbor(user)
 
@@ -97,7 +108,7 @@ class UnDirectedGraph(object):
     def getEdges(self):
         return self.edges
 '''
- Loopy belief Propagation
+ Loopy Belief Propagation
 '''
 class LBP(object):
     def __init__(self, dg):
@@ -108,10 +119,10 @@ class LBP(object):
             if flipFromUsersToProducts:
                 for user in self.dg.getNodes():
                     if user.getNodeType() == USER:
-                        user.calculateAndSendBeliefsToNeighBors()
+                        user.calculateAndSendMessagesToNeighBors()
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation)
             else:
                 for product in self.dg.getNodes():
                     if product.getNodeType() == PRODUCT:
-                        product.calculateAndSendBeliefsToNeighBors()
+                        product.calculateAndSendMessagesToNeighBors()
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation-1)

@@ -1,2 +1,12 @@
-/.metadata/
-/.metadata/*
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+/RemoteSystemsTempFiles/
