@@ -1,8 +1,4 @@
-from LoopyBeliefPropagation.LBP import UnDirectedGraph
+from LoopyBeliefPropagation.LBP import *
 '''
 Initilaize Graph
 '''
-
-def readInput():
-    unDirectedGraph = UnDirectedGraph()
-    return unDirectedGraph

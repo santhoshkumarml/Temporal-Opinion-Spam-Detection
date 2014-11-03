@@ -14,10 +14,10 @@ class LBP(object):
             if flipFromUsersToProducts:
                 for user in self.graph.nodes():
                     if user.getNodeType() == USER:
-                        user.calculateAndSendMessagesToNeighBors()
+                        user.calculateAndSendMessagesToNeighBors(self.graph.neighbors(user))
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation)
             else:
                 for product in self.graph.nodes():
                     if product.getNodeType() == PRODUCT:
-                        product.calculateAndSendMessagesToNeighBors()
+                        product.calculateAndSendMessagesToNeighBors(self.graph.neighbors(product))
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation-1)
