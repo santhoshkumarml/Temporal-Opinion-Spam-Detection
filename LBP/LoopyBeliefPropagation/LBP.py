@@ -21,3 +21,6 @@ class LBP(object):
                     if product.getNodeType() == PRODUCT:
                         product.calculateAndSendMessagesToNeighBors(self.graph.neighbors(product))
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation-1)
+        for siaObject in self.graph.nodes():
+             siaObject.calculateBeliefVals();
+             print (siaObject.getName(),'---',siaObject.getScore())

@@ -67,6 +67,9 @@ class user(SIAObject):
         self.id = id
         self.name = name
     
+    def getName(self):
+        return self.name
+    
     def calculateMessageForNeighbor(self, neighbor):
         allOtherNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
@@ -75,7 +78,7 @@ class user(SIAObject):
                 allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
         scoreAddition=0
         for userType in USER_TYPES:
-            scoreAddition+= (self.score[userType]*allOtherNeighborMessageMultiplication)
+            scoreAddition= scoreAddition+(self.score[userType]*allOtherNeighborMessageMultiplication)
         return scoreAddition
     
     def calculateBeliefVals(self):
@@ -83,10 +86,11 @@ class user(SIAObject):
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
             allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
-        scoreAddition=(0,0)
-        scoreAddition[USER_TYPE_HONEST]+= (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication)
-        scoreAddition[USER_TYPE_FRAUD]+= (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication)
-        return scoreAddition
+        scoreAdditionHonest=0
+        scoreAdditionFraud=0
+        scoreAdditionHonest= scoreAdditionHonest+(self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication)
+        scoreAdditionFraud= scoreAdditionFraud+(self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication)
+        return (scoreAdditionFraud,scoreAdditionHonest)
 
 class business(SIAObject):
     def __init__(self, id, name, rating=2.5, url=None, score=(0.5,0.5)):
@@ -95,6 +99,9 @@ class business(SIAObject):
         self.name = name
         self.rating = rating
         self.url = url
+        
+    def getName(self):
+        return self.name
     
     def calculateMessageForNeighbor(self, neighbor):
         allOtherNeighborMessageMultiplication = 1;
@@ -104,7 +111,7 @@ class business(SIAObject):
                 allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
         scoreAddition=0
         for productType in PRODUCT_TYPES:
-            scoreAddition+= (self.score[productType]*allOtherNeighborMessageMultiplication)
+            scoreAddition= scoreAddition+(self.score[productType]*allOtherNeighborMessageMultiplication)
         return scoreAddition
     
     def calculateBeliefVals(self):
@@ -112,10 +119,11 @@ class business(SIAObject):
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
             allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
-        scoreAddition=(0,0)
-        scoreAddition[PRODUCT_TYPE_GOOD]+= (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication)
-        scoreAddition[PRODUCT_TYPE_BAD]+= (self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication)
-        return scoreAddition
+        scoreAdditionGood=0
+        scoreAdditionBad=0
+        scoreAdditionGood= scoreAdditionGood+(self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication)
+        scoreAdditionBad= scoreAdditionBad+(self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication)
+        return (scoreAdditionBad,scoreAdditionGood)
 
 class review:
     def __init__(self, id, rating, usr, bn, txt='', recommended=True):

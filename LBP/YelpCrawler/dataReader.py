@@ -36,7 +36,7 @@ with open('./o_new_2.txt') as f:
                 G.add_node(usr)
                 node_colors[usr] = 'blue'
                 edge_colors[(B[1], usr)] = 'green'
-                G.add_edge(B[1], usr)
+                G.add_edge(bnss, usr)
         elif re.match('^NR=', line):
             exec(line)
             print 'NR = ', NR
@@ -46,9 +46,9 @@ with open('./o_new_2.txt') as f:
                 G.add_node(usr)
                 node_colors[usr] = 'blue'
                 edge_colors[B[1], usr] = 'black'
-                G.add_edge(B[1], usr)
+                G.add_edge(bnss, usr)
 
 loopyBeliefPropagation = LBP(graph=G)
 loopyBeliefPropagation.doBeliefPropagation(False, 10)
-ncolors = [node_colors[x] for x in G.nodes()]
-paint(ncolors,edge_colors.values())
+#ncolors = [node_colors[x] for x in G.nodes()]
+#paint(ncolors,edge_colors.values())
