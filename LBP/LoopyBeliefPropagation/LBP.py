@@ -63,7 +63,7 @@ class node(object):
             for productType in PRODUCT_TYPES:
                 scoreAddition+= (self.score[productType]*allOtherNeighborMessageMultiplication)
         return scoreAddition
-    
+        
     def calculateBeliefVals(self):
         allNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
