@@ -37,18 +37,18 @@ class CustomGraph(nx.Graph):
         
 
 '''
-  SIAObject to be used in Graph node
+  SIAObject to be used as Graph node
 '''
 
 class SIAObject(object):
-    def __init__(self, customGraph, score=(0.5, 0.5), NODE_TYPE=USER):
+    def __init__(self, graph, score=(0.5, 0.5), NODE_TYPE=USER):
         self.score = score
         self.messages = dict()
-        self.customGraph = customGraph
+        self.graph = graph
         self.nodeType = NODE_TYPE
         
     def getNeighbors(self):
-        return self.customGraph.neighbors(self)
+        return self.graph.neighbors(self)
     
     def addMessages(self, node, message):
         self.messages[(self,node)] = message
@@ -66,8 +66,8 @@ class SIAObject(object):
     
     
 class user(SIAObject):
-    def __init__(self, id, name, score=(0.5,0.5), NODE_TYPE=USER):
-        super(user, self).__init__(score, NODE_TYPE)
+    def __init__(self, id, name, graph, score=(0.5,0.5)):
+        super(user, self).__init__(graph, score, USER)
         self.id = id
         self.name = name
     
@@ -93,8 +93,8 @@ class user(SIAObject):
         return scoreAddition
 
 class business(SIAObject):
-    def __init__(self, id, name, rating=2.5, url=None, score=(0.5,0.5), NODE_TYPE=PRODUCT):
-        super(business, self).__init__(score, NODE_TYPE)
+    def __init__(self, id, name, rating=2.5, url=None, graph, score=(0.5,0.5)):
+        super(business, self).__init__(graph, score, PRODUCT)
         self.id = id
         self.name = name
         self.rating = rating
