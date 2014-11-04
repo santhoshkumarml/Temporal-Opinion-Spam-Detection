@@ -14,9 +14,11 @@ R = []
 NR = []
 node_colors = {}
 edge_colors = {}
+nodetoNodeLabelDict = {}
 ######################################################### MAIN ()
 def paint(nodecolor='red', edgecolor='blue'):
-    nx.draw(G,pos=nx.spring_layout(G), with_labels=True, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
+    nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
+    nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
     plt.show()
 
 with open('./o_new_2.txt') as f:
@@ -35,7 +37,7 @@ with open('./o_new_2.txt') as f:
                 usr = user(recoRev[1], recoRev[2])
                 G.add_node(usr)
                 node_colors[usr] = 'blue'
-                edge_colors[(B[1], usr)] = 'green'
+                edge_colors[(bnss, usr)] = 'green'
                 G.add_edge(bnss, usr)
         elif re.match('^NR=', line):
             exec(line)
@@ -45,10 +47,11 @@ with open('./o_new_2.txt') as f:
                 usr = user(noRecoRev[1], noRecoRev[2])
                 G.add_node(usr)
                 node_colors[usr] = 'blue'
-                edge_colors[B[1], usr] = 'black'
+                edge_colors[bnss, usr] = 'black'
                 G.add_edge(bnss, usr)
 
-loopyBeliefPropagation = LBP(graph=G)
-loopyBeliefPropagation.doBeliefPropagation(False, 10)
-#ncolors = [node_colors[x] for x in G.nodes()]
-#paint(ncolors,edge_colors.values())
+#loopyBeliefPropagation = LBP(graph=G)
+#loopyBeliefPropagation.doBeliefPropagation(False, 10)
+nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
+ncolors = [node_colors[x] for x in G.nodes()]
+paint(ncolors,edge_colors.values())
