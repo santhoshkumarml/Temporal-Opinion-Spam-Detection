@@ -50,8 +50,8 @@ with open('./o_new_2.txt') as f:
                 edge_colors[bnss, usr] = 'black'
                 G.add_edge(bnss, usr)
 
-#loopyBeliefPropagation = LBP(graph=G)
-#loopyBeliefPropagation.doBeliefPropagation(False, 10)
+loopyBeliefPropagation = LBP(graph=G)
+loopyBeliefPropagation.doBeliefPropagation(False, 10)
 nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-ncolors = [node_colors[x] for x in G.nodes()]
-paint(ncolors,edge_colors.values())
+#ncolors = [node_colors[x] for x in G.nodes()]
+#paint(ncolors,edge_colors.values())

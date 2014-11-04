@@ -4,6 +4,8 @@ Created on Nov 3, 2014
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
 import networkx as nx
+import numpy
+from numpy import shape, float32, dtype
 
 '''
 Node Types
@@ -30,7 +32,43 @@ Review Types
 REVIEW_TYPE_FAKE = 0
 REVIEW_TYPE_REAL = 1
 
+REVIEW_TYPE_GOOD = 0
+REVIEW_TYPE_BAD = 1
 
+'''
+Compatibility Potential
+'''
+episolon = 0.25;
+compatabilityPotential = numpy.ones(shape=(2,2), dtype=float32)
+def initialiazePotential():
+    for i in range(0,2):
+        for j in range(0,2):
+            for k in range(0,2):
+                output = 0
+                if i == REVIEW_TYPE_GOOD:
+                    if j == USER_TYPE_HONEST:
+                        if k == PRODUCT_TYPE_GOOD:
+                            output = episolon
+                        else:
+                            output = 1-episolon
+                    else:
+                        if k == PRODUCT_TYPE_GOOD:
+                            output = 1-(2*episolon)
+                        else:
+                            output = (2*episolon)
+                else:
+                    if j == USER_TYPE_HONEST:
+                        if k == PRODUCT_TYPE_GOOD:
+                            output = 1-episolon
+                        else:
+                            output = episolon
+                    else:
+                        if k == PRODUCT_TYPE_GOOD:
+                            output = (2*episolon)
+                        else:
+                            output = 1-(2*episolon)
+                compatabilityPotential[i][j][k] = output
+                    
 
 class CustomGraph(nx.Graph):
     pass
@@ -60,6 +98,15 @@ class SIAObject(object):
     def getNodeType(self):
         return self.nodeType
     
+    def getNormalizingValue(self, v):
+        norm=v.sum()
+        return norm
+    
+    def normalizeMessages(self):
+        normalizedMessages = numpy.array(self.messages.values())
+        normalizingValue = self.getNormalizingValue(normalizedMessages)
+        for key in self.messages.keys():
+            self.messages[key] = self.messages[key]/normalizingValue
     
 class user(SIAObject):
     def __init__(self, id, name, score=(0.5,0.5)):
@@ -82,7 +129,7 @@ class user(SIAObject):
         return scoreAddition
     
     def calculateBeliefVals(self):
-        allNeighborMessageMultiplication = 1;
+        allNeighborMessageMultiplication = 1
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
             allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
