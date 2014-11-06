@@ -21,7 +21,7 @@ def paint(nodecolor='red', edgecolor='blue'):
     nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
     plt.show()
 
-with open('./o_new_2.txt') as f:
+with open('../../../data/o_new_1.txt') as f:
     for line in f:
         if re.match('^B=', line):
             exec(line)

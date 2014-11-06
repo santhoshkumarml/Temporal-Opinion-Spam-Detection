@@ -6,6 +6,7 @@ Created on Nov 3, 2014
 import networkx as nx
 import numpy
 from numpy import shape, float32, dtype
+import math
 
 '''
 Node Types
@@ -38,7 +39,7 @@ REVIEW_TYPE_BAD = 1
 '''
 Compatibility Potential
 '''
-episolon = 0.25;
+episolon = math.pow(10, -6)
 compatabilityPotential = numpy.ones(shape=(2,2), dtype=float32)
 def initialiazePotential():
     for i in range(0,2):
