@@ -1,6 +1,7 @@
 from LoopyBeliefPropagation.LBP import *
 from LoopyBeliefPropagation.SIAObject import *
 from datetime import datetime
+import sys
 __author__ = 'rami'
 
 from math import *
@@ -16,14 +17,10 @@ NR = []
 node_colors = {}
 edge_colors = {}
 nodetoNodeLabelDict = {}
+inputFileName = sys.argv[1]
 ######################################################### MAIN ()
-def paint(nodecolor='red', edgecolor='blue'):
-    nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
-    nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
-    plt.show()
-
 beforeGraphPopulationTime = datetime.now() 
-with open('../../../data/o_new_1.txt') as f:
+with open(inputFileName) as f:
     for line in f:
         if re.match('^B=', line):
             exec(line)
@@ -51,9 +48,15 @@ with open('../../../data/o_new_1.txt') as f:
                 node_colors[usr] = 'blue'
                 edge_colors[bnss, usr] = 'black'
                 G.add_edge(bnss, usr)
+
+def paint(nodecolor='red', edgecolor='blue'):
+    nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
+    nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
+    plt.show()
+    
 afterGraphPopulationTime = datetime.now()
-loopyBeliefPropagation = LBP(graph=G)
-loopyBeliefPropagation.doBeliefPropagation(False, 10)
+#loopyBeliefPropagation = LBP(graph=G)
+#loopyBeliefPropagation.doBeliefPropagation(False, 10)
 afterLBPRunTime = datetime.now()
 print("Graph Population time:", afterGraphPopulationTime-beforeGraphPopulationTime, "\nAlgo run Time:", afterLBPRunTime-afterGraphPopulationTime)
 #nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
