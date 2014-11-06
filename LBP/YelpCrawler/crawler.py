@@ -8,13 +8,14 @@ import argparse
 import re
 import time
 import random
+import sys
 
 get_yelp_page = \
     lambda zipcode, page_num: \
         'http://www.yelp.com/search?find_desc=&find_loc={0}' \
         '&ns=1#cflt=restaurants&start={1}'.format(zipcode, page_num)
 
-ZIP_URL = "zipcodes.txt"
+ZIP_URL = sys.argv[1]
 FIELD_DELIM = u'###'
 LISTING_DELIM = u'((('
 
@@ -168,10 +169,9 @@ def crawl_page(zipcode, verbose=False):
 def crawl(zipcode=None):
     flag = True
     some_zipcodes = [zipcode] if zipcode else get_zips()
-
     if zipcode is None:
         print '\n**Attempting to extract all zipcodes in the U.S'
-
+        
     for zipcode in some_zipcodes:
         #print '\n===== Attempting extraction for zipcode <', zipcode, '>=====\n'
         try:
@@ -188,10 +188,10 @@ def crawl(zipcode=None):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Extracts all yelp restaurant \
-        data from a specified zip code (or all American zip codes if nothing \
-        is provided)')
-    parser.add_argument('-z', '--zipcode', type=int, help='Enter a zip code \
-        you\'t like to extract from.')
-    args = parser.parse_args()
-    crawl(args.zipcode)
+    #parser = argparse.ArgumentParser(description='Extracts all yelp restaurant \
+      #  data from a specified zip code (or all American zip codes if nothing \
+       # is provided)')
+    #parser.add_argument('-z', '--zipcode', type=int, help='Enter a zip code \
+     #   you\'t like to extract from.')
+    #args = parser.parse_args()
+    crawl()
