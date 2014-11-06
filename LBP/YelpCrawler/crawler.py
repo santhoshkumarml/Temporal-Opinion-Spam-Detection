@@ -2,7 +2,7 @@ YELP_COM_URL = 'http://www.yelp.com'
 __author__ = 'S.R'
 __date__ = 'Oct 27th, 2014'
 
-from bs4 import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 import urllib2
 import argparse
 import re
@@ -33,7 +33,7 @@ def getSoupsForZip(zipcode, max_count=1):
         count = -1
         while True:
             page_url = get_yelp_page(zipcode, page_num)
-            #print page_url
+            print page_url
             soup = BeautifulSoup(urllib2.urlopen(page_url).read())
             if soup:
                 soups.append(soup)
@@ -83,16 +83,21 @@ def getReviews(seenDict, tag, verbose):
                         date = extractText(d, None, verbose, attrs={'class': '^rating-qualifier'})
                         if date:
                             date = re.findall(r'\d+\/\d+\/\d+', str(date))[0]
-                            for u in review.findAll(['a', 'span']):
-                                username = extractText(u, None, verbose, attrs={'class': '^user-display-name'})
-                                if username:
-                                    userid = extractTagAttribute(u, '='+username, verbose, 'href', attrs={'class': '^user-display-name'})
-                                    userid = re.findall(r'=(.+)', str(userid))[0]
-                                    for p in review.findAll('p'):
-                                        reviewText = extractText(p, '', verbose, attrs={'class': '^review_comment'})
-                                        if reviewText:
-                                            reviewText = reviewText.replace('\n', '')
-                                            ret.append((reviewID, userid, username, rating, date, reviewText))
+                            mediaAvatar = review.find('div', attrs={'class': 'media-avatar'})
+                            mediaStory = review.find('div', attrs={'class': 'media-story'})
+                            reviewContent = review.find('div', attrs={'class': 'review-content'})
+                            imgSrc =  extractTagAttribute(mediaAvatar.find('img'), None, verbose, 'src')
+                            username = extractText(mediaStory.find('li', attrs={'class': 'user-name'}).find(['a','span']), None, verbose)
+                            userLocation = extractText(mediaStory.find('li', attrs={'class': 'user-location'}).find('b'), None, verbose)
+                            userFriendCount = extractText(mediaStory.find('li', attrs={'class': 'friend-count'}).find('b'), None, verbose)
+                            userReviewCount = extractText(mediaStory.find('li', attrs={'class': 'review-count'}).find('b'), None, verbose)
+                            assert username and userLocation and userFriendCount and userReviewCount
+                            userId = (username, imgSrc, userLocation, userFriendCount, userReviewCount)
+                            for p in reviewContent.findAll('p'):
+                                reviewText = extractText(p, '', verbose, attrs={'class': '^review_comment'})
+                                if reviewText:
+                                    reviewText = reviewText.replace('\n', '')
+                                    ret.append((reviewID, userId, username, rating, date, reviewText))
     return ret
 
 
