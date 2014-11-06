@@ -118,6 +118,10 @@ class user(SIAObject):
     def getName(self):
         return self.name
     
+    def getId(self):
+        return self.id
+    
+    
     def calculateMessageForNeighbor(self, neighbor):
         allOtherNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
@@ -151,6 +155,15 @@ class business(SIAObject):
     def getName(self):
         return self.name
     
+    def getId(self):
+        return self.id
+    
+    def getRating(self):
+        return self.rating
+    
+    def getUrl(self):
+        return self.url
+    
     def calculateMessageForNeighbor(self, neighbor):
         allOtherNeighborMessageMultiplication = 1;
         for messageKey in self.messages.keys():
@@ -181,4 +194,22 @@ class review:
         self.bn = bn
         self.text = txt
         self.recommended = recommended
+        
+    def getRating(self):
+        return self.rating
+    
+    def getId(self):
+        return self.id
+    
+    def getUsr(self):
+        return self.usr
+    
+    def getBusiness(self):
+        return self.bn
+    
+    def getReviewText(self):
+        return self.text
+    
+    def isRecommended(self):
+        return self.recommended
     
