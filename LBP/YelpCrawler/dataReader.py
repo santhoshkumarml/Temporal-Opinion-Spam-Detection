@@ -19,7 +19,7 @@ node_colors = {}
 edge_colors = {}
 nodetoNodeLabelDict = {}
 inputFileName = sys.argv[1]
-
+userIdToDict = dict()
 ######################################################### METHODS
 def createGrapth(G, inputFileName):
     with open(inputFileName) as f:
@@ -36,24 +36,32 @@ def createGrapth(G, inputFileName):
                 for recoRev in R:
                     revw = review(recoRev[0], recoRev[3], recoRev[2], B[0], recoRev[4], True)
                     usr = user(recoRev[1], recoRev[2])
-                    G.add_node(usr)
-                    node_colors[usr] = 'blue'
-                    edge_colors[(bnss, usr)] = 'green'
-                    G.add_edge(bnss, usr, dict({'review':revw}))
+                    dictUsr = userIdToDict.get(usr.getId())
+                    if not dictUsr:
+                        userIdToDict[usr.getId()] = usr
+                        dictUsr = usr
+                    G.add_node(dictUsr)
+                    node_colors[dictUsr] = 'blue'
+                    edge_colors[(bnss, dictUsr)] = 'green'
+                    G.add_edge(bnss, dictUsr, dict({'review':revw}))
             elif re.match('^NR=', line):
                 exec(line)
                 #print 'NR = ', NR
                 for noRecoRev in NR:
                     revw = review(noRecoRev[0], noRecoRev[3], noRecoRev[2], B[0], noRecoRev[4], False)
                     usr = user(noRecoRev[1], noRecoRev[2])
-                    G.add_node(usr)
-                    node_colors[usr] = 'blue'
-                    edge_colors[bnss, usr] = 'black'
-                    G.add_edge(bnss, usr, dict({'review':revw}))
+                    dictUsr = userIdToDict.get(usr.getId())
+                    if not dictUsr:
+                        userIdToDict[usr.getId()] = usr
+                        dictUsr = usr
+                    G.add_node(dictUsr)
+                    node_colors[dictUsr] = 'blue'
+                    edge_colors[bnss, dictUsr] = 'black'
+                    G.add_edge(bnss, dictUsr, dict({'review':revw}))
 
-def paintWithLabels(nodecolor='red', edgecolor='blue'):
-    nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
-    nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
+def paintWithLabels(graph, nodecolor='red', edgecolor='blue'):
+    nx.draw(graph,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
+    nx.draw_networkx_labels(graph, pos=nx.spring_layout(graph),labels=nodetoNodeLabelDict)
     plt.show()
 
 def paint(nodecolor='red', edgecolor='blue'):
@@ -65,12 +73,12 @@ def paint(nodecolor='red', edgecolor='blue'):
 beforeGraphPopulationTime = datetime.now()
 createGrapth(G, inputFileName)
 afterGraphPopulationTime = datetime.now()
-#cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
-#print (len(cc), nx.is_connected(G))
+cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
+print len(cc)
 ##########################################################
 beforeLBPRunTime = datetime.now()
-loopyBeliefPropagation = LBP(graph=G)
-loopyBeliefPropagation.doBeliefPropagation(False, 10)
+#loopyBeliefPropagation = LBP(graph=G)
+#loopyBeliefPropagation.doBeliefPropagation(False, 10)
 afterLBPRunTime = datetime.now()
 ###########################################################
 print('Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime, 'Algo run Time:',
