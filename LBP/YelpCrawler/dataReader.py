@@ -39,7 +39,7 @@ def createGrapth(G, inputFileName):
                     G.add_node(usr)
                     node_colors[usr] = 'blue'
                     edge_colors[(bnss, usr)] = 'green'
-                    G.add_edge(bnss, usr)
+                    G.add_edge(bnss, usr, dict({'review':revw}))
             elif re.match('^NR=', line):
                 exec(line)
                 #print 'NR = ', NR
@@ -49,7 +49,7 @@ def createGrapth(G, inputFileName):
                     G.add_node(usr)
                     node_colors[usr] = 'blue'
                     edge_colors[bnss, usr] = 'black'
-                    G.add_edge(bnss, usr)
+                    G.add_edge(bnss, usr, dict({'review':revw}))
 
 def paint(nodecolor='red', edgecolor='blue'):
     nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
