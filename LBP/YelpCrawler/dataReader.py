@@ -1,5 +1,6 @@
 from LoopyBeliefPropagation.LBP import *
 from LoopyBeliefPropagation.SIAObject import *
+from datetime import datetime
 __author__ = 'rami'
 
 from math import *
@@ -21,6 +22,7 @@ def paint(nodecolor='red', edgecolor='blue'):
     nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
     plt.show()
 
+beforeGraphPopulationTime = datetime.now() 
 with open('../../../data/o_new_1.txt') as f:
     for line in f:
         if re.match('^B=', line):
@@ -49,9 +51,11 @@ with open('../../../data/o_new_1.txt') as f:
                 node_colors[usr] = 'blue'
                 edge_colors[bnss, usr] = 'black'
                 G.add_edge(bnss, usr)
-
+afterGraphPopulationTime = datetime.now()
 loopyBeliefPropagation = LBP(graph=G)
 loopyBeliefPropagation.doBeliefPropagation(False, 10)
-nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
+afterLBPRunTime = datetime.now()
+print("Graph Population time:", afterGraphPopulationTime-beforeGraphPopulationTime, "\nAlgo run Time:", afterLBPRunTime-afterGraphPopulationTime)
+#nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 #ncolors = [node_colors[x] for x in G.nodes()]
 #paint(ncolors,edge_colors.values())
