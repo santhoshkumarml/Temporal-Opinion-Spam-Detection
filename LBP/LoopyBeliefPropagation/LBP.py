@@ -35,4 +35,4 @@ class LBP(object):
                 self.doBeliefPropagation(not flipFromUsersToProducts, saturation-1)
         for siaObject in self.graph.nodes():
             siaObject.calculateBeliefVals();
-            print (siaObject.getName(),'---',siaObject.getScore())
+            #print (siaObject.getName(),'---',siaObject.getScore())

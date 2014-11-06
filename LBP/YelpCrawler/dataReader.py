@@ -56,15 +56,21 @@ def paint(nodecolor='red', edgecolor='blue'):
     nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
     plt.show()
 
-######################################################### MAIN
+################## MAIN##################################
+#########################################################
 beforeGraphPopulationTime = datetime.now()
-createGrapth(G, inputFileName)    
+createGrapth(G, inputFileName)
 afterGraphPopulationTime = datetime.now()
+cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
+print len(cc)
+##########################################################
+beforeLBPRunTime = datetime.now()
 loopyBeliefPropagation = LBP(graph=G)
 loopyBeliefPropagation.doBeliefPropagation(False, 10)
 afterLBPRunTime = datetime.now()
+###########################################################
 print("Graph Population time:", afterGraphPopulationTime-beforeGraphPopulationTime, "\nAlgo run Time:",
-       afterLBPRunTime-afterGraphPopulationTime)
+       afterLBPRunTime-beforeLBPRunTime)
 #nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 #ncolors = [node_colors[x] for x in G.nodes()]
 #paint(ncolors,edge_colors.values())
