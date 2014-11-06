@@ -51,26 +51,30 @@ def createGrapth(G, inputFileName):
                     edge_colors[bnss, usr] = 'black'
                     G.add_edge(bnss, usr, dict({'review':revw}))
 
-def paint(nodecolor='red', edgecolor='blue'):
+def paintWithLabels(nodecolor='red', edgecolor='blue'):
     nx.draw(G,pos=nx.spring_layout(G), with_labels=False, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
     nx.draw_networkx_labels(G, pos=nx.spring_layout(G),labels=nodetoNodeLabelDict)
     plt.show()
 
-################## MAIN##################################
+def paint(nodecolor='red', edgecolor='blue'):
+    nx.draw(G,pos=nx.spring_layout(G), with_labels=True, node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0)
+    plt.show()
+    
+################## MAIN #################################
 #########################################################
 beforeGraphPopulationTime = datetime.now()
 createGrapth(G, inputFileName)
 afterGraphPopulationTime = datetime.now()
-cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
-print len(cc)
+#cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
+#print (len(cc), nx.is_connected(G))
 ##########################################################
 beforeLBPRunTime = datetime.now()
 loopyBeliefPropagation = LBP(graph=G)
 loopyBeliefPropagation.doBeliefPropagation(False, 10)
 afterLBPRunTime = datetime.now()
 ###########################################################
-print("Graph Population time:", afterGraphPopulationTime-beforeGraphPopulationTime, "\nAlgo run Time:",
+print('Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime, 'Algo run Time:',
        afterLBPRunTime-beforeLBPRunTime)
 #nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 #ncolors = [node_colors[x] for x in G.nodes()]
-#paint(ncolors,edge_colors.values())
+#paintWithLabels(ncolors,edge_colors.values())
