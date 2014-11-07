@@ -1,10 +1,11 @@
-from LoopyBeliefPropagation.LBP import LBP
-from LoopyBeliefPropagation.SIAObject import user,business,review,CustomGraph
+from LBP import LBP
+from SIAObject import user,business,review,CustomGraph,USER,PRODUCT
 from datetime import datetime
 import sys
 import re
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy
 '''
 @author: Sarath Rami
 @author: Santhosh Kumar Manavasi Lakshminarayanan
@@ -73,16 +74,47 @@ def paint(nodecolor='red', edgecolor='blue'):
 beforeGraphPopulationTime = datetime.now()
 createGrapth(G, inputFileName)
 afterGraphPopulationTime = datetime.now()
+beforeStatisticsGenerationTime = datetime.now()
 cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
-print len(cc)
+lenListComponent = [len(c.nodes()) for c in cc]
+print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
+users = [node for node in G.nodes() if node.getNodeType() == USER]
+businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
+reviews = [edge for edge in G.edges()]
+print 'Number of Users- ',len(users),'Number of Businesses- ',len(businesses),'Number of Reviews- ',len(reviews)
+userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
+businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
+print'----------------------Component Sizes----------------------------------------------------------------------'
+print lenListComponent
+print'----------------------User to Neighbors Degree--------------------------------------------------------------'
+#for node in G.nodes():
+#    if node.getNodeType() == USER:
+#        userToDegreeDict[node] = len(G.neighbors(node))
+#    else:
+#        businessToDegreeDict[node] = len(G.neighbors(node))
+
+#for user in userToDegreeDict.keys():
+#    print user.getId(),' ',userToDegreeDict[i]
+print userDegreeDistribution
+print'----------------------Business to Neighbors Degree----------------------------------------------------------'
+#for business in businessToDegreeDict.keys():
+#    print business.getName(),' ',businessToDegreeDict[i]
+print businessDegreeDistribution
+#print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
+print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponent)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponent)) 
+print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(lenListComponent))
+print 'Average Degree Of a Business - ',numpy.mean(numpy.array(businessDegreeDistribution)),'Variance Of Business Degree - ', numpy.var(numpy.array(lenListComponent))
+#print'------------------------------------------------------------------------------------------------------------'
+afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 #loopyBeliefPropagation = LBP(graph=G)
 #loopyBeliefPropagation.doBeliefPropagation(False, 10)
 afterLBPRunTime = datetime.now()
 ###########################################################
-print('Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime, 'Algo run Time:',
-       afterLBPRunTime-beforeLBPRunTime)
+print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,
+'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,
+'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
 #nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 #ncolors = [node_colors[x] for x in G.nodes()]
 #paintWithLabels(ncolors,edge_colors.values())
