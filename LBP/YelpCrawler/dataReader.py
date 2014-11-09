@@ -30,7 +30,7 @@ def createGrapth(G, inputFileName):
                 #print 'B = ', B
                 bnss = business(B[0],B[1],B[2],B[4])
                 G.add_node(bnss)
-                node_colors[bnss]='red'
+                #node_colors[bnss]='red'
             elif re.match('^R=', line):
                 exec(line)
                 #print 'R = ', R
@@ -42,8 +42,8 @@ def createGrapth(G, inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    node_colors[dictUsr] = 'blue'
-                    edge_colors[(bnss, dictUsr)] = 'green'
+                    #node_colors[dictUsr] = 'blue'
+                    #edge_colors[(bnss, dictUsr)] = 'green'
                     G.add_edge(bnss, dictUsr, dict({'review':revw}))
             elif re.match('^NR=', line):
                 exec(line)
@@ -56,8 +56,8 @@ def createGrapth(G, inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    node_colors[dictUsr] = 'blue'
-                    edge_colors[bnss, dictUsr] = 'black'
+                    #node_colors[dictUsr] = 'blue'
+                    #edge_colors[bnss, dictUsr] = 'black'
                     G.add_edge(bnss, dictUsr, dict({'review':revw}))
 
 def paintWithLabels(graph, nodecolor='red', edgecolor='blue'):
@@ -75,17 +75,19 @@ beforeGraphPopulationTime = datetime.now()
 createGrapth(G, inputFileName)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
-cc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
-lenListComponent = [len(c.nodes()) for c in cc]
+for g in nx.connected_component_subgraphs(G):
+    print g
+
+#lenListComponent = [len(c.nodes()) for c in cc]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
-users = [node for node in G.nodes() if node.getNodeType() == USER]
-businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
-reviews = [edge for edge in G.edges()]
-print 'Number of Users- ',len(users),'Number of Businesses- ',len(businesses),'Number of Reviews- ',len(reviews)
-userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
-businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
+#users = [node for node in G.nodes() if node.getNodeType() == USER]
+#businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
+#reviews = [edge for edge in G.edges()]
+#print 'Number of Users- ',len(users),'Number of Businesses- ',len(businesses),'Number of Reviews- ',len(reviews)
+#userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
+#businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
 print'----------------------Component Sizes----------------------------------------------------------------------'
-print lenListComponent
+#print sorted(lenListComponent)
 print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -95,16 +97,16 @@ print'----------------------User to Neighbors Degree----------------------------
 
 #for user in userToDegreeDict.keys():
 #    print user.getId(),' ',userToDegreeDict[i]
-print userDegreeDistribution
+#print userDegreeDistribution
 print'----------------------Business to Neighbors Degree----------------------------------------------------------'
 #for business in businessToDegreeDict.keys():
 #    print business.getName(),' ',businessToDegreeDict[i]
-print businessDegreeDistribution
-#print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
-print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponent)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponent)) 
-print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(lenListComponent))
-print 'Average Degree Of a Business - ',numpy.mean(numpy.array(businessDegreeDistribution)),'Variance Of Business Degree - ', numpy.var(numpy.array(lenListComponent))
-#print'------------------------------------------------------------------------------------------------------------'
+#print businessDegreeDistribution
+print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
+#print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponent)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponent)) 
+#print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(lenListComponent))
+#print 'Average Degree Of a Business - ',numpy.mean(numpy.array(businessDegreeDistribution)),'Variance Of Business Degree - ', numpy.var(numpy.array(lenListComponent))
+print'------------------------------------------------------------------------------------------------------------'
 afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
