@@ -1,4 +1,4 @@
-from SIAObject import user,business,review
+from SIAUtil import user,business,review
 import re
 '''
 @author: Sarath Rami

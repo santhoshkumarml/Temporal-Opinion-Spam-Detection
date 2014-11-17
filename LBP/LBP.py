@@ -1,7 +1,7 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
-from SIAObject import PRODUCT, USER
+from SIAUtil import PRODUCT, USER
 '''
  Loopy Belief Propagation
 '''

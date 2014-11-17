@@ -5,7 +5,7 @@ import sys
 import numpy
 
 from LBP import LBP
-from SIAObject import user, business, review, CustomGraph, USER, PRODUCT
+from SIAUtil import user, business, review, CustomGraph, USER, PRODUCT
 from dataReader import createGraph
 import matplotlib.pyplot as plt
 import networkx as nx
