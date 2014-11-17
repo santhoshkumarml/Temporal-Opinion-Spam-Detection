@@ -5,7 +5,7 @@ Created on Nov 3, 2014
 '''
 import networkx as nx
 import numpy
-from numpy import shape, float32, dtype
+from numpy import float32
 import math
 
 '''
@@ -19,13 +19,13 @@ User Types
 '''
 USER_TYPE_FRAUD = 0
 USER_TYPE_HONEST = 1
-USER_TYPES = {USER_TYPE_HONEST, USER_TYPE_FRAUD}
+USER_TYPES = {USER_TYPE_FRAUD, USER_TYPE_HONEST}
 '''
 Product Types
 '''
 PRODUCT_TYPE_BAD = 0
 PRODUCT_TYPE_GOOD = 1
-PRODUCT_TYPES = {PRODUCT_TYPE_GOOD, PRODUCT_TYPE_BAD}
+PRODUCT_TYPES = {PRODUCT_TYPE_BAD, PRODUCT_TYPE_GOOD}
 
 '''
 Review Types
@@ -108,11 +108,18 @@ class SIAObject(object):
         normalizingValue = self.getNormalizingValue(normalizedMessages)
         for key in self.messages.keys():
             self.messages[key] = self.messages[key]/normalizingValue
+
+class SIALink(object):
+    def __init__(self, score=(0.5, 0.5)):
+        self.score = score
+            
+    def getScore(self):
+        return self.score
     
 class user(SIAObject):
-    def __init__(self, id, name, score=(0.5,0.5)):
+    def __init__(self, _id, name, score=(0.5,0.5)):
         super(user, self).__init__(score, USER)
-        self.id = id
+        self.id = _id
         self.name = name
     
     def getName(self):
@@ -128,9 +135,8 @@ class user(SIAObject):
             if messageKey != (self,neighbor): #leaving the neighbor for which we are going to send message
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
-        scoreAddition=0
-        for userType in USER_TYPES:
-            scoreAddition= scoreAddition+(self.score[userType]*allOtherNeighborMessageMultiplication)
+        scoreAddition= ((self.score[USER_TYPE_FRAUD]*allOtherNeighborMessageMultiplication),
+                        (self.score[USER_TYPE_HONEST]*allOtherNeighborMessageMultiplication))
         return scoreAddition
     
     def calculateBeliefVals(self):
@@ -145,9 +151,9 @@ class user(SIAObject):
         return (scoreAdditionFraud,scoreAdditionHonest)
 
 class business(SIAObject):
-    def __init__(self, id, name, rating=2.5, url=None, score=(0.5,0.5)):
+    def __init__(self, _id, name, rating=2.5, url=None, score=(0.5,0.5)):
         super(business, self).__init__(score, PRODUCT)
-        self.id = id
+        self.id = _id
         self.name = name
         self.rating = rating
         self.url = url
@@ -186,12 +192,13 @@ class business(SIAObject):
         scoreAdditionBad= scoreAdditionBad+(self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication)
         return (scoreAdditionBad,scoreAdditionGood)
 
-class review:
-    def __init__(self, id, rating, usr, bn, txt='', recommended=True):
-        self.id = id
+class review(SIALink):
+    def __init__(self, _id, rating, txt='', recommended=True):
+        super(review, self).__init__()
+        self.id = _id
         self.rating = rating
-        self.usr = usr
-        self.bn = bn
+        #self.usr = usr
+        #self.bn = bn
         self.text = txt
         self.recommended = recommended
         
@@ -201,11 +208,11 @@ class review:
     def getId(self):
         return self.id
     
-    def getUsr(self):
-        return self.usr
-    
-    def getBusiness(self):
-        return self.bn
+#     def getUsr(self):
+#         return self.usr
+#     
+#     def getBusiness(self):
+#         return self.bn
     
     def getReviewText(self):
         return self.text
