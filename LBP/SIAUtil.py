@@ -71,8 +71,8 @@ def initialiazePotential():
                 compatabilityPotential[i][j][k] = output
                     
 
-class CustomGraph(nx.Graph):
-    pass
+# class CustomGraph(nx.Graph):
+#     pass
         
 
 '''

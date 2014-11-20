@@ -1,5 +1,6 @@
 from SIAUtil import user,business,review
 import re
+import networkx as nx
 '''
 @author: Sarath Rami
 @author: Santhosh Kumar Manavasi Lakshminarayanan
@@ -9,12 +10,10 @@ import re
 B = []
 R = []
 NR = []
-#node_colors = {}
-#edge_colors = {}
-nodetoNodeLabelDict = {}
 userIdToDict = dict()
 ######################################################### METHODS
-def createGraph(G, inputFileName):
+def createGraph(inputFileName):
+    G=nx.Graph()
     with open(inputFileName) as f:
         for line in f:
             if re.match('^B=', line):
@@ -53,4 +52,4 @@ def createGraph(G, inputFileName):
                     #node_colors[dictUsr] = 'blue'
                     #edge_colors[bnss, dictUsr] = 'black'
                     G.add_edge(bnss, dictUsr, dict({'review':revw}))
-
+    return G
