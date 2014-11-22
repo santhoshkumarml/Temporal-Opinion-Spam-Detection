@@ -39,7 +39,7 @@ EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-episolon = math.pow(10, -6)
+episolon = math.pow(10, -3)
 compatabilityPotential = numpy.ones(shape=(2,2,2), dtype=float32)
 def initialiazePotential():
     for i in range(0,2):
@@ -71,7 +71,7 @@ def initialiazePotential():
                 compatabilityPotential[i][j][k] = output
                 
 
-initialiazePotential()                
+initialiazePotential()
 
 # class CustomGraph(nx.Graph):
 #     pass
@@ -85,15 +85,21 @@ class SIAObject(object):
     def __init__(self, score=(0.5, 0.5), NODE_TYPE=USER):
         self.score = score
         self.messages = dict()
+        #self.allMessageBuffer = dict()
         self.nodeType = NODE_TYPE
     
+#     def getAllMessageBuffer(self):
+#         return self.allMessageBuffer
     def addMessages(self, node, message):
-        isChanged = False
-        if (self, node) not in self.messages or self.messages[(self,node)] != message:
-            self.messages[(self,node)] = message
-            isChanged = True
-        self.normalizeMessage((self,node))
-        return isChanged
+        hasChanged = False
+        if node not in self.messages or self.messages[node] != message:
+            self.messages[node] = message
+            hasChanged = True
+        self.normalizeMessage(node)
+        #if hassChanged and (self, node) not in self.allMessageBuffer:
+        #        self.allMessageBuffer[(self,node)] = []
+        #self.allMessageBuffer[(self,node)].append(self.getName()+node.getName()+str(message))
+        return hasChanged
     
     def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
         hasAnyMessageChanged = False
@@ -137,7 +143,7 @@ class user(SIAObject):
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
-            if messageKey != (self,neighborWithEdge[0]):
+            if messageKey != neighborWithEdge[0]:
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = \
                 (allOtherNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
@@ -184,13 +190,14 @@ class business(SIAObject):
     
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
+        (neighbor, edge) = neighborWithEdge
         for messageKey in self.messages.keys():
-            if messageKey != (self,neighborWithEdge[0]):
+            if messageKey != neighbor:
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = \
                 (allOtherNeighborMessageMultiplication[PRODUCT_TYPE_BAD]*message[PRODUCT_TYPE_BAD] , \
                  allOtherNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
-        review = neighborWithEdge[1][EDGE_DICT_CONST]
+        review = edge[EDGE_DICT_CONST]
         scoreAddition = (0,0)
         for productType in PRODUCT_TYPES:
             scoreAddition=\

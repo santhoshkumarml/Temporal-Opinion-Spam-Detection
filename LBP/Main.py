@@ -72,10 +72,13 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 loopyBeliefPropagation = LBP(graph=G)
-#loopyBeliefPropagation.doBeliefPropagationIterative(1000)
-#loopyBeliefPropagation.calculateAndPrintBeliefVals()
+loopyBeliefPropagation.doBeliefPropagationIterative(10)
+loopyBeliefPropagation.calculateAndPrintBeliefVals()
 afterLBPRunTime = datetime.now()
 ###########################################################
+businesses = [node.getName()+' '+node.getUrl()+'  '+str(node.getRating()) for node in G.nodes() if node.getNodeType() == PRODUCT]
+reviews = [edge[0].getName()+'  '+edge[1].getName()+' '+str(G.get_edge_data(*edge)[EDGE_DICT_CONST].getReviewSentiment()) for edge in G.edges()]
+print reviews
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime

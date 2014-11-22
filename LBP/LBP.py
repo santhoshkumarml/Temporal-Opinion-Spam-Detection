@@ -55,7 +55,7 @@ class LBP(object):
                         changedNodes += 1
                         hasAnyMessageChanged = True
 
-            #print 'changedNodes',changedNodes
+            print 'changedNodes',changedNodes
             
             if not hasAnyMessageChanged:
                 break
@@ -81,7 +81,9 @@ class LBP(object):
                 if(siaObject.getScore()[0] > siaObject.getScore()[1]):
                     badProducts.append(siaObject.getName()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 else:
-                    goodProducts.append(siaObject.getName()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                    goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
+
+            #print siaObject.getAllMessageBuffer()
         
         print 'fakeUsers', fakeUsers
         print 'honestUsers', honestUsers
