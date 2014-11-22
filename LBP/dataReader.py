@@ -5,11 +5,14 @@ import networkx as nx
 @author: Sarath Rami
 @author: Santhosh Kumar Manavasi Lakshminarayanan
 '''
+import SIAUtil
 
 ######################################################### Initializers
 B = []
 R = []
 NR = []
+node_colors = {}
+edge_colors = {}
 userIdToDict = dict()
 ######################################################### METHODS
 def createGraph(inputFileName):
@@ -21,7 +24,7 @@ def createGraph(inputFileName):
                 #print 'B = ', B
                 bnss = business(B[0],B[1],B[2],B[4])
                 G.add_node(bnss)
-                #node_colors[bnss]='red'
+                node_colors[bnss]='red'
             elif re.match('^R=', line):
                 exec(line)
                 #print 'R = ', R
@@ -34,9 +37,9 @@ def createGraph(inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    #node_colors[dictUsr] = 'blue'
-                    #edge_colors[(bnss, dictUsr)] = 'green'
-                    G.add_edge(bnss, dictUsr, dict({'review':revw}))
+                    G.add_edge(bnss, dictUsr, dict({SIAUtil.EDGE_DICT_CONST:revw}))
+                    node_colors[dictUsr] = 'blue'
+                    edge_colors[(dictUsr,bnss)] = 'green'
             elif re.match('^NR=', line):
                 exec(line)
                 #print 'NR = ', NR
@@ -49,7 +52,7 @@ def createGraph(inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    #node_colors[dictUsr] = 'blue'
-                    #edge_colors[bnss, dictUsr] = 'black'
-                    G.add_edge(bnss, dictUsr, dict({'review':revw}))
+                    G.add_edge(bnss, dictUsr, dict({SIAUtil.EDGE_DICT_CONST:revw}))
+                    node_colors[dictUsr] = 'blue'
+                    edge_colors[(dictUsr,bnss)] = 'black'
     return G

@@ -3,7 +3,6 @@ Created on Nov 3, 2014
 
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
-import networkx as nx
 import numpy
 from numpy import float32
 import math
@@ -33,20 +32,21 @@ Review Types
 REVIEW_TYPE_FAKE = 0
 REVIEW_TYPE_REAL = 1
 
-REVIEW_TYPE_GOOD = 0
-REVIEW_TYPE_BAD = 1
+REVIEW_TYPE_NEGATIVE = 0
+REVIEW_TYPE_POSITIVE = 1
 
+EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
 episolon = math.pow(10, -6)
-compatabilityPotential = numpy.ones(shape=(2,2), dtype=float32)
+compatabilityPotential = numpy.ones(shape=(2,2,2), dtype=float32)
 def initialiazePotential():
     for i in range(0,2):
         for j in range(0,2):
             for k in range(0,2):
                 output = 0
-                if i == REVIEW_TYPE_GOOD:
+                if i == REVIEW_TYPE_NEGATIVE:
                     if j == USER_TYPE_HONEST:
                         if k == PRODUCT_TYPE_GOOD:
                             output = episolon
@@ -69,7 +69,9 @@ def initialiazePotential():
                         else:
                             output = 1-(2*episolon)
                 compatabilityPotential[i][j][k] = output
-                    
+                
+
+initialiazePotential()                
 
 # class CustomGraph(nx.Graph):
 #     pass
@@ -86,28 +88,31 @@ class SIAObject(object):
         self.nodeType = NODE_TYPE
     
     def addMessages(self, node, message):
-        self.messages[(self,node)] = message
+        isChanged = False
+        if (self, node) not in self.messages or self.messages[(self,node)] != message:
+            self.messages[(self,node)] = message
+            isChanged = True
+        self.normalizeMessage((self,node))
+        return isChanged
     
-    def calculateAndSendMessagesToNeighBors(self, neighbors):
-        for neighbor in neighbors:
-            message = self.calculateMessageForNeighbor(neighbor);
-            neighbor.addMessages(self, message)
+    def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
+        hasAnyMessageChanged = False
+        for neighborWithEdge in neighborsWithEdges:
+            message = self.calculateMessageForNeighbor(neighborWithEdge);
+            if(neighborWithEdge[0].addMessages(self, message)):
+                hasAnyMessageChanged = True
+        return hasAnyMessageChanged
             
     def getScore(self):
         return self.score
     
     def getNodeType(self):
         return self.nodeType
-    
-    def getNormalizingValue(self, v):
-        norm=v.sum()
-        return norm
-    
-    def normalizeMessages(self):
-        normalizedMessages = numpy.array(self.messages.values())
-        normalizingValue = self.getNormalizingValue(normalizedMessages)
-        for key in self.messages.keys():
-            self.messages[key] = self.messages[key]/normalizingValue
+
+    def normalizeMessage(self, key):
+        normalizingValue = self.messages[key][0]+self.messages[key][1]
+        self.messages[key] = (self.messages[key][0]/normalizingValue, self.messages[key][1]/normalizingValue)
+            
 
 class SIALink(object):
     def __init__(self, score=(0.5, 0.5)):
@@ -129,26 +134,33 @@ class user(SIAObject):
         return self.id
     
     
-    def calculateMessageForNeighbor(self, neighbor):
-        allOtherNeighborMessageMultiplication = 1;
+    def calculateMessageForNeighbor(self, neighborWithEdge):
+        allOtherNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
-            if messageKey != (self,neighbor): #leaving the neighbor for which we are going to send message
+            if messageKey != (self,neighborWithEdge[0]):
                 message= self.messages[messageKey]
-                allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
-        scoreAddition= ((self.score[USER_TYPE_FRAUD]*allOtherNeighborMessageMultiplication),
-                        (self.score[USER_TYPE_HONEST]*allOtherNeighborMessageMultiplication))
+                allOtherNeighborMessageMultiplication = \
+                (allOtherNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
+                 allOtherNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
+        scoreAddition = (0,0)
+        review = neighborWithEdge[1][EDGE_DICT_CONST]
+        for userType in USER_TYPES:
+            scoreAddition=\
+             (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
+             scoreAddition[1]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_GOOD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]))
         return scoreAddition
     
     def calculateBeliefVals(self):
-        allNeighborMessageMultiplication = 1
+        allNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
-            allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
-        scoreAdditionHonest=0
-        scoreAdditionFraud=0
-        scoreAdditionHonest= scoreAdditionHonest+(self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication)
-        scoreAdditionFraud= scoreAdditionFraud+(self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication)
-        return (scoreAdditionFraud,scoreAdditionHonest)
+            allNeighborMessageMultiplication = \
+                (allNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
+                 allNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
+        normalizingValue = (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])+\
+        (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])
+        self.score = ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
+                (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])/normalizingValue)
 
 class business(SIAObject):
     def __init__(self, _id, name, rating=2.5, url=None, score=(0.5,0.5)):
@@ -170,27 +182,33 @@ class business(SIAObject):
     def getUrl(self):
         return self.url
     
-    def calculateMessageForNeighbor(self, neighbor):
-        allOtherNeighborMessageMultiplication = 1;
+    def calculateMessageForNeighbor(self, neighborWithEdge):
+        allOtherNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
-            if messageKey != (self,neighbor):
+            if messageKey != (self,neighborWithEdge[0]):
                 message= self.messages[messageKey]
-                allOtherNeighborMessageMultiplication = allOtherNeighborMessageMultiplication*message
-        scoreAddition=0
+                allOtherNeighborMessageMultiplication = \
+                (allOtherNeighborMessageMultiplication[PRODUCT_TYPE_BAD]*message[PRODUCT_TYPE_BAD] , \
+                 allOtherNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
+        review = neighborWithEdge[1][EDGE_DICT_CONST]
+        scoreAddition = (0,0)
         for productType in PRODUCT_TYPES:
-            scoreAddition= scoreAddition+(self.score[productType]*allOtherNeighborMessageMultiplication)
+            scoreAddition=\
+             (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][USER_TYPE_FRAUD][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]),\
+             scoreAddition[1]+(compatabilityPotential[review.getReviewSentiment()][USER_TYPE_HONEST][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]))
         return scoreAddition
     
     def calculateBeliefVals(self):
-        allNeighborMessageMultiplication = 1;
+        allNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
             message= self.messages[messageKey]
-            allNeighborMessageMultiplication = allNeighborMessageMultiplication*message
-        scoreAdditionGood=0
-        scoreAdditionBad=0
-        scoreAdditionGood= scoreAdditionGood+(self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication)
-        scoreAdditionBad= scoreAdditionBad+(self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication)
-        return (scoreAdditionBad,scoreAdditionGood)
+            allNeighborMessageMultiplication = \
+                (allNeighborMessageMultiplication[PRODUCT_TYPE_BAD]*message[PRODUCT_TYPE_BAD] , \
+                 allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
+        normalizingValue = (self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])+ \
+                (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])
+        self.score = ((self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])/normalizingValue,\
+                (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):
     def __init__(self, _id, rating, txt='', recommended=True):
@@ -207,6 +225,12 @@ class review(SIALink):
     
     def getId(self):
         return self.id
+    
+    def getReviewSentiment(self):
+        if self.getRating()>=3.0:
+            return REVIEW_TYPE_POSITIVE
+        else:
+            return REVIEW_TYPE_NEGATIVE
     
 #     def getUsr(self):
 #         return self.usr
