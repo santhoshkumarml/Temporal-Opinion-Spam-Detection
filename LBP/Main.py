@@ -10,16 +10,17 @@ import sys
 
 import numpy
 from LBP import LBP
-from SIAUtil import USER, PRODUCT, business, user
-from dataReader import createGraph, node_colors, edge_colors
+from SIAUtil import business, user, USER, PRODUCT, EDGE_DICT_CONST
+from dataReader import createGraph
 import matplotlib.pyplot as plt
 import networkx as nx
 
 
 inputFileName = sys.argv[1]
-#node_colors = {}
-#edge_colors = {}
-nodetoNodeLabelDict = {}
+RECOMMENDED_REVIEW_COLOR = 'black'
+NOT_RECOMMENDED_REVIEW_COLOR = 'red'
+USER_NODE_COLOR = 'green'
+PRODUCT_NODE_COLOR = 'blue'
 ##################FUNCTIONS#############################
 def paintWithLabels(graph,nodetoNodeLabelDict, nodecolor='red', edgecolor='blue'):
     nx.draw(graph,pos=nx.spring_layout(graph), with_labels=True,\
@@ -37,7 +38,7 @@ afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 #for g in nx.connected_component_subgraphs(G):
 #    print g
-cc = sorted(nx.connected_component_subgraphs(G,False))
+cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
 # print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 # users = [node for node in G.nodes() if node.getNodeType() == USER]
 # businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
@@ -47,8 +48,7 @@ cc = sorted(nx.connected_component_subgraphs(G,False))
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
 # print'----------------------Component Sizes----------------------------------------------------------------------'
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
-print sorted(lenListComponents)
-listComponents = sorted([c for c in cc if len(c.nodes())>1 ],reverse = True)
+print lenListComponents
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -80,8 +80,8 @@ print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTim
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
 nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-ncolors = [node_colors[x] for x in G.nodes()]
-print len(G.edges()), G.edges()
-print len(edge_colors.keys()), edge_colors.keys()
-ecolors = [edge_colors[(x1,x2)] if type(x1)==user else edge_colors[(x2,x1)]  for (x1,x2) in G.edges()]
+ncolors = [USER_NODE_COLOR if x.getNodeType()==USER else PRODUCT_NODE_COLOR for x in G.nodes()]
+ecolors = [RECOMMENDED_REVIEW_COLOR\
+            if G.get_edge_data(x1,x2)[EDGE_DICT_CONST].isRecommended()\
+             else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
 paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
