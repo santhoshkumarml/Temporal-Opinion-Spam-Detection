@@ -95,7 +95,7 @@ class LBP(object):
                     goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
         for edge in self.graph.edges():
-            review = edge[REVIEW_EDGE_DICT_CONST]
+            review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
             messageFromProductToUser = review.getBusiness().getMessageFromNeighbor(review.getUser())
             review = edge[REVIEW_EDGE_DICT_CONST]
             if(messageFromProductToUser[0] > messageFromProductToUser[1]):

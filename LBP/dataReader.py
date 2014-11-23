@@ -26,26 +26,26 @@ def createGraph(inputFileName):
                 exec(line)
                 #print 'R = ', R
                 for recoRev in R:
-                    revw = review(recoRev[0], recoRev[3], recoRev[2], B[0], recoRev[4], True)
-                    #revw = review(recoRev[0], recoRev[3], recoRev[4], True)
                     usr = user(recoRev[1], recoRev[2])
                     dictUsr = userIdToDict.get(usr.getId())
                     if not dictUsr:
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
+                    revw = review(recoRev[0], recoRev[3], dictUsr, bnss, recoRev[4], True)
+                    #revw = review(recoRev[0], recoRev[3], recoRev[4], True)
                     G.add_node(dictUsr)
                     G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
             elif re.match('^NR=', line):
                 exec(line)
                 #print 'NR = ', NR
                 for noRecoRev in NR:
-                    revw = review(noRecoRev[0], noRecoRev[3], noRecoRev[2], B[0], noRecoRev[4], False)
-                    #revw = review(noRecoRev[0], noRecoRev[3], noRecoRev[4], False)
                     usr = user(noRecoRev[1], noRecoRev[2])
                     dictUsr = userIdToDict.get(usr.getId())
                     if not dictUsr:
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
+                    revw = review(noRecoRev[0], noRecoRev[3], dictUsr, bnss, noRecoRev[4], False)
+                    #revw = review(noRecoRev[0], noRecoRev[3], noRecoRev[4], False)
                     G.add_node(dictUsr)
                     G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
     return G
