@@ -161,7 +161,7 @@ class user(SIAObject):
                  allNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
         normalizingValue = (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])+\
         (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])
-        return ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
+        self.score = ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
                 (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])/normalizingValue)
 
 class business(SIAObject):
@@ -210,7 +210,7 @@ class business(SIAObject):
                  allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
         normalizingValue = (self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])+ \
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])
-        return ((self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])/normalizingValue,\
+        self.score = ((self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])/normalizingValue,\
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):

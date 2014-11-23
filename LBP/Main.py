@@ -39,7 +39,7 @@ beforeStatisticsGenerationTime = datetime.now()
 #for g in nx.connected_component_subgraphs(G):
 #    print g
 #cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
-# print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
+#print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
 reviews = [edge for edge in G.edges()]
@@ -71,8 +71,16 @@ print'--------------------------------------------------------------------------
 afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
-loopyBeliefPropagation = LBP(graph=G)
-loopyBeliefPropagation.doBeliefPropagationIterative(-1)
+lbp = LBP(graph=G)
+lbp.doBeliefPropagationIterative(-1)
+(fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = \
+ lbp.calculateAndPrintBeliefVals()
+print 'fakeUsers', fakeUsers
+print 'honestUsers', honestUsers
+print 'goodProducts', goodProducts
+print 'badProducts', badProducts
+print 'fakeReviews', fakeReviews
+print 'realReviews', realReviews
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\

@@ -59,14 +59,6 @@ class LBP(object):
                         hasAnyMessageChanged = True
 
             print 'changedNodes',changedNodes
-            (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = self.calculateAndPrintBeliefVals()
-            print 'fakeUsers:',len(fakeUsers),'honestUsers:',len(honestUsers), \
-            'goodProducts:',len(goodProducts),'badProducts:',len(badProducts),\
-            'fakeReviews:',len(fakeReviews),'realReviews:',len(realReviews)
-#             
-#             noOfFakeReviews = len([r for r in fakeReviews if not r.isRecommended()])+ \
-#             len([r for r in realReviews if not r.isRecommended()])
-#             print 'noOfBadReviews:', noOfFakeReviews
             
             if not hasAnyMessageChanged:
                 break
@@ -85,7 +77,8 @@ class LBP(object):
         realReviews = []
         
         for siaObject in self.graph.nodes():
-            beliefVal = siaObject.calculateBeliefVals();
+            siaObject.calculateBeliefVals();
+            beliefVal = siaObject.getScore()
             if siaObject.getNodeType() == USER:
                 if(beliefVal[0] > beliefVal[1]):
                     fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
@@ -93,16 +86,24 @@ class LBP(object):
                     honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
             else:
                 if(beliefVal[0] > beliefVal[1]):
-                    badProducts.append(siaObject.getName()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                    badProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
+                                       str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 else:
-                    goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                    goodProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
+                                        str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
             messageFromProductToUser = review.getUser().getMessageFromNeighbor(review.getBusiness())
             if(messageFromProductToUser[0] > messageFromProductToUser[1]):
-                fakeReviews.append(review)
+                fakeReviews.append(review.getUser().getName()+\
+                                   ' '+review.getBusiness().getName()+\
+                                   ' '+review.getRating()+ ' '+\
+                                   str(review.isRecommended()))
             else:
-                realReviews.append(review)  
+                realReviews.append(review.getUser().getName()+\
+                                   ' '+review.getBusiness().getName()+\
+                                   ' '+review.getRating()+ ' '+\
+                                   str(review.isRecommended()))  
             
         return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)
