@@ -60,6 +60,10 @@ class LBP(object):
             print 'fakeUsers:',len(fakeUsers),'honestUsers:',len(honestUsers), \
             'goodProducts:',len(goodProducts),'badProducts:',len(badProducts),\
             'fakeReviews:',len(fakeReviews),'realReviews:',len(realReviews)
+#             
+#             noOfFakeReviews = len([r for r in fakeReviews if not r.isRecommended()])+ \
+#             len([r for r in realReviews if not r.isRecommended()])
+#             print 'noOfBadReviews:', noOfFakeReviews
             
             if not hasAnyMessageChanged:
                 break
@@ -76,6 +80,7 @@ class LBP(object):
         badProducts = []
         fakeReviews = []
         realReviews = []
+        
         for siaObject in self.graph.nodes():
             beliefVal = siaObject.calculateBeliefVals();
             if siaObject.getNodeType() == USER:
@@ -89,14 +94,13 @@ class LBP(object):
                 else:
                     goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
-                # last message from product to user represents a class probability for review
-                for neighborWithEdge in self.getNeighborWithEdges(siaObject):
-                    (neighbor,edge) = neighborWithEdge
-                    messageToNeighbor = neighbor.getMessageFromNeighbor(siaObject)
-                    review = edge[REVIEW_EDGE_DICT_CONST]
-                    if(messageToNeighbor[0]>messageToNeighbor[1]):
-                        fakeReviews.append(review)
-                    else:
-                        realReviews.append(review)  
+        for edge in self.graph.edges():
+            review = edge[REVIEW_EDGE_DICT_CONST]
+            messageFromProductToUser = review.getBusiness().getMessageFromNeighbor(review.getUser())
+            review = edge[REVIEW_EDGE_DICT_CONST]
+            if(messageFromProductToUser[0] > messageFromProductToUser[1]):
+                fakeReviews.append(review)
+            else:
+                realReviews.append(review)  
             
         return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)

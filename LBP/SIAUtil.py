@@ -212,12 +212,12 @@ class business(SIAObject):
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):
-    def __init__(self, _id, rating, txt='', recommended=True):
+    def __init__(self, _id, usr, bn, rating, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
         self.rating = rating
-        #self.usr = usr
-        #self.bn = bn
+        self.usr = usr
+        self.bn = bn
         self.text = txt
         self.recommended = recommended
         
@@ -233,12 +233,12 @@ class review(SIALink):
         else:
             return REVIEW_TYPE_NEGATIVE
     
-#     def getUsr(self):
-#         return self.usr
-#     
-#     def getBusiness(self):
-#         return self.bn
-    
+    def getUser(self):
+        return self.usr
+          
+    def getBusiness(self):
+        return self.bn
+      
     def getReviewText(self):
         return self.text
     
