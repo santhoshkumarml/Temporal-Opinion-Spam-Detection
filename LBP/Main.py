@@ -10,10 +10,11 @@ import numpy
 import sys
 
 from LBP import LBP
-from SIAUtil import business, user, USER, PRODUCT, REVIEW_EDGE_DICT_CONST
+from SIAUtil import business, user
 from dataReader import createGraph
 import matplotlib.pyplot as plt
 import networkx as nx
+import SIAUtil
 
 
 inputFileName = sys.argv[1]
@@ -42,8 +43,8 @@ beforeStatisticsGenerationTime = datetime.now()
 #    print g
 #cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
 #print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
-users = [node for node in G.nodes() if node.getNodeType() == USER]
-businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
+users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
+businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 reviews = [edge for edge in G.edges()]
 print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses),\
  'Number of Reviews- ', len(reviews)
@@ -78,20 +79,20 @@ lbp = LBP(graph=G)
 lbp.doBeliefPropagationIterative(20)
 (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = \
  lbp.calculateAndPrintBeliefVals()
-print 'fakeUsers=', fakeUsers
-print 'honestUsers=', honestUsers
-print 'goodProducts=', goodProducts
-print 'badProducts=', badProducts
-print 'fakeReviews=', fakeReviews
-print 'realReviews=', realReviews
+print 'fakeUsers=', len(fakeUsers)
+print 'honestUsers=', len(honestUsers)
+print 'goodProducts=', len(goodProducts)
+print 'badProducts=', len(badProducts)
+print 'fakeReviews=', len(fakeReviews)
+print 'realReviews=', len(realReviews)
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
 # nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-# ncolors = [USER_NODE_COLOR if x.getNodeType()==USER else PRODUCT_NODE_COLOR for x in G.nodes()]
-# ecolors = [RECOMMENDED_REVIEW_COLOR \
-#             if G.get_edge_data(x1,x2)[REVIEW_EDGE_DICT_CONST].isRecommended() \
-#              else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
+# ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
+ecolors = [RECOMMENDED_REVIEW_COLOR \
+             if G.get_edge_data(x1,x2)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended() \
+              else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
 # paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)

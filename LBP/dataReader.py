@@ -6,7 +6,7 @@
 
 import re
 
-from SIAUtil import user, business, review, REVIEW_EDGE_DICT_CONST
+from SIAUtil import user, business, review
 import SIAUtil
 import networkx as nx
 
