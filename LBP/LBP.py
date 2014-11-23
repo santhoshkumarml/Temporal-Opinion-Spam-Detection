@@ -90,12 +90,13 @@ class LBP(object):
                     goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
                 # last message from product to user represents a class probability for review
-                (neighbor,edge) = self.getNeighborWithEdges(siaObject)
-                messageToNeighbor = neighbor.getMessageFromNeighbor(siaObject)
-                review = edge[REVIEW_EDGE_DICT_CONST]
-                if(messageToNeighbor[0]>messageToNeighbor[1]):
-                    fakeReviews.append(review)
-                else:
-                    realReviews.append(review)  
+                for neighborWithEdge in self.getNeighborWithEdges(siaObject):
+                    (neighbor,edge) = neighborWithEdge
+                    messageToNeighbor = neighbor.getMessageFromNeighbor(siaObject)
+                    review = edge[REVIEW_EDGE_DICT_CONST]
+                    if(messageToNeighbor[0]>messageToNeighbor[1]):
+                        fakeReviews.append(review)
+                    else:
+                        realReviews.append(review)  
             
         return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)
