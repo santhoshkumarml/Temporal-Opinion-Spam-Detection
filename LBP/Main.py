@@ -24,11 +24,13 @@ PRODUCT_NODE_COLOR = 'blue'
 ##################FUNCTIONS#############################
 def paintWithLabels(graph,nodetoNodeLabelDict, nodecolor='red', edgecolor='blue'):
     nx.draw(graph,pos=nx.spring_layout(graph), with_labels=True,\
-             node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0, labels=nodetoNodeLabelDict)
+             node_color=nodecolor,edge_color=edgecolor, alpha=0.5, width=2.0,\
+              labels=nodetoNodeLabelDict)
     plt.show()
 
 def paint(graph, nodecolor='red', edgecolor='blue'):
-    nx.draw(graph,pos=nx.spring_layout(graph), with_labels=True, node_color=nodecolor,edge_color=edgecolor, alpha=1.0, width=10.0)
+    nx.draw(graph,pos=nx.spring_layout(graph), with_labels=True,\
+             node_color=nodecolor,edge_color=edgecolor, alpha=1.0, width=10.0)
     plt.show()
 ################## MAIN #################################
 #########################################################
@@ -43,7 +45,8 @@ beforeStatisticsGenerationTime = datetime.now()
 users = [node for node in G.nodes() if node.getNodeType() == USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
 reviews = [edge for edge in G.edges()]
-print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses), 'Number of Reviews- ', len(reviews)
+print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses),\
+ 'Number of Reviews- ', len(reviews)
 # userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
 # print'----------------------Component Sizes----------------------------------------------------------------------'

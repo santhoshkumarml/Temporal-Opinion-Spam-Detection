@@ -23,7 +23,8 @@ class LBP(object):
 #                 user.normalizeMessages()
     
     def getNeighborWithEdges(self, siaObject):
-        return [(neighbor,self.graph.get_edge_data(siaObject, neighbor)) for neighbor in self.graph.neighbors(siaObject)] 
+        return [(neighbor,self.graph.get_edge_data(siaObject, neighbor)) \
+                for neighbor in self.graph.neighbors(siaObject)] 
         
     #DON't USE - will reach max recursion limit
     def doBeliefPropagationRecursive(self, saturation):
@@ -98,11 +99,13 @@ class LBP(object):
             if(messageFromProductToUser[0] > messageFromProductToUser[1]):
                 fakeReviews.append(review.getUser().getName()+\
                                    ' '+review.getBusiness().getName()+\
+                                   ' '+str(messageFromProductToUser)+\
                                    ' '+review.getRating()+ ' '+\
                                    str(review.isRecommended()))
             else:
                 realReviews.append(review.getUser().getName()+\
                                    ' '+review.getBusiness().getName()+\
+                                   ' '+str(messageFromProductToUser)+\
                                    ' '+review.getRating()+ ' '+\
                                    str(review.isRecommended()))  
             
