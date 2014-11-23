@@ -72,19 +72,15 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 loopyBeliefPropagation = LBP(graph=G)
-loopyBeliefPropagation.doBeliefPropagationIterative(10)
-loopyBeliefPropagation.calculateAndPrintBeliefVals()
+loopyBeliefPropagation.doBeliefPropagationIterative(-1)
 afterLBPRunTime = datetime.now()
 ###########################################################
-businesses = [node.getName()+' '+node.getUrl()+'  '+str(node.getRating()) for node in G.nodes() if node.getNodeType() == PRODUCT]
-reviews = [edge[0].getName()+'  '+edge[1].getName()+' '+str(G.get_edge_data(*edge)[EDGE_DICT_CONST].getReviewSentiment()) for edge in G.edges()]
-print reviews
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
-nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-ncolors = [USER_NODE_COLOR if x.getNodeType()==USER else PRODUCT_NODE_COLOR for x in G.nodes()]
-ecolors = [RECOMMENDED_REVIEW_COLOR \
-            if G.get_edge_data(x1,x2)[EDGE_DICT_CONST].isRecommended() \
-             else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
-paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
+# nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
+# ncolors = [USER_NODE_COLOR if x.getNodeType()==USER else PRODUCT_NODE_COLOR for x in G.nodes()]
+# ecolors = [RECOMMENDED_REVIEW_COLOR \
+#             if G.get_edge_data(x1,x2)[EDGE_DICT_CONST].isRecommended() \
+#              else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
+# paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)

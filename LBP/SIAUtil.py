@@ -39,7 +39,7 @@ EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-episolon = math.pow(10, -3)
+EPISOLON = math.pow(10, -3)
 compatabilityPotential = numpy.ones(shape=(2,2,2), dtype=float32)
 def initialiazePotential():
     for i in range(0,2):
@@ -49,33 +49,29 @@ def initialiazePotential():
                 if i == REVIEW_TYPE_NEGATIVE:
                     if j == USER_TYPE_HONEST:
                         if k == PRODUCT_TYPE_GOOD:
-                            output = episolon
+                            output = EPISOLON
                         else:
-                            output = 1-episolon
+                            output = 1-EPISOLON
                     else:
                         if k == PRODUCT_TYPE_GOOD:
-                            output = 1-(2*episolon)
+                            output = 1-(2*EPISOLON)
                         else:
-                            output = (2*episolon)
+                            output = (2*EPISOLON)
                 else:
                     if j == USER_TYPE_HONEST:
                         if k == PRODUCT_TYPE_GOOD:
-                            output = 1-episolon
+                            output = 1-EPISOLON
                         else:
-                            output = episolon
+                            output = EPISOLON
                     else:
                         if k == PRODUCT_TYPE_GOOD:
-                            output = (2*episolon)
+                            output = (2*EPISOLON)
                         else:
-                            output = 1-(2*episolon)
+                            output = 1-(2*EPISOLON)
                 compatabilityPotential[i][j][k] = output
                 
 
 initialiazePotential()
-
-# class CustomGraph(nx.Graph):
-#     pass
-        
 
 '''
   SIAObject to be used as Graph node
@@ -85,20 +81,14 @@ class SIAObject(object):
     def __init__(self, score=(0.5, 0.5), NODE_TYPE=USER):
         self.score = score
         self.messages = dict()
-        #self.allMessageBuffer = dict()
         self.nodeType = NODE_TYPE
-    
-#     def getAllMessageBuffer(self):
-#         return self.allMessageBuffer
+
     def addMessages(self, node, message):
         hasChanged = False
+        message = self.normalizeMessage(message)
         if node not in self.messages or self.messages[node] != message:
             self.messages[node] = message
             hasChanged = True
-        self.normalizeMessage(node)
-        #if hassChanged and (self, node) not in self.allMessageBuffer:
-        #        self.allMessageBuffer[(self,node)] = []
-        #self.allMessageBuffer[(self,node)].append(self.getName()+node.getName()+str(message))
         return hasChanged
     
     def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
@@ -115,10 +105,10 @@ class SIAObject(object):
     def getNodeType(self):
         return self.nodeType
 
-    def normalizeMessage(self, key):
-        normalizingValue = self.messages[key][0]+self.messages[key][1]
-        self.messages[key] = (self.messages[key][0]/normalizingValue, self.messages[key][1]/normalizingValue)
-            
+    def normalizeMessage(self, message):
+        normalizingValue = message[0]+message[1]
+        message = (message[0]/normalizingValue, message[1]/normalizingValue)
+        return message
 
 class SIALink(object):
     def __init__(self, score=(0.5, 0.5)):
@@ -142,14 +132,15 @@ class user(SIAObject):
     
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
+        (neighbor, edge) = neighborWithEdge
         for messageKey in self.messages.keys():
-            if messageKey != neighborWithEdge[0]:
+            if messageKey != neighbor:
                 message= self.messages[messageKey]
                 allOtherNeighborMessageMultiplication = \
                 (allOtherNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
                  allOtherNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
         scoreAddition = (0,0)
-        review = neighborWithEdge[1][EDGE_DICT_CONST]
+        review = edge[EDGE_DICT_CONST]
         for userType in USER_TYPES:
             scoreAddition=\
              (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
@@ -165,7 +156,7 @@ class user(SIAObject):
                  allNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
         normalizingValue = (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])+\
         (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])
-        self.score = ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
+        return ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
                 (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])/normalizingValue)
 
 class business(SIAObject):
@@ -214,7 +205,7 @@ class business(SIAObject):
                  allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
         normalizingValue = (self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])+ \
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])
-        self.score = ((self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])/normalizingValue,\
+        return ((self.score[PRODUCT_TYPE_BAD]*allNeighborMessageMultiplication[PRODUCT_TYPE_BAD])/normalizingValue,\
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):

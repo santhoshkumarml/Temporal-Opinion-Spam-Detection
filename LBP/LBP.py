@@ -56,7 +56,9 @@ class LBP(object):
                         hasAnyMessageChanged = True
 
             print 'changedNodes',changedNodes
-            
+            (fakeUsers,honestUsers,goodProducts,badProducts) = self.calculateAndPrintBeliefVals()
+            print 'fakeUsers:',len(fakeUsers),'honestUsers:',len(honestUsers), \
+            'goodProducts:',len(goodProducts),'badProducts:',len(badProducts)
             if not hasAnyMessageChanged:
                 break
             
@@ -71,21 +73,16 @@ class LBP(object):
         goodProducts = []
         badProducts = []
         for siaObject in self.graph.nodes():
-            siaObject.calculateBeliefVals();
+            beliefVal = siaObject.calculateBeliefVals();
             if siaObject.getNodeType() == USER:
-                if(siaObject.getScore()[0] > siaObject.getScore()[1]):
+                if(beliefVal[0] > beliefVal[1]):
                     fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
                 else:
                     honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
             else:
-                if(siaObject.getScore()[0] > siaObject.getScore()[1]):
+                if(beliefVal[0] > beliefVal[1]):
                     badProducts.append(siaObject.getName()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 else:
                     goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
-
-            #print siaObject.getAllMessageBuffer()
         
-        print 'fakeUsers', fakeUsers
-        print 'honestUsers', honestUsers
-        print 'badProducts', badProducts
-        print 'goodProducts', goodProducts
+        return (fakeUsers,honestUsers,goodProducts,badProducts)
