@@ -75,15 +75,15 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(1000)
+lbp.doBeliefPropagationIterative(20)
 (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = \
  lbp.calculateAndPrintBeliefVals()
-print 'fakeUsers', fakeUsers
-print 'honestUsers', honestUsers
-print 'goodProducts', goodProducts
-print 'badProducts', badProducts
-print 'fakeReviews', fakeReviews
-print 'realReviews', realReviews
+print 'fakeUsers=', fakeUsers
+print 'honestUsers=', honestUsers
+print 'goodProducts=', goodProducts
+print 'badProducts=', badProducts
+print 'fakeReviews=', fakeReviews
+print 'realReviews=', realReviews
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
