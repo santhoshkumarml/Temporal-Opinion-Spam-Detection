@@ -35,7 +35,7 @@ REVIEW_TYPE_REAL = 1
 REVIEW_TYPE_NEGATIVE = 0
 REVIEW_TYPE_POSITIVE = 1
 
-EDGE_DICT_CONST = 'review'
+REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
@@ -140,7 +140,7 @@ class user(SIAObject):
                 (allOtherNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
                  allOtherNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
         scoreAddition = (0,0)
-        review = edge[EDGE_DICT_CONST]
+        review = edge[REVIEW_EDGE_DICT_CONST]
         for userType in USER_TYPES:
             scoreAddition=\
              (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
@@ -188,7 +188,7 @@ class business(SIAObject):
                 allOtherNeighborMessageMultiplication = \
                 (allOtherNeighborMessageMultiplication[PRODUCT_TYPE_BAD]*message[PRODUCT_TYPE_BAD] , \
                  allOtherNeighborMessageMultiplication[PRODUCT_TYPE_GOOD]*message[PRODUCT_TYPE_GOOD])
-        review = edge[EDGE_DICT_CONST]
+        review = edge[REVIEW_EDGE_DICT_CONST]
         scoreAddition = (0,0)
         for productType in PRODUCT_TYPES:
             scoreAddition=\

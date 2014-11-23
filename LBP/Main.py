@@ -10,7 +10,7 @@ import sys
 
 import numpy
 from LBP import LBP
-from SIAUtil import business, user, USER, PRODUCT, EDGE_DICT_CONST
+from SIAUtil import business, user, USER, PRODUCT, REVIEW_EDGE_DICT_CONST
 from dataReader import createGraph
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -81,6 +81,6 @@ print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTim
 # nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 # ncolors = [USER_NODE_COLOR if x.getNodeType()==USER else PRODUCT_NODE_COLOR for x in G.nodes()]
 # ecolors = [RECOMMENDED_REVIEW_COLOR \
-#             if G.get_edge_data(x1,x2)[EDGE_DICT_CONST].isRecommended() \
+#             if G.get_edge_data(x1,x2)[REVIEW_EDGE_DICT_CONST].isRecommended() \
 #              else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
 # paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
