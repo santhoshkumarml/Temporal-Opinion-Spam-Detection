@@ -2,13 +2,15 @@ YELP_COM_URL = 'http://www.yelp.com'
 __author__ = 'S.R'
 __date__ = 'Oct 27th, 2014'
 
-from BeautifulSoup import BeautifulSoup
-import urllib2
 import argparse
-import re
-import time
 import random
+import re
 import sys
+import time
+import urllib2
+
+from BeautifulSoup import BeautifulSoup
+
 
 get_yelp_page = \
     lambda zipcode, page_num: \

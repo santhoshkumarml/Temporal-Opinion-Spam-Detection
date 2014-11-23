@@ -1,6 +1,8 @@
-import urllib2
 import re
+import urllib2
+
 from BeautifulSoup import BeautifulSoup
+
 
 ROOT_URL = "http://www.aip2.com/zip.htm"
 

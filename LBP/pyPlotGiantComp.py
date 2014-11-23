@@ -17,8 +17,10 @@ try:
 except:
     raise
 
-import networkx as nx
 import math
+
+import networkx as nx
+
 
 try:
     from networkx import graphviz_layout

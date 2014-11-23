@@ -3,13 +3,15 @@ Created on Nov 3, 2014
 
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
-import numpy
-from numpy import float32
-import math
-
 '''
 Node Types
 '''
+
+import math
+from numpy import float32
+import numpy
+
+
 USER = 'USER'
 PRODUCT = 'PRODUCT'
 
@@ -39,9 +41,9 @@ REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-EPISOLON = math.pow(10, -3)
-compatabilityPotential = numpy.ones(shape=(2,2,2), dtype=float32)
-def initialiazePotential():
+EPISOLON = math.pow(10, -4)
+COMP_POT = numpy.ones(shape=(2,2,2), dtype=float32)
+def init_COMP_POT():
     for i in range(0,2):
         for j in range(0,2):
             for k in range(0,2):
@@ -68,10 +70,10 @@ def initialiazePotential():
                             output = (2*EPISOLON)
                         else:
                             output = 1-(2*EPISOLON)
-                compatabilityPotential[i][j][k] = output
+                COMP_POT[i][j][k] = output
                 
 
-initialiazePotential()
+init_COMP_POT()
 
 '''
   SIAObject to be used as Graph node
@@ -146,8 +148,8 @@ class user(SIAObject):
         review = edge[REVIEW_EDGE_DICT_CONST]
         for userType in USER_TYPES:
             scoreAddition=\
-             (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
-             scoreAddition[1]+(compatabilityPotential[review.getReviewSentiment()][userType][PRODUCT_TYPE_GOOD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]))
+             (scoreAddition[0]+(COMP_POT[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
+             scoreAddition[1]+(COMP_POT[review.getReviewSentiment()][userType][PRODUCT_TYPE_GOOD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]))
         return scoreAddition
     
     def calculateBeliefVals(self):
@@ -195,8 +197,8 @@ class business(SIAObject):
         scoreAddition = (0,0)
         for productType in PRODUCT_TYPES:
             scoreAddition=\
-             (scoreAddition[0]+(compatabilityPotential[review.getReviewSentiment()][USER_TYPE_FRAUD][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]),\
-             scoreAddition[1]+(compatabilityPotential[review.getReviewSentiment()][USER_TYPE_HONEST][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]))
+             (scoreAddition[0]+(COMP_POT[review.getReviewSentiment()][USER_TYPE_FRAUD][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]),\
+             scoreAddition[1]+(COMP_POT[review.getReviewSentiment()][USER_TYPE_HONEST][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]))
         return scoreAddition
     
     def calculateBeliefVals(self):

@@ -6,9 +6,9 @@ Created on Nov 17, 2014
 ##################VARIABLES#############################
 
 from datetime import datetime
+import numpy
 import sys
 
-import numpy
 from LBP import LBP
 from SIAUtil import business, user, USER, PRODUCT, REVIEW_EDGE_DICT_CONST
 from dataReader import createGraph

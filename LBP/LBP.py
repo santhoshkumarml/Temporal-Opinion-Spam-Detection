@@ -1,10 +1,13 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
-from SIAUtil import PRODUCT, USER, REVIEW_EDGE_DICT_CONST
 '''
  Loopy Belief Propagation
 '''
+
+from SIAUtil import PRODUCT, USER, REVIEW_EDGE_DICT_CONST
+
+
 class LBP(object):
     def __init__(self, graph):
         self.graph = graph

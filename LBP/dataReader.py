@@ -1,13 +1,16 @@
-from SIAUtil import user,business,review, REVIEW_EDGE_DICT_CONST
-import re
-import networkx as nx
 '''
 @author: Sarath Rami
 @author: Santhosh Kumar Manavasi Lakshminarayanan
 '''
-import SIAUtil
-
 ######################################################### Initializers
+
+import re
+
+from SIAUtil import user, business, review, REVIEW_EDGE_DICT_CONST
+import SIAUtil
+import networkx as nx
+
+
 B = []
 R = []
 NR = []
