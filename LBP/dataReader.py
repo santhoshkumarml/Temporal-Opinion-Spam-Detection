@@ -31,7 +31,7 @@ def createGraph(inputFileName):
                     if not dictUsr:
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
-                    revw = review(recoRev[0], recoRev[3], dictUsr, bnss, recoRev[4], True)
+                    revw = review(recoRev[0], dictUsr, bnss, recoRev[3], recoRev[4], True)
                     #revw = review(recoRev[0], recoRev[3], recoRev[4], True)
                     G.add_node(dictUsr)
                     G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
@@ -44,7 +44,7 @@ def createGraph(inputFileName):
                     if not dictUsr:
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
-                    revw = review(noRecoRev[0], noRecoRev[3], dictUsr, bnss, noRecoRev[4], False)
+                    revw = review(noRecoRev[0], dictUsr, bnss, noRecoRev[3], noRecoRev[4], False)
                     #revw = review(noRecoRev[0], noRecoRev[3], noRecoRev[4], False)
                     G.add_node(dictUsr)
                     G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
