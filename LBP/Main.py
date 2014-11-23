@@ -38,17 +38,17 @@ afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 #for g in nx.connected_component_subgraphs(G):
 #    print g
-cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
+#cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
 # print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
-# users = [node for node in G.nodes() if node.getNodeType() == USER]
-# businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
-# reviews = [edge for edge in G.edges()]
-# print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses), 'Number of Reviews- ', len(reviews)
+users = [node for node in G.nodes() if node.getNodeType() == USER]
+businesses = [node for node in G.nodes() if node.getNodeType() == PRODUCT]
+reviews = [edge for edge in G.edges()]
+print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses), 'Number of Reviews- ', len(reviews)
 # userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
 # print'----------------------Component Sizes----------------------------------------------------------------------'
-lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
-print lenListComponents
+#lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
+#print lenListComponents
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:

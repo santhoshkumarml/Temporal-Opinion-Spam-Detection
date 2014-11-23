@@ -97,7 +97,6 @@ class LBP(object):
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
             messageFromProductToUser = review.getUser().getMessageFromNeighbor(review.getBusiness())
-            review = edge[REVIEW_EDGE_DICT_CONST]
             if(messageFromProductToUser[0] > messageFromProductToUser[1]):
                 fakeReviews.append(review)
             else:
