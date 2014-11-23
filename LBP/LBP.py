@@ -1,7 +1,7 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
-from SIAUtil import PRODUCT, USER
+from SIAUtil import PRODUCT, USER, REVIEW_EDGE_DICT_CONST
 '''
  Loopy Belief Propagation
 '''
@@ -56,9 +56,11 @@ class LBP(object):
                         hasAnyMessageChanged = True
 
             print 'changedNodes',changedNodes
-            (fakeUsers,honestUsers,goodProducts,badProducts) = self.calculateAndPrintBeliefVals()
+            (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = self.calculateAndPrintBeliefVals()
             print 'fakeUsers:',len(fakeUsers),'honestUsers:',len(honestUsers), \
-            'goodProducts:',len(goodProducts),'badProducts:',len(badProducts)
+            'goodProducts:',len(goodProducts),'badProducts:',len(badProducts),\
+            'fakeReviews:',len(fakeReviews),'realReviews:',len(realReviews)
+            
             if not hasAnyMessageChanged:
                 break
             
@@ -72,6 +74,8 @@ class LBP(object):
         honestUsers = []
         goodProducts = []
         badProducts = []
+        fakeReviews = []
+        realReviews = []
         for siaObject in self.graph.nodes():
             beliefVal = siaObject.calculateBeliefVals();
             if siaObject.getNodeType() == USER:
@@ -84,5 +88,14 @@ class LBP(object):
                     badProducts.append(siaObject.getName()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 else:
                     goodProducts.append(siaObject.getName()+''+siaObject.getUrl()+' '+str(siaObject.getScore())+' '+str(siaObject.getRating()))
-        
-        return (fakeUsers,honestUsers,goodProducts,badProducts)
+                    
+                # last message from product to user represents a class probability for review
+                (neighbor,edge) = self.getNeighborWithEdges(siaObject)
+                messageToNeighbor = neighbor.getMessageFromNeighbor(siaObject)
+                review = edge[REVIEW_EDGE_DICT_CONST]
+                if(messageToNeighbor[0]>messageToNeighbor[1]):
+                    fakeReviews.append(review)
+                else:
+                    realReviews.append(review)  
+            
+        return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)

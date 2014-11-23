@@ -83,6 +83,9 @@ class SIAObject(object):
         self.messages = dict()
         self.nodeType = NODE_TYPE
 
+    def getMessageFromNeighbor(self, neighbor):
+        return self.messages[neighbor]
+
     def addMessages(self, node, message):
         hasChanged = False
         message = self.normalizeMessage(message)
