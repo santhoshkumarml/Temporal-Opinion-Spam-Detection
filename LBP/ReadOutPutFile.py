@@ -5,6 +5,7 @@ Created on Nov 23, 2014
 '''
 import sys
 import re
+from fileinput import close
 
 if __name__ == '__main__':
     inputFileName = sys.argv[1]
@@ -16,15 +17,11 @@ if __name__ == '__main__':
     realReviews = []
     with open(inputFileName) as f:
         for line in f:
-            if re.match('^fakeUsers', line):
+            if re.match('^fakeUsers', line) or re.match('^honestUsers', line)\
+             or re.match('^badProducts', line) or re.match('^goodProducts', line)\
+             or re.match('^fakeReviews', line) or re.match('^realReviews', line):
                 exec(line)
-            if re.match('^honestUsers', line):
-                pass
-            if re.match('^badProducts', line):
-                pass
-            if re.match('^goodProducts', line):
-                pass
-            if re.match('^fakeReviews', line):
-                pass
-            if re.match('^realReviews', line):
-                pass
+    close(f)
+    print 'fakeUsers',len(fakeUsers),honestUsers, len(honestUsers),\
+    'badProducts',len(badProducts), 'goodProducts',len(goodProducts),\
+    'fakeReviews', len(fakeReviews),'realReviews',len(realReviews)
