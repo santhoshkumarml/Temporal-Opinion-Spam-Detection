@@ -92,7 +92,7 @@ print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTim
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
 # nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
 # ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
-ecolors = [RECOMMENDED_REVIEW_COLOR \
-             if G.get_edge_data(x1,x2)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended() \
-              else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
+# ecolors = [RECOMMENDED_REVIEW_COLOR \
+#              if G.get_edge_data(x1,x2)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended() \
+#               else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
 # paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
