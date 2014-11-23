@@ -1,4 +1,4 @@
-from SIAUtil import user,business,review
+from SIAUtil import user,business,review, REVIEW_EDGE_DICT_CONST
 import re
 import networkx as nx
 '''
@@ -34,7 +34,7 @@ def createGraph(inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    G.add_edge(bnss, dictUsr, dict({SIAUtil.EDGE_DICT_CONST:revw}))
+                    G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
             elif re.match('^NR=', line):
                 exec(line)
                 #print 'NR = ', NR
@@ -47,5 +47,5 @@ def createGraph(inputFileName):
                         userIdToDict[usr.getId()] = usr
                         dictUsr = usr
                     G.add_node(dictUsr)
-                    G.add_edge(bnss, dictUsr, dict({SIAUtil.EDGE_DICT_CONST:revw}))
+                    G.add_edge(bnss, dictUsr, dict({SIAUtil.REVIEW_EDGE_DICT_CONST:revw}))
     return G
