@@ -159,10 +159,10 @@ class user(SIAObject):
             allNeighborMessageMultiplication = \
                 (allNeighborMessageMultiplication[USER_TYPE_FRAUD]*message[USER_TYPE_FRAUD] , \
                  allNeighborMessageMultiplication[USER_TYPE_HONEST]*message[USER_TYPE_HONEST])
-        normalizingValue = (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])+\
-        (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])
-        self.score = ((self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue, \
-                (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])/normalizingValue)
+        normalizingValue = (self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])+\
+        (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])
+        self.score = ((self.score[USER_TYPE_FRAUD]*allNeighborMessageMultiplication[USER_TYPE_FRAUD])/normalizingValue, \
+                (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue)
 
 class business(SIAObject):
     def __init__(self, _id, name, rating=2.5, url=None, score=(0.5,0.5)):
