@@ -109,6 +109,7 @@ class LBP(object):
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
+            review.calculateBeliefVals()
             beliefVal = review.getScore()
             if(beliefVal[0] > beliefVal[1]):
                 fakeReviews.append(review)
