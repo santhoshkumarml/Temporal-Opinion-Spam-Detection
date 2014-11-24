@@ -36,22 +36,21 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 ################## MAIN #################################
 #########################################################
 beforeGraphPopulationTime = datetime.now()
-wholeGraph=dataReader.createGraph(inputFileName)
+(userIdToUserDict,businessIdToBusinessDict,reviews) = dataReader.parseAndCreateObjects(inputFileName)
+wholeGraph = SIAUtil.createGraph((userIdToUserDict, businessIdToBusinessDict, reviews))
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
+
+print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
+print 'Number of Users- ', len(userIdToUserDict.keys()),\
+ 'Number of Businesses- ', len(businessIdToBusinessDict.keys()),\
+ 'Number of Reviews- ', len(reviews)
 print'----------------------Component Sizes----------------------------------------------------------------------'
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
 #G = wholeGraph
-G = cc[5]
-print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
-users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
-businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
-reviews = [edge for edge in G.edges()]
-print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses),\
- 'Number of Reviews- ', len(reviews)
-
+G = cc[1]
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -71,11 +70,11 @@ print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses)
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 #print businessDegreeDistribution
 # print'----------------------Review Sentiment Distribution----------------------------------------------------------'
-reviewSentimentDistribution = [ G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getRating()\
-#                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment(),\
-#                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended())\
-                                 for edge in G.edges()]
-print reviewSentimentDistribution
+# reviewSentimentDistribution = [ G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getRating()\
+#                                 G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment(),\
+#                                 G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended())\
+#                                  for edge in G.edges()]
+# print reviewSentimentDistribution
 # print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
 # print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponents)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponents)) 
 # print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(userDegreeDistribution))
@@ -94,7 +93,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
 ##################ALGO_START################
-lbp.doBeliefPropagationIterative(-1)
+lbp.doBeliefPropagationIterative(100)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateBeliefVals()

@@ -7,7 +7,7 @@ Created on Nov 3, 2014
 Node Types
 '''
 import numpy
-
+import networkx
 
 USER = 'USER'
 PRODUCT = 'PRODUCT'
@@ -254,3 +254,11 @@ class review(SIALink):
     def calculateBeliefVals(self):
         self.score = self.getUser().getMessageFromNeighbor(self.getBusiness())
     
+
+def createGraph((userIdToUserDict,businessIdToBusinessDict,reviews)):
+    G = networkx.Graph()
+    for review in reviews:
+        G.add_node(review.getUser())
+        G.add_node(review.getBusiness())
+        G.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
+    return G
