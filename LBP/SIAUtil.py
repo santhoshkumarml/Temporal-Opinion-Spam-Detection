@@ -251,5 +251,5 @@ class review(SIALink):
         return self.recommended
     
     def calculateBeliefVals(self):
-        self.score = review.getUser().getMessageFromNeighbor(review.getBusiness())
+        self.score = self.getUser().getMessageFromNeighbor(self.getBusiness())
     
