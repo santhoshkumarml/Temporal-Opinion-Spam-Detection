@@ -39,10 +39,7 @@ beforeGraphPopulationTime = datetime.now()
 G=createGraph(inputFileName)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
-#for g in nx.connected_component_subgraphs(G):
-#    print g
-#cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
-#print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
+print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 reviews = [edge for edge in G.edges()]
@@ -50,9 +47,10 @@ print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses)
  'Number of Reviews- ', len(reviews)
 # userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
-# print'----------------------Component Sizes----------------------------------------------------------------------'
-#lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
-#print lenListComponents
+print'----------------------Component Sizes----------------------------------------------------------------------'
+cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
+lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
+print lenListComponents
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -76,7 +74,7 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(20)
+lbp.doBeliefPropagationIterative(26)
 (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = \
  lbp.calculateAndPrintBeliefVals()
 print 'fakeUsers=', len(fakeUsers)
@@ -85,6 +83,10 @@ print 'goodProducts=', len(goodProducts)
 print 'badProducts=', len(badProducts)
 print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
+# Accuracy calculation#
+fakeReviewsRecommendation = [review for review in fakeReviews\
+                              if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+print "Accuracy of Fake Reviews",len(fakeReviewsRecommendation)
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\

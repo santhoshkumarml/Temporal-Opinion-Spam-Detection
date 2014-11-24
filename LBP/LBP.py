@@ -82,31 +82,37 @@ class LBP(object):
             beliefVal = siaObject.getScore()
             if siaObject.getNodeType() == USER:
                 if(beliefVal[0] > beliefVal[1]):
-                    fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
+                    fakeUsers.append(siaObject)
+#                     fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
                 else:
-                    honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
+                    honestUsers.append(siaObject)
+#                     honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
             else:
                 if(beliefVal[0] > beliefVal[1]):
-                    badProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
-                                       str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                    badProducts.append(siaObject)
+#                     badProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
+#                                        str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 else:
-                    goodProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
-                                        str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                    goodProducts.append(siaObject)
+#                     goodProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
+#                                         str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
             messageFromProductToUser = review.getUser().getMessageFromNeighbor(review.getBusiness())
             if(messageFromProductToUser[0] > messageFromProductToUser[1]):
-                fakeReviews.append(review.getUser().getName()+\
-                                   ' '+review.getBusiness().getName()+\
-                                   ' '+str(messageFromProductToUser)+\
-                                   ' '+review.getRating()+ ' '+\
-                                   str(review.isRecommended()))
+                fakeReviews.append(review)
+#                 fakeReviews.append(review.getUser().getName()+\
+#                                    ' '+review.getBusiness().getName()+\
+#                                    ' '+str(messageFromProductToUser)+\
+#                                    ' '+review.getRating()+ ' '+\
+#                                    str(review.isRecommended()))
             else:
-                realReviews.append(review.getUser().getName()+\
-                                   ' '+review.getBusiness().getName()+\
-                                   ' '+str(messageFromProductToUser)+\
-                                   ' '+review.getRating()+ ' '+\
-                                   str(review.isRecommended()))  
-            
+                realReviews.append(review)
+#                 realReviews.append(review.getUser().getName()+\
+#                                    ' '+review.getBusiness().getName()+\
+#                                    ' '+str(messageFromProductToUser)+\
+#                                    ' '+review.getRating()+ ' '+\
+#                                    str(review.isRecommended()))  
+#             
         return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)
