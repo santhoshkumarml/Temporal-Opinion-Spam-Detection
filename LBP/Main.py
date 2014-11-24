@@ -43,7 +43,7 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = cc[5]
+G = wholeGraph
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -69,6 +69,12 @@ print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses)
 
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 #print businessDegreeDistribution
+# print'----------------------Review Sentiment Distribution----------------------------------------------------------'
+# reviewSentimentDistribution = [(G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getRating(),\
+#                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment(),\
+#                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended())\
+#                                 for edge in G.edges()]
+# print reviewSentimentDistribution
 # print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
 # print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponents)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponents)) 
 # print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(userDegreeDistribution))
@@ -100,31 +106,32 @@ print 'unclassfiedProducts=', len(unclassifiedProducts)
 print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
-##################Accuracy calculation################# 
+##################Accuracy calculation#################
 fakeReviewsRecommendation = [review for review in fakeReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
 realReviewsRecommendation = [review for review in realReviews\
                               if not lbp.getEdgeDataForNodes(review.getUser(),\
                                                              review.getBusiness()).isRecommended()]
-unclassifiedRealReviews = [review for review in unclassifiedReviews\
-                              if lbp.getEdgeDataForNodes(review.getUser(),\
-                                                         review.getBusiness()).isRecommended()]
 unclassifiedFakeReviews = [review for review in unclassifiedReviews\
                               if not lbp.getEdgeDataForNodes(review.getUser(),\
                                                              review.getBusiness()).isRecommended()]
+unclassifiedRealReviews = [review for review in unclassifiedReviews\
+                              if lbp.getEdgeDataForNodes(review.getUser(),\
+                                                         review.getBusiness()).isRecommended()]
 print "Number of Real Reviews in Fake Reviews",len(fakeReviewsRecommendation)
 print "Number of Fake Reviews in Real Reviews",len(realReviewsRecommendation)
 print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)
 print "Number of Real Reviews in Unclassified Reviews",len(unclassifiedRealReviews)
+
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
-nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
-ecolors = [RECOMMENDED_REVIEW_COLOR \
-             if lbp.getEdgeDataForNodes(x1,x2).isRecommended() \
-               else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
-paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
+# nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
+# ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
+# ecolors = [RECOMMENDED_REVIEW_COLOR \
+#              if lbp.getEdgeDataForNodes(x1,x2).isRecommended() \
+#                else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
+# paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
