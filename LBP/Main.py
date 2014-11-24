@@ -77,11 +77,13 @@ print'--------------------------------------------------------------------------
 afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
+##################ALGO_START################
 lbp = LBP(graph=G)
 lbp.doBeliefPropagationIterative(10)
 (fakeUsers,honestUsers,unclassifiedUsers,\
-                badProducts,goodProducts,unclassifiedProducts,\
-                fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
+ badProducts,goodProducts,unclassifiedProducts,\
+ fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
+##################ALGO_END################ 
 print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if LBP.getEdgeDataForNodes(*edge).getReviewSentiment()\
@@ -94,7 +96,7 @@ print 'unclassfiedProducts=', len(unclassifiedProducts)
 print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
-# Accuracy calculation#
+##################Accuracy calculation################# 
 fakeReviewsRecommendation = [review for review in fakeReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
