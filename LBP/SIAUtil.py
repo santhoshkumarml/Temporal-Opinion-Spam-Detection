@@ -220,7 +220,7 @@ class review(SIALink):
     def __init__(self, _id, usr, bn, rating, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
-        self.rating = rating
+        self.rating = float(rating)
         self.usr = usr
         self.bn = bn
         self.text = txt

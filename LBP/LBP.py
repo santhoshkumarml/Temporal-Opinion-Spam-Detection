@@ -47,6 +47,7 @@ class LBP(object):
                 self.doBeliefPropagation(saturation-1)
                 
     def doBeliefPropagationIterative(self, saturation):
+        lastFiveteenIterations = []
         while (saturation>0 or saturation<0):
             changedNodes=0
             hasAnyMessageChanged = False
@@ -63,6 +64,14 @@ class LBP(object):
                         hasAnyMessageChanged = True
 
             print 'changedNodes',changedNodes
+            if len(lastFiveteenIterations) == 15:
+                firstElement = lastFiveteenIterations[0]
+                lastFiveteenIterations.remove(firstElement)
+            lastFiveteenIterations.append(changedNodes)
+            
+            if lastFiveteenIterations.count(changedNodes) == 15:
+                print "Having the same number of nodes change for last five teen iterations - stopping BP"
+                saturation = 1
             
             if not hasAnyMessageChanged:
                 break

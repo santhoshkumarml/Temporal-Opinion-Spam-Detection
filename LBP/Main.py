@@ -70,11 +70,11 @@ print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses)
 # businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 #print businessDegreeDistribution
 # print'----------------------Review Sentiment Distribution----------------------------------------------------------'
-# reviewSentimentDistribution = [(G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getRating(),\
+reviewSentimentDistribution = [ G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getRating()\
 #                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment(),\
 #                                G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended())\
-#                                 for edge in G.edges()]
-# print reviewSentimentDistribution
+                                 for edge in G.edges()]
+print reviewSentimentDistribution
 # print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
 # print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponents)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponents)) 
 # print 'Average Degree Of a User - ',numpy.mean(numpy.array(userDegreeDistribution)),'Variance Of User Degree - ', numpy.var(numpy.array(userDegreeDistribution))
@@ -93,7 +93,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
 ##################ALGO_START################
-lbp.doBeliefPropagationIterative(25)
+lbp.doBeliefPropagationIterative(-1)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
