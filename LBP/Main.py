@@ -83,13 +83,7 @@ print'--------------------------------------------------------------------------
 afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
-##################ALGO_START################
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(30)
-(fakeUsers,honestUsers,unclassifiedUsers,\
- badProducts,goodProducts,unclassifiedProducts,\
- fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
-##################ALGO_END################ 
 print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
@@ -98,6 +92,12 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
+##################ALGO_START################
+lbp.doBeliefPropagationIterative(25)
+(fakeUsers,honestUsers,unclassifiedUsers,\
+ badProducts,goodProducts,unclassifiedProducts,\
+ fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
+##################ALGO_END################ 
 print 'fakeUsers=', len(fakeUsers)
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
