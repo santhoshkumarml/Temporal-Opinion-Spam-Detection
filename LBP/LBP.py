@@ -1,6 +1,7 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
+import SIAUtil
 '''
  Loopy Belief Propagation
 '''
@@ -21,6 +22,8 @@ class LBP(object):
 #         for user in self.graph.nodes():
 #             if user.getNodeType() == USER:
 #                 user.normalizeMessages()
+    def getEdgeDataForNodes(self,user,business):
+        return self.graph.get_edge_data(user,business)[SIAUtil.REVIEW_EDGE_DICT_CONST]
     
     def getNeighborWithEdges(self, siaObject):
         return [(neighbor,self.graph.get_edge_data(siaObject, neighbor)) \

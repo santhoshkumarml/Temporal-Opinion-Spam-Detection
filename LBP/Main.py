@@ -78,13 +78,13 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(25)
+lbp.doBeliefPropagationIterative(10)
 (fakeUsers,honestUsers,unclassifiedUsers,\
                 badProducts,goodProducts,unclassifiedProducts,\
                 fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
-print 'positive reviews', len([G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
+print 'positive reviews', len([LBP.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
-                              if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment() == SIAUtil.REVIEW_TYPE_POSITIVE])
+                              if LBP.getEdgeDataForNodes(*edge).getReviewSentiment() == SIAUtil.REVIEW_TYPE_POSITIVE])
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
 print 'goodProducts=', len(goodProducts)
@@ -95,13 +95,13 @@ print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
 # Accuracy calculation#
 fakeReviewsRecommendation = [review for review in fakeReviews\
-                              if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
-realReviewsRecommendation = [review for review in fakeReviews\
-                              if not G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+                              if LBP.getEdgeDataForNodes(review.getUser(),review.getBusiness()).isRecommended()]
+realReviewsRecommendation = [review for review in realReviews\
+                              if not LBP.getEdgeDataForNodes(review.getUser(),review.getBusiness()).isRecommended()]
 unclassifiedRealReviews = [review for review in unclassifiedReviews\
-                              if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+                              if LBP.getEdgeDataForNodes(review.getUser(),review.getBusiness()).isRecommended()]
 unclassifiedFakeReviews = [review for review in unclassifiedReviews\
-                              if not G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+                              if not LBP.getEdgeDataForNodes(review.getUser(),review.getBusiness()).isRecommended()]
 print "Number of Real Reviews in Fake Reviews",len(fakeReviewsRecommendation)
 print "Number of Fake Reviews in Real Reviews",len(realReviewsRecommendation)
 print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)

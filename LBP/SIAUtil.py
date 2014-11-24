@@ -40,7 +40,7 @@ REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-EPISOLON = 10**-1
+EPISOLON = 10**-4
 #COMP_POT = [[[0.0 for productType in PRODUCT_TYPES] for userType in USER_TYPES] for reviewType in REVIEW_TYPES]
 COMP_POT = numpy.zeros(shape=(2,2,2),dtype=numpy.float32)
 def init_COMP_POT():
@@ -64,20 +64,20 @@ def init_COMP_POT():
                         if productType == PRODUCT_TYPE_GOOD:
                             output = 1-EPISOLON
                         else:
-                            output = 2*EPISOLON #EPISOLON
+                            output = EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = (EPISOLON) #(2*EPISOLON)
+                            output = 2*EPISOLON
                         else:
                             output = 1-(2*EPISOLON)
                             
                 COMP_POT[reviewType][userType][productType] = output
 
 init_COMP_POT()
-# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
-# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
-# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
-# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
+print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
+print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
+print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
+print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
 '''
   SIAObject to be used as Graph node
 '''
