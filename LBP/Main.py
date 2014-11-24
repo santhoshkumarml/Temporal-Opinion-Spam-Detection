@@ -108,6 +108,14 @@ print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
 ##################Accuracy calculation#################
+positiveReviewsInFakeReviews = [review for review in fakeReviews\
+                              if lbp.getEdgeDataForNodes(review.getUser(),\
+                                                         review.getBusiness()).getReviewSentiment() \
+                                == SIAUtil.REVIEW_TYPE_POSITIVE]
+negativeReviewsInFakeReviews = [review for review in fakeReviews\
+                              if lbp.getEdgeDataForNodes(review.getUser(),\
+                                                         review.getBusiness()).getReviewSentiment() \
+                                == SIAUtil.REVIEW_TYPE_NEGATIVE]
 realReviewsInFakeReviews = [review for review in fakeReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
@@ -120,6 +128,8 @@ unclassifiedFakeReviews = [review for review in unclassifiedReviews\
 unclassifiedRealReviews = [review for review in unclassifiedReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
+print "Number of Positive Reviews in Fake Reviews",len(positiveReviewsInFakeReviews)
+print "Number of Negative Reviews in Fake Reviews",len(negativeReviewsInFakeReviews)
 print "Number of Real Reviews in Fake Reviews",len(realReviewsInFakeReviews)
 print "Number of Fake Reviews in Real Reviews",len(fakeReviewsInRealReviews)
 print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)
