@@ -45,8 +45,8 @@ businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUC
 reviews = [edge for edge in G.edges()]
 print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses),\
  'Number of Reviews- ', len(reviews)
-# userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == USER]
-# businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == PRODUCT]
+# userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
+# businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 print'----------------------Component Sizes----------------------------------------------------------------------'
 cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
