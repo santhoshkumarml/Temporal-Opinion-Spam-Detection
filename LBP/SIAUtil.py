@@ -6,8 +6,6 @@ Created on Nov 3, 2014
 '''
 Node Types
 '''
-
-from numpy import shape, dtype, float32
 import numpy
 
 
@@ -42,9 +40,9 @@ REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-EPISOLON = 10**-4
+EPISOLON = 10**-1
 #COMP_POT = [[[0.0 for productType in PRODUCT_TYPES] for userType in USER_TYPES] for reviewType in REVIEW_TYPES]
-COMP_POT = numpy.zeros(shape=(2,2,2),dtype=float32)
+COMP_POT = numpy.zeros(shape=(2,2,2),dtype=numpy.float32)
 def init_COMP_POT():
     for reviewType in REVIEW_TYPES:
         for userType in USER_TYPES:
@@ -66,10 +64,10 @@ def init_COMP_POT():
                         if productType == PRODUCT_TYPE_GOOD:
                             output = 1-EPISOLON
                         else:
-                            output = EPISOLON
+                            output = 2*EPISOLON #EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = (2*EPISOLON)
+                            output = (EPISOLON) #(2*EPISOLON)
                         else:
                             output = 1-(2*EPISOLON)
                             

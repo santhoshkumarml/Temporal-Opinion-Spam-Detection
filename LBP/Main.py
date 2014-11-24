@@ -43,7 +43,7 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = cc[3]
+G = cc[0]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -78,14 +78,13 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(26)
+lbp.doBeliefPropagationIterative(25)
 (fakeUsers,honestUsers,unclassifiedUsers,\
                 badProducts,goodProducts,unclassifiedProducts,\
                 fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
 print 'positive reviews', len([G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
                                 for edge in G.edges()\
                               if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].getReviewSentiment() == SIAUtil.REVIEW_TYPE_POSITIVE])
-print 'fakeUsers=', len(fakeUsers), str(fakeUsers[0].getScore())
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
 print 'goodProducts=', len(goodProducts)
