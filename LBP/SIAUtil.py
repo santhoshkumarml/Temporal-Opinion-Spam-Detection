@@ -250,3 +250,6 @@ class review(SIALink):
     def isRecommended(self):
         return self.recommended
     
+    def calculateBeliefVals(self):
+        self.score = review.getUser().getMessageFromNeighbor(review.getBusiness())
+    

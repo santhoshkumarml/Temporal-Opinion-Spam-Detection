@@ -109,15 +109,15 @@ class LBP(object):
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
-            messageFromProductToUser = review.getUser().getMessageFromNeighbor(review.getBusiness())
-            if(messageFromProductToUser[0] > messageFromProductToUser[1]):
+            beliefVal = review.getScore()
+            if(beliefVal[0] > beliefVal[1]):
                 fakeReviews.append(review)
 #                 fakeReviews.append(review.getUser().getName()+\
 #                                    ' '+review.getBusiness().getName()+\
 #                                    ' '+str(messageFromProductToUser)+\
 #                                    ' '+review.getRating()+ ' '+\
 #                                    str(review.isRecommended()))
-            elif(messageFromProductToUser[0] == messageFromProductToUser[1]):
+            elif(beliefVal[0] == beliefVal[1]):
                     unclassifiedReviews.append(review)
             else:
                 realReviews.append(review)
