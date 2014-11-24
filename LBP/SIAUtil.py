@@ -72,13 +72,12 @@ def init_COMP_POT():
                             output = 1-(2*EPISOLON)
                             
                 COMP_POT[reviewType][userType][productType] = output
-                print reviewType,userType,productType,COMP_POT[reviewType][userType][productType]
 
 init_COMP_POT()
-print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
-print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
-print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
-print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
+# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
+# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
+# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
+# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
 '''
   SIAObject to be used as Graph node
 '''
