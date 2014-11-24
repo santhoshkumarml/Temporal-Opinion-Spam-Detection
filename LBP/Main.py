@@ -85,7 +85,7 @@ afterStatisticsGenerationTime = datetime.now()
 beforeLBPRunTime = datetime.now()
 ##################ALGO_START################
 lbp = LBP(graph=G)
-lbp.doBeliefPropagationIterative(10)
+lbp.doBeliefPropagationIterative(30)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
@@ -98,6 +98,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
+print 'fakeUsers=', len(fakeUsers)
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
 print 'goodProducts=', len(goodProducts)
@@ -107,10 +108,10 @@ print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
 ##################Accuracy calculation#################
-fakeReviewsRecommendation = [review for review in fakeReviews\
+realReviewsInFakeReviews = [review for review in fakeReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
-realReviewsRecommendation = [review for review in realReviews\
+fakeReviewsInRealReviews = [review for review in realReviews\
                               if not lbp.getEdgeDataForNodes(review.getUser(),\
                                                              review.getBusiness()).isRecommended()]
 unclassifiedFakeReviews = [review for review in unclassifiedReviews\
@@ -119,8 +120,8 @@ unclassifiedFakeReviews = [review for review in unclassifiedReviews\
 unclassifiedRealReviews = [review for review in unclassifiedReviews\
                               if lbp.getEdgeDataForNodes(review.getUser(),\
                                                          review.getBusiness()).isRecommended()]
-print "Number of Real Reviews in Fake Reviews",len(fakeReviewsRecommendation)
-print "Number of Fake Reviews in Real Reviews",len(realReviewsRecommendation)
+print "Number of Real Reviews in Fake Reviews",len(realReviewsInFakeReviews)
+print "Number of Fake Reviews in Real Reviews",len(fakeReviewsInRealReviews)
 print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)
 print "Number of Real Reviews in Unclassified Reviews",len(unclassifiedRealReviews)
 
