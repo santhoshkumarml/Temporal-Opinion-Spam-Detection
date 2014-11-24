@@ -76,6 +76,9 @@ class LBP(object):
         badProducts = []
         fakeReviews = []
         realReviews = []
+        unclassifiedUsers = []
+        unclassifiedProducts = []
+        unclassifiedReviews = []
         
         for siaObject in self.graph.nodes():
             siaObject.calculateBeliefVals();
@@ -84,6 +87,8 @@ class LBP(object):
                 if(beliefVal[0] > beliefVal[1]):
                     fakeUsers.append(siaObject)
 #                     fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
+                elif(beliefVal[0] == beliefVal[1]):
+                    unclassifiedUsers.append(siaObject)
                 else:
                     honestUsers.append(siaObject)
 #                     honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
@@ -92,6 +97,8 @@ class LBP(object):
                     badProducts.append(siaObject)
 #                     badProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
 #                                        str(siaObject.getScore())+' '+str(siaObject.getRating()))
+                elif(beliefVal[0] == beliefVal[1]):
+                    unclassifiedProducts.append(siaObject)
                 else:
                     goodProducts.append(siaObject)
 #                     goodProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
@@ -107,6 +114,8 @@ class LBP(object):
 #                                    ' '+str(messageFromProductToUser)+\
 #                                    ' '+review.getRating()+ ' '+\
 #                                    str(review.isRecommended()))
+            elif(messageFromProductToUser[0] == messageFromProductToUser[1]):
+                    unclassifiedReviews.append(review)
             else:
                 realReviews.append(review)
 #                 realReviews.append(review.getUser().getName()+\
@@ -115,4 +124,6 @@ class LBP(object):
 #                                    ' '+review.getRating()+ ' '+\
 #                                    str(review.isRecommended()))  
 #             
-        return (fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews)
+        return (fakeUsers,honestUsers,unclassifiedUsers,\
+                badProducts,goodProducts,unclassifiedProducts,\
+                fakeReviews,realReviews,unclassifiedReviews)

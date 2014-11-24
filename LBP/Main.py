@@ -43,7 +43,7 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = cc[2]
+G = cc[14]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -79,18 +79,31 @@ afterStatisticsGenerationTime = datetime.now()
 beforeLBPRunTime = datetime.now()
 lbp = LBP(graph=G)
 lbp.doBeliefPropagationIterative(26)
-(fakeUsers,honestUsers,badProducts,goodProducts,fakeReviews,realReviews) = \
- lbp.calculateAndPrintBeliefVals()
+(fakeUsers,honestUsers,unclassifiedUsers,\
+                badProducts,goodProducts,unclassifiedProducts,\
+                fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
 print 'fakeUsers=', len(fakeUsers)
 print 'honestUsers=', len(honestUsers)
+print 'unclassfiedUsers=', len(unclassifiedUsers)
 print 'goodProducts=', len(goodProducts)
 print 'badProducts=', len(badProducts)
+print 'unclassfiedProducts=', len(unclassifiedProducts)
 print 'fakeReviews=', len(fakeReviews)
 print 'realReviews=', len(realReviews)
+print 'unclassfiedReviews=', len(unclassifiedReviews)
 # Accuracy calculation#
 fakeReviewsRecommendation = [review for review in fakeReviews\
                               if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
-print "Accuracy of Fake Reviews",len(fakeReviewsRecommendation)
+realReviewsRecommendation = [review for review in fakeReviews\
+                              if not G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+unclassifiedRealReviews = [review for review in unclassifiedReviews\
+                              if G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+unclassifiedFakeReviews = [review for review in unclassifiedReviews\
+                              if not G.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended()]
+print "Number of Real Reviews in Fake Reviews",len(fakeReviewsRecommendation)
+print "Number of Fake Reviews in Real Reviews",len(realReviewsRecommendation)
+print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)
+print "Number of Real Reviews in Unclassified Reviews",len(unclassifiedRealReviews)
 afterLBPRunTime = datetime.now()
 ###########################################################
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
