@@ -36,21 +36,21 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 ################## MAIN #################################
 #########################################################
 beforeGraphPopulationTime = datetime.now()
-G=createGraph(inputFileName)
+wholeGraph=createGraph(inputFileName)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
+print'----------------------Component Sizes----------------------------------------------------------------------'
+cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
+lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
+print lenListComponents
+G = cc[2]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 reviews = [edge for edge in G.edges()]
 print 'Number of Users- ', len(users), 'Number of Businesses- ', len(businesses),\
  'Number of Reviews- ', len(reviews)
-# userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
-# businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
-print'----------------------Component Sizes----------------------------------------------------------------------'
-cc = sorted(nx.connected_component_subgraphs(G,False), key=len)
-lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
-print lenListComponents
+
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -60,10 +60,14 @@ print lenListComponents
 
 #for user in userToDegreeDict.keys():
 #    print user.getId(),' ',userToDegreeDict[i]
+
+# userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 #print userDegreeDistribution
 #print'----------------------Business to Neighbors Degree----------------------------------------------------------'
 #for business in businessToDegreeDict.keys():
 #    print business.getName(),' ',businessToDegreeDict[i]
+
+# businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
 #print businessDegreeDistribution
 # print '---------------------- Mean And Variance of the Distributions ----------------------------------------------------------'
 # print 'Average Size Of a Component - ', numpy.mean(numpy.array(lenListComponents)),'Variance Of Component Size - ', numpy.var(numpy.array(lenListComponents)) 
