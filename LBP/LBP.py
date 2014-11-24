@@ -81,7 +81,7 @@ class LBP(object):
             
                 
             
-    def calculateAndPrintBeliefVals(self):
+    def calculateBeliefVals(self):
         fakeUsers = []
         honestUsers = []
         goodProducts = []
