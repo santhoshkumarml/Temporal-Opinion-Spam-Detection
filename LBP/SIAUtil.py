@@ -74,10 +74,10 @@ def init_COMP_POT():
                 COMP_POT[reviewType][userType][productType] = output
 
 init_COMP_POT()
-print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
-print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
-print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
-print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
+# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
+# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
+# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
+# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
 '''
   SIAObject to be used as Graph node
 '''
@@ -100,12 +100,13 @@ class SIAObject(object):
         return hasChanged
     
     def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
-        hasAnyMessageChanged = False
+        changedNeighbors = []
+        (neighbor,edge) = neighborsWithEdges
         for neighborWithEdge in neighborsWithEdges:
             message = self.calculateMessageForNeighbor(neighborWithEdge);
-            if(neighborWithEdge[0].addMessages(self, message)):
-                hasAnyMessageChanged = True
-        return hasAnyMessageChanged
+            if(neighbor.addMessages(self, message)):
+                changedNeighbors.append(neighbor)
+        return changedNeighbors
             
     def getScore(self):
         return self.score
