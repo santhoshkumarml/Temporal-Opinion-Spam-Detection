@@ -11,7 +11,7 @@ import sys
 
 from LBP import LBP
 from SIAUtil import business, user
-from dataReader import createGraph
+import dataReader
 import matplotlib.pyplot as plt
 import networkx as nx
 import SIAUtil
@@ -36,14 +36,14 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 ################## MAIN #################################
 #########################################################
 beforeGraphPopulationTime = datetime.now()
-wholeGraph=createGraph(inputFileName)
+wholeGraph=dataReader.createGraph(inputFileName)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 print'----------------------Component Sizes----------------------------------------------------------------------'
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = cc[0]
+G = cc[1]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -86,7 +86,7 @@ lbp.doBeliefPropagationIterative(10)
 ##################ALGO_END################ 
 print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
-                              if LBP.getEdgeDataForNodes(*edge).getReviewSentiment()\
+                              if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_POSITIVE])
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
