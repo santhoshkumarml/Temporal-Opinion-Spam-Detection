@@ -43,7 +43,8 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = wholeGraph
+#G = wholeGraph
+G = cc[4]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -96,7 +97,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
 lbp.doBeliefPropagationIterative(-1)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
- fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateAndPrintBeliefVals()
+ fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateBeliefVals()
 ##################ALGO_END################ 
 print 'fakeUsers=', len(fakeUsers)
 print 'honestUsers=', len(honestUsers)
