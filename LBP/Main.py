@@ -37,7 +37,7 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 #########################################################
 beforeGraphPopulationTime = datetime.now()
 (userIdToUserDict,businessIdToBusinessDict,reviews) = dataReader.parseAndCreateObjects(inputFileName)
-wholeGraph = SIAUtil.createGraph((userIdToUserDict, businessIdToBusinessDict, reviews))
+wholeGraph = SIAUtil.createGraph(userIdToUserDict, businessIdToBusinessDict, reviews)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 

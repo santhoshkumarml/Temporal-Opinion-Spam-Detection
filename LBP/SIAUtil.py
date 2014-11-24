@@ -255,7 +255,7 @@ class review(SIALink):
         self.score = self.getUser().getMessageFromNeighbor(self.getBusiness())
     
 
-def createGraph((userIdToUserDict,businessIdToBusinessDict,reviews)):
+def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
     G = networkx.Graph()
     for review in reviews:
         G.add_node(review.getUser())
