@@ -101,9 +101,9 @@ class SIAObject(object):
     
     def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
         changedNeighbors = []
-        (neighbor,edge) = neighborsWithEdges
         for neighborWithEdge in neighborsWithEdges:
-            message = self.calculateMessageForNeighbor(neighborWithEdge);
+            (neighbor,edge) = neighborWithEdge
+            message = self.calculateMessageForNeighbor((neighbor,edge));
             if(neighbor.addMessages(self, message)):
                 changedNeighbors.append(neighbor)
         return changedNeighbors
