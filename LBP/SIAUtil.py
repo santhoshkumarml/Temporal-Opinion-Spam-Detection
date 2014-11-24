@@ -7,8 +7,7 @@ Created on Nov 3, 2014
 Node Types
 '''
 
-import math
-from numpy import float32
+from numpy import shape, dtype, float32
 import numpy
 
 
@@ -33,6 +32,8 @@ Review Types
 '''
 REVIEW_TYPE_FAKE = 0
 REVIEW_TYPE_REAL = 1
+REVIEW_TYPES = {REVIEW_TYPE_FAKE, REVIEW_TYPE_REAL}
+
 
 REVIEW_TYPE_NEGATIVE = 0
 REVIEW_TYPE_POSITIVE = 1
@@ -41,40 +42,45 @@ REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-EPISOLON = math.pow(10, -4)
-COMP_POT = numpy.ones(shape=(2,2,2), dtype=float32)
+EPISOLON = 10**-4
+#COMP_POT = [[[0.0 for productType in PRODUCT_TYPES] for userType in USER_TYPES] for reviewType in REVIEW_TYPES]
+COMP_POT = numpy.zeros(shape=(2,2,2),dtype=float32)
 def init_COMP_POT():
-    for i in range(0,2):
-        for j in range(0,2):
-            for k in range(0,2):
+    for reviewType in REVIEW_TYPES:
+        for userType in USER_TYPES:
+            for productType in PRODUCT_TYPES:
                 output = 0
-                if i == REVIEW_TYPE_NEGATIVE:
-                    if j == USER_TYPE_HONEST:
-                        if k == PRODUCT_TYPE_GOOD:
+                if reviewType == REVIEW_TYPE_NEGATIVE:
+                    if userType == USER_TYPE_HONEST:
+                        if productType == PRODUCT_TYPE_GOOD:
                             output = EPISOLON
                         else:
                             output = 1-EPISOLON
                     else:
-                        if k == PRODUCT_TYPE_GOOD:
+                        if productType == PRODUCT_TYPE_GOOD:
                             output = 1-(2*EPISOLON)
                         else:
                             output = (2*EPISOLON)
                 else:
-                    if j == USER_TYPE_HONEST:
-                        if k == PRODUCT_TYPE_GOOD:
+                    if userType == USER_TYPE_HONEST:
+                        if productType == PRODUCT_TYPE_GOOD:
                             output = 1-EPISOLON
                         else:
                             output = EPISOLON
                     else:
-                        if k == PRODUCT_TYPE_GOOD:
+                        if productType == PRODUCT_TYPE_GOOD:
                             output = (2*EPISOLON)
                         else:
                             output = 1-(2*EPISOLON)
-                COMP_POT[i][j][k] = output
-                
+                            
+                COMP_POT[reviewType][userType][productType] = output
+                print reviewType,userType,productType,COMP_POT[reviewType][userType][productType]
 
 init_COMP_POT()
-
+print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
+print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
+print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
+print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
 '''
   SIAObject to be used as Graph node
 '''
