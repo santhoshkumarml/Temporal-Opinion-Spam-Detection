@@ -43,7 +43,7 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-G = cc[1]
+G = cc[5]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
@@ -88,6 +88,10 @@ print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_POSITIVE])
+print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
+                                for edge in G.edges()\
+                              if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
+                               == SIAUtil.REVIEW_TYPE_NEGATIVE])
 print 'honestUsers=', len(honestUsers)
 print 'unclassfiedUsers=', len(unclassifiedUsers)
 print 'goodProducts=', len(goodProducts)
@@ -118,9 +122,9 @@ afterLBPRunTime = datetime.now()
 print'Graph Population time:', afterGraphPopulationTime-beforeGraphPopulationTime,\
 'Statistics Generation Time:', afterStatisticsGenerationTime-beforeStatisticsGenerationTime,\
 'Algo run Time:', afterLBPRunTime-beforeLBPRunTime
-# nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
-# ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
-# ecolors = [RECOMMENDED_REVIEW_COLOR \
-#              if G.get_edge_data(x1,x2)[SIAUtil.REVIEW_EDGE_DICT_CONST].isRecommended() \
-#               else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
-# paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
+nodetoNodeLabelDict = {node:node.getName() for node in G.nodes()}
+ncolors = [USER_NODE_COLOR if x.getNodeType()==SIAUtil.USER else PRODUCT_NODE_COLOR for x in G.nodes()]
+ecolors = [RECOMMENDED_REVIEW_COLOR \
+             if lbp.getEdgeDataForNodes(x1,x2).isRecommended() \
+               else NOT_RECOMMENDED_REVIEW_COLOR for (x1,x2) in G.edges()]
+paintWithLabels(G, nodetoNodeLabelDict, ncolors, ecolors)
