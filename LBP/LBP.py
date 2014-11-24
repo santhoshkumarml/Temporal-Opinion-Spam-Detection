@@ -30,33 +30,39 @@ class LBP(object):
                 for neighbor in self.graph.neighbors(siaObject)] 
         
     #DON't USE - will reach max recursion limit
-    def doBeliefPropagationRecursive(self, saturation):
+    def doBeliefPropagationRecursive(self, limit):
         changedProducts = []
         changedUsers = []
-        if saturation>0 or saturation<0:
+        if not (limit==0):
             for user in self.graph.nodes():
                 if user.getNodeType() == USER:
-                    changedProducts = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
+                    changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
+                    changedProducts.extend(changedNodes)
                     
             
             for product in self.graph.nodes():
                 if product.getNodeType() == PRODUCT:
-                    changedUsers = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
-
-            if len(changedProducts)>0 or len(changedUsers)>0:
-                self.doBeliefPropagation(saturation-1)
+                    changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
+                    changedUsers.extend(changedNodes)
+            noOfChangedProducts = len(changedProducts)
+            noOfChangedUsers = len(changedUsers)
+            totalNoOfChangedNodes = noOfChangedProducts+noOfChangedUsers
+            if not (totalNoOfChangedNodes==0):
+                self.doBeliefPropagation(limit-1)
                 
-    def doBeliefPropagationIterative(self, saturation):
-        while not saturation:
+    def doBeliefPropagationIterative(self, limit):
+        while not (limit==0):
             changedProducts = []
             changedUsers = []
             for user in self.graph.nodes():
                 if user.getNodeType() == USER:
-                    changedProducts = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
+                    changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
+                    changedProducts.extend(changedNodes)
             
             for product in self.graph.nodes():
                 if product.getNodeType() == PRODUCT:
-                    changedUsers = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
+                    changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
+                    changedUsers.extend(changedNodes)
                     
             noOfChangedProducts = len(changedProducts)
             noOfChangedUsers = len(changedUsers)
@@ -64,10 +70,10 @@ class LBP(object):
             
             print 'changedNodes In This Iteration', totalNoOfChangedNodes 
             
-            if not totalNoOfChangedNodes:
+            if (totalNoOfChangedNodes==0):
                 break
             
-            saturation-=1
+            limit-=1
             
                 
             

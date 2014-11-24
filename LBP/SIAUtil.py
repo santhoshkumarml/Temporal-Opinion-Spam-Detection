@@ -103,7 +103,7 @@ class SIAObject(object):
         changedNeighbors = []
         for neighborWithEdge in neighborsWithEdges:
             (neighbor,edge) = neighborWithEdge
-            message = self.calculateMessageForNeighbor((neighbor,edge));
+            message = self.calculateMessageForNeighbor(neighborWithEdge);
             if(neighbor.addMessages(self, message)):
                 changedNeighbors.append(neighbor)
         return changedNeighbors

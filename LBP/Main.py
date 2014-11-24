@@ -44,7 +44,7 @@ cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
 #G = wholeGraph
-G = cc[4]
+G = cc[5]
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
 users = [node for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
 businesses = [node for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
