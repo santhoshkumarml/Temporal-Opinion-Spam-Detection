@@ -293,10 +293,9 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, time
                  for r in reviews ])
     cross_time_graphs = dict()
     key = 0
-    while key < ((maxDate-minDate)+timedelta(dayIncrement)).days:
+    while key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
         cross_time_graphs[key] = networkx.Graph()
         key+=1
-        
     for review in reviews:
         reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
                     int(review.getTimeOfReview().split('/')[0]),\
