@@ -291,17 +291,19 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, time
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
                  for r in reviews ])
-    graphs = dict()
-    for key in range(timedelta(0),(maxDate-minDate)+timedelta(dayIncrement)):
-        graphs[key] = networkx.Graph()
+    cross_time_graphs = dict()
+    key = 0
+    while key < ((maxDate-minDate)+timedelta(dayIncrement)).days:
+        cross_time_graphs[key] = networkx.Graph()
+        key+=1
         
     for review in reviews:
-        reviewDate = date(int(r.getTimeOfReview().split('/')[2]),\
-                    int(r.getTimeOfReview().split('/')[0]),\
-                     int(r.getTimeOfReview().split('/')[1]))
-        timeDeltaKey = reviewDate-minDate
-        graph = graphs[timeDeltaKey]
-        graph.add_node(review.getUser())
-        graph.add_node(review.getBusiness())
-        graph.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
-    return graphs
+        reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
+                    int(review.getTimeOfReview().split('/')[0]),\
+                     int(review.getTimeOfReview().split('/')[1]))
+        timeDeltaKey = ((reviewDate-minDate)/dayIncrement).days
+        timeSplittedgraph = cross_time_graphs[timeDeltaKey]
+        timeSplittedgraph.add_node(review.getUser())
+        timeSplittedgraph.add_node(review.getBusiness())
+        timeSplittedgraph.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
+    return cross_time_graphs
