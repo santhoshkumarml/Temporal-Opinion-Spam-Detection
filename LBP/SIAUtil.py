@@ -269,7 +269,7 @@ def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
     return G
 
 def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, timeSplit ='1-D'):
-    if not re.match('[0-9]-[DMY]', timeSplit):
+    if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
 
