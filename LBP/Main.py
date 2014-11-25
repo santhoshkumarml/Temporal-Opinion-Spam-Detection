@@ -49,8 +49,8 @@ print'----------------------Component Sizes-------------------------------------
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
-#G = wholeGraph
-G = cc[1]
+G = wholeGraph
+#G = cc[1]
 #print'----------------------User to Neighbors Degree--------------------------------------------------------------'
 #for node in G.nodes():
 #    if node.getNodeType() == USER:
@@ -93,7 +93,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
 ##################ALGO_START################
-lbp.doBeliefPropagationIterative(100)
+lbp.doBeliefPropagationIterative(20)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateBeliefVals()
