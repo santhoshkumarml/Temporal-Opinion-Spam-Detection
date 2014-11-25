@@ -3,12 +3,13 @@ Created on Nov 3, 2014
 
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
+from datetime import datetime, date
 '''
 Node Types
 '''
 import numpy
 import networkx
-
+import re
 USER = 'USER'
 PRODUCT = 'PRODUCT'
 
@@ -267,7 +268,16 @@ def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
         G.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
     return G
 
-def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, timeIncrement):
+def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, timeSplit ='1-D'):
+    if not re.match('[0-9]-[DMY]', timeSplit):
+        print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
+        timeSplit ='1-D'
+    numeric = timeSplit.split('-')[0]
+    timeIncrement =  timeSplit.split('-')[1]
+    print min([date(int(r.getTimeOfReview().split('/')[2]),\
+                    int(r.getTimeOfReview().split('/')[0]),\
+                     int(r.getTimeOfReview().split('/')[1]))\
+                 for r in reviews ])
     graphs = dict()
     for review in reviews:
         graph = networkx.Graph()
