@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extracts details of yelp restaurant')
     parser.add_argument('-f', '--file', type=str, help='Enter file')
     args = parser.parse_args()
-
+    er = open("error.txt", mode='w')
     with open(args.file, mode='r') as f:
         for line in f:
             try:
@@ -59,7 +59,8 @@ if __name__ == '__main__':
                 else:
                     print line
             except Exception, e:
-                print >>sys.stderr, 'B=', B
-                print >>sys.stderr, 'R=', R
-                print >>sys.stderr, 'NR=', NR
+                print >>sys.stderr, e
+                print >>er, 'B=', B
+                print >>er, 'R=', R
+                print >>er, 'NR=', NR
                 time.sleep(random.randint(1, 4) * .931467298)
