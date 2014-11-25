@@ -3,7 +3,7 @@ Created on Nov 3, 2014
 
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 '''
 Node Types
 '''
@@ -272,17 +272,35 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, time
     if not re.match('[0-9]-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
-    numeric = timeSplit.split('-')[0]
-    timeIncrement =  timeSplit.split('-')[1]
-    print min([date(int(r.getTimeOfReview().split('/')[2]),\
+
+    numeric = int(timeSplit.split('-')[0])
+    incrementStr = timeSplit.split('-')[1]
+    dayIncrement = 1
+    if incrementStr=='D':
+        dayIncrement = numeric
+    elif incrementStr=='M':
+        dayIncrement = numeric*30
+    else:
+        dayIncrement = numeric*365
+        
+    minDate =  min([date(int(r.getTimeOfReview().split('/')[2]),\
+                    int(r.getTimeOfReview().split('/')[0]),\
+                     int(r.getTimeOfReview().split('/')[1]))\
+                 for r in reviews ])
+    maxDate =  max([date(int(r.getTimeOfReview().split('/')[2]),\
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
                  for r in reviews ])
     graphs = dict()
+    for key in range(timedelta(0),(maxDate-minDate)+timedelta(dayIncrement)):
+        graphs[key] = networkx.Graph()
+        
     for review in reviews:
-        graph = networkx.Graph()
-        if review.getTimeOfReview() in graphs:
-            graph = graphs[review.getTimeOfReview()]
+        reviewDate = date(int(r.getTimeOfReview().split('/')[2]),\
+                    int(r.getTimeOfReview().split('/')[0]),\
+                     int(r.getTimeOfReview().split('/')[1]))
+        timeDeltaKey = reviewDate-minDate
+        graph = graphs[timeDeltaKey]
         graph.add_node(review.getUser())
         graph.add_node(review.getBusiness())
         graph.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
