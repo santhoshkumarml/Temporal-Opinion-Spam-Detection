@@ -6,6 +6,9 @@ from BeautifulSoup import BeautifulSoup
 import urllib2
 import argparse
 import re
+import time
+import random
+import sys
 
 def extractText(tag, default=None, verbose=False, attrs={}):
     try:
@@ -33,6 +36,7 @@ def crawl_page(url, verbose=False):
         for subtag in tag.findAll('meta', {'itemprop':'ratingValue'}):
             return float(extractTagAttribute(subtag, -1, verbose))
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extracts details of yelp restaurant')
     parser.add_argument('-f', '--file', type=str, help='Enter file')
@@ -40,10 +44,22 @@ if __name__ == '__main__':
 
     with open(args.file, mode='r') as f:
         for line in f:
-            if line.startswith("B="):
-                B=[] #TMP HOLDER
-                exec(line)
-                B[4] = crawl_page(B[4])
-                print 'B=', B
-            else:
-                print line
+            try:
+                if line.startswith("B="):
+                    B=R=NR=[] #TMP HOLDER
+                    exec(line)
+                elif line.startswith("R="):
+                    exec(line) #New R
+                elif line.startswith("NR="):
+                    exec(line) #New NR, End of one set
+                    B[2] = crawl_page(B[4])
+                    print 'B=', B
+                    print 'R=', R
+                    print 'NR=', NR
+                else:
+                    print line
+            except Exception, e:
+                print >>sys.stderr, 'B=', B
+                print >>sys.stderr, 'R=', R
+                print >>sys.stderr, 'NR=', NR
+                time.sleep(random.randint(1, 4) * .931467298)
