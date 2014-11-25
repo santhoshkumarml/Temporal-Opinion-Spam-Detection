@@ -218,12 +218,13 @@ class business(SIAObject):
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):
-    def __init__(self, _id, usr, bn, rating, txt='', recommended=True):
+    def __init__(self, _id, usr, bn, rating, timeOfReview, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
         self.rating = float(rating)
         self.usr = usr
         self.bn = bn
+        self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
         
@@ -244,6 +245,9 @@ class review(SIALink):
           
     def getBusiness(self):
         return self.bn
+    
+    def getTimeOfReview(self):
+        return self.timeOfReview
       
     def getReviewText(self):
         return self.text
@@ -262,3 +266,14 @@ def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
         G.add_node(review.getBusiness())
         G.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
     return G
+
+def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, timeIncrement):
+    graphs = dict()
+    for review in reviews:
+        graph = networkx.Graph()
+        if review.getTimeOfReview() in graphs:
+            graph = graphs[review.getTimeOfReview()]
+        graph.add_node(review.getUser())
+        graph.add_node(review.getBusiness())
+        graph.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
+    return graphs
