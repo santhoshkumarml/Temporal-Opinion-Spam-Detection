@@ -94,7 +94,7 @@ bnss_score_cross_time_map = dict()
 for time_key in cross_year_graphs.iterkeys():
     bnss_score_map_for_time = {bnss.getId():bnss.getScore() for bnss in cross_year_graphs[time_key].nodes() if bnss.getNodeType()==SIAUtil.PRODUCT}
     for bnss_key in bnss_score_map_for_time.iterkeys():
-        if bnss_key in bnss_score_cross_time_map:
+        if bnss_key not in bnss_score_cross_time_map:
             bnss_score_cross_time_map[bnss_key] = dict()
         time_score_map = bnss_score_cross_time_map[bnss_key]
         time_score_map[time_key] = bnss_score_map_for_time[bnss_key]
