@@ -42,14 +42,14 @@ if __name__ == '__main__':
 #                       for c in sorted(nx.connected_component_subgraphs(cross_9_months_graphs[key],False))]\
 #                     for key in cross_9_months_graphs.iterkeys() ]
 #     
-    print 'Years:',[ [len(c.nodes())\
-                      for c in sorted(nx.connected_component_subgraphs(cross_year_graphs[key],False))]\
-                    for key in cross_year_graphs.iterkeys() ]
+#    print 'Years:',[ [len(c.nodes())\
+#                      for c in sorted(nx.connected_component_subgraphs(cross_year_graphs[key],False))]\
+#                    for key in cross_year_graphs.iterkeys() ]
     
     for key in cross_year_graphs.iterkeys():
         print '----------------------------------GRAPH-',key,'---------------------------------------------'
         lbp = LBP(graph=cross_year_graphs[key])
-        lbp.doBeliefPropagationIterative(3)
+        lbp.doBeliefPropagationIterative(10)
         (fakeUsers, honestUsers,unclassifiedUsers,\
           badProducts,goodProducts, unclassifiedProducts,\
           fakeReviews, realReviews,unclassifiedReviews) =lbp.calculateBeliefVals()
@@ -62,26 +62,27 @@ if __name__ == '__main__':
         print 'fakeReviews=', len(fakeReviews)
         print 'realReviews=', len(realReviews)
         print 'unclassfiedReviews=', len(unclassifiedReviews)
+##################Accuracy calculation#################
         positiveReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                         review.getBusinessID()).getReviewSentiment() \
-                                == SIAUtil.REVIEW_TYPE_POSITIVE]
+                                        if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).getReviewSentiment() \
+                                        == SIAUtil.REVIEW_TYPE_POSITIVE]
         negativeReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                         review.getBusinessID()).getReviewSentiment() \
-                                == SIAUtil.REVIEW_TYPE_NEGATIVE]
+                                        if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).getReviewSentiment() \
+                                        == SIAUtil.REVIEW_TYPE_NEGATIVE]
         realReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                         review.getBusinessID()).isRecommended()]
+                                    if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
         fakeReviewsInRealReviews = [review for review in realReviews\
-                              if not lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                             review.getBusinessID()).isRecommended()]
+                                    if not lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
         unclassifiedFakeReviews = [review for review in unclassifiedReviews\
-                              if not lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                             review.getBusinessID()).isRecommended()]
+                                   if not lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
         unclassifiedRealReviews = [review for review in unclassifiedReviews\
-                              if lbp.getEdgeDataForNodes(review.getUserId(),\
-                                                         review.getBusinessID()).isRecommended()]
+                                   if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
         print "Number of Positive Reviews in Fake Reviews",len(positiveReviewsInFakeReviews)
         print "Number of Negative Reviews in Fake Reviews",len(negativeReviewsInFakeReviews)
         print "Number of Real Reviews in Fake Reviews",len(realReviewsInFakeReviews)
