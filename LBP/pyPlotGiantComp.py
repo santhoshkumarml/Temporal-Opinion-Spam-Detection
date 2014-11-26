@@ -52,7 +52,7 @@ for p in pvals:
             node_size=10
             )
     # identify largest connected component
-    Gcc=sorted(nx.connected_component_subgraphs(G), key = len, reverse=True)
+    Gcc=sorted(nx.connected_component_subgraphs(G), time_key = len, reverse=True)
     G0=Gcc[0]
     nx.draw_networkx_edges(G0,pos,
                            with_labels=False,

@@ -12,7 +12,7 @@ import sys
 
 def extractText(tag, default=None, verbose=False, attrs={}):
     try:
-        if False in [True if(re.compile(attrs[key]).match(tag[key])) else False for key in attrs.keys()]:
+        if False in [True if(re.compile(attrs[time_key]).match(tag[time_key])) else False for time_key in attrs.keys()]:
             return default
         else:
             return tag.getText()
@@ -22,7 +22,7 @@ def extractText(tag, default=None, verbose=False, attrs={}):
 
 def extractTagAttribute(tag, default=None, verbose=False, property='content', attrs={}):
     try:
-        if False in [True if(re.compile(attrs[key]).match(tag[key])) else False for key in attrs.keys()]:
+        if False in [True if(re.compile(attrs[time_key]).match(tag[time_key])) else False for time_key in attrs.keys()]:
             return default
         else:
             return tag[property]

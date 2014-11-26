@@ -46,7 +46,7 @@ print 'Number of Users- ', len(userIdToUserDict.keys()),\
  'Number of Businesses- ', len(businessIdToBusinessDict.keys()),\
  'Number of Reviews- ', len(reviews)
 print'----------------------Component Sizes----------------------------------------------------------------------'
-cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
+cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), time_key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
 G = wholeGraph

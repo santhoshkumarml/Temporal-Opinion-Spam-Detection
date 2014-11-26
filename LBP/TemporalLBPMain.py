@@ -23,32 +23,32 @@ if __name__ == '__main__':
     cross_year_graphs = SIAUtil.createTimeBasedGraph(userIdToUserDict, businessIdToBusinessDict, reviews, '1-Y')
     
 #     print 'Days:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_day_graphs[key],False))]\
-#                     for key in cross_day_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_day_graphs[time_key],False))]\
+#                     for time_key in cross_day_graphs.iterkeys() ]
 #     print '15 Days:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_15_days_graphs[key],False))]\
-#                     for key in cross_15_days_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_15_days_graphs[time_key],False))]\
+#                     for time_key in cross_15_days_graphs.iterkeys() ]
     
 #     print 'Months:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_month_graphs[key],False))]\
-#                     for key in cross_month_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_month_graphs[time_key],False))]\
+#                     for time_key in cross_month_graphs.iterkeys() ]
 #     print '3 Months:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_3_months_graphs[key],False))]\
-#                     for key in cross_3_months_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_3_months_graphs[time_key],False))]\
+#                     for time_key in cross_3_months_graphs.iterkeys() ]
 #     print '6 Months:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_6_months_graphs[key],False))]\
-#                     for key in cross_6_months_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_6_months_graphs[time_key],False))]\
+#                     for time_key in cross_6_months_graphs.iterkeys() ]
 #     print '9 Months:',[ [len(c.nodes())\
-#                       for c in sorted(nx.connected_component_subgraphs(cross_9_months_graphs[key],False))]\
-#                     for key in cross_9_months_graphs.iterkeys() ]
+#                       for c in sorted(nx.connected_component_subgraphs(cross_9_months_graphs[time_key],False))]\
+#                     for time_key in cross_9_months_graphs.iterkeys() ]
 #     
 #    print 'Years:',[ [len(c.nodes())\
-#                      for c in sorted(nx.connected_component_subgraphs(cross_year_graphs[key],False))]\
-#                    for key in cross_year_graphs.iterkeys() ]
+#                      for c in sorted(nx.connected_component_subgraphs(cross_year_graphs[time_key],False))]\
+#                    for time_key in cross_year_graphs.iterkeys() ]
     
-    for key in cross_year_graphs.iterkeys():
-        print '----------------------------------GRAPH-',key,'---------------------------------------------'
-        lbp = LBP(graph=cross_year_graphs[key])
+    for time_key in cross_year_graphs.iterkeys():
+        print '----------------------------------GRAPH-',time_key,'---------------------------------------------'
+        lbp = LBP(graph=cross_year_graphs[time_key])
         lbp.doBeliefPropagationIterative(10)
         (fakeUsers, honestUsers,unclassifiedUsers,\
           badProducts,goodProducts, unclassifiedProducts,\
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         print 'fakeReviews=', len(fakeReviews)
         print 'realReviews=', len(realReviews)
         print 'unclassfiedReviews=', len(unclassifiedReviews)
-##################Accuracy calculation#################
+###########################################################Accuracy calculation######################################################################
         positiveReviewsInFakeReviews = [review for review in fakeReviews\
                                         if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
                                                          lbp.getBusiness(review.getBusinessID())).getReviewSentiment() \
@@ -89,3 +89,14 @@ if __name__ == '__main__':
         print "Number of Fake Reviews in Real Reviews",len(fakeReviewsInRealReviews)
         print "Number of Fake Reviews in Unclassified Reviews",len(unclassifiedFakeReviews)
         print "Number of Real Reviews in Unclassified Reviews",len(unclassifiedRealReviews)
+###################################################################MERGE_GRAPHS################################################################################
+bnss_score_cross_time_map = dict()
+for time_key in cross_year_graphs.iterkeys():
+    bnss_score_map_for_time = {bnss.getId():bnss.getScore() for bnss in cross_year_graphs[time_key].nodes() if bnss.getNodeType()==SIAUtil.PRODUCT}
+    for bnss_key in bnss_score_map_for_time.iterkeys():
+        if bnss_key in bnss_score_cross_time_map:
+            bnss_score_cross_time_map[bnss_key] = dict()
+        time_score_map = bnss_score_cross_time_map[bnss_key]
+        time_score_map[time_key] = bnss_score_map_for_time[bnss_key]
+print bnss_score_cross_time_map
+        
