@@ -83,7 +83,7 @@ print'--------------------------------------------------------------------------
 afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
-lbp = LBP(graph=G)
+lbp = LBP(G)
 print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
@@ -93,7 +93,7 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
 ##################ALGO_START################
-lbp.doBeliefPropagationIterative(20)
+lbp.doBeliefPropagationIterative(-1)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateBeliefVals()
@@ -109,25 +109,25 @@ print 'realReviews=', len(realReviews)
 print 'unclassfiedReviews=', len(unclassifiedReviews)
 ##################Accuracy calculation#################
 positiveReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUser(),\
-                                                         review.getBusiness()).getReviewSentiment() \
+                              if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).getReviewSentiment() \
                                 == SIAUtil.REVIEW_TYPE_POSITIVE]
 negativeReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUser(),\
-                                                         review.getBusiness()).getReviewSentiment() \
+                              if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).getReviewSentiment() \
                                 == SIAUtil.REVIEW_TYPE_NEGATIVE]
 realReviewsInFakeReviews = [review for review in fakeReviews\
-                              if lbp.getEdgeDataForNodes(review.getUser(),\
-                                                         review.getBusiness()).isRecommended()]
+                              if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
 fakeReviewsInRealReviews = [review for review in realReviews\
-                              if not lbp.getEdgeDataForNodes(review.getUser(),\
-                                                             review.getBusiness()).isRecommended()]
+                              if not lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
 unclassifiedFakeReviews = [review for review in unclassifiedReviews\
-                              if not lbp.getEdgeDataForNodes(review.getUser(),\
-                                                             review.getBusiness()).isRecommended()]
+                              if not lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
 unclassifiedRealReviews = [review for review in unclassifiedReviews\
-                              if lbp.getEdgeDataForNodes(review.getUser(),\
-                                                         review.getBusiness()).isRecommended()]
+                              if lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()),\
+                                                         lbp.getBusiness(review.getBusinessID())).isRecommended()]
 print "Number of Positive Reviews in Fake Reviews",len(positiveReviewsInFakeReviews)
 print "Number of Negative Reviews in Fake Reviews",len(negativeReviewsInFakeReviews)
 print "Number of Real Reviews in Fake Reviews",len(realReviewsInFakeReviews)

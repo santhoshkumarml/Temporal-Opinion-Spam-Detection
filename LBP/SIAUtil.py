@@ -4,6 +4,7 @@ Created on Nov 3, 2014
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
 from datetime import datetime, date, timedelta
+from copy import deepcopy
 '''
 Node Types
 '''
@@ -219,12 +220,12 @@ class business(SIAObject):
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):
-    def __init__(self, _id, usr, bn, rating, timeOfReview, txt='', recommended=True):
+    def __init__(self, _id, usrId, bnId, rating, timeOfReview, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
         self.rating = float(rating)
-        self.usr = usr
-        self.bn = bn
+        self.usrId = usrId
+        self.bnId = bnId
         self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
@@ -241,11 +242,11 @@ class review(SIALink):
         else:
             return REVIEW_TYPE_NEGATIVE
     
-    def getUser(self):
-        return self.usr
+    def getUserId(self):
+        return self.usrId
           
-    def getBusiness(self):
-        return self.bn
+    def getBusinessID(self):
+        return self.bnId
     
     def getTimeOfReview(self):
         return self.timeOfReview
@@ -256,19 +257,40 @@ class review(SIALink):
     def isRecommended(self):
         return self.recommended
     
-    def calculateBeliefVals(self):
-        self.score = self.getUser().getMessageFromNeighbor(self.getBusiness())
+    def calculateBeliefVals(self, user, business):
+        self.score = user.getMessageFromNeighbor(business)
+
+
+
+class TimeBasedGraph(networkx.Graph):
+    def __init__(self, userIdToUserDict=dict(),businessIdToBusinessDict=dict()):
+        super(TimeBasedGraph, self).__init__()
+        self.userIdToUserDict = deepcopy(userIdToUserDict)
+        self.businessIdToBusinessDict = deepcopy(businessIdToBusinessDict)
+        
+    def initialize(self,userIdToUserDict,businessIdToBusinessDict):
+        self.userIdToUserDict = deepcopy(userIdToUserDict)
+        self.businessIdToBusinessDict = deepcopy(businessIdToBusinessDict)
+        
+    def getUser(self,userId):
+        return self.userIdToUserDict[userId]
+    
+    def getBusiness(self, businessId):
+        return self.businessIdToBusinessDict[businessId]
     
 
 def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
-    G = networkx.Graph()
+    G = TimeBasedGraph(userIdToUserDict, businessIdToBusinessDict)
     for review in reviews:
-        G.add_node(review.getUser())
-        G.add_node(review.getBusiness())
-        G.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
+        usr = G.getUser(review.getUserId())
+        business = G.getBusiness(review.getBusinessID())
+        G.add_node(usr)
+        G.add_node(business)
+        G.add_edge(business, usr, dict({REVIEW_EDGE_DICT_CONST:review}))
     return G
-
-def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, timeSplit ='1-D'):
+    
+    
+def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict, reviews, timeSplit ='1-D'):
     if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
@@ -294,7 +316,7 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, time
     cross_time_graphs = dict()
     key = 0
     while key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
-        cross_time_graphs[key] = networkx.Graph()
+        cross_time_graphs[key] = TimeBasedGraph(userIdToUserDict, businessIdToBusinessDict)
         key+=1
     for review in reviews:
         reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
@@ -302,7 +324,9 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict,reviews, time
                      int(review.getTimeOfReview().split('/')[1]))
         timeDeltaKey = ((reviewDate-minDate)/dayIncrement).days
         timeSplittedgraph = cross_time_graphs[timeDeltaKey]
-        timeSplittedgraph.add_node(review.getUser())
-        timeSplittedgraph.add_node(review.getBusiness())
-        timeSplittedgraph.add_edge(review.getBusiness(), review.getUser(), dict({REVIEW_EDGE_DICT_CONST:review}))
+        usr = timeSplittedgraph.getUser(review.getUserId())
+        bnss = timeSplittedgraph.getBusiness(review.getBusinessID())
+        timeSplittedgraph.add_node(usr)
+        timeSplittedgraph.add_node(bnss)
+        timeSplittedgraph.add_edge(usr, bnss, dict({REVIEW_EDGE_DICT_CONST:review}))
     return cross_time_graphs

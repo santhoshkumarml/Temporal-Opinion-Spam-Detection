@@ -12,7 +12,6 @@ from SIAUtil import PRODUCT, USER, REVIEW_EDGE_DICT_CONST
 class LBP(object):
     def __init__(self, graph):
         self.graph = graph
-        
 #     def normalizeProductMessages(self):
 #         for product in self.graph.nodes():
 #             if product.getNodeType() == PRODUCT:
@@ -22,6 +21,14 @@ class LBP(object):
 #         for user in self.graph.nodes():
 #             if user.getNodeType() == USER:
 #                 user.normalizeMessages()
+    def getUser(self, userId):
+        user = self.graph.getUser(userId)
+        return user
+    
+    def getBusiness(self,businessID):
+        business = self.graph.getBusiness(businessID)
+        return business
+    
     def getEdgeDataForNodes(self,user,business):
         return self.graph.get_edge_data(user,business)[SIAUtil.REVIEW_EDGE_DICT_CONST]
     
@@ -114,7 +121,7 @@ class LBP(object):
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
-            review.calculateBeliefVals()
+            review.calculateBeliefVals(*edge)
             beliefVal = review.getScore()
             if(beliefVal[0] > beliefVal[1]):
                 fakeReviews.append(review)
