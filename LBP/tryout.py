@@ -14,6 +14,6 @@ if __name__ == '__main__':
     print year_sum
     final_sum = sum(year_sum)
     print final_sum
-    (userIdToUserDict,businessIdToBusinessDict,reviews) =\
+    (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) =\
     dataReader.parseAndCreateObjects('E:\\sample_master.txt')
-    print len(userIdToUserDict.keys())+len(businessIdToBusinessDict.keys())
+    print len(parentUserIdToUserDict.keys())+len(parentBusinessIdToBusinessDict.keys())

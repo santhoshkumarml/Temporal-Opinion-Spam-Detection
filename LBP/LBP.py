@@ -124,16 +124,16 @@ class LBP(object):
             review.calculateBeliefVals(*edge)
             beliefVal = review.getScore()
             if(beliefVal[0] > beliefVal[1]):
-                fakeReviews.append(review)
+                fakeReviews.append(edge)
 #                 fakeReviews.append(review.getUser().getName()+\
 #                                    ' '+review.getBusiness().getName()+\
 #                                    ' '+str(messageFromProductToUser)+\
 #                                    ' '+review.getRating()+ ' '+\
 #                                    str(review.isRecommended()))
             elif(beliefVal[0] == beliefVal[1]):
-                    unclassifiedReviews.append(review)
+                    unclassifiedReviews.append(edge)
             else:
-                realReviews.append(review)
+                realReviews.append(edge)
 #                 realReviews.append(review.getUser().getName()+\
 #                                    ' '+review.getBusiness().getName()+\
 #                                    ' '+str(messageFromProductToUser)+\

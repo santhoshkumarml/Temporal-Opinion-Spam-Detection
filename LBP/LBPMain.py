@@ -36,15 +36,15 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 ################## MAIN #################################
 #########################################################
 beforeGraphPopulationTime = datetime.now()
-(userIdToUserDict,businessIdToBusinessDict,reviews) = dataReader.parseAndCreateObjects(inputFileName)
-wholeGraph = SIAUtil.createGraph(userIdToUserDict, businessIdToBusinessDict, reviews)
+(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) = dataReader.parseAndCreateObjects(inputFileName)
+wholeGraph = SIAUtil.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 
 print'----------------------Number of Users, Businesses, Reviews----------------------------------------------------------------------'
-print 'Number of Users- ', len(userIdToUserDict.keys()),\
- 'Number of Businesses- ', len(businessIdToBusinessDict.keys()),\
- 'Number of Reviews- ', len(reviews)
+print 'Number of Users- ', len(parentUserIdToUserDict.keys()),\
+ 'Number of Businesses- ', len(parentBusinessIdToBusinessDict.keys()),\
+ 'Number of Reviews- ', len(parent_reviews)
 print'----------------------Component Sizes----------------------------------------------------------------------'
 cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), time_key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
@@ -84,11 +84,11 @@ afterStatisticsGenerationTime = datetime.now()
 ##########################################################
 beforeLBPRunTime = datetime.now()
 lbp = LBP(G)
-print 'positive reviews', len([lbp.getEdgeDataForNodes(*edge)\
+print 'positive parent_reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_POSITIVE])
-print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
+print 'Negative parent_reviews', len([lbp.getEdgeDataForNodes(*edge)\
                                 for edge in G.edges()\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
@@ -96,7 +96,10 @@ print 'Negative reviews', len([lbp.getEdgeDataForNodes(*edge)\
 lbp.doBeliefPropagationIterative(-1)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
- fakeReviews,realReviews,unclassifiedReviews) = lbp.calculateBeliefVals()
+ fakeReviewEdges,realReviewEdges,unclassifiedReviewEdges) = lbp.calculateBeliefVals()
+fakeReviews = [lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
+realReviews = [lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
+unclassifiedReviews = [lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
 ##################ALGO_END################ 
 print 'fakeUsers=', len(fakeUsers)
 print 'honestUsers=', len(honestUsers)

@@ -89,6 +89,10 @@ class SIAObject(object):
         self.score = score
         self.messages = dict()
         self.nodeType = NODE_TYPE
+    
+    def reset(self):
+        self.messages.clear()
+        self.score = (0.5,0.5)
 
     def getMessageFromNeighbor(self, neighbor):
         return self.messages[neighbor]
@@ -263,14 +267,14 @@ class review(SIALink):
 
 
 class TimeBasedGraph(networkx.Graph):
-    def __init__(self, userIdToUserDict=dict(),businessIdToBusinessDict=dict()):
+    def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict()):
         super(TimeBasedGraph, self).__init__()
-        self.userIdToUserDict = deepcopy(userIdToUserDict)
-        self.businessIdToBusinessDict = deepcopy(businessIdToBusinessDict)
+        self.userIdToUserDict = deepcopy(parentUserIdToUserDict)
+        self.businessIdToBusinessDict = deepcopy(parentBusinessIdToBusinessDict)
         
-    def initialize(self,userIdToUserDict,businessIdToBusinessDict):
-        self.userIdToUserDict = deepcopy(userIdToUserDict)
-        self.businessIdToBusinessDict = deepcopy(businessIdToBusinessDict)
+    def initialize(self,parentUserIdToUserDict,parentBusinessIdToBusinessDict):
+        self.userIdToUserDict = deepcopy(parentUserIdToUserDict)
+        self.businessIdToBusinessDict = deepcopy(parentBusinessIdToBusinessDict)
         
     def getUser(self,userId):
         return self.userIdToUserDict[userId]
@@ -279,9 +283,9 @@ class TimeBasedGraph(networkx.Graph):
         return self.businessIdToBusinessDict[businessId]
     
 
-def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
-    G = TimeBasedGraph(userIdToUserDict, businessIdToBusinessDict)
-    for review in reviews:
+def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews):
+    G = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
+    for review in parent_reviews:
         usr = G.getUser(review.getUserId())
         business = G.getBusiness(review.getBusinessID())
         G.add_node(usr)
@@ -290,7 +294,7 @@ def createGraph(userIdToUserDict,businessIdToBusinessDict,reviews):
     return G
     
     
-def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict, reviews, timeSplit ='1-D'):
+def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, timeSplit ='1-D'):
     if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
@@ -308,17 +312,17 @@ def createTimeBasedGraph(userIdToUserDict,businessIdToBusinessDict, reviews, tim
     minDate =  min([date(int(r.getTimeOfReview().split('/')[2]),\
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
-                 for r in reviews ])
+                 for r in parent_reviews ])
     maxDate =  max([date(int(r.getTimeOfReview().split('/')[2]),\
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
-                 for r in reviews ])
+                 for r in parent_reviews ])
     cross_time_graphs = dict()
     time_key = 0
     while time_key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
-        cross_time_graphs[time_key] = TimeBasedGraph(userIdToUserDict, businessIdToBusinessDict)
+        cross_time_graphs[time_key] = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
         time_key+=1
-    for review in reviews:
+    for review in parent_reviews:
         reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
                     int(review.getTimeOfReview().split('/')[0]),\
                      int(review.getTimeOfReview().split('/')[1]))
