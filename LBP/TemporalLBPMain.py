@@ -49,7 +49,7 @@ if __name__ == '__main__':
     for time_key in cross_year_graphs.iterkeys():
         print '----------------------------------GRAPH-',time_key,'---------------------------------------------'
         lbp = LBP(graph=cross_year_graphs[time_key])
-        lbp.doBeliefPropagationIterative(10)
+        lbp.doBeliefPropagationIterative(15)
         (fakeUsers, honestUsers,unclassifiedUsers,\
           badProducts,goodProducts, unclassifiedProducts,\
           fakeReviews, realReviews,unclassifiedReviews) =lbp.calculateBeliefVals()
@@ -98,5 +98,4 @@ for time_key in cross_year_graphs.iterkeys():
             bnss_score_cross_time_map[bnss_key] = dict()
         time_score_map = bnss_score_cross_time_map[bnss_key]
         time_score_map[time_key] = bnss_score_map_for_time[bnss_key]
-print bnss_score_cross_time_map
         
