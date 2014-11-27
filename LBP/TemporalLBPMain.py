@@ -19,7 +19,7 @@ def initialize(inputFileName, file_path):
     if p.exists(file_path+'pickle1'):
         with open(file_path+'pickle1', 'rb') as f:
             cross_time_graphs = pickle.load(f)
-        
+         
     if p.exists(file_path+'pickle2'):
         with open(file_path+'pickle2', 'rb') as f:
             parent_graph = pickle.load(f)
@@ -109,6 +109,8 @@ def calculateCrossTimeDs(cross_time_graphs):
 ################################################ALGO FOR MERGE###############################################################
 def calculateVarianceMerge(cross_time_graphs, parent_graph):
     (bnss_score_all_time_map,cross_time_business_id_set_dict) = calculateCrossTimeDs(cross_time_graphs)
+    
+    # calculate interesting businesses across time
     mergeable_businessids = dict()
     not_mergeable_businessids = dict()
     for bnss_key in bnss_score_all_time_map.iterkeys():
@@ -118,7 +120,6 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
         std = numpy.std(array)
         meanMinus3STD = mean - (2*std)
         meanPlus3STD = mean + (2*std)
-        print meanMinus3STD,array,meanPlus3STD
         for time_key in time_score_map.iterkeys():
             good_product_score = time_score_map[time_key][1]
             if(meanMinus3STD<=good_product_score and good_product_score<=meanPlus3STD):
@@ -130,49 +131,109 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                     not_mergeable_businessids[time_key] = set()
                 not_mergeable_businessids[time_key].add(bnss_key)
                 
+    # create a new super graph with all nodes
     alltimeD_access_merge_graph = TimeBasedGraph()
-    parentUserIdToUserDict = dict()
-    parentBusinessIdToBusinessDict = dict()
+    all_time_userIdToUserDict = dict()
+    all_time_bnssIdToBnssDict = dict()
     for time_key in cross_time_graphs.iterkeys():
         for siaObject in cross_time_graphs[time_key].nodes():
-            if siaObject.getId() in parentUserIdToUserDict or siaObject.getId() in parentBusinessIdToBusinessDict:
+            if siaObject.getId() in all_time_userIdToUserDict or siaObject.getId() in all_time_bnssIdToBnssDict:
                 continue
             newSiaObject = copy(siaObject)
             newSiaObject.reset()
             if(newSiaObject.getNodeType() == SIAUtil.USER):
-                parentUserIdToUserDict[newSiaObject.getId()] = newSiaObject
+                all_time_userIdToUserDict[newSiaObject.getId()] = newSiaObject
             else:
-                parentBusinessIdToBusinessDict[newSiaObject.getId()] = newSiaObject
+                all_time_bnssIdToBnssDict[newSiaObject.getId()] = newSiaObject
             alltimeD_access_merge_graph.add_node(newSiaObject)
-        
+    
+    alltimeD_access_merge_graph.initialize(all_time_userIdToUserDict, all_time_bnssIdToBnssDict)
+    
+    # whatever businesses did not drastically change, get all the edges
+    # of the business and add them to new super graph    
     for time_key in mergeable_businessids:
             graph = cross_time_graphs[time_key]
             for bnssid in mergeable_businessids[time_key]:
                 bnss = graph.getBusiness(bnssid)
                 usrs = graph.neighbors(bnss)
                 for usr in usrs:
-                    review = graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST]
-                    alltimeD_access_merge_graph.add_edge(parentBusinessIdToBusinessDict[bnss.getId()],\
-                                                         parentUserIdToUserDict[usr.getId()],\
+                    review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
+                    alltimeD_access_merge_graph.add_edge(alltimeD_access_merge_graph.getBusiness(bnss.getId()),\
+                                                         alltimeD_access_merge_graph.getUser(usr.getId()),\
                                                           {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
                     graph.remove_edge(usr,bnss)
 
+    # whatever businesses did drastically change,
+    # we will copy the super graph and try adding these edges to the copied
+    # graph and run LBP
     to_be_removed_edge_between_user_bnss = set()
+    certifiedfFakes = set()
     for time_key in not_mergeable_businessids:
         copied_all_timeD_access_merge_graph =  deepcopy(alltimeD_access_merge_graph)
-        merge_lbp = LBP(copied_all_timeD_access_merge_graph)
-        merge_lbp.doBeliefPropagationIterative(10)
+        graph = cross_time_graphs[time_key]
+        for bnssid in mergeable_businessids[time_key]:
+            bnss = graph.getBusiness(bnssid)
+            usrs = graph.neighbors(bnss)
+            for usr in usrs:
+                review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
+                copied_all_timeD_access_merge_graph.add_edge(copied_all_timeD_access_merge_graph.getBusiness(bnss.getId()),\
+                                                             copied_all_timeD_access_merge_graph.getUser(usr.getId()),
+                                                             {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
+        print "------------------------------------Running Merge LBP along with not mergeable ",time_key,"--------------------------------------"    
+        copy_merge_lbp = LBP(copied_all_timeD_access_merge_graph)
+        copy_merge_lbp.doBeliefPropagationIterative(20)
         (fakeUsers, honestUsers,unclassifiedUsers,\
           badProducts,goodProducts, unclassifiedProducts,\
-          fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
+          fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = copy_merge_lbp.calculateBeliefVals()
         for edge in fakeReviewEdges:
-            to_be_removed_edge_between_user_bnss.add(merge_lbp.getEdgeDataForNodes(*edge))
-    print len(to_be_removed_edge_between_user_bnss)
+            to_be_removed_edge_between_user_bnss.add((copy_merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
+                                                       copy_merge_lbp.getEdgeDataForNodes(*edge).getBusinessID()))
+            certifiedfFakes.add(copy_merge_lbp.getEdgeDataForNodes(*edge).getId())
+    
+    #from the drastically change businesses we have find out all fake edges in the above step
+    # without them add rest of the edges to the super graph and run LBP on it
+    for time_key in not_mergeable_businessids:
+        graph = cross_time_graphs[time_key]
+        for bnssid in mergeable_businessids[time_key]:
+            bnss = graph.getBusiness(bnssid)
+            usrs = graph.neighbors(bnss)
+            for usr in usrs:
+                if (usr.getId(),bnss.getId()) not in to_be_removed_edge_between_user_bnss:
+                    review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
+                    alltimeD_access_merge_graph.add_edge(alltimeD_access_merge_graph.getBusiness(bnss.getId()),\
+                                                         alltimeD_access_merge_graph.getUser(usr.getId()),\
+                                                          {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
+    print "------------------------------------Running Final Merge LBP--------------------------------------"
+    merge_lbp = LBP(alltimeD_access_merge_graph)
+    merge_lbp.doBeliefPropagationIterative(25)
+    (fakeUsers, honestUsers,unclassifiedUsers,\
+     badProducts,goodProducts, unclassifiedProducts,\
+     fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
+    for edge in fakeReviewEdges:
+        certifiedfFakes.add(merge_lbp.getEdgeDataForNodes(*edge).getId())
+        to_be_removed_edge_between_user_bnss.add((merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
+                                                    merge_lbp.getEdgeDataForNodes(*edge).getBusinessID())) 
+    print "------------------------------------Running Parent LBP along with all Time Edges--------------------------------------"
+    
+    # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    realReviewsInFakeReviews = [review for review in to_be_removed_edge_between_user_bnss 
-                                if parent_lbp.getEdgeDataForNodes(parent_lbp.getUser(review.getUserId()), parent_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-    print len(realReviewsInFakeReviews)
-        
+    parent_lbp.doBeliefPropagationIterative(25)
+    (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
+          parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
+          parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
+
+    print "-----------------------------------------------Statistics------------------------------------------------------------------"
+    fakeReviewInParentLBP = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_lbp_fakeReviewEdges]) 
+    fakeReviewsFromYelp   = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_graph.edges()\
+                                  if not parent_lbp.getEdgeDataForNodes(*edge).isRecommended()] )
+    fakeReviewsFromTemporalAlgo = certifiedfFakes
+    #Accuracy
+    print 'Temporal Algo',len(fakeReviewsFromTemporalAlgo)
+    print 'LBP',len(fakeReviewInParentLBP)
+    print 'Yelp', len(fakeReviewsFromYelp)
+    print 'Intersection of Yelp with TemporalLBP', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
+    print 'Intersection of Yelp with LBP', len(fakeReviewsFromYelp&fakeReviewInParentLBP)
+    print 'Intersection of Temporal LBP with LBP', len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP)
         
 #############################################################################################################################
 

@@ -272,9 +272,9 @@ class TimeBasedGraph(networkx.Graph):
         self.userIdToUserDict = deepcopy(parentUserIdToUserDict)
         self.businessIdToBusinessDict = deepcopy(parentBusinessIdToBusinessDict)
         
-    def initialize(self,parentUserIdToUserDict,parentBusinessIdToBusinessDict):
-        self.userIdToUserDict = deepcopy(parentUserIdToUserDict)
-        self.businessIdToBusinessDict = deepcopy(parentBusinessIdToBusinessDict)
+    def initialize(self, userIdToUserDict,businessIdToBusinessDict):
+        self.userIdToUserDict = userIdToUserDict
+        self.businessIdToBusinessDict = businessIdToBusinessDict
         
     def getUser(self,userId):
         return self.userIdToUserDict[userId]
