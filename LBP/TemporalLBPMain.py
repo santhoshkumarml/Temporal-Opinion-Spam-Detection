@@ -16,32 +16,33 @@ import pickle
 def initialize(inputFileName, file_path):
     cross_time_graphs = dict()
     parent_graph = object()
-    if p.exists(file_path+'pickle1'):
-        with open(file_path+'pickle1', 'rb') as f:
-            cross_time_graphs = pickle.load(f)
-         
-    if p.exists(file_path+'pickle2'):
-        with open(file_path+'pickle2', 'rb') as f:
-            parent_graph = pickle.load(f)
+#     if p.exists(file_path+'pickle1'):
+#         with open(file_path+'pickle1', 'rb') as f:
+#             cross_time_graphs = pickle.load(f)
+#          
+#     if p.exists(file_path+'pickle2'):
+#         with open(file_path+'pickle2', 'rb') as f:
+#             parent_graph = pickle.load(f)
             
     if(not isinstance(parent_graph, TimeBasedGraph)):
         (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
          dataReader.parseAndCreateObjects(inputFileName)
         parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
-        f = open(file_path+'pickle2', 'wb')
-        try:
-            pickle.dump(parent_graph, f)
-        finally:
-            f.close()
+#         f = open(file_path+'pickle2', 'wb')
+#         try:
+#             pickle.dump(parent_graph, f)
+#         finally:
+#             f.close()
     
     if len(cross_time_graphs.keys()) == 0:
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
         cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '1-Y')
-        f = open(file_path+'pickle1', 'wb')
-        try:
-            pickle.dump(cross_time_graphs, f)
-        finally:
-            f.close()
+#         f = open(file_path+'pickle1', 'wb')
+#         try:
+#             pickle.dump(cross_time_graphs, f)
+#         finally:
+#             f.close()
+
 #
 #    print 'Years:',[ [len(c.nodes())\
 #                      for c in sorted(nx.connected_component_subgraphs(cross_time_graphs[time_key],False))]\
@@ -49,12 +50,12 @@ def initialize(inputFileName, file_path):
 
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------'
-        lbp = LBP(graph=cross_time_graphs[time_key])
-        lbp.doBeliefPropagationIterative(10)
-        fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges = lbp.calculateBeliefVals()
-        fakeReviews = [lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
-        realReviews = [lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
-        unclassifiedReviews = [lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
+        unit_time_based_lbp = LBP(graph=cross_time_graphs[time_key])
+        unit_time_based_lbp.doBeliefPropagationIterative(25)
+        fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges = unit_time_based_lbp.calculateBeliefVals()
+        fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
+        realReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
+        unclassifiedReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
         print 'fakeUsers=', len(fakeUsers)
         print 'honestUsers=', len(honestUsers)
         print 'unclassfiedUsers=', len(unclassifiedUsers)
@@ -66,21 +67,21 @@ def initialize(inputFileName, file_path):
         print 'unclassfiedReviews=', len(unclassifiedReviews)
 ###########################################################Accuracy calculation######################################################################
         positiveReviewsInFakeReviews = [review for review in fakeReviews if 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
             SIAUtil.REVIEW_TYPE_POSITIVE]
         negativeReviewsInFakeReviews = [review for review in fakeReviews if 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
             SIAUtil.REVIEW_TYPE_NEGATIVE]
         realReviewsInFakeReviews = [review for review in fakeReviews if 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).isRecommended()]
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
         fakeReviewsInRealReviews = [review for review in realReviews if 
             not 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).isRecommended()]
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
         unclassifiedFakeReviews = [review for review in unclassifiedReviews if 
             not 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).isRecommended()]
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
         unclassifiedRealReviews = [review for review in unclassifiedReviews if 
-            lbp.getEdgeDataForNodes(lbp.getUser(review.getUserId()), lbp.getBusiness(review.getBusinessID())).isRecommended()]
+            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
         print "Number of Positive Reviews in Fake Reviews", len(positiveReviewsInFakeReviews)
         print "Number of Negative Reviews in Fake Reviews", len(negativeReviewsInFakeReviews)
         print "Number of Real Reviews in Fake Reviews", len(realReviewsInFakeReviews)
@@ -231,9 +232,18 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     print 'Temporal Algo',len(fakeReviewsFromTemporalAlgo)
     print 'LBP',len(fakeReviewInParentLBP)
     print 'Yelp', len(fakeReviewsFromYelp)
-    print 'Intersection of Yelp with TemporalLBP', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
-    print 'Intersection of Yelp with LBP', len(fakeReviewsFromYelp&fakeReviewInParentLBP)
-    print 'Intersection of Temporal LBP with LBP', len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP)
+    print 'Intersection of Yelp with TemporalLBP:', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
+    print 'Intersection of Yelp with LBP:', len(fakeReviewsFromYelp&fakeReviewInParentLBP)
+    print 'Intersection of Temporal LBP with LBP:', len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP)
+    
+    print 'Yelp-TemporalLBP:',len(fakeReviewsFromYelp-fakeReviewsFromTemporalAlgo)
+    print 'TemporalLBP-Yelp:',len(fakeReviewsFromTemporalAlgo-fakeReviewsFromYelp)
+    
+    print 'Yelp-LBP:', len(fakeReviewsFromYelp-fakeReviewInParentLBP)
+    print 'LBP-Yelp:', len(fakeReviewInParentLBP-fakeReviewsFromYelp)
+    
+    print 'Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewInParentLBP)
+    print 'LBP-TemporalLBP:', len(fakeReviewInParentLBP-fakeReviewsFromTemporalAlgo)
         
 #############################################################################################################################
 
