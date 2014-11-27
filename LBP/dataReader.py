@@ -42,8 +42,7 @@ def parseAndCreateObjects(inputFileName):
                     revw = review(recoRev[0], dictUsr.getId(), bnss.getId(), recoRev[3],recoRev[4], recoRev[5], True)
                     revwKey = (revw.getUserId(),revw.getBusinessID())
                     if revwKey in parent_reviews:
-                        print (parent_reviews[revwKey].getId(),parent_reviews[revwKey].getTimeOfReview(), parent_reviews[revwKey].isRecommended()),\
-                         (revw.getId(),revw.getTimeOfReview(), revw.isRecommended()) 
+                        continue 
                     parent_reviews[revwKey] = revw
             elif re.match('^NR=', line):
                 exec(line)
@@ -60,7 +59,6 @@ def parseAndCreateObjects(inputFileName):
                     revw = review(noRecoRev[0], dictUsr.getId(), bnss.getId(), noRecoRev[3], noRecoRev[4], noRecoRev[5], False)
                     revwKey = (revw.getUserId(),revw.getBusinessID())
                     if revwKey in parent_reviews:
-                        print (parent_reviews[revwKey].getId(),parent_reviews[revwKey].getTimeOfReview(), parent_reviews[revwKey].isRecommended()),\
-                         (revw.getId(),revw.getTimeOfReview(), revw.isRecommended()) 
+                        continue 
                     parent_reviews[revwKey] = revw
     return (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
