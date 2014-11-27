@@ -122,8 +122,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
         array = numpy.array([time_score_map[key][1] for key in time_score_map.iterkeys()])
         mean = numpy.mean(array)
         std = numpy.std(array)
-        meanMinus3STD = mean - (3*std)
-        meanPlus3STD = mean + (3*std)
+        meanMinus3STD = mean - (2*std)
+        meanPlus3STD = mean + (2*std)
         for time_key in time_score_map.iterkeys():
             good_product_score = time_score_map[time_key][1]
             if(meanMinus3STD<=good_product_score and good_product_score<=meanPlus3STD):
