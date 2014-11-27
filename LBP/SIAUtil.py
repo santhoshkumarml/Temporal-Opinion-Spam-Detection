@@ -285,7 +285,8 @@ class TimeBasedGraph(networkx.Graph):
 
 def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews):
     G = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
-    for review in parent_reviews:
+    for reviewKey in parent_reviews:
+        review = parent_reviews[reviewKey]
         usr = G.getUser(review.getUserId())
         business = G.getBusiness(review.getBusinessID())
         G.add_node(usr)
@@ -312,17 +313,18 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
     minDate =  min([date(int(r.getTimeOfReview().split('/')[2]),\
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
-                 for r in parent_reviews ])
+                 for r in parent_reviews.values() ])
     maxDate =  max([date(int(r.getTimeOfReview().split('/')[2]),\
                     int(r.getTimeOfReview().split('/')[0]),\
                      int(r.getTimeOfReview().split('/')[1]))\
-                 for r in parent_reviews ])
+                 for r in parent_reviews.values() ])
     cross_time_graphs = dict()
     time_key = 0
     while time_key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
         cross_time_graphs[time_key] = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
         time_key+=1
-    for review in parent_reviews:
+    for reviewKey in parent_reviews.iterkeys():
+        review = parent_reviews[reviewKey]
         reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
                     int(review.getTimeOfReview().split('/')[0]),\
                      int(review.getTimeOfReview().split('/')[1]))

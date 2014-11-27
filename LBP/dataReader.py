@@ -14,7 +14,7 @@ NR = []
 def parseAndCreateObjects(inputFileName):
     parentUserIdToUserDict = dict()
     parentBusinessIdToBusinessDict = dict()
-    parent_reviews = []
+    parent_reviews = dict()
     isBusinessAlreadyPresent = False
     with open(inputFileName) as f:
         for line in f:
@@ -40,7 +40,11 @@ def parseAndCreateObjects(inputFileName):
                         parentUserIdToUserDict[usr.getId()] = usr
                         dictUsr = usr
                     revw = review(recoRev[0], dictUsr.getId(), bnss.getId(), recoRev[3],recoRev[4], recoRev[5], True)
-                    parent_reviews.append(revw)
+                    revwKey = (revw.getUserId(),revw.getBusinessID())
+                    if revwKey in parent_reviews:
+                        print (parent_reviews[revwKey].getId(),parent_reviews[revwKey].getTimeOfReview(), parent_reviews[revwKey].isRecommended()),\
+                         (revw.getId(),revw.getTimeOfReview(), revw.isRecommended()) 
+                    parent_reviews[revwKey] = revw
             elif re.match('^NR=', line):
                 exec(line)
                 if isBusinessAlreadyPresent:
@@ -54,5 +58,9 @@ def parseAndCreateObjects(inputFileName):
                         parentUserIdToUserDict[usr.getId()] = usr
                         dictUsr = usr
                     revw = review(noRecoRev[0], dictUsr.getId(), bnss.getId(), noRecoRev[3], noRecoRev[4], noRecoRev[5], False)
-                    parent_reviews.append(revw)
+                    revwKey = (revw.getUserId(),revw.getBusinessID())
+                    if revwKey in parent_reviews:
+                        print (parent_reviews[revwKey].getId(),parent_reviews[revwKey].getTimeOfReview(), parent_reviews[revwKey].isRecommended()),\
+                         (revw.getId(),revw.getTimeOfReview(), revw.isRecommended()) 
+                    parent_reviews[revwKey] = revw
     return (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)

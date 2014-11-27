@@ -11,6 +11,7 @@ from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 import os.path as p
 import pickle
+import sys
 
 ###################################################INITIALIZE_PREMILINARY_STEPS##########################################################
 def initialize(inputFileName, file_path):
@@ -36,7 +37,9 @@ def initialize(inputFileName, file_path):
     
     if len(cross_time_graphs.keys()) == 0:
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
-        cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '1-Y')
+        cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
+                                                          parentBusinessIdToBusinessDict,\
+                                                           parent_reviews, '2-Y')
 #         f = open(file_path+'pickle1', 'wb')
 #         try:
 #             pickle.dump(cross_time_graphs, f)
@@ -51,43 +54,43 @@ def initialize(inputFileName, file_path):
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------'
         unit_time_based_lbp = LBP(graph=cross_time_graphs[time_key])
-        unit_time_based_lbp.doBeliefPropagationIterative(25)
-        fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges = unit_time_based_lbp.calculateBeliefVals()
-        fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
-        realReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
-        unclassifiedReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
-        print 'fakeUsers=', len(fakeUsers)
-        print 'honestUsers=', len(honestUsers)
-        print 'unclassfiedUsers=', len(unclassifiedUsers)
-        print 'goodProducts=', len(goodProducts)
-        print 'badProducts=', len(badProducts)
-        print 'unclassfiedProducts=', len(unclassifiedProducts)
-        print 'fakeReviews=', len(fakeReviews)
-        print 'realReviews=', len(realReviews)
-        print 'unclassfiedReviews=', len(unclassifiedReviews)
+        unit_time_based_lbp.doBeliefPropagationIterative(50)
+#         fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges = unit_time_based_lbp.calculateBeliefVals()
+#         fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
+#         realReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
+#         unclassifiedReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
+#         print 'fakeUsers=', len(fakeUsers)
+#         print 'honestUsers=', len(honestUsers)
+#         print 'unclassfiedUsers=', len(unclassifiedUsers)
+#         print 'goodProducts=', len(goodProducts)
+#         print 'badProducts=', len(badProducts)
+#         print 'unclassfiedProducts=', len(unclassifiedProducts)
+#         print 'fakeReviews=', len(fakeReviews)
+#         print 'realReviews=', len(realReviews)
+#         print 'unclassfiedReviews=', len(unclassifiedReviews)
 ###########################################################Accuracy calculation######################################################################
-        positiveReviewsInFakeReviews = [review for review in fakeReviews if 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
-            SIAUtil.REVIEW_TYPE_POSITIVE]
-        negativeReviewsInFakeReviews = [review for review in fakeReviews if 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
-            SIAUtil.REVIEW_TYPE_NEGATIVE]
-        realReviewsInFakeReviews = [review for review in fakeReviews if 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-        fakeReviewsInRealReviews = [review for review in realReviews if 
-            not 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-        unclassifiedFakeReviews = [review for review in unclassifiedReviews if 
-            not 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-        unclassifiedRealReviews = [review for review in unclassifiedReviews if 
-            unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-        print "Number of Positive Reviews in Fake Reviews", len(positiveReviewsInFakeReviews)
-        print "Number of Negative Reviews in Fake Reviews", len(negativeReviewsInFakeReviews)
-        print "Number of Real Reviews in Fake Reviews", len(realReviewsInFakeReviews)
-        print "Number of Fake Reviews in Real Reviews", len(fakeReviewsInRealReviews)
-        print "Number of Fake Reviews in Unclassified Reviews", len(unclassifiedFakeReviews)
-        print "Number of Real Reviews in Unclassified Reviews", len(unclassifiedRealReviews)
+#         positiveReviewsInFakeReviews = [review for review in fakeReviews if 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
+#             SIAUtil.REVIEW_TYPE_POSITIVE]
+#         negativeReviewsInFakeReviews = [review for review in fakeReviews if 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
+#             SIAUtil.REVIEW_TYPE_NEGATIVE]
+#         realReviewsInFakeReviews = [review for review in fakeReviews if 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
+#         fakeReviewsInRealReviews = [review for review in realReviews if 
+#             not 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
+#         unclassifiedFakeReviews = [review for review in unclassifiedReviews if 
+#             not 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
+#         unclassifiedRealReviews = [review for review in unclassifiedReviews if 
+#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
+#         print "Number of Positive Reviews in Fake Reviews", len(positiveReviewsInFakeReviews)
+#         print "Number of Negative Reviews in Fake Reviews", len(negativeReviewsInFakeReviews)
+#         print "Number of Real Reviews in Fake Reviews", len(realReviewsInFakeReviews)
+#         print "Number of Fake Reviews in Real Reviews", len(fakeReviewsInRealReviews)
+#         print "Number of Fake Reviews in Unclassified Reviews", len(unclassifiedFakeReviews)
+#         print "Number of Real Reviews in Unclassified Reviews", len(unclassifiedRealReviews)
     
     return (cross_time_graphs, parent_graph)
 
@@ -119,8 +122,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
         array = numpy.array([time_score_map[key][1] for key in time_score_map.iterkeys()])
         mean = numpy.mean(array)
         std = numpy.std(array)
-        meanMinus3STD = mean - (2*std)
-        meanPlus3STD = mean + (2*std)
+        meanMinus3STD = mean - (3*std)
+        meanPlus3STD = mean + (3*std)
         for time_key in time_score_map.iterkeys():
             good_product_score = time_score_map[time_key][1]
             if(meanMinus3STD<=good_product_score and good_product_score<=meanPlus3STD):
@@ -131,6 +134,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                 if time_key not in not_mergeable_businessids:
                     not_mergeable_businessids[time_key] = set()
                 not_mergeable_businessids[time_key].add(bnss_key)
+    
+    print 'Interesting businesses across time:', not_mergeable_businessids
                 
     # create a new super graph with all nodes
     alltimeD_access_merge_graph = TimeBasedGraph()
@@ -204,6 +209,25 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                     alltimeD_access_merge_graph.add_edge(alltimeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                          alltimeD_access_merge_graph.getUser(usr.getId()),\
                                                           {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
+    
+    alltimeD_access_merge_graph_nodeIds = set([siaObject.getId() for siaObject in alltimeD_access_merge_graph.nodes()])
+    alltimeD_access_merge_graph_reviewIds = set([alltimeD_access_merge_graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
+                                             for edge in alltimeD_access_merge_graph.edges()])
+    
+    parent_graph_nodeIds = set([siaObject.getId() for siaObject in parent_graph.nodes()])
+    parent_reviewIds = set([parent_graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
+                                             for edge in parent_graph.edges()])
+    
+    parentMinusalltimenodes = parent_graph_nodeIds-alltimeD_access_merge_graph_nodeIds
+    allTimeMinusParentNodes = alltimeD_access_merge_graph_nodeIds-parent_graph_nodeIds
+    
+    parentMinusalltimereview = parent_reviewIds-alltimeD_access_merge_graph_reviewIds
+    allTimeMinusParentreview = alltimeD_access_merge_graph_reviewIds-parent_reviewIds
+    
+    print 'parentNodes-alltime',len(parentMinusalltimenodes),len(parentMinusalltimereview)
+    print 'allTime-Parent', len(allTimeMinusParentNodes),len(allTimeMinusParentreview)
+    sys.exit()                                                                                      
+    
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
     merge_lbp.doBeliefPropagationIterative(25)
