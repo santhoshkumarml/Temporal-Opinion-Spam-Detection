@@ -4,16 +4,25 @@ Created on Nov 26, 2014
 @author: Santhosh Kumar
 '''
 import dataReader
+import SIAUtil
 
 if __name__ == '__main__':
-    Years = []
-    with open('E:\\workspace\\\dm\\data\\Temporal\\years.log') as f:
-        for line in f:
-            exec(line)
-    year_sum = [sum(x) for x in Years]
-    print year_sum
-    final_sum = sum(year_sum)
-    print final_sum
-    (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) =\
+    (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) = \
     dataReader.parseAndCreateObjects('E:\\sample_master.txt')
-    print len(parentUserIdToUserDict.keys())+len(parentBusinessIdToBusinessDict.keys())
+    
+    cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
+                                                          parentBusinessIdToBusinessDict,\
+                                                           parent_reviews, '2-Y')
+    
+    parent_graph = SIAUtil.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) 
+    
+    cross_reviewids = dict()
+    noOfEdges = 0
+    for time_key in cross_time_graphs.iterkeys():
+        for siaLink in cross_time_graphs[time_key].edges():
+            noOfEdges+=1
+            
+    print len(parent_reviews),len(parent_graph.edges()),noOfEdges
+#     out = set(parent_reviewIds.keys())-set(cross_reviewids.keys())
+#     print 'review', len(out), [(parent_reviewIds[_id],_id) for _id in out]
+    
