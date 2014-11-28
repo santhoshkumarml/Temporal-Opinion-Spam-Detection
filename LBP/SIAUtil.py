@@ -10,7 +10,9 @@ Node Types
 '''
 import numpy
 import networkx
+import numpy as np
 import re
+
 USER = 'USER'
 PRODUCT = 'PRODUCT'
 
@@ -334,3 +336,15 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
         timeSplittedgraph.add_node(bnss)
         timeSplittedgraph.add_edge(usr, bnss, dict({REVIEW_EDGE_DICT_CONST:review}))
     return cross_time_graphs
+
+def rm_outlier(points, threshold=1.0):
+    points_array = np.array(points)
+    if len(points_array.shape) == 1:
+        points_array = points_array[:,None]
+    median = np.median(points_array, axis=0)
+    diff_from_median = np.sum((points_array - median)**2, axis=-1)
+    diff_from_median = np.sqrt(diff_from_median)
+    median_abs_deviation = np.median(diff_from_median)
+    if median_abs_deviation == 0:  median_abs_deviation = 0.1 #For div by zero error only
+    modified_z_score = 0.6745 * diff_from_median / median_abs_deviation
+    return [points[i] for i in range(0, len(points)) if modified_z_score[i] <= threshold]
