@@ -10,6 +10,7 @@ import numpy
 from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from math import fabs
+from datetime import datetime
 
 
 ###################################################INITIALIZE_PREMILINARY_STEPS##########################################################
@@ -26,7 +27,7 @@ def initialize(inputFileName, file_path):
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------'
         unit_time_based_lbp = LBP(graph=cross_time_graphs[time_key])
-        unit_time_based_lbp.doBeliefPropagationIterative(75)
+        unit_time_based_lbp.doBeliefPropagationIterative(200)
         (fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges) = \
             unit_time_based_lbp.calculateBeliefVals()
 #         fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
@@ -169,7 +170,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                                                              {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
         print "------------------------------------Running Merge LBP along with not mergeable ",time_key,"--------------------------------------"    
         copy_merge_lbp = LBP(copied_all_timeD_access_merge_graph)
-        copy_merge_lbp.doBeliefPropagationIterative(20)
+        copy_merge_lbp.doBeliefPropagationIterative(50)
         (fakeUsers, honestUsers,unclassifiedUsers,\
           badProducts,goodProducts, unclassifiedProducts,\
           fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = copy_merge_lbp.calculateBeliefVals()
@@ -194,7 +195,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
-    merge_lbp.doBeliefPropagationIterative(50)
+    merge_lbp.doBeliefPropagationIterative(200)
     (fakeUsers, honestUsers,unclassifiedUsers,\
      badProducts,goodProducts, unclassifiedProducts,\
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
@@ -206,7 +207,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    parent_lbp.doBeliefPropagationIterative(50)
+    parent_lbp.doBeliefPropagationIterative(200)
     (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
           parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
@@ -238,7 +239,10 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
 
 if __name__ == '__main__':
     #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    beforeRunTime = datetime.now()
     inputFileName = 'E:\\workspace\\dm\\data\\crawl_new\\sample_master.txt'
     file_path = "E:\\"
     (cross_time_graphs,parent_graph) = initialize(inputFileName, file_path)
     calculateVarianceMerge(cross_time_graphs, parent_graph)
+    afterRunTime = datetime.now()
+    print 'Total Run Time', afterRunTime-beforeRunTime
