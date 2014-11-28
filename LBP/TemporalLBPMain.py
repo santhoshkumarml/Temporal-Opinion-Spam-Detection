@@ -9,53 +9,26 @@ from LBP import LBP
 import numpy
 from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
-import os.path as p
-import pickle
-import sys
+from math import fabs
+
 
 ###################################################INITIALIZE_PREMILINARY_STEPS##########################################################
 def initialize(inputFileName, file_path):
-    cross_time_graphs = dict()
-    parent_graph = object()
-#     if p.exists(file_path+'pickle1'):
-#         with open(file_path+'pickle1', 'rb') as f:
-#             cross_time_graphs = pickle.load(f)
-#          
-#     if p.exists(file_path+'pickle2'):
-#         with open(file_path+'pickle2', 'rb') as f:
-#             parent_graph = pickle.load(f)
-            
-    if(not isinstance(parent_graph, TimeBasedGraph)):
-        (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
-         dataReader.parseAndCreateObjects(inputFileName)
-        parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
-#         f = open(file_path+'pickle2', 'wb')
-#         try:
-#             pickle.dump(parent_graph, f)
-#         finally:
-#             f.close()
-    
-    if len(cross_time_graphs.keys()) == 0:
+    (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
+        dataReader.parseAndCreateObjects(inputFileName)
+    parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
+
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
-        cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
+    cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
                                                           parentBusinessIdToBusinessDict,\
                                                            parent_reviews, '2-Y')
-#         f = open(file_path+'pickle1', 'wb')
-#         try:
-#             pickle.dump(cross_time_graphs, f)
-#         finally:
-#             f.close()
-
-#
-#    print 'Years:',[ [len(c.nodes())\
-#                      for c in sorted(nx.connected_component_subgraphs(cross_time_graphs[time_key],False))]\
-#                    for time_key in cross_time_graphs.iterkeys() ]
 
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------'
         unit_time_based_lbp = LBP(graph=cross_time_graphs[time_key])
-        unit_time_based_lbp.doBeliefPropagationIterative(50)
-#         fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges = unit_time_based_lbp.calculateBeliefVals()
+        unit_time_based_lbp.doBeliefPropagationIterative(75)
+        (fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges) = \
+            unit_time_based_lbp.calculateBeliefVals()
 #         fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
 #         realReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
 #         unclassifiedReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
@@ -104,39 +77,46 @@ def calculateCrossTimeDs(cross_time_graphs):
                 bnss_score_all_time_map[bnss_key] = dict()
             time_score_map = bnss_score_all_time_map[bnss_key]
             time_score_map[time_key] = bnss_score_map_for_time[bnss_key]
-    cross_time_business_id_set_dict = {time_key:set([bnss.getId() \
-                                                     for bnss in cross_time_graphs[time_key].nodes()\
-                                                      if bnss.getNodeType()==SIAUtil.PRODUCT])\
-                                       for time_key in cross_time_graphs.iterkeys()}
-    return (bnss_score_all_time_map,cross_time_business_id_set_dict)
+#     cross_time_business_id_set_dict = {time_key:set([bnss.getId() \
+#                                                      for bnss in cross_time_graphs[time_key].nodes()\
+#                                                       if bnss.getNodeType()==SIAUtil.PRODUCT])\
+#                                        for time_key in cross_time_graphs.iterkeys()}
+    return bnss_score_all_time_map
 
 ################################################ALGO FOR MERGE###############################################################
 def calculateVarianceMerge(cross_time_graphs, parent_graph):
-    (bnss_score_all_time_map,cross_time_business_id_set_dict) = calculateCrossTimeDs(cross_time_graphs)
+    bnss_score_all_time_map = calculateCrossTimeDs(cross_time_graphs)
     
     # calculate interesting businesses across time
     mergeable_businessids = dict()
     not_mergeable_businessids = dict()
     for bnss_key in bnss_score_all_time_map.iterkeys():
         time_score_map = bnss_score_all_time_map[bnss_key]
-        array = numpy.array([time_score_map[key][1] for key in time_score_map.iterkeys()])
-        mean = numpy.mean(array)
-        std = numpy.std(array)
-        meanMinus3STD = mean - (2*std)
-        meanPlus3STD = mean + (2*std)
+        old_data = []
         for time_key in time_score_map.iterkeys():
             good_product_score = time_score_map[time_key][1]
-            if(meanMinus3STD<=good_product_score and good_product_score<=meanPlus3STD):
+            
+            mean = good_product_score
+            std = 0
+            if len(old_data)>0:
+                array = numpy.array(old_data)
+                mean = numpy.mean(array)
+                std = numpy.std(array)
+                
+            if(fabs(good_product_score) < mean-(3*std) or std==0):
                 if time_key not in mergeable_businessids:
                     mergeable_businessids[time_key] = set()
                 mergeable_businessids[time_key].add(bnss_key)
+                old_data.append(good_product_score)
             else:
                 if time_key not in not_mergeable_businessids:
                     not_mergeable_businessids[time_key] = set()
                 not_mergeable_businessids[time_key].add(bnss_key)
-    
-    print 'Interesting businesses across time:', not_mergeable_businessids
                 
+    for time_key in not_mergeable_businessids.iterkeys():
+            print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
+    for time_key in mergeable_businessids.iterkeys():
+            print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
     # create a new super graph with all nodes
     alltimeD_access_merge_graph = TimeBasedGraph()
     all_time_userIdToUserDict = dict()
@@ -154,7 +134,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
             alltimeD_access_merge_graph.add_node(newSiaObject)
     
     alltimeD_access_merge_graph.initialize(all_time_userIdToUserDict, all_time_bnssIdToBnssDict)
-    
+        
     # whatever businesses did not drastically change, get all the edges
     # of the business and add them to new super graph    
     for time_key in mergeable_businessids:
@@ -169,6 +149,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                                                           {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
                     graph.remove_edge(usr,bnss)
 
+    print len(alltimeD_access_merge_graph.nodes()),len(alltimeD_access_merge_graph.edges())
+
     # whatever businesses did drastically change,
     # we will copy the super graph and try adding these edges to the copied
     # graph and run LBP
@@ -177,7 +159,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     for time_key in not_mergeable_businessids:
         copied_all_timeD_access_merge_graph =  deepcopy(alltimeD_access_merge_graph)
         graph = cross_time_graphs[time_key]
-        for bnssid in mergeable_businessids[time_key]:
+        for bnssid in not_mergeable_businessids[time_key]:
             bnss = graph.getBusiness(bnssid)
             usrs = graph.neighbors(bnss)
             for usr in usrs:
@@ -200,7 +182,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     # without them add rest of the edges to the super graph and run LBP on it
     for time_key in not_mergeable_businessids:
         graph = cross_time_graphs[time_key]
-        for bnssid in mergeable_businessids[time_key]:
+        for bnssid in not_mergeable_businessids[time_key]:
             bnss = graph.getBusiness(bnssid)
             usrs = graph.neighbors(bnss)
             for usr in usrs:
@@ -208,29 +190,11 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                     review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
                     alltimeD_access_merge_graph.add_edge(alltimeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                          alltimeD_access_merge_graph.getUser(usr.getId()),\
-                                                          {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
-    
-    alltimeD_access_merge_graph_nodeIds = set([siaObject.getId() for siaObject in alltimeD_access_merge_graph.nodes()])
-    alltimeD_access_merge_graph_reviewIds = set([alltimeD_access_merge_graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
-                                             for edge in alltimeD_access_merge_graph.edges()])
-    
-    parent_graph_nodeIds = set([siaObject.getId() for siaObject in parent_graph.nodes()])
-    parent_reviewIds = set([parent_graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]\
-                                             for edge in parent_graph.edges()])
-    
-    parentMinusalltimenodes = parent_graph_nodeIds-alltimeD_access_merge_graph_nodeIds
-    allTimeMinusParentNodes = alltimeD_access_merge_graph_nodeIds-parent_graph_nodeIds
-    
-    parentMinusalltimereview = parent_reviewIds-alltimeD_access_merge_graph_reviewIds
-    allTimeMinusParentreview = alltimeD_access_merge_graph_reviewIds-parent_reviewIds
-    
-    print 'parentNodes-alltime',len(parentMinusalltimenodes),len(parentMinusalltimereview)
-    print 'allTime-Parent', len(allTimeMinusParentNodes),len(allTimeMinusParentreview)
-    sys.exit()                                                                                      
+                                                          {SIAUtil.REVIEW_EDGE_DICT_CONST:review})               
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
-    merge_lbp.doBeliefPropagationIterative(25)
+    merge_lbp.doBeliefPropagationIterative(50)
     (fakeUsers, honestUsers,unclassifiedUsers,\
      badProducts,goodProducts, unclassifiedProducts,\
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
@@ -242,7 +206,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    parent_lbp.doBeliefPropagationIterative(25)
+    parent_lbp.doBeliefPropagationIterative(50)
     (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
           parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
@@ -273,7 +237,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
 
 
 if __name__ == '__main__':
-    inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    inputFileName = 'E:\\workspace\\dm\\data\\crawl_new\\sample_master.txt'
     file_path = "E:\\"
     (cross_time_graphs,parent_graph) = initialize(inputFileName, file_path)
     calculateVarianceMerge(cross_time_graphs, parent_graph)
