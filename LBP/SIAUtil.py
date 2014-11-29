@@ -12,6 +12,7 @@ import numpy
 import networkx
 import numpy as np
 import re
+from scipy.stats import bayes_mvs
 
 USER = 'USER'
 PRODUCT = 'PRODUCT'
@@ -339,7 +340,14 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
         timeSplittedgraph.add_edge(usr, bnss, dict({REVIEW_EDGE_DICT_CONST:review}))
     return cross_time_graphs
 
-def rm_outlier(points, threshold=1.0):
+def rm_outlier(points, threshold=0.9):
+    try:
+        confidence = bayes_mvs(points, threshold)
+        return [points[i] for i in range(0, len(points)) if confidence[i][0] != float('inf')]
+    except:
+        return points
+
+def rm_outlier2(points, threshold=1.0):
     points_array = np.array(points)
     if len(points_array.shape) == 1:
         points_array = points_array[:,None]
