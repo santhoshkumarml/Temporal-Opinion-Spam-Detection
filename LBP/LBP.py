@@ -32,6 +32,9 @@ class LBP(object):
     def getEdgeDataForNodes(self,user,business):
         return self.graph.get_edge_data(user,business)[SIAUtil.REVIEW_EDGE_DICT_CONST]
     
+    def getReviewIdsForUsrBnssId(self, usrId, bnssId):
+        return self.getEdgeDataForNodes(self.getUser(usrId), self.getBusiness(bnssId)).getId()
+    
     def getNeighborWithEdges(self, siaObject):
         return [(neighbor,self.graph.get_edge_data(siaObject, neighbor)) \
                 for neighbor in self.graph.neighbors(siaObject)] 
@@ -75,8 +78,7 @@ class LBP(object):
             noOfChangedUsers = len(changedUsers)
             totalNoOfChangedNodes = noOfChangedProducts+noOfChangedUsers
             
-            print 'changedNodes In This Iteration', totalNoOfChangedNodes 
-            
+            #print 'changedNodes In This Iteration', totalNoOfChangedNodes 
             if (totalNoOfChangedNodes==0):
                 break
             

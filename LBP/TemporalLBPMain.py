@@ -6,15 +6,40 @@ Created on Nov 25, 2014
 import SIAUtil
 import dataReader
 from LBP import LBP
-import numpy
 from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
-from math import fabs
 from datetime import datetime
+from threading import Thread
 
-
+###################################################Parallelize LBP Run Using Thread######################################################
+class LBPRunnerThread(Thread):
+    def __init__(self, graph, limit, name='LBPRunner'):
+        super(LBPRunnerThread,self).__init__()
+        self.graph = graph
+        self.name = name
+        self.limit = limit
+        self.to_be_removed_usr_bnss_edges = set()
+        
+    def getFakeEdgesData(self):
+        return self.to_be_removed_usr_bnss_edges
+    
+    def runLBP(self):
+        threadedLBP = LBP(self.graph)
+        threadedLBP.doBeliefPropagationIterative(self.limit)
+        (fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges) = \
+            threadedLBP.calculateBeliefVals()
+        self.to_be_removed_usr_bnss_edges = set([(threadedLBP.getEdgeDataForNodes(*edge).getUserId(),\
+                                                       threadedLBP.getEdgeDataForNodes(*edge).getBusinessID())\
+                             for edge in fakeReviewEdges])
+        print len(self.to_be_removed_usr_bnss_edges)
+        
+    def run(self):
+        print "Starting LBP " + self.name + " " + str(datetime.now())
+        self.runLBP()
+        print "Exiting " + self.name + " " + str(datetime.now())
+        
 ###################################################INITIALIZE_PREMILINARY_STEPS##########################################################
-def initialize(inputFileName, file_path):
+def initialize(inputFileName):
     (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
         dataReader.parseAndCreateObjects(inputFileName)
     parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
@@ -22,50 +47,18 @@ def initialize(inputFileName, file_path):
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
     cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
                                                           parentBusinessIdToBusinessDict,\
-                                                           parent_reviews, '2-Y')
-
+                                                           parent_reviews, '1-Y')
+    beforeThreadTime = datetime.now()
+    cross_time_lbp_runner_threads = []
     for time_key in cross_time_graphs.iterkeys():
-        print '----------------------------------GRAPH-', time_key, '---------------------------------------------'
-        unit_time_based_lbp = LBP(graph=cross_time_graphs[time_key])
-        unit_time_based_lbp.doBeliefPropagationIterative(200)
-        (fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges) = \
-            unit_time_based_lbp.calculateBeliefVals()
-#         fakeReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
-#         realReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
-#         unclassifiedReviews = [unit_time_based_lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]
-#         print 'fakeUsers=', len(fakeUsers)
-#         print 'honestUsers=', len(honestUsers)
-#         print 'unclassfiedUsers=', len(unclassifiedUsers)
-#         print 'goodProducts=', len(goodProducts)
-#         print 'badProducts=', len(badProducts)
-#         print 'unclassfiedProducts=', len(unclassifiedProducts)
-#         print 'fakeReviews=', len(fakeReviews)
-#         print 'realReviews=', len(realReviews)
-#         print 'unclassfiedReviews=', len(unclassifiedReviews)
-###########################################################Accuracy calculation######################################################################
-#         positiveReviewsInFakeReviews = [review for review in fakeReviews if 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
-#             SIAUtil.REVIEW_TYPE_POSITIVE]
-#         negativeReviewsInFakeReviews = [review for review in fakeReviews if 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).getReviewSentiment() == 
-#             SIAUtil.REVIEW_TYPE_NEGATIVE]
-#         realReviewsInFakeReviews = [review for review in fakeReviews if 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-#         fakeReviewsInRealReviews = [review for review in realReviews if 
-#             not 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-#         unclassifiedFakeReviews = [review for review in unclassifiedReviews if 
-#             not 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-#         unclassifiedRealReviews = [review for review in unclassifiedReviews if 
-#             unit_time_based_lbp.getEdgeDataForNodes(unit_time_based_lbp.getUser(review.getUserId()), unit_time_based_lbp.getBusiness(review.getBusinessID())).isRecommended()]
-#         print "Number of Positive Reviews in Fake Reviews", len(positiveReviewsInFakeReviews)
-#         print "Number of Negative Reviews in Fake Reviews", len(negativeReviewsInFakeReviews)
-#         print "Number of Real Reviews in Fake Reviews", len(realReviewsInFakeReviews)
-#         print "Number of Fake Reviews in Real Reviews", len(fakeReviewsInRealReviews)
-#         print "Number of Fake Reviews in Unclassified Reviews", len(unclassifiedFakeReviews)
-#         print "Number of Real Reviews in Unclassified Reviews", len(unclassifiedRealReviews)
-    
+        print '----------------------------------GRAPH-', time_key, '---------------------------------------------\n'
+        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 50, 'Initial LBP Runner for Time'+str(time_key))
+        cross_time_lbp_runner_threads.append(lbp_runner)
+        lbp_runner.start()
+    for lbp_runner in cross_time_lbp_runner_threads:
+        lbp_runner.join()
+    afterThreadTime = datetime.now()
+    print 'Time to be reduced',afterThreadTime-beforeThreadTime    
     return (cross_time_graphs, parent_graph)
 
 ###################################################################DATASTRUCTURES################################################################################
@@ -78,51 +71,21 @@ def calculateCrossTimeDs(cross_time_graphs):
                 bnss_score_all_time_map[bnss_key] = dict()
             time_score_map = bnss_score_all_time_map[bnss_key]
             time_score_map[time_key] = bnss_score_map_for_time[bnss_key]
-#     cross_time_business_id_set_dict = {time_key:set([bnss.getId() \
-#                                                      for bnss in cross_time_graphs[time_key].nodes()\
-#                                                       if bnss.getNodeType()==SIAUtil.PRODUCT])\
-#                                        for time_key in cross_time_graphs.iterkeys()}
     return bnss_score_all_time_map
 
 ################################################ALGO FOR MERGE###############################################################
-def calculateVarianceMerge(cross_time_graphs, parent_graph):
+def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, parent_graph):
     bnss_score_all_time_map = calculateCrossTimeDs(cross_time_graphs)
-    
     # calculate interesting businesses across time
     mergeable_businessids = dict()
     not_mergeable_businessids = dict()
-    """
-    for bnss_key in bnss_score_all_time_map.iterkeys():
-        time_score_map = bnss_score_all_time_map[bnss_key]
-        old_data = []
-        for time_key in time_score_map.iterkeys():
-            good_product_score = time_score_map[time_key][1]
-            
-            mean = good_product_score
-            std = 0
-            if len(old_data)>0:
-                array = numpy.array(old_data)
-                mean = numpy.mean(array)
-                std = numpy.std(array)
-                
-            if(fabs(good_product_score) < mean-(3*std) or std==0):
-                if time_key not in mergeable_businessids:
-                    mergeable_businessids[time_key] = set()
-                mergeable_businessids[time_key].add(bnss_key)
-                old_data.append(good_product_score)
-            else:
-                if time_key not in not_mergeable_businessids:
-                    not_mergeable_businessids[time_key] = set()
-                not_mergeable_businessids[time_key].add(bnss_key)
-    """
-    ####################################################################################################
     for bnss_key in bnss_score_all_time_map.iterkeys():
         time_score_map = bnss_score_all_time_map[bnss_key]
         scores = [time_score_map[time_key][1] for time_key in time_score_map.iterkeys()]
         good_scores = SIAUtil.rm_outlier(scores)
-        print 'IN: ', scores #  REMOVE
-        print 'OP: ', good_scores
-        print '*'*10
+#         print 'IN: ', scores #  REMOVE
+#         print 'OP: ', good_scores
+#         print '*'*10
         for time_key in time_score_map.iterkeys():
             score = time_score_map[time_key][1]
             if(score in good_scores):
@@ -133,12 +96,14 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                 if time_key not in not_mergeable_businessids:
                     not_mergeable_businessids[time_key] = set()
                 not_mergeable_businessids[time_key].add(bnss_key)
-    ####################################################################################################
+                
     for time_key in not_mergeable_businessids.iterkeys():
-            print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
+        print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
     for time_key in mergeable_businessids.iterkeys():
-            print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
-    # create a new super graph with all nodes
+        print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
+    return (mergeable_businessids,not_mergeable_businessids)
+
+def mergeTimeBasedGraphsWithMergeableIds(mergeable_businessids, cross_time_graphs):
     alltimeD_access_merge_graph = TimeBasedGraph()
     all_time_userIdToUserDict = dict()
     all_time_bnssIdToBnssDict = dict()
@@ -155,7 +120,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
             alltimeD_access_merge_graph.add_node(newSiaObject)
     
     alltimeD_access_merge_graph.initialize(all_time_userIdToUserDict, all_time_bnssIdToBnssDict)
-        
+    # create a new super graph with all nodes    
     # whatever businesses did not drastically change, get all the edges
     # of the business and add them to new super graph    
     for time_key in mergeable_businessids:
@@ -171,12 +136,17 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                     graph.remove_edge(usr,bnss)
 
     print len(alltimeD_access_merge_graph.nodes()),len(alltimeD_access_merge_graph.edges())
+    
+    return alltimeD_access_merge_graph
 
+def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_mergeable_businessids, cross_time_graphs):
     # whatever businesses did drastically change,
     # we will copy the super graph and try adding these edges to the copied
     # graph and run LBP
     to_be_removed_edge_between_user_bnss = set()
-    certifiedfFakes = set()
+    
+    copy_merge_lbp_runner_threads = []
+    beforeThreadTime = datetime.now()
     for time_key in not_mergeable_businessids:
         copied_all_timeD_access_merge_graph =  deepcopy(alltimeD_access_merge_graph)
         graph = cross_time_graphs[time_key]
@@ -187,17 +157,20 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                 review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
                 copied_all_timeD_access_merge_graph.add_edge(copied_all_timeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                              copied_all_timeD_access_merge_graph.getUser(usr.getId()),
-                                                             {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
-        print "------------------------------------Running Merge LBP along with not mergeable ",time_key,"--------------------------------------"    
-        copy_merge_lbp = LBP(copied_all_timeD_access_merge_graph)
-        copy_merge_lbp.doBeliefPropagationIterative(50)
-        (fakeUsers, honestUsers,unclassifiedUsers,\
-          badProducts,goodProducts, unclassifiedProducts,\
-          fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = copy_merge_lbp.calculateBeliefVals()
-        for edge in fakeReviewEdges:
-            to_be_removed_edge_between_user_bnss.add((copy_merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
-                                                       copy_merge_lbp.getEdgeDataForNodes(*edge).getBusinessID()))
-            certifiedfFakes.add(copy_merge_lbp.getEdgeDataForNodes(*edge).getId())
+                                                             {SIAUtil.REVIEW_EDGE_DICT_CONST:review})    
+        copy_merge_lbp_runner = LBPRunnerThread(copied_all_timeD_access_merge_graph, 10, 'LBP Runner For Not mergeableIds'+str(time_key))
+        copy_merge_lbp_runner_threads.append(copy_merge_lbp_runner)
+        copy_merge_lbp_runner.start()
+        
+    for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
+        copy_merge_lbp_runner.join()
+    
+    afterThreadTime = datetime.now()
+    print 'Time to be reduced', afterThreadTime-beforeThreadTime
+        
+    for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
+        print 'Copy merge runner', len(copy_merge_lbp_runner.getFakeEdgesData())
+        to_be_removed_edge_between_user_bnss = to_be_removed_edge_between_user_bnss.union(copy_merge_lbp_runner.getFakeEdgesData())
     
     #from the drastically change businesses we have find out all fake edges in the above step
     # without them add rest of the edges to the super graph and run LBP on it
@@ -215,19 +188,20 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
-    merge_lbp.doBeliefPropagationIterative(200)
+    merge_lbp.doBeliefPropagationIterative(10)
     (fakeUsers, honestUsers,unclassifiedUsers,\
      badProducts,goodProducts, unclassifiedProducts,\
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
     for edge in fakeReviewEdges:
-        certifiedfFakes.add(merge_lbp.getEdgeDataForNodes(*edge).getId())
         to_be_removed_edge_between_user_bnss.add((merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
                                                     merge_lbp.getEdgeDataForNodes(*edge).getBusinessID())) 
+    return to_be_removed_edge_between_user_bnss
+#############################################################################################################################
+def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_graph):
     print "------------------------------------Running Parent LBP along with all Time Edges--------------------------------------"
-    
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    parent_lbp.doBeliefPropagationIterative(200)
+    parent_lbp.doBeliefPropagationIterative(10)
     (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
           parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
@@ -236,7 +210,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     fakeReviewInParentLBP = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_lbp_fakeReviewEdges]) 
     fakeReviewsFromYelp   = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_graph.edges()\
                                   if not parent_lbp.getEdgeDataForNodes(*edge).isRecommended()] )
-    fakeReviewsFromTemporalAlgo = certifiedfFakes
+    fakeReviewsFromTemporalAlgo = set([parent_lbp.getReviewIdsForUsrBnssId(usrId, bnssId) for (usrId,bnssId) in certifiedFakesFromTemporalAlgo])
+    
     #Accuracy
     print 'Temporal Algo',len(fakeReviewsFromTemporalAlgo)
     print 'LBP',len(fakeReviewInParentLBP)
@@ -244,6 +219,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     print 'Intersection of Yelp with TemporalLBP:', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
     print 'Intersection of Yelp with LBP:', len(fakeReviewsFromYelp&fakeReviewInParentLBP)
     print 'Intersection of Temporal LBP with LBP:', len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP)
+    print 'Intersection Across Yelp,Temporal and LBP',len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP&fakeReviewsFromYelp)
     
     print 'Yelp-TemporalLBP:',len(fakeReviewsFromYelp-fakeReviewsFromTemporalAlgo)
     print 'TemporalLBP-Yelp:',len(fakeReviewsFromTemporalAlgo-fakeReviewsFromYelp)
@@ -253,16 +229,27 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     
     print 'Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewInParentLBP)
     print 'LBP-TemporalLBP:', len(fakeReviewInParentLBP-fakeReviewsFromTemporalAlgo)
-        
-#############################################################################################################################
 
 
 if __name__ == '__main__':
-    #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_old\\o_new_2.txt'
     beforeRunTime = datetime.now()
-    inputFileName = '/home/rami/Downloads/sample_master.txt'
-    file_path = "/home/rami/Downloads/"
-    (cross_time_graphs,parent_graph) = initialize(inputFileName, file_path)
-    calculateVarianceMerge(cross_time_graphs, parent_graph)
+    #inputFileName = '/home/rami/Downloads/sample_master.txt'
+    
+    beforeTemporalTime = datetime.now()
+    (cross_graphs, pg) = initialize(inputFileName)
+    (mIds,nonMids) = calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_graphs, pg)
+    time_merge_graph = mergeTimeBasedGraphsWithMergeableIds(mIds, cross_graphs)
+    fakesFromTemporalAlgo = mergeTimeBasedGraphsWithNotMergeableIds(time_merge_graph, nonMids, cross_graphs)
+    afterTemporalTime = datetime.now()
+    
+    beforeParentLBP = datetime.now()
+    runParentLBPAndCompareStatistics(fakesFromTemporalAlgo, pg)
+    afterParentLBP = datetime.now()
+    
     afterRunTime = datetime.now()
-    print 'Total Run Time', afterRunTime-beforeRunTime
+    
+    print 'Total Run Time', afterRunTime-beforeRunTime,\
+            'Run Time of Temporal LBP Algo',afterTemporalTime-beforeTemporalTime,\
+            'Run Time of LBP Algo',afterParentLBP-beforeParentLBP
