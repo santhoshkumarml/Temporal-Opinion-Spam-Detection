@@ -342,7 +342,7 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
 
 def rm_outlier(points, threshold=0.9):
     try:
-        confidence = bayes_mvs(points, threshold)
+        confidence = bayes_mvs(rm_outlier2(points), threshold)
         return [points[i] for i in range(0, len(points)) if confidence[i][0] != float('inf')]
     except:
         return points

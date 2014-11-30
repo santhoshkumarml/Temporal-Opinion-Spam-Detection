@@ -91,6 +91,7 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
     # calculate interesting businesses across time
     mergeable_businessids = dict()
     not_mergeable_businessids = dict()
+    """
     for bnss_key in bnss_score_all_time_map.iterkeys():
         time_score_map = bnss_score_all_time_map[bnss_key]
         old_data = []
@@ -113,7 +114,26 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
                 if time_key not in not_mergeable_businessids:
                     not_mergeable_businessids[time_key] = set()
                 not_mergeable_businessids[time_key].add(bnss_key)
-                
+    """
+    ####################################################################################################
+    for bnss_key in bnss_score_all_time_map.iterkeys():
+        time_score_map = bnss_score_all_time_map[bnss_key]
+        scores = [time_score_map[time_key][1] for time_key in time_score_map.iterkeys()]
+        good_scores = SIAUtil.rm_outlier(scores)
+        print 'IN: ', scores #  REMOVE
+        print 'OP: ', good_scores
+        print '*'*10
+        for time_key in time_score_map.iterkeys():
+            score = time_score_map[time_key][1]
+            if(score in good_scores):
+                if time_key not in mergeable_businessids:
+                    mergeable_businessids[time_key] = set()
+                mergeable_businessids[time_key].add(bnss_key)
+            else:
+                if time_key not in not_mergeable_businessids:
+                    not_mergeable_businessids[time_key] = set()
+                not_mergeable_businessids[time_key].add(bnss_key)
+    ####################################################################################################
     for time_key in not_mergeable_businessids.iterkeys():
             print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
     for time_key in mergeable_businessids.iterkeys():
@@ -240,8 +260,8 @@ def calculateVarianceMerge(cross_time_graphs, parent_graph):
 if __name__ == '__main__':
     #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
     beforeRunTime = datetime.now()
-    inputFileName = 'E:\\workspace\\dm\\data\\crawl_new\\sample_master.txt'
-    file_path = "E:\\"
+    inputFileName = '/home/rami/Downloads/sample_master.txt'
+    file_path = "/home/rami/Downloads/"
     (cross_time_graphs,parent_graph) = initialize(inputFileName, file_path)
     calculateVarianceMerge(cross_time_graphs, parent_graph)
     afterRunTime = datetime.now()
