@@ -46,7 +46,7 @@ print 'Number of Users- ', len(parentUserIdToUserDict.keys()),\
  'Number of Businesses- ', len(parentBusinessIdToBusinessDict.keys()),\
  'Number of Reviews- ', len(parent_reviews)
 print'----------------------Component Sizes----------------------------------------------------------------------'
-cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), time_key=len, reverse=True)
+cc = sorted(nx.connected_component_subgraphs(wholeGraph,False), key=len, reverse=True)
 lenListComponents = [len(c.nodes()) for c in cc if len(c.nodes())>1 ]
 print lenListComponents
 G = wholeGraph
@@ -93,10 +93,11 @@ print 'Negative parent_reviews', len([lbp.getEdgeDataForNodes(*edge)\
                               if lbp.getEdgeDataForNodes(*edge).getReviewSentiment()\
                                == SIAUtil.REVIEW_TYPE_NEGATIVE])
 ##################ALGO_START################
-lbp.doBeliefPropagationIterative(-1)
+lbp.doBeliefPropagationIterative(1)
 (fakeUsers,honestUsers,unclassifiedUsers,\
  badProducts,goodProducts,unclassifiedProducts,\
  fakeReviewEdges,realReviewEdges,unclassifiedReviewEdges) = lbp.calculateBeliefVals()
+
 fakeReviews = [lbp.getEdgeDataForNodes(*edge) for edge in fakeReviewEdges]
 realReviews = [lbp.getEdgeDataForNodes(*edge) for edge in realReviewEdges]
 unclassifiedReviews = [lbp.getEdgeDataForNodes(*edge) for edge in unclassifiedReviewEdges]

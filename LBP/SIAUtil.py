@@ -185,6 +185,11 @@ class business(SIAObject):
         self.rating = rating
         self.url = url
         
+    def setPriorScore(self):
+        if self.rating:
+            scorePositive = self.rating/5
+            self.score = (1-scorePositive,scorePositive)
+                
     def getName(self):
         return self.name
     
@@ -286,19 +291,41 @@ class TimeBasedGraph(networkx.Graph):
         return self.businessIdToBusinessDict[businessId]
     
 
-def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews):
+
+def setPriors(G):
+    for bnss in G.nodes():
+        if bnss.getNodeType() == PRODUCT:
+            neigbors = G.neighbors(bnss)
+            recommended = 0
+            notRecommended = 0
+            for neighbor in neigbors:
+                review = G.get_edge_data(neighbor, bnss)[REVIEW_EDGE_DICT_CONST]
+                if review.isRecommended() == True:
+                    recommended += 1
+                else:
+                    notRecommended += 1
+            totalReviews = recommended+notRecommended
+            fractionOfRecommeded = recommended / totalReviews
+            fractionOfNotRecommeded = notRecommended / totalReviews
+            if fractionOfRecommeded >= 0.8 or fractionOfNotRecommeded >= 0.8:
+                bnss.setPriorScore()
+                print bnss.getScore()
+
+def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, initializePrirors = True):
     G = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
     for reviewKey in parent_reviews:
         review = parent_reviews[reviewKey]
         usr = G.getUser(review.getUserId())
-        business = G.getBusiness(review.getBusinessID())
+        bnss = G.getBusiness(review.getBusinessID())
         G.add_node(usr)
-        G.add_node(business)
-        G.add_edge(business, usr, dict({REVIEW_EDGE_DICT_CONST:review}))
+        G.add_node(bnss)
+        G.add_edge(bnss, usr, dict({REVIEW_EDGE_DICT_CONST:review}))
+    if initializePrirors:
+        setPriors(G)
     return G
     
     
-def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, timeSplit ='1-D'):
+def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, timeSplit ='1-D', initializePriors=True):
     if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
@@ -338,6 +365,9 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
         timeSplittedgraph.add_node(usr)
         timeSplittedgraph.add_node(bnss)
         timeSplittedgraph.add_edge(usr, bnss, dict({REVIEW_EDGE_DICT_CONST:review}))
+    if initializePriors:
+        for time_key in cross_time_graphs.iterkeys():
+            setPriors(cross_time_graphs[time_key])
     return cross_time_graphs
 
 def rm_outlier(points, threshold=0.9):
