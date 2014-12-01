@@ -288,8 +288,7 @@ class TimeBasedGraph(networkx.Graph):
         return self.userIdToUserDict[userId]
     
     def getBusiness(self, businessId):
-        return self.businessIdToBusinessDict[businessId]
-    
+        return self.businessIdToBusinessDict[businessId]    
 
 
 def setPriors(G):
