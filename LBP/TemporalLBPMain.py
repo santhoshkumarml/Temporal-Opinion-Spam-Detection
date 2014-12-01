@@ -143,7 +143,6 @@ def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, par
                 
     for time_key in not_mergeable_businessids.iterkeys():
         print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
-    
              
     for time_key in mergeable_businessids.iterkeys():
         print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
