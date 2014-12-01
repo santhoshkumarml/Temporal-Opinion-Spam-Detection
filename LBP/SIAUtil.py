@@ -370,7 +370,20 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
             setPriors(cross_time_graphs[time_key])
     return cross_time_graphs
 
-def rm_outlier(points, threshold=0.9):
+def rm_outlier(points, threshold=0.45):
+    try:
+        #diff = [sum([abs(y-x) for x in points]) for y in points]
+        diff = [sum([abs(points[j]-points[i])*(len(points)-abs((j-i))/len(points)) for i in range(0, len(points))]) for j in range(0, len(points))]
+        avg_diff = sum(diff)/len(diff)
+        if avg_diff <= 0: # All values the same, absolute diff is 0
+            return points
+        percent_diff_from_avg = [abs(x - avg_diff)/avg_diff for x in diff]
+        return [points[i] for i in range(0, len(points)) if percent_diff_from_avg[i] <= threshold]
+    except:
+        return points
+    
+
+def rm_outlier3(points, threshold=0.9):
     try:
         confidence = bayes_mvs(rm_outlier2(points), threshold)
         return [points[i] for i in range(0, len(points)) if confidence[i][0] != float('inf')]

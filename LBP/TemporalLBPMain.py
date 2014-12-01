@@ -10,7 +10,7 @@ from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread
-
+import sys
 ###################################################Parallelize LBP Run Using Thread######################################################
 class LBPRunnerThread(Thread):
     def __init__(self, graph, limit, name='LBPRunner'):
@@ -232,7 +232,7 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
 
 
 if __name__ == '__main__':
-    inputFileName = 'E:\\workspace\\\dm\\data\\crawl_new\\sample_master.txt'
+    inputFileName = sys.argv[1]
     #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_old\\o_new_2.txt'
     beforeRunTime = datetime.now()
     #inputFileName = '/home/rami/Downloads/sample_master.txt'
