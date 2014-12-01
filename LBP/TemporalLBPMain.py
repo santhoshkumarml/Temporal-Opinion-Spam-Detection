@@ -1,3 +1,4 @@
+from __future__ import division
 '''
 Created on Nov 25, 2014
 
@@ -99,8 +100,40 @@ def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, par
                 
     for time_key in not_mergeable_businessids.iterkeys():
         print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
-        
-    print not_mergeable_businessids
+    
+    interesting_bnss_across_time = set([bnss_key for time_key in not_mergeable_businessids for bnss_key in not_mergeable_businessids[time_key]])
+    
+    bnss_score_across_time_with_interestingMarked = dict()
+    
+    for bnss_key in interesting_bnss_across_time:
+        score_across_time_with_intersting_maked = [ (bnss_score_all_time_map[bnss_key][time_key],True) \
+                                                   if time_key in bnss_score_all_time_map[bnss_key] and time_key in not_mergeable_businessids \
+                                                   else '-' if time_key not in bnss_score_all_time_map[bnss_key]\
+                                                   else (bnss_score_all_time_map[bnss_key][time_key],False)\
+                                                   for time_key in cross_time_graphs.iterkeys() ]
+        bnss_score_across_time_with_interestingMarked[bnss_key] = score_across_time_with_intersting_maked
+    
+    print bnss_score_across_time_with_interestingMarked
+                
+    
+#     for time_key in cross_time_graphs:
+#         if time_key in not_mergeable_businessids:
+#             graph = cross_time_graphs[time_key]
+#             dummy_lbp = LBP(graph)
+#             (fakeUsers,honestUsers,unclassifiedUsers,\
+#                  badProducts,goodProducts,unclassifiedProducts,\
+#                  fakeReviewEdges,realReviewEdges,unclassifiedReviewEdges) = dummy_lbp.calculateBeliefVals()
+#             bnss_time_map = not_mergeable_businessids[time_key]
+#             for fakeReviewEdge in fakeReviewEdges:
+#                 (siaObject1,siaObject2) = fakeReviewEdge
+#                 if siaObject1.getNodeType() == SIAUtil.PRODUCT:
+#                     bnssIdFromEdge = siaObject1.getId()
+#                     if bnssIdFromEdge in bnss_time_map.keys():
+#                         print  
+#                     else:
+#                         bnssIdFromEdge = siaObject2.getId()
+#                         if bnssIdFromEdge in bnss_time_map.keys():
+#                                 print
     
     for time_key in mergeable_businessids.iterkeys():
         print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
@@ -187,7 +220,7 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
                     review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
                     alltimeD_access_merge_graph.add_edge(alltimeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                          alltimeD_access_merge_graph.getUser(usr.getId()),\
-                                                          {SIAUtil.REVIEW_EDGE_DICT_CONST:review})               
+                                                          {SIAUtil.REVIEW_EDGE_DICT_CONST:review})            
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
@@ -233,12 +266,12 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
     print 'Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewInParentLBP)
     print 'LBP-TemporalLBP:', len(fakeReviewInParentLBP-fakeReviewsFromTemporalAlgo)
     
-    precisionOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromYelp)
-    precisionOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewsFromYelp)
-    recallOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/(len(fakeReviewsFromYelp)-len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo))
-    recallOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/(len(fakeReviewsFromYelp)-len(fakeReviewsFromYelp&fakeReviewInParentLBP))
-    F1ScoreOfTemporalAlgo = (precisionOfTemporalAlgo*recallOfTemporalAlgo)/(precisionOfTemporalAlgo+recallOfTemporalAlgo)
-    F1ScoreOfLBP = (precisionOfLBP*recallOfLBP)/(precisionOfLBP+recallOfLBP)
+    precisionOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromTemporalAlgo)
+    precisionOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewInParentLBP)
+    recallOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromYelp)
+    recallOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewsFromYelp)
+    F1ScoreOfTemporalAlgo = (2*precisionOfTemporalAlgo*recallOfTemporalAlgo)/(precisionOfTemporalAlgo+recallOfTemporalAlgo)
+    F1ScoreOfLBP = (2*precisionOfLBP*recallOfLBP)/(precisionOfLBP+recallOfLBP)
     
     print 'Precision of Temporal LBP',precisionOfTemporalAlgo 
     print 'Precision of LBP', precisionOfLBP
@@ -248,8 +281,8 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
     print 'F1Score of LBP',F1ScoreOfLBP
     
 if __name__ == '__main__':
-    inputFileName = sys.argv[1]
-    #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_old\\o_new_2.txt'
+    #inputFileName = sys.argv[1]
+    inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_old/o_new_2.txt'
     beforeRunTime = datetime.now()
     #inputFileName = '/home/rami/Downloads/sample_master.txt'
     
