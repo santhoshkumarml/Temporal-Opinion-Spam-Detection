@@ -75,8 +75,51 @@ def calculateCrossTimeDs(cross_time_graphs):
     return bnss_score_all_time_map
 
 ################################################ALGO FOR MERGE###############################################################
-def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, parent_graph):
-    bnss_score_all_time_map = calculateCrossTimeDs(cross_time_graphs)
+def calculateInterestingBusinessStatistics(cross_time_graphs, not_mergeable_businessids, bnss_score_all_time_map):
+    print not_mergeable_businessids
+    interesting_bnss_across_time = set([bnss_key for time_key in not_mergeable_businessids for bnss_key in not_mergeable_businessids[time_key]])
+    
+    bnss_score_across_time_with_interestingMarked = dict()
+    
+    for bnss_key in interesting_bnss_across_time:
+        score_across_time_with_intersting_marked = { time_key:(bnss_score_all_time_map[bnss_key][time_key],(0,0),True) \
+                                                   if time_key in bnss_score_all_time_map[bnss_key] and time_key in not_mergeable_businessids \
+                                                   else '-' if time_key not in bnss_score_all_time_map[bnss_key] \
+                                                   else (bnss_score_all_time_map[bnss_key][time_key],(0,0),False) \
+                                                   for time_key in cross_time_graphs.iterkeys()}
+        bnss_score_across_time_with_interestingMarked[bnss_key] = score_across_time_with_intersting_marked
+
+                
+    for time_key in cross_time_graphs:
+        graph = cross_time_graphs[time_key]
+        dummy_lbp = LBP(graph)
+        (fakeUsers,honestUsers,unclassifiedUsers,\
+            badProducts,goodProducts,unclassifiedProducts,\
+            fakeReviewEdges,realReviewEdges,unclassifiedReviewEdges) = dummy_lbp.calculateBeliefVals()
+        for fakeReviewEdge in fakeReviewEdges:
+            (siaObject1,siaObject2) = fakeReviewEdge
+            if siaObject1.getNodeType() == SIAUtil.PRODUCT:
+                bnssIdFromEdge = siaObject1.getId()
+                if bnssIdFromEdge in bnss_score_across_time_with_interestingMarked:
+                    score,(edge_sentiment_negative,edge_sentiment_positive),isInteresting = bnss_score_across_time_with_interestingMarked[bnssIdFromEdge][time_key]
+                    if dummy_lbp.getEdgeDataForNodes(*fakeReviewEdge).getReviewSentiment() == SIAUtil.REVIEW_TYPE_NEGATIVE:
+                        edge_sentiment_negative+=1
+                    else:
+                        edge_sentiment_positive+=1
+                    bnss_score_across_time_with_interestingMarked[bnssIdFromEdge][time_key] = score,(edge_sentiment_negative,edge_sentiment_positive),isInteresting 
+                else:
+                    bnssIdFromEdge = siaObject2.getId()
+                    if bnssIdFromEdge in bnss_score_across_time_with_interestingMarked:
+                        score,(edge_sentiment_negative,edge_sentiment_positive),isInteresting = bnss_score_across_time_with_interestingMarked[bnssIdFromEdge][time_key]
+                        if dummy_lbp.getEdgeDataForNodes(*fakeReviewEdge).getReviewSentiment() == SIAUtil.REVIEW_TYPE_NEGATIVE:
+                            edge_sentiment_negative+=1
+                        else:
+                            edge_sentiment_positive+=1
+                        bnss_score_across_time_with_interestingMarked[bnssIdFromEdge][time_key] = score,(edge_sentiment_negative,edge_sentiment_positive),isInteresting
+    print bnss_score_across_time_with_interestingMarked
+
+
+def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, parent_graph, bnss_score_all_time_map):
     # calculate interesting businesses across time
     mergeable_businessids = dict()
     not_mergeable_businessids = dict()
@@ -101,40 +144,7 @@ def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, par
     for time_key in not_mergeable_businessids.iterkeys():
         print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
     
-    interesting_bnss_across_time = set([bnss_key for time_key in not_mergeable_businessids for bnss_key in not_mergeable_businessids[time_key]])
-    
-    bnss_score_across_time_with_interestingMarked = dict()
-    
-    for bnss_key in interesting_bnss_across_time:
-        score_across_time_with_intersting_maked = [ (bnss_score_all_time_map[bnss_key][time_key],True) \
-                                                   if time_key in bnss_score_all_time_map[bnss_key] and time_key in not_mergeable_businessids \
-                                                   else '-' if time_key not in bnss_score_all_time_map[bnss_key]\
-                                                   else (bnss_score_all_time_map[bnss_key][time_key],False)\
-                                                   for time_key in cross_time_graphs.iterkeys() ]
-        bnss_score_across_time_with_interestingMarked[bnss_key] = score_across_time_with_intersting_maked
-    
-    print bnss_score_across_time_with_interestingMarked
-                
-    
-#     for time_key in cross_time_graphs:
-#         if time_key in not_mergeable_businessids:
-#             graph = cross_time_graphs[time_key]
-#             dummy_lbp = LBP(graph)
-#             (fakeUsers,honestUsers,unclassifiedUsers,\
-#                  badProducts,goodProducts,unclassifiedProducts,\
-#                  fakeReviewEdges,realReviewEdges,unclassifiedReviewEdges) = dummy_lbp.calculateBeliefVals()
-#             bnss_time_map = not_mergeable_businessids[time_key]
-#             for fakeReviewEdge in fakeReviewEdges:
-#                 (siaObject1,siaObject2) = fakeReviewEdge
-#                 if siaObject1.getNodeType() == SIAUtil.PRODUCT:
-#                     bnssIdFromEdge = siaObject1.getId()
-#                     if bnssIdFromEdge in bnss_time_map.keys():
-#                         print  
-#                     else:
-#                         bnssIdFromEdge = siaObject2.getId()
-#                         if bnssIdFromEdge in bnss_time_map.keys():
-#                                 print
-    
+             
     for time_key in mergeable_businessids.iterkeys():
         print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
     return (mergeable_businessids,not_mergeable_businessids)
@@ -281,14 +291,16 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
     print 'F1Score of LBP',F1ScoreOfLBP
     
 if __name__ == '__main__':
-    #inputFileName = sys.argv[1]
-    inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_old/o_new_2.txt'
+    inputFileName = sys.argv[1]
+    #inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_old/o_new_2.txt'
     beforeRunTime = datetime.now()
     #inputFileName = '/home/rami/Downloads/sample_master.txt'
     
     beforeTemporalTime = datetime.now()
     (cross_graphs, pg) = initialize(inputFileName)
-    (mIds,nonMids) = calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_graphs, pg)
+    bnss_all_time_map = calculateCrossTimeDs(cross_graphs)
+    (mIds,nonMids) = calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_graphs, pg, bnss_all_time_map)
+    calculateInterestingBusinessStatistics(cross_graphs, nonMids, bnss_all_time_map)
     time_merge_graph = mergeTimeBasedGraphsWithMergeableIds(mIds, cross_graphs)
     fakesFromTemporalAlgo = mergeTimeBasedGraphsWithNotMergeableIds(time_merge_graph, nonMids, cross_graphs)
     afterTemporalTime = datetime.now()
