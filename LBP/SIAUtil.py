@@ -45,7 +45,7 @@ REVIEW_EDGE_DICT_CONST = 'review'
 '''
 Compatibility Potential
 '''
-EPISOLON = 10**-4
+EPISOLON = 10**-1
 #COMP_POT = [[[0.0 for productType in PRODUCT_TYPES] for userType in USER_TYPES] for reviewType in REVIEW_TYPES]
 COMP_POT = numpy.zeros(shape=(2,2,2),dtype=numpy.float32)
 def init_COMP_POT():
@@ -61,9 +61,9 @@ def init_COMP_POT():
                             output = 1-EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = 1-(2*EPISOLON)
+                            output = (2*EPISOLON)#0.2
                         else:
-                            output = (2*EPISOLON)
+                            output = (1-2*EPISOLON)
                 else:
                     if userType == USER_TYPE_HONEST:
                         if productType == PRODUCT_TYPE_GOOD:
@@ -72,9 +72,9 @@ def init_COMP_POT():
                             output = EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = 2*EPISOLON
+                            output = (1-2*EPISOLON)
                         else:
-                            output = 1-(2*EPISOLON)
+                            output = 2*EPISOLON
                             
                 COMP_POT[reviewType][userType][productType] = output
 
@@ -311,7 +311,8 @@ def setPriors(G):
                 bnss.setPriorScore()
                 print bnss.getScore()
 
-def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, initializePrirors = True):
+def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
+                 parent_reviews, initializePrirors = False):
     G = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
     for reviewKey in parent_reviews:
         review = parent_reviews[reviewKey]
@@ -325,7 +326,8 @@ def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_re
     return G
     
     
-def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews, timeSplit ='1-D', initializePriors=True):
+def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews,\
+                          timeSplit ='1-D', initializePriors=False):
     if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'

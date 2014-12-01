@@ -47,12 +47,12 @@ def initialize(inputFileName):
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
     cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
                                                           parentBusinessIdToBusinessDict,\
-                                                           parent_reviews, '1-Y')
+                                                           parent_reviews, '9-M')
     beforeThreadTime = datetime.now()
     cross_time_lbp_runner_threads = []
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------\n'
-        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 50, 'Initial LBP Runner for Time'+str(time_key))
+        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 25, 'Initial LBP Runner for Time'+str(time_key))
         cross_time_lbp_runner_threads.append(lbp_runner)
         lbp_runner.start()
     for lbp_runner in cross_time_lbp_runner_threads:
@@ -99,6 +99,9 @@ def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, par
                 
     for time_key in not_mergeable_businessids.iterkeys():
         print 'Interesting businesses in  time:', time_key,len(not_mergeable_businessids[time_key])
+        
+    print not_mergeable_businessids
+    
     for time_key in mergeable_businessids.iterkeys():
         print 'Not Interesting businesses in time:', time_key,len(mergeable_businessids[time_key])
     return (mergeable_businessids,not_mergeable_businessids)
@@ -158,7 +161,7 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
                 copied_all_timeD_access_merge_graph.add_edge(copied_all_timeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                              copied_all_timeD_access_merge_graph.getUser(usr.getId()),
                                                              {SIAUtil.REVIEW_EDGE_DICT_CONST:review})    
-        copy_merge_lbp_runner = LBPRunnerThread(copied_all_timeD_access_merge_graph, 10, 'LBP Runner For Not mergeableIds'+str(time_key))
+        copy_merge_lbp_runner = LBPRunnerThread(copied_all_timeD_access_merge_graph, 25, 'LBP Runner For Not mergeableIds'+str(time_key))
         copy_merge_lbp_runner_threads.append(copy_merge_lbp_runner)
         copy_merge_lbp_runner.start()
         
@@ -188,7 +191,7 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
-    merge_lbp.doBeliefPropagationIterative(10)
+    merge_lbp.doBeliefPropagationIterative(25)
     (fakeUsers, honestUsers,unclassifiedUsers,\
      badProducts,goodProducts, unclassifiedProducts,\
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
@@ -201,7 +204,7 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
     print "------------------------------------Running Parent LBP along with all Time Edges--------------------------------------"
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    parent_lbp.doBeliefPropagationIterative(10)
+    parent_lbp.doBeliefPropagationIterative(25)
     (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
           parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
@@ -229,8 +232,21 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
     
     print 'Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewInParentLBP)
     print 'LBP-TemporalLBP:', len(fakeReviewInParentLBP-fakeReviewsFromTemporalAlgo)
-
-
+    
+    precisionOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromYelp)
+    precisionOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewsFromYelp)
+    recallOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/(len(fakeReviewsFromYelp)-len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo))
+    recallOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/(len(fakeReviewsFromYelp)-len(fakeReviewsFromYelp&fakeReviewInParentLBP))
+    F1ScoreOfTemporalAlgo = (precisionOfTemporalAlgo*recallOfTemporalAlgo)/(precisionOfTemporalAlgo+recallOfTemporalAlgo)
+    F1ScoreOfLBP = (precisionOfLBP*recallOfLBP)/(precisionOfLBP+recallOfLBP)
+    
+    print 'Precision of Temporal LBP',precisionOfTemporalAlgo 
+    print 'Precision of LBP', precisionOfLBP
+    print 'Recall of Temporal LBP', recallOfTemporalAlgo
+    print 'Recall of LBP', recallOfLBP
+    print 'F1Score of Temporal Algo',F1ScoreOfTemporalAlgo
+    print 'F1Score of LBP',F1ScoreOfLBP
+    
 if __name__ == '__main__':
     inputFileName = sys.argv[1]
     #inputFileName = 'E:\\workspace\\\dm\\data\\crawl_old\\o_new_2.txt'
