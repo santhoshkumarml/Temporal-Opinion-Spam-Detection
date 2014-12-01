@@ -48,12 +48,12 @@ def initialize(inputFileName):
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
     cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
                                                           parentBusinessIdToBusinessDict,\
-                                                           parent_reviews, '9-M')
+                                                           parent_reviews, '1-Y')
     beforeThreadTime = datetime.now()
     cross_time_lbp_runner_threads = []
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------\n'
-        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 25, 'Initial LBP Runner for Time'+str(time_key))
+        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 20, 'Initial LBP Runner for Time'+str(time_key))
         cross_time_lbp_runner_threads.append(lbp_runner)
         lbp_runner.start()
     for lbp_runner in cross_time_lbp_runner_threads:
@@ -76,7 +76,6 @@ def calculateCrossTimeDs(cross_time_graphs):
 
 ################################################ALGO FOR MERGE###############################################################
 def calculateInterestingBusinessStatistics(cross_time_graphs, not_mergeable_businessids, bnss_score_all_time_map):
-    print not_mergeable_businessids
     interesting_bnss_across_time = set([bnss_key for time_key in not_mergeable_businessids for bnss_key in not_mergeable_businessids[time_key]])
     
     bnss_score_across_time_with_interestingMarked = dict()
@@ -84,6 +83,7 @@ def calculateInterestingBusinessStatistics(cross_time_graphs, not_mergeable_busi
     for bnss_key in interesting_bnss_across_time:
         score_across_time_with_intersting_marked = { time_key:(bnss_score_all_time_map[bnss_key][time_key],(0,0),True) \
                                                    if time_key in bnss_score_all_time_map[bnss_key] and time_key in not_mergeable_businessids \
+                                                   and bnss_key in not_mergeable_businessids[time_key]\
                                                    else '-' if time_key not in bnss_score_all_time_map[bnss_key] \
                                                    else (bnss_score_all_time_map[bnss_key][time_key],(0,0),False) \
                                                    for time_key in cross_time_graphs.iterkeys()}

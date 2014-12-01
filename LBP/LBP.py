@@ -2,6 +2,7 @@
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
 import SIAUtil
+from math import fabs
 '''
  Loopy Belief Propagation
 '''
@@ -103,45 +104,28 @@ class LBP(object):
             if siaObject.getNodeType() == USER:
                 if(beliefVal[0] > beliefVal[1]):
                     fakeUsers.append(siaObject)
-#                     fakeUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
                 elif(beliefVal[0] == beliefVal[1]):
                     unclassifiedUsers.append(siaObject)
                 else:
                     honestUsers.append(siaObject)
-#                     honestUsers.append(siaObject.getName()+' '+str(siaObject.getScore()))
             else:
                 if(beliefVal[0] > beliefVal[1]):
                     badProducts.append(siaObject)
-#                     badProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
-#                                        str(siaObject.getScore())+' '+str(siaObject.getRating()))
                 elif(beliefVal[0] == beliefVal[1]):
                     unclassifiedProducts.append(siaObject)
                 else:
                     goodProducts.append(siaObject)
-#                     goodProducts.append(siaObject.getName()+' '+siaObject.getUrl()+' '+\
-#                                         str(siaObject.getScore())+' '+str(siaObject.getRating()))
                     
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
             review.calculateBeliefVals(*edge)
             beliefVal = review.getScore()
-            if(beliefVal[0] > beliefVal[1]):
+            if(beliefVal[0] == beliefVal[1]) or (fabs(beliefVal[0]-beliefVal[1]) < 0.02):
+                unclassifiedReviews.append(edge)
+            elif(beliefVal[0] > beliefVal[1]):
                 fakeReviews.append(edge)
-#                 fakeReviews.append(review.getUser().getName()+\
-#                                    ' '+review.getBusiness().getName()+\
-#                                    ' '+str(messageFromProductToUser)+\
-#                                    ' '+review.getRating()+ ' '+\
-#                                    str(review.isRecommended()))
-            elif(beliefVal[0] == beliefVal[1]):
-                    unclassifiedReviews.append(edge)
             else:
                 realReviews.append(edge)
-#                 realReviews.append(review.getUser().getName()+\
-#                                    ' '+review.getBusiness().getName()+\
-#                                    ' '+str(messageFromProductToUser)+\
-#                                    ' '+review.getRating()+ ' '+\
-#                                    str(review.isRecommended()))  
-#             
         return (fakeUsers,honestUsers,unclassifiedUsers,\
                 badProducts,goodProducts,unclassifiedProducts,\
                 fakeReviews,realReviews,unclassifiedReviews)

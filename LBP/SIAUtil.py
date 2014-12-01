@@ -61,9 +61,9 @@ def init_COMP_POT():
                             output = 1-EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = (2*EPISOLON)#0.2
+                            output = 0.1#(2*EPISOLON)#0.2
                         else:
-                            output = (1-2*EPISOLON)
+                            output = 0.9#(1-2*EPISOLON)
                 else:
                     if userType == USER_TYPE_HONEST:
                         if productType == PRODUCT_TYPE_GOOD:
@@ -72,9 +72,9 @@ def init_COMP_POT():
                             output = EPISOLON
                     else:
                         if productType == PRODUCT_TYPE_GOOD:
-                            output = (1-2*EPISOLON)
+                            output = 0.9#(1-2*EPISOLON)
                         else:
-                            output = 2*EPISOLON
+                            output =0.1#2*EPISOLON
                             
                 COMP_POT[reviewType][userType][productType] = output
 
@@ -307,9 +307,8 @@ def setPriors(G):
             totalReviews = recommended+notRecommended
             fractionOfRecommeded = recommended / totalReviews
             fractionOfNotRecommeded = notRecommended / totalReviews
-            if fractionOfRecommeded >= 0.8 or fractionOfNotRecommeded >= 0.8:
+            if fractionOfRecommeded >= 0.9 or fractionOfNotRecommeded >= 0.9:
                 bnss.setPriorScore()
-                print bnss.getScore()
 
 def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
                  parent_reviews, initializePrirors = False):

@@ -39,7 +39,7 @@ def parseAndCreateObjects(inputFileName):
                     if not dictUsr:
                         parentUserIdToUserDict[usr.getId()] = usr
                         dictUsr = usr
-                    revw = review(recoRev[0], dictUsr.getId(), bnss.getId(), recoRev[3],recoRev[4], recoRev[5], True)
+                    revw = review(recoRev[0], dictUsr.getId(), bnss.getId(), recoRev[3],recoRev[4], '', True)
                     revwKey = (revw.getUserId(),revw.getBusinessID())
                     if revwKey in parent_reviews:
                         continue 
@@ -56,7 +56,7 @@ def parseAndCreateObjects(inputFileName):
                     if not dictUsr:
                         parentUserIdToUserDict[usr.getId()] = usr
                         dictUsr = usr
-                    revw = review(noRecoRev[0], dictUsr.getId(), bnss.getId(), noRecoRev[3], noRecoRev[4], noRecoRev[5], False)
+                    revw = review(noRecoRev[0], dictUsr.getId(), bnss.getId(), noRecoRev[3], noRecoRev[4], '', False)
                     revwKey = (revw.getUserId(),revw.getBusinessID())
                     if revwKey in parent_reviews:
                         continue 
