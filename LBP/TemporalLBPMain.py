@@ -12,6 +12,7 @@ from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread
 import sys
+import networkx
 ###################################################Parallelize LBP Run Using Thread######################################################
 class LBPRunnerThread(Thread):
     def __init__(self, graph, limit, name='LBPRunner'):
@@ -44,6 +45,26 @@ def initialize(inputFileName):
     (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
         dataReader.parseAndCreateObjects(inputFileName)
     parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
+
+#     unnecessary_reviews = set()
+#     cc = sorted(networkx.connected_component_subgraphs(parent_graph,False), key=len, reverse=True)
+#     for g in cc:
+#         g.initializeDicts()
+#                 
+#     for g in cc:
+#         usr_count = g.getUserCount()
+#         bnss_count = g.getBusinessCount()
+#         if(usr_count==1):
+#             usr = g.getUser(g.getUserIds()[0])
+#             for bnss in g.neighbors(usr):
+#                 review = g.getReview(usr.getId(),bnss.getId())
+#                 unnecessary_reviews.add(review.getId())
+#         if(bnss_count==1):
+#             bnss = g.getBusiness(g.getBusinessIds()[0])
+#             for usr in g.neighbors(bnss):
+#                 review = g.getReview(usr.getId(),bnss.getId())
+#                 unnecessary_reviews.add(review.getId())    
+#     print len(unnecessary_reviews)
 
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
     cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\

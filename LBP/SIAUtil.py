@@ -3,16 +3,19 @@ Created on Nov 3, 2014
 
 @author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
 '''
-from datetime import datetime, date, timedelta
-from copy import deepcopy
 '''
 Node Types
 '''
-import numpy
+
+from copy import deepcopy
+from datetime import datetime, date, timedelta
 import networkx
-import numpy as np
+import numpy
 import re
 from scipy.stats import bayes_mvs
+
+import numpy as np
+
 
 USER = 'USER'
 PRODUCT = 'PRODUCT'
@@ -283,12 +286,34 @@ class TimeBasedGraph(networkx.Graph):
     def initialize(self, userIdToUserDict,businessIdToBusinessDict):
         self.userIdToUserDict = userIdToUserDict
         self.businessIdToBusinessDict = businessIdToBusinessDict
+    
+    def initializeDicts(self):
+        for siaObject in self.nodes():
+            if siaObject.getNodeType() == USER:
+                self.userIdToUserDict[siaObject.getId()] =siaObject
+            else:
+                self.businessIdToBusinessDict[siaObject.getId()] =siaObject
+    
+    def getUserCount(self):
+        return len(set([node.getId() for node in self.nodes() if node.getNodeType()==USER]))
+    
+    def getUserIds(self):
+        return [node.getId() for node in self.nodes() if node.getNodeType()==USER]
+    
+    def getBusinessIds(self):
+        return [node.getId() for node in self.nodes() if node.getNodeType()==PRODUCT]
+    
+    def getBusinessCount(self):
+        return len(set([node.getId() for node in self.nodes() if node.getNodeType()==PRODUCT]))
         
     def getUser(self,userId):
         return self.userIdToUserDict[userId]
     
     def getBusiness(self, businessId):
-        return self.businessIdToBusinessDict[businessId]    
+        return self.businessIdToBusinessDict[businessId]
+    
+    def getReview(self,usrId,bnssId):
+        return self.get_edge_data(self.getUser(usrId), self.getBusiness(bnssId))[REVIEW_EDGE_DICT_CONST]
 
 
 def setPriors(G):

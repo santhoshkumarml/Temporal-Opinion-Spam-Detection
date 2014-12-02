@@ -1,13 +1,13 @@
 '''
 @author: Santhosh Kumar Manavasi Lakshminaryanan
 '''
-import SIAUtil
-from math import fabs
 '''
  Loopy Belief Propagation
 '''
 
-from SIAUtil import PRODUCT, USER, REVIEW_EDGE_DICT_CONST
+from math import fabs
+
+import SIAUtil
 
 
 class LBP(object):
@@ -46,15 +46,15 @@ class LBP(object):
         changedUsers = []
         if not (limit==0):
             for user in self.graph.nodes():
-                if user.getNodeType() == USER:
+                if user.getNodeType() == SIAUtil.USER:
                     changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
                     changedProducts.extend(changedNodes)
-                    
             
             for product in self.graph.nodes():
-                if product.getNodeType() == PRODUCT:
+                if product.getNodeType() == SIAUtil.PRODUCT:
                     changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
                     changedUsers.extend(changedNodes)
+            
             noOfChangedProducts = len(changedProducts)
             noOfChangedUsers = len(changedUsers)
             totalNoOfChangedNodes = noOfChangedProducts+noOfChangedUsers
@@ -66,12 +66,12 @@ class LBP(object):
             changedProducts = []
             changedUsers = []
             for user in self.graph.nodes():
-                if user.getNodeType() == USER:
+                if user.getNodeType() == SIAUtil.USER:
                     changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
                     changedProducts.extend(changedNodes)
             
             for product in self.graph.nodes():
-                if product.getNodeType() == PRODUCT:
+                if product.getNodeType() == SIAUtil.PRODUCT:
                     changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
                     changedUsers.extend(changedNodes)
                     
@@ -101,7 +101,7 @@ class LBP(object):
         for siaObject in self.graph.nodes():
             siaObject.calculateBeliefVals();
             beliefVal = siaObject.getScore()
-            if siaObject.getNodeType() == USER:
+            if siaObject.getNodeType() == SIAUtil.USER:
                 if(beliefVal[0] > beliefVal[1]):
                     fakeUsers.append(siaObject)
                 elif(beliefVal[0] == beliefVal[1]):
@@ -117,7 +117,7 @@ class LBP(object):
                     goodProducts.append(siaObject)
                     
         for edge in self.graph.edges():
-            review = self.graph.get_edge_data(*edge)[REVIEW_EDGE_DICT_CONST]
+            review = self.graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]
             review.calculateBeliefVals(*edge)
             beliefVal = review.getScore()
             if(beliefVal[0] == beliefVal[1]) or (fabs(beliefVal[0]-beliefVal[1]) < 0.02):
