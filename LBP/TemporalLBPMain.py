@@ -11,8 +11,6 @@ from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread
-import sys
-import networkx
 ###################################################Parallelize LBP Run Using Thread######################################################
 class LBPRunnerThread(Thread):
     def __init__(self, graph, limit, name='LBPRunner'):
@@ -260,10 +258,14 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
     for edge in fakeReviewEdges:
         to_be_removed_edge_between_user_bnss.add((merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
-                                                    merge_lbp.getEdgeDataForNodes(*edge).getBusinessID())) 
-    return to_be_removed_edge_between_user_bnss
+                                                    merge_lbp.getEdgeDataForNodes(*edge).getBusinessID()))
+    certifiedRealFromTemporalAlgo = set()
+    for edge in realReviewEdges: 
+        certifiedRealFromTemporalAlgo.add((merge_lbp.getEdgeDataForNodes(*edge).getUserId(),\
+                                                    merge_lbp.getEdgeDataForNodes(*edge).getBusinessID()))
+    return (to_be_removed_edge_between_user_bnss,certifiedRealFromTemporalAlgo)
 #############################################################################################################################
-def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_graph):
+def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo,certifiedRealFromTemporalAlgo, parent_graph):
     print "------------------------------------Running Parent LBP along with all Time Edges--------------------------------------"
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
@@ -273,46 +275,81 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo, parent_grap
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
 
     print "-----------------------------------------------Statistics------------------------------------------------------------------"
-    fakeReviewInParentLBP = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_lbp_fakeReviewEdges]) 
+    fakeReviewsInParentLBP = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_lbp_fakeReviewEdges])
+    realReviewsInParentLBP = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_lbp_realReviewEdges])
+     
     fakeReviewsFromYelp   = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_graph.edges()\
                                   if not parent_lbp.getEdgeDataForNodes(*edge).isRecommended()] )
+    realReviewsFromYelp = set([parent_lbp.getEdgeDataForNodes(*edge).getId() for edge in parent_graph.edges()\
+                                  if  parent_lbp.getEdgeDataForNodes(*edge).isRecommended()] )
     fakeReviewsFromTemporalAlgo = set([parent_lbp.getReviewIdsForUsrBnssId(usrId, bnssId) for (usrId,bnssId) in certifiedFakesFromTemporalAlgo])
+    realReviewsFromTemporalAlgo = set([parent_lbp.getReviewIdsForUsrBnssId(usrId, bnssId) for (usrId,bnssId) in realFromTemporalAlgo])
+    
+    totalReviews = len([egde for egde in parent_graph.edges()])
     
     #Accuracy
-    print 'Temporal Algo',len(fakeReviewsFromTemporalAlgo)
-    print 'LBP',len(fakeReviewInParentLBP)
-    print 'Yelp', len(fakeReviewsFromYelp)
-    print 'Intersection of Yelp with TemporalLBP:', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
-    print 'Intersection of Yelp with LBP:', len(fakeReviewsFromYelp&fakeReviewInParentLBP)
-    print 'Intersection of Temporal LBP with LBP:', len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP)
-    print 'Intersection Across Yelp,Temporal and LBP',len(fakeReviewsFromTemporalAlgo&fakeReviewInParentLBP&fakeReviewsFromYelp)
+    print 'Fake Reviews Temporal Algo',len(fakeReviewsFromTemporalAlgo)
+    print 'Fake Reviews LBP',len(fakeReviewsInParentLBP)
+    print 'Fake Reviews Yelp', len(fakeReviewsFromYelp)
     
-    print 'Yelp-TemporalLBP:',len(fakeReviewsFromYelp-fakeReviewsFromTemporalAlgo)
-    print 'TemporalLBP-Yelp:',len(fakeReviewsFromTemporalAlgo-fakeReviewsFromYelp)
+    print 'Real Reviews Temporal Algo',len(realReviewsFromTemporalAlgo)
+    print 'Real Reviews LBP',len(realReviewsInParentLBP)
+    print 'Real Reviews Yelp', len(realReviewsFromYelp)
     
-    print 'Yelp-LBP:', len(fakeReviewsFromYelp-fakeReviewInParentLBP)
-    print 'LBP-Yelp:', len(fakeReviewInParentLBP-fakeReviewsFromYelp)
+    print 'Intersection of FakeReviews between Yelp with TemporalLBP:', len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
+    print 'Intersection of FakeReviews between Yelp with LBP:', len(fakeReviewsFromYelp&fakeReviewsInParentLBP)
+    print 'Intersection of FakeReviews between Temporal LBP with LBP:', len(fakeReviewsFromTemporalAlgo&fakeReviewsInParentLBP)
+    print 'Intersection FakeReviews Across Yelp,Temporal and LBP',len(fakeReviewsFromTemporalAlgo&fakeReviewsInParentLBP&fakeReviewsFromYelp)
     
-    print 'Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewInParentLBP)
-    print 'LBP-TemporalLBP:', len(fakeReviewInParentLBP-fakeReviewsFromTemporalAlgo)
+    print 'Intersection of RealReviews between Yelp with TemporalLBP:', len(realReviewsFromYelp&realReviewsFromTemporalAlgo)
+    print 'Intersection of RealReviews between Yelp with LBP:', len(realReviewsFromYelp&realReviewsInParentLBP)
+    print 'Intersection of RealReviews between Temporal LBP with LBP:', len(realReviewsFromTemporalAlgo&realReviewsInParentLBP)
+    print 'Intersection RealReviews Across Yelp,Temporal and LBP',len(realReviewsFromTemporalAlgo&realReviewsInParentLBP&fakeReviewsFromYelp)
+    
+    
+    print 'Fake Review - Yelp-TemporalLBP:',len(fakeReviewsFromYelp-fakeReviewsFromTemporalAlgo)
+    print 'Fake Reviews - TemporalLBP-Yelp:',len(fakeReviewsFromTemporalAlgo-fakeReviewsFromYelp)
+    
+    print 'Fake Reviews Yelp-LBP:', len(fakeReviewsFromYelp-fakeReviewsInParentLBP)
+    print 'Fake Reviews LBP-Yelp:', len(fakeReviewsInParentLBP-fakeReviewsFromYelp)
+    
+    print 'Fake Reviews Temporal LBP-LBP:', len(fakeReviewsFromTemporalAlgo-fakeReviewsInParentLBP)
+    print 'Fake Reviews LBP-TemporalLBP:', len(fakeReviewsInParentLBP-fakeReviewsFromTemporalAlgo)
+    
+    trueNegativesTemporalAlgo = len(realReviewsFromYelp&realReviewsFromTemporalAlgo)
+    truePositivesTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)
+    
+    trueNegativesLBP = len(realReviewsFromYelp&realReviewsInParentLBP)
+    truePositivesLBP = len(fakeReviewsFromYelp&fakeReviewsInParentLBP)
+    
+    accuracyOfTemporalAlgo = (truePositivesTemporalAlgo + trueNegativesTemporalAlgo)/totalReviews
+    accuracyOfLBP = (truePositivesLBP + trueNegativesLBP)/totalReviews 
     
     precisionOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromTemporalAlgo)
-    precisionOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewInParentLBP)
+    precisionOfLBP = len(fakeReviewsFromYelp&fakeReviewsInParentLBP)/len(fakeReviewsInParentLBP)
+    
     recallOfTemporalAlgo = len(fakeReviewsFromYelp&fakeReviewsFromTemporalAlgo)/len(fakeReviewsFromYelp)
-    recallOfLBP = len(fakeReviewsFromYelp&fakeReviewInParentLBP)/len(fakeReviewsFromYelp)
+    recallOfLBP = len(fakeReviewsFromYelp&fakeReviewsInParentLBP)/len(fakeReviewsFromYelp)
+    
     F1ScoreOfTemporalAlgo = (2*precisionOfTemporalAlgo*recallOfTemporalAlgo)/(precisionOfTemporalAlgo+recallOfTemporalAlgo)
     F1ScoreOfLBP = (2*precisionOfLBP*recallOfLBP)/(precisionOfLBP+recallOfLBP)
     
+    print 'Accuracy of Temporal LBP',accuracyOfTemporalAlgo 
+    print 'Accuracy of LBP', accuracyOfLBP
+    
     print 'Precision of Temporal LBP',precisionOfTemporalAlgo 
     print 'Precision of LBP', precisionOfLBP
+    
     print 'Recall of Temporal LBP', recallOfTemporalAlgo
     print 'Recall of LBP', recallOfLBP
-    print 'F1Score of Temporal Algo',F1ScoreOfTemporalAlgo
+    
+    print 'F1Score of Temporal LBP',F1ScoreOfTemporalAlgo
     print 'F1Score of LBP',F1ScoreOfLBP
     
 if __name__ == '__main__':
-    inputFileName = sys.argv[1]
+    #inputFileName = sys.argv[1]
     #inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_old/o_new_2.txt'
+    inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_new/sample_master.txt'
     beforeRunTime = datetime.now()
     #inputFileName = '/home/rami/Downloads/sample_master.txt'
     
@@ -322,11 +359,11 @@ if __name__ == '__main__':
     (mIds,nonMids) = calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_graphs, pg, bnss_all_time_map)
     calculateInterestingBusinessStatistics(cross_graphs, nonMids, bnss_all_time_map)
     time_merge_graph = mergeTimeBasedGraphsWithMergeableIds(mIds, cross_graphs)
-    fakesFromTemporalAlgo = mergeTimeBasedGraphsWithNotMergeableIds(time_merge_graph, nonMids, cross_graphs)
+    (fakesFromTemporalAlgo,realFromTemporalAlgo) = mergeTimeBasedGraphsWithNotMergeableIds(time_merge_graph, nonMids, cross_graphs)
     afterTemporalTime = datetime.now()
     
     beforeParentLBP = datetime.now()
-    runParentLBPAndCompareStatistics(fakesFromTemporalAlgo, pg)
+    runParentLBPAndCompareStatistics(fakesFromTemporalAlgo, realFromTemporalAlgo, pg)
     afterParentLBP = datetime.now()
     
     afterRunTime = datetime.now()
