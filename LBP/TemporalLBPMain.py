@@ -11,6 +11,7 @@ from SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread
+import sys
 ###################################################Parallelize LBP Run Using Thread######################################################
 class LBPRunnerThread(Thread):
     def __init__(self, graph, limit, name='LBPRunner'):
@@ -42,6 +43,16 @@ class LBPRunnerThread(Thread):
 def initialize(inputFileName):
     (parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews) =\
         dataReader.parseAndCreateObjects(inputFileName)
+    print len(parent_reviews)
+    inputFileNameForPriors = '/media/santhosh/Data/workspace/dm/data/crawl_new/sample_master.txt'        
+    (tempUserIdToUserDict, tempBusinessIdToBusinessDict, temp_reviews) =\
+        dataReader.parseAndCreateObjects(inputFileNameForPriors)
+    bnssEdited = 0
+    for bnssId in tempBusinessIdToBusinessDict.iterkeys():
+        if bnssId in parentBusinessIdToBusinessDict:
+            parentBusinessIdToBusinessDict[bnssId].setRating(tempBusinessIdToBusinessDict[bnssId].getRating())
+            bnssEdited+=1
+    print bnssEdited
     parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
 
 #     unnecessary_reviews = set()
@@ -72,7 +83,7 @@ def initialize(inputFileName):
     cross_time_lbp_runner_threads = []
     for time_key in cross_time_graphs.iterkeys():
         print '----------------------------------GRAPH-', time_key, '---------------------------------------------\n'
-        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 20, 'Initial LBP Runner for Time'+str(time_key))
+        lbp_runner = LBPRunnerThread(cross_time_graphs[time_key], 50, 'Initial LBP Runner for Time'+str(time_key))
         cross_time_lbp_runner_threads.append(lbp_runner)
         lbp_runner.start()
     for lbp_runner in cross_time_lbp_runner_threads:
@@ -209,7 +220,7 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
     # graph and run LBP
     to_be_removed_edge_between_user_bnss = set()
     
-    copy_merge_lbp_runner_threads = []
+    #copy_merge_lbp_runner_threads = []
     beforeThreadTime = datetime.now()
     for time_key in not_mergeable_businessids:
         copied_all_timeD_access_merge_graph =  deepcopy(alltimeD_access_merge_graph)
@@ -221,20 +232,32 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
                 review = deepcopy(graph.get_edge_data(usr,bnss)[SIAUtil.REVIEW_EDGE_DICT_CONST])
                 copied_all_timeD_access_merge_graph.add_edge(copied_all_timeD_access_merge_graph.getBusiness(bnss.getId()),\
                                                              copied_all_timeD_access_merge_graph.getUser(usr.getId()),
-                                                             {SIAUtil.REVIEW_EDGE_DICT_CONST:review})    
-        copy_merge_lbp_runner = LBPRunnerThread(copied_all_timeD_access_merge_graph, 25, 'LBP Runner For Not mergeableIds'+str(time_key))
-        copy_merge_lbp_runner_threads.append(copy_merge_lbp_runner)
-        copy_merge_lbp_runner.start()
+                                                             {SIAUtil.REVIEW_EDGE_DICT_CONST:review})
+        copy_merge_lbp = LBP(copied_all_timeD_access_merge_graph)
+        copy_merge_lbp.doBeliefPropagationIterative(50)
+        (fakeUsers, honestUsers,unclassifiedUsers,\
+         badProducts,goodProducts, unclassifiedProducts,\
+         fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = copy_merge_lbp.calculateBeliefVals()
+        for edge in fakeReviewEdges:
+            (s1,s2) = edge
+            if s1.getNodeType() == SIAUtil.USER:
+                to_be_removed_edge_between_user_bnss.add((s1.getId(),s2.getId()))
+            else:
+                to_be_removed_edge_between_user_bnss.add((s2.getId(),s1.getId()))
+#         copy_merge_lbp_runner = LBPRunnerThread(copied_all_timeD_access_merge_graph, 25, 'LBP Runner For Not mergeableIds'+str(time_key))
+#         copy_merge_lbp_runner_threads.append(copy_merge_lbp_runner)
+#         copy_merge_lbp_runner.start()
+          
         
-    for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
-        copy_merge_lbp_runner.join()
+#     for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
+#         copy_merge_lbp_runner.join()
     
     afterThreadTime = datetime.now()
     print 'Time to be reduced', afterThreadTime-beforeThreadTime
         
-    for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
-        print 'Copy merge runner', len(copy_merge_lbp_runner.getFakeEdgesData())
-        to_be_removed_edge_between_user_bnss = to_be_removed_edge_between_user_bnss.union(copy_merge_lbp_runner.getFakeEdgesData())
+#     for copy_merge_lbp_runner in copy_merge_lbp_runner_threads:
+#         print 'Copy merge runner', len(copy_merge_lbp_runner.getFakeEdgesData())
+#         to_be_removed_edge_between_user_bnss = to_be_removed_edge_between_user_bnss.union(copy_merge_lbp_runner.getFakeEdgesData())
     
     #from the drastically change businesses we have find out all fake edges in the above step
     # without them add rest of the edges to the super graph and run LBP on it
@@ -252,7 +275,7 @@ def mergeTimeBasedGraphsWithNotMergeableIds(alltimeD_access_merge_graph,not_merg
     
     print "------------------------------------Running Final Merge LBP--------------------------------------"
     merge_lbp = LBP(alltimeD_access_merge_graph)
-    merge_lbp.doBeliefPropagationIterative(25)
+    merge_lbp.doBeliefPropagationIterative(50)
     (fakeUsers, honestUsers,unclassifiedUsers,\
      badProducts,goodProducts, unclassifiedProducts,\
      fakeReviewEdges, realReviewEdges,unclassifiedReviewEdges) = merge_lbp.calculateBeliefVals()
@@ -269,7 +292,7 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo,certifiedRea
     print "------------------------------------Running Parent LBP along with all Time Edges--------------------------------------"
     # run LBP on a non temporal full graph for comparison  
     parent_lbp = LBP(parent_graph)
-    parent_lbp.doBeliefPropagationIterative(25)
+    parent_lbp.doBeliefPropagationIterative(50)
     (parent_lbp_fakeUsers, parent_lbp_honestUsers,parent_lbp_unclassifiedUsers,\
           parent_lbp_badProducts, parent_lbp_goodProducts, parent_lbp_unclassifiedProducts,\
           parent_lbp_fakeReviewEdges, parent_lbp_realReviewEdges, parent_lbp_unclassifiedReviewEdges) = parent_lbp.calculateBeliefVals()
@@ -347,9 +370,9 @@ def runParentLBPAndCompareStatistics(certifiedFakesFromTemporalAlgo,certifiedRea
     print 'F1Score of LBP',F1ScoreOfLBP
     
 if __name__ == '__main__':
-    #inputFileName = sys.argv[1]
+    inputFileName = sys.argv[1]
     #inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_old/o_new_2.txt'
-    inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_new/sample_master.txt'
+    #inputFileName = '/media/santhosh/Data/workspace/dm/data/crawl_new/sample_master.txt'
     beforeRunTime = datetime.now()
     #inputFileName = '/home/rami/Downloads/sample_master.txt'
     
@@ -357,7 +380,7 @@ if __name__ == '__main__':
     (cross_graphs, pg) = initialize(inputFileName)
     bnss_all_time_map = calculateCrossTimeDs(cross_graphs)
     (mIds,nonMids) = calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_graphs, pg, bnss_all_time_map)
-    calculateInterestingBusinessStatistics(cross_graphs, nonMids, bnss_all_time_map)
+    #calculateInterestingBusinessStatistics(cross_graphs, nonMids, bnss_all_time_map)
     time_merge_graph = mergeTimeBasedGraphsWithMergeableIds(mIds, cross_graphs)
     (fakesFromTemporalAlgo,realFromTemporalAlgo) = mergeTimeBasedGraphsWithNotMergeableIds(time_merge_graph, nonMids, cross_graphs)
     afterTemporalTime = datetime.now()

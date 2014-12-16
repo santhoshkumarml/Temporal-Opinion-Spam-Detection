@@ -120,7 +120,7 @@ class LBP(object):
             review = self.graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]
             review.calculateBeliefVals(*edge)
             beliefVal = review.getScore()
-            if(beliefVal[0] == beliefVal[1]) or (fabs(beliefVal[0]-beliefVal[1]) < 0.02):
+            if(beliefVal[0] == beliefVal[1]): #or (fabs(beliefVal[0]-beliefVal[1]) < 0.01):
                 unclassifiedReviews.append(edge)
             elif(beliefVal[0] > beliefVal[1]):
                 fakeReviews.append(edge)

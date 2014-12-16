@@ -202,6 +202,9 @@ class business(SIAObject):
     def getRating(self):
         return self.rating
     
+    def setRating(self, rating):
+        self.rating = rating
+    
     def getUrl(self):
         return self.url
     
@@ -319,23 +322,10 @@ class TimeBasedGraph(networkx.Graph):
 def setPriors(G):
     for bnss in G.nodes():
         if bnss.getNodeType() == PRODUCT:
-            neigbors = G.neighbors(bnss)
-            recommended = 0
-            notRecommended = 0
-            for neighbor in neigbors:
-                review = G.get_edge_data(neighbor, bnss)[REVIEW_EDGE_DICT_CONST]
-                if review.isRecommended() == True:
-                    recommended += 1
-                else:
-                    notRecommended += 1
-            totalReviews = recommended+notRecommended
-            fractionOfRecommeded = recommended / totalReviews
-            fractionOfNotRecommeded = notRecommended / totalReviews
-            if fractionOfRecommeded >= 0.9 or fractionOfNotRecommeded >= 0.9:
                 bnss.setPriorScore()
 
 def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
-                 parent_reviews, initializePrirors = False):
+                 parent_reviews, initializePrirors = True):
     G = TimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict)
     for reviewKey in parent_reviews:
         review = parent_reviews[reviewKey]
@@ -350,7 +340,7 @@ def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
     
     
 def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews,\
-                          timeSplit ='1-D', initializePriors=False):
+                          timeSplit ='1-D', initializePriors=True):
     if not re.match('[0-9]+-[DMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
         timeSplit ='1-D'
