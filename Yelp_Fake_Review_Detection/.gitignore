@@ -1,0 +1,4 @@
+*.pyc
+error.txt
+.project
+.pydev*
