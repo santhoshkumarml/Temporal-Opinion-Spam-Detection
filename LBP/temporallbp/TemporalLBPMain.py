@@ -4,10 +4,10 @@ Created on Nov 25, 2014
 
 @author: Santhosh Kumar
 '''
-import SIAUtil
-import dataReader
-from LBP import LBP
-from SIAUtil import TimeBasedGraph
+import util.SIAUtil as SIAUtil
+import util.dataReader as dataReader
+from lbp.LBP import LBP
+from util.SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread

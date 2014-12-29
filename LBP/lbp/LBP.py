@@ -7,7 +7,7 @@
 
 from math import fabs
 
-import SIAUtil
+import util.SIAUtil as SIAUtil
 
 
 class LBP(object):
