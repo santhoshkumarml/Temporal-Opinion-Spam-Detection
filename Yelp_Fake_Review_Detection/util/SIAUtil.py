@@ -339,6 +339,11 @@ def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
     return G
     
     
+
+def getDateForReview(r):
+    return date(int(r.getTimeOfReview().split('/')[2]), int(r.getTimeOfReview().split('/')[0]), 
+        int(r.getTimeOfReview().split('/')[1]))
+
 def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews,\
                           timeSplit ='1-D', initializePriors=True):
     if not re.match('[0-9]+-[DMY]', timeSplit):
@@ -355,13 +360,9 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
     else:
         dayIncrement = numeric*365
         
-    minDate =  min([date(int(r.getTimeOfReview().split('/')[2]),\
-                    int(r.getTimeOfReview().split('/')[0]),\
-                     int(r.getTimeOfReview().split('/')[1]))\
+    minDate =  min([getDateForReview(r)\
                  for r in parent_reviews.values() ])
-    maxDate =  max([date(int(r.getTimeOfReview().split('/')[2]),\
-                    int(r.getTimeOfReview().split('/')[0]),\
-                     int(r.getTimeOfReview().split('/')[1]))\
+    maxDate =  max([getDateForReview(r)\
                  for r in parent_reviews.values() ])
     cross_time_graphs = dict()
     time_key = 0
@@ -370,9 +371,7 @@ def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, 
         time_key+=1
     for reviewKey in parent_reviews.iterkeys():
         review = parent_reviews[reviewKey]
-        reviewDate = date(int(review.getTimeOfReview().split('/')[2]),\
-                    int(review.getTimeOfReview().split('/')[0]),\
-                     int(review.getTimeOfReview().split('/')[1]))
+        reviewDate = getDateForReview(review)
         timeDeltaKey = ((reviewDate-minDate)/dayIncrement).days
         timeSplittedgraph = cross_time_graphs[timeDeltaKey]
         usr = timeSplittedgraph.getUser(review.getUserId())
