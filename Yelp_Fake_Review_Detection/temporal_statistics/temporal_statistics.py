@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from util import SIAUtil
 import util.dataReader as dataReader
 
+FIRST_TIME_KEY = 'First Time Key'
 
 AVERAGE_RATING = 'Average Rating'
 RATING_ENTROPY = 'Rating entropy'
@@ -169,7 +170,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
         for bnssId in G.getBusinessIds():
             if bnssId not in bnss_statistics:
                 bnss_statistics[bnssId] = dict()
-            
+                bnss_statistics[bnssId][FIRST_TIME_KEY] = timeKey
             #Average Rating
             if AVERAGE_RATING not in bnss_statistics[bnssId]:
                 bnss_statistics[bnssId][AVERAGE_RATING] = numpy.zeros(total_time_slots)
@@ -180,7 +181,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 review_for_bnss = G.getReview(usrId,bnssId)
                 reviews_for_bnss.append(review_for_bnss)
             ratings = [review.getRating() for review in reviews_for_bnss]
-            bnss_statistics[bnssId][AVERAGE_RATING][timeKey] = float(sum(ratings))/float(len(ratings))
+            bnss_statistics[bnssId][AVERAGE_RATING][timeKey] = float(sum(ratings))
             
             #Rating Entropy
             sorted_rating_list = set(sorted(ratings))
@@ -253,55 +254,70 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             
             #Max Text Similarity
     
-    #POST PROCESSING FOR REVIEW AVERAGE_RATING AND RATING_ENTROPY
+    #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS AND RATING_ENTROPY
     for bnss_key in bnss_statistics:
         statistics_for_bnss = bnss_statistics[bnss_key]
         no_of_reviews_for_bnss = statistics_for_bnss[NO_OF_REVIEWS]
-        avg_rating_for_bnss = statistics_for_bnss[AVERAGE_RATING]
-        rating_sum_for_bnss = numpy.zeros(total_time_slots)
         
+#         for timeKey in range(total_time_slots):
+#             rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
+#             
+#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':
+#             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
+            
         for timeKey in range(total_time_slots):
-            rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
-         
-        for timeKey in range(total_time_slots):
-            #POST PROCESSING FOR AVERAGE RATING
-            if sum(no_of_reviews_for_bnss[:timeKey]) > 0:
-                statistics_for_bnss[AVERAGE_RATING][timeKey] = sum(rating_sum_for_bnss[:timeKey])/sum(no_of_reviews_for_bnss[:timeKey])
+            if timeKey > 0:
+                #POST PROCESSING FOR NUMBER_OF_REVIEWS
+                statistics_for_bnss[NO_OF_REVIEWS][timeKey] = no_of_reviews_for_bnss[timeKey-1]+no_of_reviews_for_bnss[timeKey]
+                #POST PROCESSING FOR AVERAGE RATING
+                if no_of_reviews_for_bnss[timeKey] > 0:
+                    sum_of_ratings = (statistics_for_bnss[AVERAGE_RATING][timeKey-1]*no_of_reviews_for_bnss[timeKey-1])
+                    sum_of_ratings += statistics_for_bnss[AVERAGE_RATING][timeKey]
+                    statistics_for_bnss[AVERAGE_RATING][timeKey] = sum_of_ratings/no_of_reviews_for_bnss[timeKey]
+                else:
+                    statistics_for_bnss[AVERAGE_RATING][timeKey] = 0
             else:
-                statistics_for_bnss[AVERAGE_RATING][timeKey] = 0
-                
+                if no_of_reviews_for_bnss[timeKey] > 0:
+                    statistics_for_bnss[AVERAGE_RATING][timeKey] /=  statistics_for_bnss[NO_OF_REVIEWS][timeKey]
+            
             #POST PROCESSING FOR RATING ENTROPY        
             if timeKey in statistics_for_bnss[RATING_DISTRIBUTION]:
                 entropy = entropyFn(statistics_for_bnss[RATING_DISTRIBUTION][timeKey])
                 if RATING_ENTROPY not in statistics_for_bnss:
                     statistics_for_bnss[RATING_ENTROPY] = numpy.zeros(total_time_slots)
                 statistics_for_bnss[RATING_ENTROPY][timeKey] = entropy
-
+                
+#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':
+#             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
+            
     return bnss_statistics
 
 
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
-    plot = 0
+    plot = 1
+    plt.figure(figsize=(20,15))
     for measure_key in MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
+        plt.subplot(len(MEASURES), 1, plot)
         plt.title('Business statistics') 
         plt.xlabel('Time in multiples of 2 months')
         plt.ylabel(measure_key)
-        plt.plot(range(len(bnss_statistics[bnss_key][measure_key])),\
-                bnss_statistics[bnss_key][measure_key],\
+        plt.plot(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])-1),\
+                bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]+1:],\
                 clr+'o-',\
                 label=bnssIdToBusinessDict[bnss_key].getName())
                 #align="center")
-        
-        art = []
-        lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
-        art.append(lgd)
-        plt.savefig('/home/santhosh/logs/'+bnss_name+'_'+measure_key+'.png',\
-                     additional_artists=art,\
-                     bbox_inches="tight")
-        plt.clf()
+        plot+=1
+    art = []
+    lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
+    art.append(lgd)
+    plt.tight_layout()
+    plt.savefig('/home/santhosh/logs/'+bnss_name+'.png',\
+                 additional_artists=art,\
+                 bbox_inches="tight")
+    plt.close()
         
 
 if __name__ == '__main__':
@@ -323,10 +339,11 @@ if __name__ == '__main__':
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
     
     bnssKeys = [bnss_key for bnss_key in bnss_statistics]
+    
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     i=0
-    while i<100:
+    while i<20:
         plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], random.choice(colors))
         i+=1
