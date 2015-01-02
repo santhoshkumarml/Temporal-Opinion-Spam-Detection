@@ -13,6 +13,9 @@ from datetime import date, timedelta
 import re
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import legend
+import itertools
+import math
+import pylab
 
 AVERAGE_RATING = 'Average Rating'
 RATING_ENTROPY = 'Rating entropy'
@@ -146,6 +149,9 @@ class TemporalGraph(networkx.Graph):
                                          review)
         return cross_time_graphs
 
+def sigmoid_prime(x):
+    return (2.0/(1+math.exp(-x)))-1
+    
 def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict):
     bnss_statistics = dict()
     total_time_slots = len(cross_time_graphs.keys())
@@ -205,26 +211,68 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             bnss_statistics[bnssId][RATIO_OF_FIRST_TIMERS][timeKey] = float(noOfFirstTimers)/float(len(reviews_for_bnss))
             
             #Youth Score
-            
+            if YOUTH_SCORE not in bnss_statistics[bnssId]: 
+                bnss_statistics[bnssId][YOUTH_SCORE] = numpy.zeros(total_time_slots)
+            youth_scores = []
+            for usr_neighbor in neighboring_usr_nodes:
+                (usrId, usr_type) = usr_neighbor
+                firstReviewDate = None
+                for super_graph_prod_neighbor in superGraph.neighbors(usr_neighbor):
+                    (super_graph_bnssId, super_graph_bnss_type) = super_graph_prod_neighbor
+                    super_graph_review = superGraph.getReview(usrId, super_graph_bnssId)
+                    super_graph_review_date = SIAUtil.getDateForReview(super_graph_review)
+                    if firstReviewDate is None or firstReviewDate > super_graph_review_date:
+                        firstReviewDate = super_graph_review_date
+                current_temporal_review = G.getReview(usrId, bnssId)
+                current_temporal_review_time = SIAUtil.getDateForReview(current_temporal_review)
+                youth_score = 1-sigmoid_prime((current_temporal_review_time-firstReviewDate).days)
+                youth_scores.append(youth_score)
+            bnss_statistics[bnssId][YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
             #Entropy Score
             
             #Max Text Similarity
-            
+    
+    #POST PROCESSING FOR REVIEW AVERAGE_RATING AND RATING_ENTROPY
+    for bnss_key in bnss_statistics:
+        #POST PROCESSING FOR AVERAGE RATING
+        statistics_for_bnss = bnss_statistics[bnss_key]
+        no_of_reviews_for_bnss = statistics_for_bnss[NO_OF_REVIEWS]
+        avg_rating_for_bnss = statistics_for_bnss[AVERAGE_RATING]
+        rating_sum_for_bnss = numpy.zeros(total_time_slots)
+        for timeKey in range(total_time_slots):
+            rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
+         
+        for timeKey in range(total_time_slots):
+            if sum(no_of_reviews_for_bnss[:timeKey]) > 0:
+                statistics_for_bnss[AVERAGE_RATING][timeKey] = sum(rating_sum_for_bnss[:timeKey])/sum(no_of_reviews_for_bnss[:timeKey])
+            else:
+                statistics_for_bnss[AVERAGE_RATING][timeKey] = 0 
+
     return bnss_statistics
 
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict):
-    for measure_key in bnss_statistics.iterkeys():
+    for measure_key in MEASURES:
+        colors = itertools.cycle(['b', 'c', 'r', 'g', 'm', 'y', 'k'])
         i=0
-        for bnss_key in bnss_statistics:
+        for bnss_key in bnss_statistics.iterkeys():
+            clr = colors.next()
+            if measure_key not in bnss_statistics[bnss_key]:
+                break
             plt.title('Business Statistics') 
             plt.xlabel('Time in multiples of 2 months')
             plt.ylabel(measure_key)
-            plt.bar(range(len(bnss_statistics[bnss_key][measure_key])), bnss_statistics[bnss_key][measure_key],\
-                                      label=bnssIdToBusinessDict[bnss_key].getName())
+            plt.bar(range(len(bnss_statistics[bnss_key][measure_key])),\
+                     bnss_statistics[bnss_key][measure_key],\
+                     label=bnssIdToBusinessDict[bnss_key].getName(),
+                     color=clr)
             i+=1
-            if i>2:
-                legend()
-                plt.savefig('/home/santhosh/'+measure_key+'.png')
+            if i>=2:
+                art = []
+                lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1), ncol=2)
+                art.append(lgd)
+                plt.savefig('/home/santhosh/'+measure_key+'.png', additional_artists=art,
+                             bbox_inches="tight")
+                plt.clf()
                 break
         
 
