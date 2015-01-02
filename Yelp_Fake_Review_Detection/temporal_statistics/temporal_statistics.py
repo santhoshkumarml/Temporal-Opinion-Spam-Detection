@@ -282,16 +282,18 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
 
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
+    plot = 0
     for measure_key in MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
         plt.title('Business statistics') 
         plt.xlabel('Time in multiples of 2 months')
         plt.ylabel(measure_key)
-        plt.bar(range(len(bnss_statistics[bnss_key][measure_key])),\
+        plt.plot(range(len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key],\
-                label=bnssIdToBusinessDict[bnss_key].getName(),
-                color=clr, width=0.5, align="center")
+                clr+'o-',\
+                label=bnssIdToBusinessDict[bnss_key].getName())
+                #align="center")
         
         art = []
         lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
@@ -325,6 +327,6 @@ if __name__ == '__main__':
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     i=0
-    while i<5:
+    while i<100:
         plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], random.choice(colors))
         i+=1
