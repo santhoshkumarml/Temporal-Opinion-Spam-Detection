@@ -250,13 +250,13 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
 
     return bnss_statistics
 
-def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict):
+def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys):
     for measure_key in MEASURES:
-        colors = itertools.cycle(['b', 'c', 'r', 'g', 'm', 'y', 'k'])
-        i=0
-        for bnss_key in bnss_statistics.iterkeys():
+        colors = itertools.cycle(['g', 'c', 'r', 'b', 'm', 'y', 'k'])
+        i=1
+        for bnss_key in bnssKeys:
             clr = colors.next()
-            if measure_key not in bnss_statistics[bnss_key]:
+            if measure_key not in bnss_statistics[bnss_key] or i>=5:
                 break
             plt.title('Business Statistics') 
             plt.xlabel('Time in multiples of 2 months')
@@ -264,16 +264,16 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict):
             plt.bar(range(len(bnss_statistics[bnss_key][measure_key])),\
                      bnss_statistics[bnss_key][measure_key],\
                      label=bnssIdToBusinessDict[bnss_key].getName(),
-                     color=clr)
+                     color=clr, width=0.5, align="center")
             i+=1
-            if i>=2:
-                art = []
-                lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1), ncol=2)
-                art.append(lgd)
-                plt.savefig('/home/santhosh/'+measure_key+'.png', additional_artists=art,
+        
+        if measure_key in bnss_statistics[bnss_key]:
+            art = []
+            lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1), ncol=2)
+            art.append(lgd)
+            plt.savefig('/home/santhosh/'+measure_key+'.png', additional_artists=art,
                              bbox_inches="tight")
-                plt.clf()
-                break
+            plt.clf()
         
 
 if __name__ == '__main__':
@@ -294,4 +294,6 @@ if __name__ == '__main__':
                                              '2-M', False)
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
     
-    plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict)
+    bnssKeys = [bnss_key for bnss_key in bnss_statistics]
+    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+    plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[:1])
