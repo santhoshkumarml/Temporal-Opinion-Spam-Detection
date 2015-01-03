@@ -344,6 +344,6 @@ if __name__ == '__main__':
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     i=0
-    while i<20:
+    while i<100:
         plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], random.choice(colors))
         i+=1
