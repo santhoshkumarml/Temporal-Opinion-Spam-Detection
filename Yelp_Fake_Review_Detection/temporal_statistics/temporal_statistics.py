@@ -171,6 +171,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             if bnssId not in bnss_statistics:
                 bnss_statistics[bnssId] = dict()
                 bnss_statistics[bnssId][FIRST_TIME_KEY] = timeKey
+            bnss_name = bnssIdToBusinessDict[bnssId].getName()
             #Average Rating
             if AVERAGE_RATING not in bnss_statistics[bnssId]:
                 bnss_statistics[bnssId][AVERAGE_RATING] = numpy.zeros(total_time_slots)
@@ -218,16 +219,10 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             noOfFirstTimers = 0
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
-                isFirstTime = True
                 current_temporal_review = G.getReview(usrId, bnssId)
-                current_temporal_review_time = SIAUtil.getDateForReview(current_temporal_review)
-                for super_graph_prod_neighbor in superGraph.neighbors(usr_neighbor):
-                    (super_graph_bnssId, super_graph_bnss_type) = super_graph_prod_neighbor
-                    super_graph_review = superGraph.getReview(usrId, super_graph_bnssId)
-                    if current_temporal_review_time>SIAUtil.getDateForReview(super_graph_review):
-                        isFirstTime = False
-                        break
-                if isFirstTime:
+                allReviews = [superGraph.getReview(usrId, super_graph_bnssId)  for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
+                if firstReview.getId() == current_temporal_review.getId():
                     noOfFirstTimers+=1
             bnss_statistics[bnssId][RATIO_OF_FIRST_TIMERS][timeKey] = float(noOfFirstTimers)/float(len(reviews_for_bnss))
             
@@ -237,16 +232,15 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             youth_scores = []
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
-                firstReviewDate = None
-                for super_graph_prod_neighbor in superGraph.neighbors(usr_neighbor):
-                    (super_graph_bnssId, super_graph_bnss_type) = super_graph_prod_neighbor
-                    super_graph_review = superGraph.getReview(usrId, super_graph_bnssId)
-                    super_graph_review_date = SIAUtil.getDateForReview(super_graph_review)
-                    if firstReviewDate is None or firstReviewDate > super_graph_review_date:
-                        firstReviewDate = super_graph_review_date
+                allReviews = [superGraph.getReview(usrId, super_graph_bnssId)  for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+                allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x)) 
                 current_temporal_review = G.getReview(usrId, bnssId)
-                current_temporal_review_time = SIAUtil.getDateForReview(current_temporal_review)
-                youth_score = 1-sigmoid_prime((current_temporal_review_time-firstReviewDate).days)
+                reviewAge = 0
+                for review in allReviews:
+                    if review.getId() == current_temporal_review.getId():
+                        break
+                    reviewAge+=1
+                youth_score = 1-sigmoid_prime(reviewAge)
                 youth_scores.append(youth_score)
             bnss_statistics[bnssId][YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
             
@@ -262,7 +256,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
 #         for timeKey in range(total_time_slots):
 #             rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
 #             
-#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':
+#         if bnssIdToBusinessDict[bnss_key].getName() == 'Arizona Humane Society':
 #             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
             
         for timeKey in range(total_time_slots):
@@ -280,14 +274,15 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 if no_of_reviews_for_bnss[timeKey] > 0:
                     statistics_for_bnss[AVERAGE_RATING][timeKey] /=  statistics_for_bnss[NO_OF_REVIEWS][timeKey]
             
-            #POST PROCESSING FOR RATING ENTROPY        
+            #POST PROCESSING FOR RATING ENTROPY
             if timeKey in statistics_for_bnss[RATING_DISTRIBUTION]:
                 entropy = entropyFn(statistics_for_bnss[RATING_DISTRIBUTION][timeKey])
                 if RATING_ENTROPY not in statistics_for_bnss:
                     statistics_for_bnss[RATING_ENTROPY] = numpy.zeros(total_time_slots)
                 statistics_for_bnss[RATING_ENTROPY][timeKey] = entropy
                 
-#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':
+#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':               
+#         if bnssIdToBusinessDict[bnss_key].getName() == 'Arizona Humane Society':
 #             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
             
     return bnss_statistics
@@ -304,8 +299,11 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
         plt.title('Business statistics') 
         plt.xlabel('Time in multiples of 2 months')
         plt.ylabel(measure_key)
-        plt.plot(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])-1),\
-                bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]+1:],\
+        if measure_key == AVERAGE_RATING:
+            plt.ylim((1,5))
+        #print measure_key,bnss_statistics[bnss_key][FIRST_TIME_KEY],bnss_statistics[bnss_key][measure_key],bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]+1:]
+        plt.plot(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
+                bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]:],\
                 clr+'o-',\
                 label=bnssIdToBusinessDict[bnss_key].getName())
                 #align="center")
