@@ -57,7 +57,7 @@ class SuperGraph(networkx.Graph):
         return self.reviewIdToReviewDict[self.get_edge_data((usrId,SIAUtil.USER), (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
     
     @staticmethod
-    def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews):
+    def createGraph(userIdToUserDict,bnssIdToBusinessDict, parent_reviews):
         graph = SuperGraph()
         for reviewKey in parent_reviews.iterkeys():
             review = parent_reviews[reviewKey]
@@ -235,11 +235,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 allReviews = [superGraph.getReview(usrId, super_graph_bnssId)  for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
                 allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x)) 
                 current_temporal_review = G.getReview(usrId, bnssId)
-                reviewAge = 0
-                for review in allReviews:
-                    if review.getId() == current_temporal_review.getId():
-                        break
-                    reviewAge+=1
+                reviewAge = (SIAUtil.getDateForReview(current_temporal_review)-SIAUtil.getDateForReview(allReviews[0])).days
                 youth_score = 1-sigmoid_prime(reviewAge)
                 youth_scores.append(youth_score)
             bnss_statistics[bnssId][YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
@@ -291,16 +287,19 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
     plot = 1
-    plt.figure(figsize=(20,15))
+    plt.figure(figsize=(20,20))
     for measure_key in MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
         plt.subplot(len(MEASURES), 1, plot)
         plt.title('Business statistics') 
         plt.xlabel('Time in multiples of 2 months')
+        plt.xlim((bnss_statistics[bnss_key][FIRST_TIME_KEY],60))
+        plt.xticks(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],61))
         plt.ylabel(measure_key)
         if measure_key == AVERAGE_RATING:
             plt.ylim((1,5))
+            plt.yticks(range(1,6))
         #print measure_key,bnss_statistics[bnss_key][FIRST_TIME_KEY],bnss_statistics[bnss_key][measure_key],bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]+1:]
         plt.plot(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]:],\
@@ -312,7 +311,7 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
     plt.tight_layout()
-    plt.savefig('/home/santhosh/logs/'+bnss_name+'.png',\
+    plt.savefig('/home/santhosh/logs/latest/'+bnss_name+'.png',\
                  additional_artists=art,\
                  bbox_inches="tight")
     plt.close()

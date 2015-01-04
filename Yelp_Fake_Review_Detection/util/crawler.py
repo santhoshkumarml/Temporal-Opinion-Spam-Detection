@@ -17,13 +17,13 @@ get_yelp_page = \
         'http://www.yelp.com/search?find_desc=&find_loc={0}' \
         '&ns=1#cflt=restaurants&start={1}'.format(zipcode, page_num)
 
-ZIP_URL = sys.argv[1]
 FIELD_DELIM = u'###'
 LISTING_DELIM = u'((('
 
 def get_zips():
     """
     """
+    ZIP_URL = sys.argv[1]
     f = open(ZIP_URL, 'r+')
     zips = [int(zz.strip()) for zz in f.read().split('\n') if zz.strip() ]
     f.close()
@@ -74,7 +74,10 @@ def extractTagAttribute(tag, default=None, verbose=False, property='content', at
 
 def getReviews(seenDict, tag, verbose):
     ret = []
-    for review in tag.findAll('div'):
+    reviews = tag.findAll('div')
+    if reviews is None:
+        return ret
+    for review in reviews:
         reviewID = extractTagAttribute(review, None, verbose, 'data-review-id', attrs={'class': '^review'})
         if reviewID != None and reviewID not in seenDict.keys():
             for i in review.findAll('i'):
@@ -96,8 +99,9 @@ def getReviews(seenDict, tag, verbose):
                             userReviewCount = extractText(mediaStory.find('li', attrs={'class': 'review-count'}).find('b'), None, verbose)
                             assert username and userLocation and userFriendCount and userReviewCount
                             userId = (username, imgSrc, userLocation, userFriendCount, userReviewCount)
-                            for p in reviewContent.findAll('p'):
-                                reviewText = extractText(p, '', verbose, attrs={'class': '^review_comment'})
+                            for p in reviewContent.findAll('p',attrs={'itemprop':'description'} ):
+                                print p
+                                reviewText = extractText(p, '', verbose)
                                 if reviewText:
                                     reviewText = reviewText.replace('\n', '')
                                     ret.append((reviewID, userId, username, rating, date, reviewText))
@@ -109,13 +113,8 @@ def crawl_page(zipcode, verbose=False):
     for zipPage in soups:
         for rl in zipPage.findAll('a', attrs={'class':re.compile('^biz-name')}):
             restaurantMainPage = YELP_COM_URL + re.findall('href=[\'"]?([^\'" >]+)', str(rl))[0]
-            #print restaurantMainPage
             soup = BeautifulSoup(urllib2.urlopen(restaurantMainPage).read())
-            nrsoup = BeautifulSoup(urllib2.urlopen(restaurantMainPage.replace('biz','not_recommended_reviews')).read())
-
-            attributeTags = soup.findAll()
-            nrTags = nrsoup.findAll('li')
-
+            
             type= 'business'
             business_id = 'UNKNOWN'
             name = 'UNKNOWN'
@@ -132,31 +131,44 @@ def crawl_page(zipcode, verbose=False):
             open= 'UNKNOWN'
             schools= 'UNKNOWN'
             url= restaurantMainPage
+        
+            noOfPagesDivTag = soup.find("div", {"class":"page-of-pages"})
+            pageOfPages = extractText(noOfPagesDivTag)
+            noOfPages = int(pageOfPages.split("of")[1].strip())
+            
+            business_id_tag = soup.find('meta',attrs={'name':'yelp-biz-id'})
+            business_id = extractTagAttribute(business_id_tag,verbose)
+            
+            top_lef_side_bar_div_tag = soup.find("div", {'class':'biz-page-header-left'})
 
+            name_tag = top_lef_side_bar_div_tag.find('h1',attrs={'itemprop':'name'})
+            name = extractText(name_tag, verbose)
+            
+            stars_tag = top_lef_side_bar_div_tag.find('meta',attrs={'itemprop':'ratingValue'})
+            stars= float(extractTagAttribute(stars_tag, verbose))
+            
+            review_count_tag = top_lef_side_bar_div_tag.find('span',attrs={'itemprop':'reviewCount'})
+            review_count= int(extractText(review_count_tag, verbose))
+            
             seenDict = {}
             notrecommendedR = []
             recommendedR = []
-
-            for tag in attributeTags:
-                type= extractTagAttribute(tag, type, verbose, attrs={'property':'og:type'})
-                business_id = extractTagAttribute(tag, business_id, verbose, attrs={'name':'yelp-biz-id'})
-                name = extractTagAttribute(tag, name, verbose, attrs={'property':'og:title'})
-                neighborhoods= 'UNKNOWN'
-                full_address= 'UNKNOWN'
-                city= 'UNKNOWN'
-                state= 'UNKNOWN'
-                latitude= 'UNKNOWN'
-                longitude= 'UNKNOWN'
-                stars= float(extractTagAttribute(tag, stars, verbose, attrs={'itemprop':'ratingValue'}))
-                review_count= int(extractText(tag, review_count, verbose, attrs={'itemprop':'reviewCount'}))
-                photo_url= 'UNKNOWN'
-                categories= 'UNKNOWN'
-                open= 'UNKNOWN'
-                schools= 'UNKNOWN'
-                url= url
-
+            
+            noOfPagesCrawled = 0
+            
+            while noOfPagesCrawled < noOfPages:
+                restaurantPage = restaurantMainPage+"?start="+str(len(recommendedR))
+                if noOfPagesCrawled > 0:
+                    soup = BeautifulSoup(urllib2.urlopen(restaurantPage).read())
+                tag = soup.find('div',{'class':'review-list'})
                 recommendedR.extend(getReviews(seenDict, tag, verbose))
+                noOfPagesCrawled+=1
+                
+            nrsoup = BeautifulSoup(urllib2.urlopen(restaurantMainPage.replace('biz','not_recommended_reviews')).read())
+            noOfPagesDivTag = nrsoup.find("div", {"class":"page-of-pages"})
+            noOfPagesCrawled = 0
 
+            nrTags = nrsoup.findAll('li')
             for nrtag in nrTags:
                 notrecommendedR.extend(getReviews(seenDict, nrtag, verbose))
 
@@ -196,4 +208,7 @@ if __name__ == '__main__':
     #parser.add_argument('-z', '--zipcode', type=int, help='Enter a zip code \
      #   you\'t like to extract from.')
     #args = parser.parse_args()
-    crawl()
+    nyc_zip_code_start= zip_code = 10001
+    nyc_zip_code_end = 10292
+    while zip_code <= nyc_zip_code_end:
+        crawl(zip_code)
