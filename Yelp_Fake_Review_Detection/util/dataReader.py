@@ -16,8 +16,6 @@ def parseAndCreateObjects(inputFileName):
     parentUserIdToUserDict = dict()
     parentBusinessIdToBusinessDict = dict()
     parent_reviews = dict()
-    dictOut = dict()
-    sampleOut = dict()
     isBusinessAlreadyPresent = False
     with open(inputFileName) as f:
         for line in f:

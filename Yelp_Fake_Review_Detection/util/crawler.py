@@ -132,9 +132,9 @@ def crawl_page(zipcode, verbose=False):
             schools= 'UNKNOWN'
             url= restaurantMainPage
         
-            noOfPagesDivTag = soup.find("div", {"class":"page-of-pages"})
-            pageOfPages = extractText(noOfPagesDivTag)
-            noOfPages = int(pageOfPages.split("of")[1].strip())
+            noOfRPagesDivTag = soup.find("div", {"class":"page-of-pages"})
+            rpageOfPages = extractText(noOfRPagesDivTag)
+            noOfPagesR = int(rpageOfPages.split("of")[1].strip())
             
             business_id_tag = soup.find('meta',attrs={'name':'yelp-biz-id'})
             business_id = extractTagAttribute(business_id_tag,verbose)
@@ -156,7 +156,7 @@ def crawl_page(zipcode, verbose=False):
             
             noOfPagesCrawled = 0
             
-            while noOfPagesCrawled < noOfPages:
+            while noOfPagesCrawled < noOfPagesR:
                 restaurantPage = restaurantMainPage+"?start="+str(len(recommendedR))
                 if noOfPagesCrawled > 0:
                     soup = BeautifulSoup(urllib2.urlopen(restaurantPage).read())
@@ -165,12 +165,16 @@ def crawl_page(zipcode, verbose=False):
                 noOfPagesCrawled+=1
                 
             nrsoup = BeautifulSoup(urllib2.urlopen(restaurantMainPage.replace('biz','not_recommended_reviews')).read())
-            noOfPagesDivTag = nrsoup.find("div", {"class":"page-of-pages"})
+            noOfNRPagesDivTag = soup.find("div", {"class":"page-of-pages"})
+            nrpageOfPages = extractText(noOfNRPagesDivTag)
+            noOfPagesNR = int(nrpageOfPages.split("of")[1].strip())
+            
             noOfPagesCrawled = 0
 
-            nrTags = nrsoup.findAll('li')
-            for nrtag in nrTags:
-                notrecommendedR.extend(getReviews(seenDict, nrtag, verbose))
+            while noOfPagesCrawled < noOfPagesR:
+                nrTags = nrsoup.findAll('li')
+                for nrtag in nrTags:
+                    notrecommendedR.extend(getReviews(seenDict, nrtag, verbose))
 
             #print 'B  : ', [type,business_id,name,neighborhoods, full_address,city,state,latitude,longitude,stars,review_count,photo_url,categories,open,schools,url]
             print 'B=', [business_id,name,stars,review_count, url]

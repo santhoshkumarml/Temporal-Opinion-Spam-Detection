@@ -2,13 +2,13 @@
 Simple demo with multiple subplots.
 
 
-
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from lshash import LSHash
 from util import dataReader as dr, SIAUtil
 import networkx
+from util.RaviDataReader import RaviDataReader
 
 
 class SuperGraph(networkx.Graph):
@@ -78,4 +78,16 @@ def checkRestaurant():
         if bnssIdToBusinessDict[bnssKey].getName()=='Cheese Board Pizza':
             print bnssIdToBusinessDict[bnssKey].getUrl()
 
-checkRestaurant()
+
+    
+def checkNewReader():
+    inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
+    #\\2 Duck Goose.txt
+    rdr = RaviDataReader()
+    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(inputDirName)    
+    print 'bnss', len(bnssIdToBusinessDict.keys())
+
+import re
+out = '5\/10\/2014'
+for s in re.split('\/',out):
+    print s.strip('\\')

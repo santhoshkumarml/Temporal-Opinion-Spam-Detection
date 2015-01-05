@@ -14,6 +14,7 @@ import sys
 import matplotlib.pyplot as plt
 from util import SIAUtil
 import util.dataReader as dataReader
+from util.RaviDataReader import RaviDataReader
 
 FIRST_TIME_KEY = 'First Time Key'
 
@@ -220,7 +221,8 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
                 current_temporal_review = G.getReview(usrId, bnssId)
-                allReviews = [superGraph.getReview(usrId, super_graph_bnssId)  for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+                allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
+                              for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
                 firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
                 if firstReview.getId() == current_temporal_review.getId():
                     noOfFirstTimers+=1
@@ -232,8 +234,9 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             youth_scores = []
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
-                allReviews = [superGraph.getReview(usrId, super_graph_bnssId)  for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
-                allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x)) 
+                allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
+                              for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+                allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
                 current_temporal_review = G.getReview(usrId, bnssId)
                 reviewAge = (SIAUtil.getDateForReview(current_temporal_review)-SIAUtil.getDateForReview(allReviews[0])).days
                 youth_score = 1-sigmoid_prime(reviewAge)
@@ -311,7 +314,7 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
     plt.tight_layout()
-    plt.savefig('/home/santhosh/logs/latest/'+bnss_name+'.png',\
+    plt.savefig('D:\\workspace\\datalab\\data\\latest'+bnss_name+'.png',\
                  additional_artists=art,\
                  bbox_inches="tight")
     plt.close()
@@ -323,8 +326,9 @@ if __name__ == '__main__':
         sys.exit()
     inputFileName = sys.argv[1]
     beforeGraphPopulationTime = datetime.now()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dataReader.parseAndCreateObjects(inputFileName)
-    
+    #(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dataReader.parseAndCreateObjects(inputFileName)
+    rdr = RaviDataReader()
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict)

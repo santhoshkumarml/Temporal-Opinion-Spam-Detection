@@ -181,12 +181,13 @@ class user(SIAObject):
                 (self.score[USER_TYPE_HONEST]*allNeighborMessageMultiplication[USER_TYPE_HONEST])/normalizingValue)
 
 class business(SIAObject):
-    def __init__(self, _id, name, rating=2.5, url=None, score=(0.5,0.5)):
+    def __init__(self, _id, name, rating=2.5, url=None, score=(0.5,0.5), reviewCount=0):
         super(business, self).__init__(score, PRODUCT)
         self.id = _id
         self.name = name
         self.rating = rating
         self.url = url
+        self.reviewCount = reviewCount
         
     def setPriorScore(self):
         if self.rating:
@@ -207,6 +208,9 @@ class business(SIAObject):
     
     def getUrl(self):
         return self.url
+    
+    def getReviewCount(self):
+        return self.reviewCount
     
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
@@ -341,8 +345,14 @@ def createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,\
     
 
 def getDateForReview(r):
-    return date(int(r.getTimeOfReview().split('/')[2]), int(r.getTimeOfReview().split('/')[0]), 
-        int(r.getTimeOfReview().split('/')[1]))
+    review_date = ''
+    if '-' in r.getTimeOfReview():
+        review_date = re.split('-', r.getTimeOfReview())
+        review_date =  date(int(review_date[0]), int(review_date[1]), int(review_date[2]))
+    else:
+        review_date = re.split('/', r.getTimeOfReview())
+        review_date = date(int(review_date[2].strip('\\')), int(review_date[0].strip('\\')), int(review_date[1].strip('\\')))
+    return review_date
 
 def createTimeBasedGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict, parent_reviews,\
                           timeSplit ='1-D', initializePriors=True):
