@@ -81,13 +81,12 @@ def checkRestaurant():
 
     
 def checkNewReader():
-    inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
+    #inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
+    inputDirName = 'D:\\workspace\\datalab\\NYCYelpData2'
     #\\2 Duck Goose.txt
+    #\\Cafe Habana.txt
     rdr = RaviDataReader()
-    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(inputDirName)    
-    print 'bnss', len(bnssIdToBusinessDict.keys())
+    print rdr.readDataForBnss(inputDirName+"\\2 Duck Goose.txt", 0)    
+    print 'bnss', len(rdr.getBnssIdToBnssDict().keys())
 
-import re
-out = '5\/10\/2014'
-for s in re.split('\/',out):
-    print s.strip('\\')
+checkNewReader()
