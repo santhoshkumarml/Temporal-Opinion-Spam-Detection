@@ -7,6 +7,7 @@ from util.SIAUtil import business, user, review
 from os import listdir
 from os.path import isfile, join
 import re
+import sys
 
 NOT_RECOMMENDED = 'nonReccomended'
 RECOMMENDED = 'Reccomended'
@@ -47,6 +48,7 @@ class RaviDataReader:
             bnss = business((bnssName, bnssAddress), bnssName)
             nrReviews = data[NOT_RECOMMENDED]
             rReviews = data[RECOMMENDED]
+            print bnssName, len(rReviews), len(nrReviews)
                 
             for r in rReviews:
                 reviewIDIncrementer += 1
@@ -59,10 +61,12 @@ class RaviDataReader:
                 usr_name = r[NAME]
                 usr_review_count = r[REVIEW_COUNT]
                 usr_friend_count = r[FRIEND_COUNT]
-                usr_img_src = r[IMG_SRC]
                 if not usr_name or usr_name=='':
+                    print "Continue"
                     continue
-                usr = user((usr_name, usr_location, usr_img_src, usr_review_count, usr_friend_count), usr_name)
+                usrId = r['usrId']
+                usrExtra = (usr_location, usr_review_count, usr_friend_count)
+                usr = user(usrId, usr_name, usrExtra)
                     
                 revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
                 self.usrIdToUsrDict[usr.getId()] = usr
@@ -80,10 +84,12 @@ class RaviDataReader:
                 usr_name = nr[NAME]
                 usr_review_count = nr[REVIEW_COUNT]
                 usr_friend_count = nr[FRIEND_COUNT]
-                usr_img_src = nr[IMG_SRC]
                 if not usr_name or usr_name=='':
+                    print "Continue"
                     continue
-                usr = user((usr_name, usr_location, usr_img_src, usr_review_count, usr_friend_count), usr_name)
+                usrId = nr['usrId']
+                usrExtra = (usr_location, usr_review_count, usr_friend_count)
+                usr = user(usrId, usr_name, usrExtra)
                     
                 revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
                     

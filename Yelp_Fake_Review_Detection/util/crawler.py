@@ -92,19 +92,21 @@ def getReviews(seenDict, tag, verbose):
                             mediaAvatar = review.find('div', attrs={'class': 'media-avatar'})
                             mediaStory = review.find('div', attrs={'class': 'media-story'})
                             reviewContent = review.find('div', attrs={'class': 'review-content'})
-                            imgSrc =  extractTagAttribute(mediaAvatar.find('img'), None, verbose, 'src')
+                            #imgSrc =  extractTagAttribute(mediaAvatar.find('img'), None, verbose, 'src')
                             username = extractText(mediaStory.find('li', attrs={'class': 'user-name'}).find(['a','span']), None, verbose)
+                            usrId = extractTagAttribute(mediaStory.find('li', attrs={'class': 'user-name'}).find(['a','span']), None, verbose,'data-hovercard-id')
+                            
                             userLocation = extractText(mediaStory.find('li', attrs={'class': 'user-location'}).find('b'), None, verbose)
                             userFriendCount = extractText(mediaStory.find('li', attrs={'class': 'friend-count'}).find('b'), None, verbose)
                             userReviewCount = extractText(mediaStory.find('li', attrs={'class': 'review-count'}).find('b'), None, verbose)
-                            assert username and userLocation and userFriendCount and userReviewCount
-                            userId = (username, imgSrc, userLocation, userFriendCount, userReviewCount)
+                            
+                            assert usrId and username and userLocation and userFriendCount and userReviewCount
+                            userExtra = (userLocation, userFriendCount, userReviewCount)
                             for p in reviewContent.findAll('p',attrs={'itemprop':'description'} ):
-                                print p
                                 reviewText = extractText(p, '', verbose)
                                 if reviewText:
-                                    reviewText = reviewText.replace('\n', '')
-                                    ret.append((reviewID, userId, username, rating, date, reviewText))
+                                    #reviewText = reviewText.replace('\n', '')
+                                    ret.append((reviewID, usrId, username, userExtra, rating, date, reviewText))
     return ret
 
 

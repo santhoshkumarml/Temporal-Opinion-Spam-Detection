@@ -139,16 +139,20 @@ class SIALink(object):
         return self.score
     
 class user(SIAObject):
-    def __init__(self, _id, name, score=(0.5,0.5)):
+    def __init__(self, _id, name, usrExtra ='',score=(0.5,0.5)):
         super(user, self).__init__(score, USER)
         self.id = _id
         self.name = name
+        self.usrExtra = usrExtra
     
     def getName(self):
         return self.name
     
     def getId(self):
         return self.id
+    
+    def getUsrExtra(self):
+        return self.usrExtra
     
     
     def calculateMessageForNeighbor(self, neighborWithEdge):

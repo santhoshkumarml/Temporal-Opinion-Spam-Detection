@@ -9,6 +9,8 @@ from lshash import LSHash
 from util import dataReader as dr, SIAUtil
 import networkx
 from util.RaviDataReader import RaviDataReader
+from os.path import join
+import json
 
 
 class SuperGraph(networkx.Graph):
@@ -23,9 +25,27 @@ class SuperGraph(networkx.Graph):
         self.userIdToUserDict[usr.getId()] = usr
         self.businessIdToBusinessDict[bnss.getId()] = bnss
         self.reviewIdToReviewDict[review.getId()] = review
-        super(SuperGraph, self).add_node((usr.getId(),SIAUtil.USER))
-        super(SuperGraph, self).add_node((bnss.getId(),SIAUtil.PRODUCT))
-        super(SuperGraph, self).add_edge((usr.getId(),SIAUtil.USER),\
+        
+        if not super(SuperGraph, self).has_node((usr.getId(),SIAUtil.USER)):
+            super(SuperGraph, self).add_node((usr.getId(),SIAUtil.USER))
+        
+        if not super(SuperGraph, self).has_node((bnss.getId(),SIAUtil.PRODUCT)):
+            super(SuperGraph, self).add_node((bnss.getId(),SIAUtil.PRODUCT))
+            
+        if super(SuperGraph, self).has_edge((usr.getId(),SIAUtil.USER),\
+                                              (bnss.getId(),SIAUtil.PRODUCT)):
+            usrId = usr.getId()
+            bnssId = bnss.getId()
+            alreadyPresentReview =\
+             self.reviewIdToReviewDict[self.get_edge_data(\
+                                                          (usrId,SIAUtil.USER),\
+                                                           (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
+            if self.businessIdToBusinessDict[bnssId].getName() == 'Silver Rice':
+                print alreadyPresentReview.getTimeOfReview(), self.userIdToUserDict[alreadyPresentReview.getUserId()].getName(), alreadyPresentReview.getBusinessID()
+                print review.getTimeOfReview(), self.userIdToUserDict[review.getUserId()].getName(), review.getBusinessID()
+                print alreadyPresentReview.getReviewText() == review.getReviewText(), review.getReviewText() 
+        else:
+            super(SuperGraph, self).add_edge((usr.getId(),SIAUtil.USER),\
                                               (bnss.getId(),SIAUtil.PRODUCT),\
                                                attr_dict={SIAUtil.REVIEW_EDGE_DICT_CONST: review.getId()})
     
@@ -82,11 +102,49 @@ def checkRestaurant():
     
 def checkNewReader():
     #inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
-    inputDirName = 'D:\\workspace\\datalab\\NYCYelpData2'
+    #inputDirName = 'D:\\workspace\\datalab\\NYCYelpData2'
+    #inputDirName = '/media/santhosh/Data/workspace/datalab/NYCYelpData2'
+    inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2-without_sort'
     #\\2 Duck Goose.txt
     #\\Cafe Habana.txt
     rdr = RaviDataReader()
-    print rdr.readDataForBnss(inputDirName+"\\2 Duck Goose.txt", 0)    
-    print 'bnss', len(rdr.getBnssIdToBnssDict().keys())
-
+    rdr.readData(inputDirName)    
+    G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
+#     for bnssKey in rdr.getBnssIdToBnssDict():
+#         if 'Halal Guys' in rdr.getBnssIdToBnssDict()[bnssKey].getName():
+#             print rdr.getBnssIdToBnssDict()[bnssKey].getName(), len(G.neighbors((bnssKey,SIAUtil.PRODUCT)))
+    usrKeys = [usrKey for usrKey in rdr.getUsrIdToUsrDict()]
+    for usrKey in usrKeys:
+        neighbors = G.neighbors((usrKey,SIAUtil.USER))
+        if len(neighbors) > 2 and len(neighbors)<10:
+            allReviews = [G.getReview(usrKey, neighbor[0]) for neighbor in neighbors]
+            rec_reviews = [r for r in allReviews if r.isRecommended()]
+            not_rec_reviews = [r for r in allReviews if not r.isRecommended()]
+            if len(rec_reviews)>0 and len(not_rec_reviews)>0:
+                usr = rdr.getUsrIdToUsrDict()[usrKey]
+                print usr.getName(),usr.getUsrExtra(), len(neighbors)
+                for r in rec_reviews:
+                    print 'Rec', r.getBusinessID(), r.getTimeOfReview()
+                for r in not_rec_reviews:
+                    print 'Not Rec', r.getBusinessID(), r.getTimeOfReview()
+     
+    
+def doIndexForRestaurants():
+    inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2/'
+    rdr = RaviDataReader()
+    rdr.readData(inputDirName)
+    result = dict()
+    restaurants = []
+    for bnssKey in rdr.getBnssIdToBnssDict():
+        addr = bnssKey[1]
+        bnss = rdr.getBnssIdToBnssDict()[bnssKey]
+        outDict = dict()
+        outDict['address'] = addr
+        outDict['bnssName'] = bnss.getName()
+        restaurants.append(outDict)
+    result['bnss'] = restaurants
+    with open(join(inputDirName, 'index.json'),'w') as f:
+        json.dump(result, f)
+         
+        
 checkNewReader()
