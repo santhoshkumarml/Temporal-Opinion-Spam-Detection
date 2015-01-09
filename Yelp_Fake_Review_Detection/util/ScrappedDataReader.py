@@ -22,7 +22,7 @@ REVIEW_TEXT = 'ReviewComment'
 REVIEW_DATE = 'Date'
 IMG_SRC = 'imgSrc'
 
-class RaviDataReader:
+class ScrappedDataReader:
     def __init__(self):
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}
@@ -37,7 +37,7 @@ class RaviDataReader:
     def getReviewIdToReviewDict(self):
         return self.reviewIdToReviewDict
         
-    def readDataForBnss(self,inputDirName,fileName, reviewIDIncrementer):
+    def readDataForBnss(self, inputDirName, fileName, reviewIDIncrementer):
         content = 'data='
         with open(join(inputDirName, fileName), mode='r') as f:
             data = dict()
@@ -48,7 +48,7 @@ class RaviDataReader:
             bnss = business((bnssName, bnssAddress), bnssName)
             nrReviews = data[NOT_RECOMMENDED]
             rReviews = data[RECOMMENDED]
-            print bnssName, len(rReviews), len(nrReviews)
+            #print bnssName, len(rReviews), len(nrReviews)
                 
             for r in rReviews:
                 reviewIDIncrementer += 1
@@ -101,8 +101,9 @@ class RaviDataReader:
             return reviewIDIncrementer
         
     def readData(self, inputDirName):
-        onlyfiles = [ f for f in listdir(inputDirName) if isfile(join(inputDirName,f)) ]
+        zipDirectories = [join(inputDirName,f) for f in listdir(inputDirName) if not isfile(join(inputDirName,f)) ]
+        onlyfiles = [(zipDir,f) for zipDir in zipDirectories for f in listdir(zipDir) if isfile(join(zipDir,f))]
         reviewIDIncrementer = 0
-        for fileName in onlyfiles:
-            reviewIDIncrementer = self.readDataForBnss(inputDirName, fileName, reviewIDIncrementer)
+        for dirName,fileName in onlyfiles:
+            reviewIDIncrementer = self.readDataForBnss(dirName, fileName, reviewIDIncrementer)
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)

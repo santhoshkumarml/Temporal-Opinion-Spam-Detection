@@ -13,8 +13,7 @@ import sys
 
 import matplotlib.pyplot as plt
 from util import SIAUtil
-import util.dataReader as dataReader
-from util import ScrappedDataReader.RaviDataReader
+from util.ScrappedDataReader import ScrappedDataReader
 
 FIRST_TIME_KEY = 'First Time Key'
 
@@ -307,14 +306,14 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
         plt.plot(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][FIRST_TIME_KEY]:],\
                 clr+'o-',\
-                label=bnssIdToBusinessDict[bnss_key].getName())
+                label= "bnss")
                 #align="center")
         plot+=1
     art = []
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
     plt.tight_layout()
-    plt.savefig('D:\\workspace\\datalab\\data\\latest'+bnss_name+'.png',\
+    plt.savefig('/media/santhosh/Data/workspace/datalab/data/latest/'+bnss_name+'.png',\
                  additional_artists=art,\
                  bbox_inches="tight")
     plt.close()
@@ -325,9 +324,12 @@ if __name__ == '__main__':
         print 'Usage: python temporal_statistics.py fileName'
         sys.exit()
     inputFileName = sys.argv[1]
+    
     beforeGraphPopulationTime = datetime.now()
     #(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dataReader.parseAndCreateObjects(inputFileName)
+    
     rdr = ScrappedDataReader()
+    
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\

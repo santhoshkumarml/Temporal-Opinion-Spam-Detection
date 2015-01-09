@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 from lshash import LSHash
 from util import dataReader as dr, SIAUtil
 import networkx
-from util import ScrappedDataReader
 from os.path import join
 import json
+from util.ScrappedDataReader import ScrappedDataReader
 
 
 class SuperGraph(networkx.Graph):
@@ -104,7 +104,7 @@ def checkNewReader():
     #inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
     #inputDirName = 'D:\\workspace\\datalab\\NYCYelpData2'
     #inputDirName = '/media/santhosh/Data/workspace/datalab/NYCYelpData2'
-    inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2-without_sort'
+    inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/zips'
     #\\2 Duck Goose.txt
     #\\Cafe Habana.txt
     rdr = ScrappedDataReader()
@@ -114,6 +114,8 @@ def checkNewReader():
 #         if 'Halal Guys' in rdr.getBnssIdToBnssDict()[bnssKey].getName():
 #             print rdr.getBnssIdToBnssDict()[bnssKey].getName(), len(G.neighbors((bnssKey,SIAUtil.PRODUCT)))
     usrKeys = [usrKey for usrKey in rdr.getUsrIdToUsrDict()]
+    usrKeys = sorted(usrKeys, reverse=True, key = lambda x: len(G.neighbors((x,SIAUtil.USER))))
+    
     for usrKey in usrKeys:
         neighbors = G.neighbors((usrKey,SIAUtil.USER))
         if len(neighbors) > 2 and len(neighbors)<10:
@@ -130,7 +132,7 @@ def checkNewReader():
      
     
 def doIndexForRestaurants():
-    inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2/'
+    inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/zips'
     rdr = ScrappedDataReader()
     rdr.readData(inputDirName)
     result = dict()
