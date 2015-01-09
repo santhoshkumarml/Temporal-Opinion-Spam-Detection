@@ -14,7 +14,7 @@ import sys
 import matplotlib.pyplot as plt
 from util import SIAUtil
 import util.dataReader as dataReader
-from util.RaviDataReader import RaviDataReader
+from util import ScrappedDataReader.RaviDataReader
 
 FIRST_TIME_KEY = 'First Time Key'
 
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     inputFileName = sys.argv[1]
     beforeGraphPopulationTime = datetime.now()
     #(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dataReader.parseAndCreateObjects(inputFileName)
-    rdr = RaviDataReader()
+    rdr = ScrappedDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\

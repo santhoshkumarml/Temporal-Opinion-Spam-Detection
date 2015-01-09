@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from lshash import LSHash
 from util import dataReader as dr, SIAUtil
 import networkx
-from util.RaviDataReader import RaviDataReader
+from util import ScrappedDataReader
 from os.path import join
 import json
 
@@ -107,7 +107,7 @@ def checkNewReader():
     inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2-without_sort'
     #\\2 Duck Goose.txt
     #\\Cafe Habana.txt
-    rdr = RaviDataReader()
+    rdr = ScrappedDataReader()
     rdr.readData(inputDirName)    
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
 #     for bnssKey in rdr.getBnssIdToBnssDict():
@@ -131,7 +131,7 @@ def checkNewReader():
     
 def doIndexForRestaurants():
     inputDirName = '/home/santhosh/workspaces/datalab/NYCYelpData2/'
-    rdr = RaviDataReader()
+    rdr = ScrappedDataReader()
     rdr.readData(inputDirName)
     result = dict()
     restaurants = []
