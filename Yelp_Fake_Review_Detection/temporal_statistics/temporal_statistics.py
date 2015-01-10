@@ -294,7 +294,7 @@ def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
         if measure_key not in bnss_statistics[bnss_key]:
             continue
         plt.subplot(len(MEASURES), 1, plot)
-        plt.title('Business statistics') 
+        plt.title('Business statistics')
         plt.xlabel('Time in multiples of 2 months')
         plt.xlim((bnss_statistics[bnss_key][FIRST_TIME_KEY],60))
         plt.xticks(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],61))

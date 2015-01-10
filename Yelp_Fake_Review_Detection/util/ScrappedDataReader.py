@@ -21,6 +21,7 @@ USR_LOCATION = 'Place'
 REVIEW_TEXT = 'ReviewComment'
 REVIEW_DATE = 'Date'
 IMG_SRC = 'imgSrc'
+URL = 'URL'
 
 class ScrappedDataReader:
     def __init__(self):
@@ -45,7 +46,15 @@ class ScrappedDataReader:
             exec(content)
             bnssName = fileName.strip('.txt')
             bnssAddress = data[ADDRESS]
-            bnss = business((bnssName, bnssAddress), bnssName)
+            bnssUrl = data[URL]
+            bnssId = (bnssUrl, bnssAddress)
+            
+            if bnssId in self.bnssIdToBnssDict:
+                bnss = self.bnssIdToBnssDict[bnssId]
+            else:
+                bnss = business(bnssId, bnssName, url=bnssUrl)     
+                self.bnssIdToBnssDict[bnss.getId()] = bnss
+            
             nrReviews = data[NOT_RECOMMENDED]
             rReviews = data[RECOMMENDED]
             #print bnssName, len(rReviews), len(nrReviews)
@@ -66,7 +75,12 @@ class ScrappedDataReader:
                     continue
                 usrId = r['usrId']
                 usrExtra = (usr_location, usr_review_count, usr_friend_count)
-                usr = user(usrId, usr_name, usrExtra)
+                
+                if usrId in self.usrIdToUsrDict:
+                    usr = self.usrIdToUsrDict[usrId]
+                else:
+                    usr = user(usrId, usr_name, usrExtra)
+                    self.usrIdToUsrDict[usr.getId()] = usr
                     
                 revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
                 self.usrIdToUsrDict[usr.getId()] = usr
@@ -88,15 +102,17 @@ class ScrappedDataReader:
                     print "Continue"
                     continue
                 usrId = nr['usrId']
-                usrExtra = (usr_location, usr_review_count, usr_friend_count)
-                usr = user(usrId, usr_name, usrExtra)
+                if usrId in self.usrIdToUsrDict:
+                    usr = self.usrIdToUsrDict[usrId]
+                else:
+                    usrExtra = (usr_location, usr_review_count, usr_friend_count)
+                    usr = user(usrId, usr_name, usrExtra)
+                    self.usrIdToUsrDict[usr.getId()] = usr
                     
                 revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
-                    
-                self.usrIdToUsrDict[usr.getId()] = usr
+            
                 self.reviewIdToReviewDict[revw.getId()] = revw
-                
-            self.bnssIdToBnssDict[bnss.getId()] = bnss
+            
             
             return reviewIDIncrementer
         

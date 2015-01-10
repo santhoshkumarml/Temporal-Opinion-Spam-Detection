@@ -10,11 +10,11 @@ import numpy
 import sys
 
 from LBP import LBP
-from SIAUtil import business, user
-import dataReader
+from util.SIAUtil import business, user
+from util import dataReader
 import matplotlib.pyplot as plt
 import networkx as nx
-import SIAUtil
+from util import SIAUtil
 
 
 inputFileName = sys.argv[1]

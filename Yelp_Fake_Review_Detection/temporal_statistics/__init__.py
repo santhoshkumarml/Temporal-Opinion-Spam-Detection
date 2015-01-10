@@ -110,25 +110,51 @@ def checkNewReader():
     rdr = ScrappedDataReader()
     rdr.readData(inputDirName)    
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
+    
+    cc = sorted(networkx.connected_component_subgraphs(G, False), key=len, reverse=True)
+    
+    for g in cc:
+        cbnssNodes = [node for node in g.nodes() if node[1] == SIAUtil.PRODUCT]
+        for node in cbnssNodes:
+            bnss = rdr.getBnssIdToBnssDict()[node[0]]
+            print bnss.getId(), len(g.neighbors(node))
+        print '-----------------------------------'
+    
+    bnssNodes = [node for node in G.nodes() if node[1] == SIAUtil.PRODUCT]
+    bnssNodes = sorted(bnssNodes, reverse=True, key = lambda x: len(G.neighbors(x)))
+    usrNodes = [node for node in G.nodes() if node[1] == SIAUtil.USER]
+    usrNodes = sorted(usrNodes, reverse=True, key = lambda x: len(G.neighbors(x)))
+    print len(bnssNodes), len(usrNodes)
+    
+    for bnssNode in bnssNodes:
+        bnss = rdr.getBnssIdToBnssDict()[bnssNode[0]]
+        print bnss.getName(), len(G.neighbors(bnssNode))
+    
+    print '=============================================================================='
+    
+    for usrNode in usrNodes:
+        usr = rdr.getUsrIdToUsrDict()[usrNode[0]]
+        print usr.getName(), usr.getUsrExtra(), len(G.neighbors(usrNode))
+        
 #     for bnssKey in rdr.getBnssIdToBnssDict():
 #         if 'Halal Guys' in rdr.getBnssIdToBnssDict()[bnssKey].getName():
 #             print rdr.getBnssIdToBnssDict()[bnssKey].getName(), len(G.neighbors((bnssKey,SIAUtil.PRODUCT)))
-    usrKeys = [usrKey for usrKey in rdr.getUsrIdToUsrDict()]
-    usrKeys = sorted(usrKeys, reverse=True, key = lambda x: len(G.neighbors((x,SIAUtil.USER))))
-    
-    for usrKey in usrKeys:
-        neighbors = G.neighbors((usrKey,SIAUtil.USER))
-        if len(neighbors) > 2 and len(neighbors)<10:
-            allReviews = [G.getReview(usrKey, neighbor[0]) for neighbor in neighbors]
-            rec_reviews = [r for r in allReviews if r.isRecommended()]
-            not_rec_reviews = [r for r in allReviews if not r.isRecommended()]
-            if len(rec_reviews)>0 and len(not_rec_reviews)>0:
-                usr = rdr.getUsrIdToUsrDict()[usrKey]
-                print usr.getName(),usr.getUsrExtra(), len(neighbors)
-                for r in rec_reviews:
-                    print 'Rec', r.getBusinessID(), r.getTimeOfReview()
-                for r in not_rec_reviews:
-                    print 'Not Rec', r.getBusinessID(), r.getTimeOfReview()
+#     usrKeys = [usrKey for usrKey in rdr.getUsrIdToUsrDict()]
+#     usrKeys = sorted(usrKeys, reverse=True, key = lambda x: len(G.neighbors((x,SIAUtil.USER))))
+#     
+#     for usrKey in usrKeys:
+#         neighbors = G.neighbors((usrKey,SIAUtil.USER))
+#         if len(neighbors) > 2 and len(neighbors)<10:
+#             allReviews = [G.getReview(usrKey, neighbor[0]) for neighbor in neighbors]
+#             rec_reviews = [r for r in allReviews if r.isRecommended()]
+#             not_rec_reviews = [r for r in allReviews if not r.isRecommended()]
+#             if len(rec_reviews)>0 and len(not_rec_reviews)>0:
+#                 usr = rdr.getUsrIdToUsrDict()[usrKey]
+#                 print usr.getName(),usr.getUsrExtra(), len(neighbors)
+#                 for r in rec_reviews:
+#                     print 'Rec', r.getBusinessID(), r.getTimeOfReview()
+#                 for r in not_rec_reviews:
+#                     print 'Not Rec', r.getBusinessID(), r.getTimeOfReview()
      
     
 def doIndexForRestaurants():
