@@ -246,11 +246,24 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             
             #Max Text Similarity
     
-    #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS AND RATING_ENTROPY
+    
+    #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS, RATING_ENTROPY and ENTROPY_SCORE
     for bnss_key in bnss_statistics:
         statistics_for_bnss = bnss_statistics[bnss_key]
         no_of_reviews_for_bnss = statistics_for_bnss[NO_OF_REVIEWS]
         
+        statistics_for_bnss[ENTROPY_SCORE] = numpy.zeros(total_time_slots)
+        entropy_score = statistics_for_bnss[ENTROPY_SCORE] 
+
+        bnss_node = (bnss_key,SIAUtil.PRODUCT)
+        allReviews = [superGraph.getReview(usr_neighbor[0], bnss_key)\
+                       for usr_neighbor in superGraph.neighbors(bnss_node)]
+        allReviews = sorted(allReviews, key = lambda x: SIAUtil.getDateForReview(x))
+        allReviewVelocity = [ (SIAUtil.getDateForReview(allReviews[x+1])-SIAUtil.getDateForReview(allReviews[x])).days \
+                             for x in range(len(allReviews)-1)]
+        print len(allReviews), len(allReviewVelocity)
+        
+            
 #         for timeKey in range(total_time_slots):
 #             rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
 #             
@@ -286,18 +299,21 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
     return bnss_statistics
 
 
-def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, clr):
+def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnss_key, total_time_slots, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
     plot = 1
     plt.figure(figsize=(20,20))
+
+    LABELS = [str(i)+"-"+str(i+1)+" days" for i in range(total_time_slots)]
+    
     for measure_key in MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
         plt.subplot(len(MEASURES), 1, plot)
         plt.title('Business statistics')
         plt.xlabel('Time in multiples of 2 months')
-        plt.xlim((bnss_statistics[bnss_key][FIRST_TIME_KEY],60))
-        plt.xticks(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],61))
+        plt.xlim((bnss_statistics[bnss_key][FIRST_TIME_KEY],total_time_slots))
+        plt.xticks(range(bnss_statistics[bnss_key][FIRST_TIME_KEY],total_time_slots+1))
         plt.ylabel(measure_key)
         if measure_key == AVERAGE_RATING:
             plt.ylim((1,5))
@@ -340,6 +356,7 @@ if __name__ == '__main__':
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
+    sys.exit()
     
     bnssKeys = [bnss_key for bnss_key in bnss_statistics]
     
@@ -348,5 +365,5 @@ if __name__ == '__main__':
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     i=0
     while i<100:
-        plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], random.choice(colors))
+        plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i],len(cross_time_graphs.keys()), random.choice(colors))
         i+=1
