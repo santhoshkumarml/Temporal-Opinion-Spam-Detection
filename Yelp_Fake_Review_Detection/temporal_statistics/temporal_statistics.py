@@ -187,7 +187,8 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             
             for rating in sorted_rating_list:
                 bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey][rating] /= float(len(reviews_for_bnss)) 
-              
+            
+            
             #NumberOfReviews
             if StatConstants.NO_OF_REVIEWS not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots)
@@ -233,6 +234,35 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             bnss_statistics[bnssId][StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
             
             #Entropy Score
+            entropyScore= 0
+            
+            if StatConstants.ENTROPY_SCORE not in bnss_statistics[bnssId]:
+                bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
+                
+            if noOfReviews >= 2:
+                reviewVelocityVector = numpy.zeros(60)
+                allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
+                allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key = lambda x: SIAUtil.getDateForReview(x))
+                allReviewVelocity = [ (SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x+1]) - \
+                                       SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
+                                     for x in range(len(allReviewsInThisTimeBlock)-1)]
+                for reviewTimeDiff in allReviewVelocity:
+                    reviewVelocityVector[reviewTimeDiff]+=1
+                
+                if StatConstants.REVIEW_TIME_VELOCITY not in bnss_statistics[bnssId]:
+                    bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY] = dict()
+                    
+                bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY][timeKey] = allReviewVelocity 
+                    
+                rating_velocity_prob_dist = {key:(reviewVelocityVector[key]/(noOfReviews-1))  \
+                                             for key in range(len(reviewVelocityVector))}
+                
+                entropyScore = entropyFn(rating_velocity_prob_dist)
+                bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
+#                 print bnss_name, noOfReviews, range(len(allReviewsInThisTimeBlock)-1)
+#                 print [SIAUtil.getDateForReview(r) for r in allReviewsInThisTimeBlock]
+#                 print reviewVelocityVector, rating_velocity_prob_dist
+            
             
             #Max Text Similarity
     
@@ -241,21 +271,6 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
     for bnss_key in bnss_statistics:
         statistics_for_bnss = bnss_statistics[bnss_key]
         no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
-        
-        statistics_for_bnss[StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
-        entropy_score = statistics_for_bnss[StatConstants.ENTROPY_SCORE]
-
-        bnss_node = (bnss_key,SIAUtil.PRODUCT)
-        allReviews = [superGraph.getReview(usr_neighbor[0], bnss_key)\
-                       for usr_neighbor in superGraph.neighbors(bnss_node)]
-        allReviews = sorted(allReviews, key = lambda x: SIAUtil.getDateForReview(x))
-        allReviewVelocity = [ (SIAUtil.getDateForReview(allReviews[x+1])-SIAUtil.getDateForReview(allReviews[x])).days \
-                             for x in range(len(allReviews)-1)]
-        
-        for reviewVelocity in allReviewVelocity:
-            entropy_score[reviewVelocity]+=1
-            
-        
             
 #         for timeKey in range(total_time_slots):
 #             rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
@@ -317,12 +332,16 @@ if __name__ == '__main__':
                                              '2-M', False)
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
     
+    #sys.exit()
+    
     bnssKeys = [bnss_key for bnss_key in bnss_statistics]
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
+    
+    inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
     i=0
     while i<100:
-        PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], len(cross_time_graphs.keys()), join(join(inputFileName, os.pardir), 'latest'), random.choice(colors))
+        PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], len(cross_time_graphs.keys()), inputDir, random.choice(colors))
         i+=1
