@@ -39,11 +39,11 @@ if __name__ == '__main__':
 #     for user in userToDegreeDict.keys():
 #         print user.getId(),' ',userToDegreeDict[i]
 
-    userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.USER]
+    userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node[1] == SIAUtil.USER]
     print userDegreeDistribution
     print'----------------------Business to Neighbors Degree----------------------------------------------------------'
 #     for business in businessToDegreeDict.keys():
 #         print business.getName(),' ',businessToDegreeDict[i]
     
-    businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node.getNodeType() == SIAUtil.PRODUCT]
+    businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node[1] == SIAUtil.PRODUCT]
     print businessDegreeDistribution
