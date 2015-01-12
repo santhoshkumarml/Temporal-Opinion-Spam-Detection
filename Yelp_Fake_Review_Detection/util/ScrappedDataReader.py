@@ -49,72 +49,70 @@ class ScrappedDataReader:
             bnssUrl = data[URL]
             bnssId = (bnssUrl, bnssAddress)
             
-            if bnssId in self.bnssIdToBnssDict:
-                bnss = self.bnssIdToBnssDict[bnssId]
-            else:
+            if bnssId not in self.bnssIdToBnssDict:
                 bnss = business(bnssId, bnssName, url=bnssUrl)     
                 self.bnssIdToBnssDict[bnss.getId()] = bnss
             
-            nrReviews = data[NOT_RECOMMENDED]
-            rReviews = data[RECOMMENDED]
+                nrReviews = data[NOT_RECOMMENDED]
+                rReviews = data[RECOMMENDED]
             #print bnssName, len(rReviews), len(nrReviews)
                 
-            for r in rReviews:
-                reviewIDIncrementer += 1
-                review_rating = r[RATING]
-                review_id = reviewIDIncrementer
-                review_text = r[REVIEW_TEXT]
-                review_date = r[REVIEW_DATE].split('Updated review')[0]
+                for r in rReviews:
+                    reviewIDIncrementer += 1
+                    review_rating = r[RATING]
+                    review_id = reviewIDIncrementer
+                    review_text = r[REVIEW_TEXT]
+                    review_date = r[REVIEW_DATE].split('Updated review')[0]
                     
-                usr_location = r[USR_LOCATION]
-                usr_name = r[NAME]
-                usr_review_count = r[REVIEW_COUNT]
-                usr_friend_count = r[FRIEND_COUNT]
-                if not usr_name or usr_name=='':
-                    print "Continue"
-                    continue
-                usrId = r['usrId']
-                usrExtra = (usr_location, usr_review_count, usr_friend_count)
+                    usr_location = r[USR_LOCATION]
+                    usr_name = r[NAME]
+                    usr_review_count = r[REVIEW_COUNT]
+                    usr_friend_count = r[FRIEND_COUNT]
+                    if not usr_name or usr_name=='':
+                        print "Continue"
+                        continue
+                    usrId = r['usrId']
+                    usrExtra = (usr_location, usr_review_count, usr_friend_count)
                 
-                if usrId in self.usrIdToUsrDict:
-                    usr = self.usrIdToUsrDict[usrId]
-                else:
-                    usr = user(usrId, usr_name, usrExtra)
-                    self.usrIdToUsrDict[usr.getId()] = usr
+                    if usrId in self.usrIdToUsrDict:
+                        usr = self.usrIdToUsrDict[usrId]
+                    else:
+                        usr = user(usrId, usr_name, usrExtra)
+                        self.usrIdToUsrDict[usr.getId()] = usr
                     
-                revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
-                self.usrIdToUsrDict[usr.getId()] = usr
-                self.reviewIdToReviewDict[revw.getId()] = revw
+                    revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
+                    self.usrIdToUsrDict[usr.getId()] = usr
+                    self.reviewIdToReviewDict[revw.getId()] = revw
 
                     
-            for nr in nrReviews:
-                reviewIDIncrementer += 1
-                review_rating = nr[RATING]
-                review_id = reviewIDIncrementer
-                review_text = nr[REVIEW_TEXT]
-                review_date = nr[REVIEW_DATE].split('Updated review')[0]
+                for nr in nrReviews:
+                    reviewIDIncrementer += 1
+                    review_rating = nr[RATING]
+                    review_id = reviewIDIncrementer
+                    review_text = nr[REVIEW_TEXT]
+                    review_date = nr[REVIEW_DATE].split('Updated review')[0]
                     
-                usr_location = nr[USR_LOCATION]
-                usr_name = nr[NAME]
-                usr_review_count = nr[REVIEW_COUNT]
-                usr_friend_count = nr[FRIEND_COUNT]
-                if not usr_name or usr_name=='':
-                    print "Continue"
-                    continue
-                usrId = nr['usrId']
-                if usrId in self.usrIdToUsrDict:
-                    usr = self.usrIdToUsrDict[usrId]
-                else:
-                    usrExtra = (usr_location, usr_review_count, usr_friend_count)
-                    usr = user(usrId, usr_name, usrExtra)
-                    self.usrIdToUsrDict[usr.getId()] = usr
+                    usr_location = nr[USR_LOCATION]
+                    usr_name = nr[NAME]
+                    usr_review_count = nr[REVIEW_COUNT]
+                    usr_friend_count = nr[FRIEND_COUNT]
+                    if not usr_name or usr_name=='':
+                        print "Continue"
+                        continue
+                    usrId = nr['usrId']
+                    if usrId in self.usrIdToUsrDict:
+                        usr = self.usrIdToUsrDict[usrId]
+                    else:
+                        usrExtra = (usr_location, usr_review_count, usr_friend_count)
+                        usr = user(usrId, usr_name, usrExtra)
+                        self.usrIdToUsrDict[usr.getId()] = usr
                     
-                revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
+                    revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
             
-                self.reviewIdToReviewDict[revw.getId()] = revw
+                    self.reviewIdToReviewDict[revw.getId()] = revw
             
             
-            return reviewIDIncrementer
+        return reviewIDIncrementer
         
     def readData(self, inputDirName):
         zipDirectories = [join(inputDirName,f) for f in listdir(inputDirName) if not isfile(join(inputDirName,f)) ]

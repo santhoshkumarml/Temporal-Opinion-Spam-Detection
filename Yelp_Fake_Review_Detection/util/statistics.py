@@ -40,10 +40,12 @@ if __name__ == '__main__':
 #         print user.getId(),' ',userToDegreeDict[i]
 
     userDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node[1] == SIAUtil.USER]
+    userDegreeDistribution = sorted(userDegreeDistribution, reverse=True)
     print userDegreeDistribution
     print'----------------------Business to Neighbors Degree----------------------------------------------------------'
 #     for business in businessToDegreeDict.keys():
 #         print business.getName(),' ',businessToDegreeDict[i]
     
     businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node[1] == SIAUtil.PRODUCT]
+    businessDegreeDistribution = sorted(businessDegreeDistribution, reverse=True)
     print businessDegreeDistribution
