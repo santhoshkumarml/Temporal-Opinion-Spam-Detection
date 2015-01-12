@@ -5,15 +5,18 @@ Created on Dec 15, 2014
 '''
 import networkx as nx
 import SIAUtil
+from GraphUtil import SuperGraph
 from datetime import datetime
-import dataReader
+import ScrappedDataReader
 import sys
 
 if __name__ == '__main__':
     inputFileName = sys.argv[1]
     beforeGraphPopulationTime = datetime.now()
-    (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) = dataReader.parseAndCreateObjects(inputFileName)
-    wholeGraph = SIAUtil.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews)
+    #(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) = dataReader.parseAndCreateObjects(inputFileName)
+    scr = ScrappedDataReader.ScrappedDataReader()
+    (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) =scr.readData(inputFileName)
+    wholeGraph = SuperGraph.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews)
     afterGraphPopulationTime = datetime.now()
     beforeStatisticsGenerationTime = datetime.now()
 
