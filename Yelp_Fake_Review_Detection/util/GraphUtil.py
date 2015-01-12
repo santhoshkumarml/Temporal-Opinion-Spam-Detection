@@ -71,9 +71,7 @@ class TemporalGraph(networkx.Graph):
     
     def getBusinessIds(self):
         return [node_id for (node_id, node_type) in self.nodes() if node_type == SIAUtil.PRODUCT]
-    
-if __name__ == '__main__':
-    pass
+
     def getBusinessCount(self):
         return len(set([node_id for (node_id, node_type) in self.nodes() if node_type == SIAUtil.PRODUCT]))
     
