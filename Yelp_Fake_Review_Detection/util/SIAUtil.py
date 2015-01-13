@@ -7,10 +7,10 @@ Created on Nov 3, 2014
 Node Types
 '''
 
-from copy import deepcopy
-from datetime import datetime, date, timedelta
+from datetime import date
 import numpy
 import re
+
 
 USER = 'USER'
 PRODUCT = 'PRODUCT'

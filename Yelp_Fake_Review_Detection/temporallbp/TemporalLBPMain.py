@@ -7,11 +7,12 @@ Created on Nov 25, 2014
 import util.SIAUtil as SIAUtil
 import util.dataReader as dataReader
 from lbp.LBP import LBP
-from util.SIAUtil import TimeBasedGraph
 from copy import deepcopy, copy
 from datetime import datetime
 from threading import Thread
 import sys
+from util import OldGraphUtil
+from util.OldGraphUtil import TimeBasedGraph
 ###################################################Parallelize LBP Run Using Thread######################################################
 class LBPRunnerThread(Thread):
     def __init__(self, graph, limit, name='LBPRunner'):
@@ -53,7 +54,7 @@ def initialize(inputFileName):
             parentBusinessIdToBusinessDict[bnssId].setRating(tempBusinessIdToBusinessDict[bnssId].getRating())
             bnssEdited+=1
     print bnssEdited
-    parent_graph = SIAUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
+    parent_graph = OldGraphUtil.createGraph(parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews)
 
 #     unnecessary_reviews = set()
 #     cc = sorted(networkx.connected_component_subgraphs(parent_graph,False), key=len, reverse=True)
@@ -76,7 +77,7 @@ def initialize(inputFileName):
 #     print len(unnecessary_reviews)
 
 #     cross_9_months_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews, '9-M')
-    cross_time_graphs = SIAUtil.createTimeBasedGraph(parentUserIdToUserDict,\
+    cross_time_graphs = OldGraphUtil.createTimeBasedGraph(parentUserIdToUserDict,\
                                                           parentBusinessIdToBusinessDict,\
                                                            parent_reviews, '1-Y')
     beforeThreadTime = datetime.now()
@@ -156,7 +157,7 @@ def calculateMergeAbleAndNotMergeableBusinessesAcrossTime(cross_time_graphs, par
     for bnss_key in bnss_score_all_time_map.iterkeys():
         time_score_map = bnss_score_all_time_map[bnss_key]
         scores = [time_score_map[time_key][1] for time_key in time_score_map.iterkeys()]
-        good_scores = SIAUtil.rm_outlier(scores)
+        good_scores = OldGraphUtil.rm_outlier(scores)
 #         print 'IN: ', scores #  REMOVE
 #         print 'OP: ', good_scores
 #         print '*'*10

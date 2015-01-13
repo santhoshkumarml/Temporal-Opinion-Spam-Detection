@@ -11,7 +11,7 @@ import sys
 
 from LBP import LBP
 from util.SIAUtil import business, user
-from util import dataReader
+from util import dataReader, OldGraphUtil
 import matplotlib.pyplot as plt
 import networkx as nx
 from util import SIAUtil
@@ -37,7 +37,7 @@ def paint(graph, nodecolor='red', edgecolor='blue'):
 #########################################################
 beforeGraphPopulationTime = datetime.now()
 (parentUserIdToUserDict,parentBusinessIdToBusinessDict,parent_reviews) = dataReader.parseAndCreateObjects(inputFileName)
-wholeGraph = SIAUtil.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews)
+wholeGraph = OldGraphUtil.createGraph(parentUserIdToUserDict, parentBusinessIdToBusinessDict, parent_reviews)
 afterGraphPopulationTime = datetime.now()
 beforeStatisticsGenerationTime = datetime.now()
 
