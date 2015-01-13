@@ -3,12 +3,11 @@ from util.GraphUtil import TemporalGraph
 from util import SIAUtil
 import ShingleUtil
 import sys
-import jac_doc_hash
 
 inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/main_zips'
-texts = ['abc def ghi jkl', 'bcd effg hijklm']
+texts = ['abc def ghi jkl', 'bcd effg hijklm', 'abcde ehfgi klm', 'effgh ijklmnopqr','nop qrestv']
 data = ShingleUtil.formDataMatrix(texts, 5)
-print jac_doc_hash.jac_doc_hash(data, 10, 5)
+print ShingleUtil.jac_doc_hash(data, 3, 3)
 sys.exit()
 scr = sdr()
 (usrIdToUsrDict, bnssIdToBnssDict, reviewIdToReviewDict) = scr.readData(inputDirName)
@@ -23,6 +22,6 @@ for time_key in cross_time_graphs:
             if len(reviewTextsInThisTimeBlock) > 1: 
                 print time_key, bnss_key
                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock, 5)
-                jac_doc_hash.jac_doc_hash(data_matrix, 10, 5)
+                #jac_doc_hash.jac_doc_hash(data_matrix, 10, 5)
                 sys.exit()
                 print '------------------------------------------'
