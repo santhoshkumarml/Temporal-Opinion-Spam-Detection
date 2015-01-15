@@ -73,3 +73,4 @@ def plotCurve(a,b):
     #plt.figure(figsize=(20,20))
     plt.title('Plot')
     plt.plot(a,b)
+    plt.show()

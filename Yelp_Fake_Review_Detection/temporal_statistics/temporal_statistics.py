@@ -15,7 +15,8 @@ from util import SIAUtil
 from util import StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
 from util.ScrappedDataReader import ScrappedDataReader
-from intervaltree import Interval,IntervalTree
+from intervaltree import IntervalTree
+from lsh import ShingleUtil
 
 
 def sigmoid_prime(x):
@@ -167,6 +168,18 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
             
             
             #Max Text Similarity
+            if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]: 
+                bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
+                
+            reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText() for (usrId, usr_type) in neighboring_usr_nodes]
+            maxTextSimilarity = 1
+            
+            if len(reviewTextsInThisTimeBlock) > 1:
+                data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
+                candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
+                maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
+                
+            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
     
     
     #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS, RATING_ENTROPY and ENTROPY_SCORE
@@ -245,5 +258,7 @@ if __name__ == '__main__':
     inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
     i=0
     while i<100:
-        PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict, bnssKeys[i], len(cross_time_graphs.keys()), inputDir, random.choice(colors))
+        PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
+                                     bnssKeys[i], len(cross_time_graphs.keys()),\
+                                      inputDir, random.choice(colors))
         i+=1

@@ -136,9 +136,9 @@ def jac_doc_hash(A,r,b):
     ucg=set(candidategroups)
     num_clusters=len(ucg)
     
-    if num_clusters < len(candidategroups):
-        print 'yes'
-    print num_clusters, len(candidategroups)
+#     if num_clusters < len(candidategroups):
+#         print 'yes'
+#     print num_clusters, len(candidategroups)
     
     return candidategroups
 

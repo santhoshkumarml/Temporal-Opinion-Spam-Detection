@@ -3,6 +3,7 @@ from util.GraphUtil import TemporalGraph
 from util import SIAUtil
 import ShingleUtil
 import sys
+import numpy
 
 
 def checkJacDocHash(inputDirName):
@@ -19,19 +20,21 @@ def checkJacDocHash(inputDirName):
                     #print '------------------------------------------'
                     #print time_key, bnss_key
                     data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
-                    ShingleUtil.jac_doc_hash(data_matrix, 20, 4)
+                    candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
+                    maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
+                    print maxTextSimilarity
 #                    sys.exit()
                     #print '------------------------------------------'
 
 inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/main_zips'
-inputDirName = 'D:\\workspace\\datalab\\data\\from ubuntu\\main_zips'
+inputDirName = 'D:\\workspace\\datalab\\data\\from ubuntu\\zips'
 # texts = ['abc def ghi jkl', 'bcd effg hijklm', 'abcde ehfgi klm', 'effgh ijklmnopqr','nop qrestv', 'abcdef ghi jklmn']
 # data = ShingleUtil.formDataMatrix(texts)
 # print ShingleUtil.jac_doc_hash(data, 2, 3)
 # sys.exit()
 #checkJacDocHash(inputDirName)
 def checkSCurve():
-    r = 10
-    b = 4
+    r = 20
+    b = 50
     ShingleUtil.s_curve(r, b)
-checkSCurve()
+checkJacDocHash(inputDirName)
