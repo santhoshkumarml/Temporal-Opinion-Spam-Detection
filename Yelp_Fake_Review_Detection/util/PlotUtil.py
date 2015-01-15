@@ -68,4 +68,8 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
-    
+
+def plotCurve(a,b):
+    #plt.figure(figsize=(20,20))
+    plt.title('Plot')
+    plt.plot(a,b)

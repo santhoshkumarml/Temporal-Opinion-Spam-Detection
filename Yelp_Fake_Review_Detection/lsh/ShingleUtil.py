@@ -7,8 +7,16 @@ Created on Jan 12, 2015
 import re
 import numpy
 import sys
+from util import PlotUtil
 
 skip_words = '[\n]|[ ]|[\t]'
+
+
+sample_m = [ [10,6,4,2,7,1,8,5,3,9], [6,4,5,3,7,8,2,10,9,1],
+            [5,2,4,8,10,9,1,3,7,6],[8,6,1,7,9,4,2,10,3,5],
+            [8,4,9,1,10,3,7,5,2,6],[6,5,2,7,8,9,10,1,3,4],
+            [4,1,9,2,10,7,8,6,3,5],[4,9,8,5,3,2,6,7,1,10],
+            [1,5,9,6,7,8,10,4,2,3]]
 
 def createAndReturnShingles(texts, n):
     shingle_dict = dict()
@@ -29,16 +37,29 @@ def createAndReturnShingles(texts, n):
                     shingle_dict[shingle] = numpy.zeros(len(texts))
             shingle_dict[shingle][text_index] = 1
             
-        text_index+=1
-        
+        text_index+=1    
     return shingle_dict
 
-def formDataMatrix(texts, n):
-    shingle_dict = createAndReturnShingles(texts, n)
+def createAndReturnWords(texts):
+    shingle_dict = dict()
+    text_index = 0
+    for text in texts:
+        lines = text.splitlines()
+        for line in lines:
+            words = line.split()
+            for word in words:
+                if word not in shingle_dict:
+                    shingle_dict[word] = numpy.zeros(len(texts))
+                shingle_dict[word][text_index] = 1
+        text_index+=1
+    return shingle_dict
+
+def formDataMatrix(texts):
+    
+    shingle_dict = createAndReturnWords(texts)
     
     n = len(shingle_dict.keys())
     m = len(texts)
-    
     data_matrix = numpy.zeros(shape =(n,m))
     shingle_list = []
     
@@ -55,14 +76,16 @@ def formDataMatrix(texts, n):
 # main.py /media/santhosh/Data/workspace/datalab/data/src/jac_doc_hash.m
 
 def jac_doc_hash(A,r,b):
-    print A
     n,m= A.shape
     s=r*b
     S=numpy.zeros(shape=(s,m))
     M=numpy.zeros(shape=(s,n))
     for i in numpy.arange(0,s).reshape(-1):
         M[i,:]=numpy.random.permutation(numpy.arange(1,n+1))
-    print M
+    #M = numpy.array(sample_m)
+    #print A
+    #print M
+    
     
     for i in numpy.arange(0,m).reshape(-1):
         out = A[:,i]
@@ -71,48 +94,55 @@ def jac_doc_hash(A,r,b):
             temp_min_for_iter = ''
             for index in range(len(out)):
                 if out[index] > 0:
-                    print i,M[:,index]
                     if temp_min_for_iter == '':
                         temp_min_for_iter = numpy.array(M[:,index])
                     else:
-                        temp_min_for_iter = numpy.vstack((temp_min_for_iter,M[:,index]))
-            print temp_min_for_iter.transpose()
-            print numpy.amin(temp_min_for_iter,axis=0)
-            print '----------------------------------------'
+                        temp_min_for_iter = numpy.vstack((temp_min_for_iter, M[:,index]))
+#             print numpy.amin(temp_min_for_iter,axis=0)
+#             print '----------------------------------------'
             S[:,i]=numpy.amin(temp_min_for_iter,axis=0)
-            #print S
+#    print S
 
-    M = numpy.zeros(shape=(s,n))
-    A = numpy.zeros(shape=A.shape)
+    M = numpy.zeros(shape = (s,n))
+    A = numpy.zeros(shape = A.shape)
     
-    maps=numpy.zeros(shape=(b,1))
+    #maps=numpy.zeros(shape=(b,1))
+    maps = {key:0 for key in range(b)}
     
     for j in numpy.arange(0,b).reshape(-1):
-        from_=1 + r * (j - 1)
-        to=from_ + (r - 1)
+        from_= 0 + r * (j)
+        to = from_ + (r)
         c= dict()
         for i in numpy.arange(0,m).reshape(-1):
+            #print from_, to, j, i, S[from_:to,i] 
             t=S[from_:to,i]
             t=str(t)
             if (t in c):
-                c[t] = numpy.append(c[t],i)
+                c[t] = numpy.append(c[t], i)
             else:
-                c[t]=numpy.array([i])
-        
-        print j,c  
+                c[t] = numpy.array([i])
         maps[j]= c
         
-    S=numpy.zeros(s,m)
+    S = numpy.zeros(shape = (s,m))
     
-    candidategroups=numpy.arange(0,m)
+    candidategroups = numpy.arange(0,m)
     
     for i in numpy.arange(0,b).reshape(-1):
-        c=maps[i]
-        k=c.keys()
-        for j in numpy.arange(1,len(k)).reshape(-1):
-            candidategroups[c[k[j]]]=min(candidategroups[c[k[j]]])
+        c = maps[i]
+        k = c.keys()
+        for j in numpy.arange(0,len(k)).reshape(-1):
+            candidategroups[c[k[j]]] = min(candidategroups[c[k[j]]])
             
     ucg=set(candidategroups)
     num_clusters=len(ucg)
-    print num_clusters
+    
+    if num_clusters < len(candidategroups):
+        print 'yes'
+    print num_clusters, len(candidategroups)
+    
     return candidategroups
+
+def s_curve(r,b):
+    s = numpy.arange(0,1,0.01)
+    p = 1 - (1 - s ** r) ** b
+    PlotUtil.plotCurve(s, p)
