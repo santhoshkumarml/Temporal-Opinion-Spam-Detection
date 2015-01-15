@@ -11,6 +11,7 @@ import networkx
 from os.path import join
 import json
 from util.ScrappedDataReader import ScrappedDataReader
+import temporal_statistics
 
 
 class SuperGraph(networkx.Graph):
@@ -175,4 +176,20 @@ def doIndexForRestaurants():
         json.dump(result, f)
          
         
-checkNewReader()
+def checkBucketTree():
+    bucketTree = temporal_statistics.constructIntervalTree(60)
+    print bucketTree
+    inputData = [1,4,4,4,8,16,32]
+    for i in inputData:
+        interval = temporal_statistics.getBucketIntervalForBucketTree(bucketTree, i)
+        begin,end,data = interval
+        bucketTree.remove(interval)
+        bucketTree[begin:end] = data+1.0
+        
+    print bucketTree
+    
+    rating_velocity_prob_dist = {(begin,end):(count_data/(6)) for (begin, end, count_data) in bucketTree}
+    
+    print rating_velocity_prob_dist
+
+checkBucketTree()

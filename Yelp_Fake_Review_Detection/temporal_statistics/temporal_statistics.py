@@ -15,6 +15,7 @@ from util import SIAUtil
 from util import StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
 from util.ScrappedDataReader import ScrappedDataReader
+from intervaltree import Interval,IntervalTree
 
 
 def sigmoid_prime(x):
@@ -27,6 +28,31 @@ def entropyFn(probability_dict):
         if probability > 0:
             entropy += -(probability*math.log(probability,2))
     return entropy
+
+def constructIntervalTree(days):
+    t = IntervalTree()
+    end = days
+    t[0:1] = 0
+    iter_start = 1
+    step_index = 0
+    while(iter_start<end):
+        iterend = iter_start+(2**step_index)
+        t[iter_start:iterend] = 0
+        iter_start =  iterend
+        step_index+=1
+    return t
+
+
+def getBucketIntervalForBucketTree(bucketTree, point):
+    bucket_intervals = list(bucketTree[point])
+    assert len(bucket_intervals) == 1
+    return bucket_intervals[0]
+
+def updateBucketTree(bucketTree, point):
+    interval = getBucketIntervalForBucketTree(bucketTree, point)
+    begin,end,data = interval
+    bucketTree.remove(interval)
+    bucketTree[begin:end] = data + 1.0
     
 def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict):
     bnss_statistics = dict()
@@ -117,22 +143,21 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
                 
             if noOfReviews >= 2:
-                reviewVelocityVector = numpy.zeros(60)
+                bucketTree = constructIntervalTree(60)
                 allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
                 allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key = lambda x: SIAUtil.getDateForReview(x))
                 allReviewVelocity = [ (SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x+1]) - \
                                        SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
                                      for x in range(len(allReviewsInThisTimeBlock)-1)]
                 for reviewTimeDiff in allReviewVelocity:
-                    reviewVelocityVector[reviewTimeDiff]+=1
+                    updateBucketTree(bucketTree, reviewTimeDiff)
                 
                 if StatConstants.REVIEW_TIME_VELOCITY not in bnss_statistics[bnssId]:
                     bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY] = dict()
                     
-                bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY][timeKey] = allReviewVelocity 
-                    
-                rating_velocity_prob_dist = {key:(reviewVelocityVector[key]/(noOfReviews-1))  \
-                                             for key in range(len(reviewVelocityVector))}
+                bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY][timeKey] = allReviewVelocity
+                 
+                rating_velocity_prob_dist = {(begin,end):(count_data/(noOfReviews-1)) for (begin, end, count_data) in bucketTree}
                 
                 entropyScore = entropyFn(rating_velocity_prob_dist)
                 bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
