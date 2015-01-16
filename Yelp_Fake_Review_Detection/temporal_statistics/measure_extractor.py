@@ -163,6 +163,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 rating_velocity_prob_dist = {(begin,end):(count_data/(noOfReviews-1)) for (begin, end, count_data) in bucketTree}
                 
                 entropyScore = entropyFn(rating_velocity_prob_dist)
+                
                 bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
             
             
@@ -178,7 +179,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
                 maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
                 
-            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity-1
     
     
     #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS, RATING_ENTROPY and ENTROPY_SCORE
@@ -234,8 +235,9 @@ if __name__ == '__main__':
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
+    beforeStat = datetime.now()
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
-    
+    afterStat = datetime.now()
     
     bnssKeys = [bnss_key for bnss_key in bnss_statistics]
     
@@ -245,8 +247,13 @@ if __name__ == '__main__':
     
     inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
     i=0
-    while i<min([100, len(bnssKeys)]):
+    end = min([len(bnssKeys),100])
+    print end
+    beforePlot = datetime.now()
+    while i<end:
         PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
                                      bnssKeys[i], len(cross_time_graphs.keys()),\
                                       inputDir, random.choice(colors))
         i+=1
+    afterPlot = datetime.now()
+    print 'TimeTaken for Statistics:',afterStat-beforeStat, 'Time taken for Plot:',afterPlot-beforePlot
