@@ -66,12 +66,14 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 bnss_statistics[bnssId] = dict()
                 bnss_statistics[bnssId][StatConstants.FIRST_TIME_KEY] = timeKey
             bnss_name = bnssIdToBusinessDict[bnssId].getName()
+            
+            neighboring_usr_nodes = G.neighbors((bnssId,SIAUtil.PRODUCT))
             #Average Rating
             if StatConstants.AVERAGE_RATING not in bnss_statistics[bnssId]:
                 bnss_statistics[bnssId][StatConstants.AVERAGE_RATING] = numpy.zeros(total_time_slots)
-                
-            neighboring_usr_nodes = G.neighbors((bnssId,SIAUtil.PRODUCT))
+            
             reviews_for_bnss = []
+            
             for (usrId, usr_type) in neighboring_usr_nodes:
                 review_for_bnss = G.getReview(usrId,bnssId)
                 reviews_for_bnss.append(review_for_bnss)
@@ -162,9 +164,6 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 
                 entropyScore = entropyFn(rating_velocity_prob_dist)
                 bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
-#                 print bnss_name, noOfReviews, range(len(allReviewsInThisTimeBlock)-1)
-#                 print [SIAUtil.getDateForReview(r) for r in allReviewsInThisTimeBlock]
-#                 print reviewVelocityVector, rating_velocity_prob_dist
             
             
             #Max Text Similarity
@@ -187,12 +186,6 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
         statistics_for_bnss = bnss_statistics[bnss_key]
         no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
             
-#         for timeKey in range(total_time_slots):
-#             rating_sum_for_bnss[timeKey] = no_of_reviews_for_bnss[timeKey]*avg_rating_for_bnss[timeKey]
-#             
-#         if bnssIdToBusinessDict[bnss_key].getName() == 'Arizona Humane Society':
-#             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
-            
         for timeKey in range(total_time_slots):
             if timeKey > 0:
                 #POST PROCESSING FOR NUMBER_OF_REVIEWS
@@ -214,10 +207,7 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 if StatConstants.RATING_ENTROPY not in statistics_for_bnss:
                     statistics_for_bnss[StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
                 statistics_for_bnss[StatConstants.RATING_ENTROPY][timeKey] = entropy
-                
-#         if bnssIdToBusinessDict[bnss_key].getName() == 'Matsuhisa':               
-#         if bnssIdToBusinessDict[bnss_key].getName() == 'Arizona Humane Society':
-#             print statistics_for_bnss[NO_OF_REVIEWS],statistics_for_bnss[AVERAGE_RATING]
+
             
     return bnss_statistics
 
@@ -232,7 +222,6 @@ if __name__ == '__main__':
     inputFileName = sys.argv[1]
     
     beforeGraphPopulationTime = datetime.now()
-    #(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dataReader.parseAndCreateObjects(inputFileName)
     
     rdr = ScrappedDataReader()
     
@@ -247,7 +236,6 @@ if __name__ == '__main__':
                                              '2-M', False)
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
     
-    #sys.exit()
     
     bnssKeys = [bnss_key for bnss_key in bnss_statistics]
     
@@ -257,7 +245,7 @@ if __name__ == '__main__':
     
     inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
     i=0
-    while i<100:
+    while i<min([100, len(bnssKeys)]):
         PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
                                      bnssKeys[i], len(cross_time_graphs.keys()),\
                                       inputDir, random.choice(colors))

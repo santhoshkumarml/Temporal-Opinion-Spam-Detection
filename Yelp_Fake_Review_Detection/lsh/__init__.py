@@ -28,13 +28,8 @@ def checkJacDocHash(inputDirName):
 
 inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/main_zips'
 inputDirName = 'D:\\workspace\\datalab\\data\\from ubuntu\\zips'
-# texts = ['abc def ghi jkl', 'bcd effg hijklm', 'abcde ehfgi klm', 'effgh ijklmnopqr','nop qrestv', 'abcdef ghi jklmn']
+# texts = ['The food there is awesome. The server was ok.', 'The food there is awesome. jfnsdjnvjdsn. The server was ok. ']
 # data = ShingleUtil.formDataMatrix(texts)
-# print ShingleUtil.jac_doc_hash(data, 2, 3)
-# sys.exit()
-#checkJacDocHash(inputDirName)
-def checkSCurve():
-    r = 20
-    b = 50
-    ShingleUtil.s_curve(r, b)
-checkJacDocHash(inputDirName)
+# print data
+# print ShingleUtil.jac_doc_hash(data, 30, 5)
+#ShingleUtil.s_curve()

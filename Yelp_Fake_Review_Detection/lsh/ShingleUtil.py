@@ -134,15 +134,14 @@ def jac_doc_hash(A,r,b):
             candidategroups[c[k[j]]] = min(candidategroups[c[k[j]]])
             
     ucg=set(candidategroups)
+    
     num_clusters=len(ucg)
-    
-#     if num_clusters < len(candidategroups):
-#         print 'yes'
-#     print num_clusters, len(candidategroups)
-    
+        
     return candidategroups
 
-def s_curve(r,b):
+# r= 4 and b = 10 --> 0.5  
+# r = 20 and b = 50 --> 0.8
+def s_curve(r = 20,b = 50):
     s = numpy.arange(0,1,0.01)
     p = 1 - (1 - s ** r) ** b
     PlotUtil.plotCurve(s, p)
