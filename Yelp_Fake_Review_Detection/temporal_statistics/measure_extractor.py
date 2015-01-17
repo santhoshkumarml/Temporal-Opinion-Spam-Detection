@@ -55,13 +55,18 @@ def updateBucketTree(bucketTree, point):
     bucketTree.remove(interval)
     bucketTree[begin:end] = data + 1.0
     
-def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict):
+def generateStatistics(superGraph, cross_time_graphs,\
+                        usrIdToUserDict, bnssIdToBusinessDict,\
+                         reviewIdToReviewsDict, bnssKeys):
     bnss_statistics = dict()
     total_time_slots = len(cross_time_graphs.keys())
     
     for timeKey in cross_time_graphs.iterkeys():
+        print timeKey
         G = cross_time_graphs[timeKey]
         for bnssId in G.getBusinessIds():
+            if bnssId not in bnssKeys:
+                continue
             if bnssId not in bnss_statistics:
                 bnss_statistics[bnssId] = dict()
                 bnss_statistics[bnssId][StatConstants.FIRST_TIME_KEY] = timeKey
@@ -172,14 +177,17 @@ def generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToB
                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
                 
             reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText() for (usrId, usr_type) in neighboring_usr_nodes]
-            maxTextSimilarity = 1
-            
+            maxTextSimilarity = 0
             if len(reviewTextsInThisTimeBlock) > 1:
                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
-                maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
                 
-            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity-1
+                if len(set(candidateGroups)) == noOfReviews:
+                    maxTextSimilarity = 0
+                else:
+                    maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
+                                    
+            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
     
     
     #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS, RATING_ENTROPY and ENTROPY_SCORE
@@ -222,11 +230,16 @@ if __name__ == '__main__':
         sys.exit()
     inputFileName = sys.argv[1]
     
-    beforeGraphPopulationTime = datetime.now()
+    beforeDataReadTime = datetime.now()
     
     rdr = ScrappedDataReader()
-    
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
+    
+    afterDataReadTime = datetime.now()
+    
+    print 'TimeTaken for Reading data:',afterDataReadTime-beforeDataReadTime
+    
+    beforeGraphConstructionTime = datetime.now()
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict)
@@ -235,13 +248,21 @@ if __name__ == '__main__':
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
-    beforeStat = datetime.now()
-    bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict)
-    afterStat = datetime.now()
-    
-    bnssKeys = [bnss_key for bnss_key in bnss_statistics]
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes() if bnss_type == SIAUtil.PRODUCT]
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+    
+    bnssKeySet = set(bnssKeys[:100])
+    
+    afterGraphConstructionTime = datetime.now()
+    print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
+    
+    beforeStat = datetime.now()
+    bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, bnssKeySet)
+    afterStat = datetime.now()
+    
+    print 'TimeTaken for Statistics:',afterStat-beforeStat
+    
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     
@@ -256,4 +277,4 @@ if __name__ == '__main__':
                                       inputDir, random.choice(colors))
         i+=1
     afterPlot = datetime.now()
-    print 'TimeTaken for Statistics:',afterStat-beforeStat, 'Time taken for Plot:',afterPlot-beforePlot
+    print 'Time taken for Plot:',afterPlot-beforePlot
