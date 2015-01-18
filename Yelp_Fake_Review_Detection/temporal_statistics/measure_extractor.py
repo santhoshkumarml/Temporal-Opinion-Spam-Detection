@@ -3,7 +3,7 @@ Created on Dec 29, 2014
 
 @author: santhosh
 '''
-from datetime import datetime, timedelta
+from datetime import datetime
 import math
 import numpy
 import os
@@ -19,6 +19,20 @@ from intervaltree import IntervalTree
 from lsh import ShingleUtil
 
 
+def printSimilarReviews(bin_count, candidateGroups, timeKey, bnss_key, reviewTextsInThisTimeBlock):
+    bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
+    bucketIndexListPair = []
+    for bucketNumber in bucketNumbers:
+        indexes = [i for i in range(len(candidateGroups)) if candidateGroups[i]==bucketNumber]
+        bucketIndexListPair.append((bucketNumber,indexes))
+    print bnss_key, timeKey
+    for bucketNumber,indexes in bucketIndexListPair:
+        print '-------------------------'
+        print bucketNumber
+        for index in indexes:
+            print reviewTextsInThisTimeBlock[index]
+        print '-------------------------'
+        
 def sigmoid_prime(x):
     return (2.0/(1+math.exp(-x)))-1
 
@@ -55,6 +69,19 @@ def updateBucketTree(bucketTree, point):
     bucketTree.remove(interval)
     bucketTree[begin:end] = data + 1.0
     
+
+def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
+#     changed = False
+    noOfReviewsInTime = statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
+    for measure_key in StatConstants.MEASURES:
+        if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING:
+            if noOfReviewsInTime == 0:
+                statistics_for_bnss[measure_key][timeKey] = statistics_for_bnss[measure_key][timeKey - 1]
+#                 changed = True
+#     if changed:
+#         print timeKey
+#         print statistics_for_bnss
+
 def generateStatistics(superGraph, cross_time_graphs,\
                         usrIdToUserDict, bnssIdToBusinessDict,\
                          reviewIdToReviewsDict, bnssKeys):
@@ -67,9 +94,11 @@ def generateStatistics(superGraph, cross_time_graphs,\
         for bnssId in G.getBusinessIds():
             if bnssId not in bnssKeys:
                 continue
+            
             if bnssId not in bnss_statistics:
                 bnss_statistics[bnssId] = dict()
                 bnss_statistics[bnssId][StatConstants.FIRST_TIME_KEY] = timeKey
+                    
             bnss_name = bnssIdToBusinessDict[bnssId].getName()
             
             neighboring_usr_nodes = G.neighbors((bnssId,SIAUtil.PRODUCT))
@@ -89,6 +118,9 @@ def generateStatistics(superGraph, cross_time_graphs,\
             sorted_rating_list = set(sorted(ratings))
             if StatConstants.RATING_DISTRIBUTION not in bnss_statistics[bnssId]:
                 bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION] = dict()
+                
+            if StatConstants.RATING_ENTROPY not in bnss_statistics[bnssId]:
+                    bnss_statistics[bnssId][StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
                 
             if timeKey not in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
                 bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey] = {key:0.0 for key in sorted_rating_list}
@@ -176,29 +208,43 @@ def generateStatistics(superGraph, cross_time_graphs,\
             if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
                 
-            reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText() for (usrId, usr_type) in neighboring_usr_nodes]
-            maxTextSimilarity = 0
+            reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
+                                           for (usrId, usr_type) in neighboring_usr_nodes]
+            
+            maxTextSimilarity = 1
             if len(reviewTextsInThisTimeBlock) > 1:
                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
-                
                 if len(set(candidateGroups)) == noOfReviews:
-                    maxTextSimilarity = 0
+                    maxTextSimilarity = 1
                 else:
-                    maxTextSimilarity = numpy.amax(numpy.bincount(candidateGroups))
+                    bin_count = numpy.bincount(candidateGroups)
+#                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
+#                                          bnssId, reviewTextsInThisTimeBlock) 
+                    maxTextSimilarity = numpy.amax(bin_count)
                                     
             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+            
+            if timeKey in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
+                entropy = entropyFn(bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey])
+                bnss_statistics[bnssId][StatConstants.RATING_ENTROPY][timeKey] = entropy
+                
     
-    
-    #POST PROCESSING FOR REVIEW AVERAGE_RATING, NO_OF_REVIEWS, RATING_ENTROPY and ENTROPY_SCORE
+    #POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     for bnss_key in bnss_statistics:
         statistics_for_bnss = bnss_statistics[bnss_key]
         no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
-            
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        #print statistics_for_bnss
+        print '--------------------------------------------------'
         for timeKey in range(total_time_slots):
-            if timeKey > 0:
+            if timeKey > firstTimeKey:
+                fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
+                        
                 #POST PROCESSING FOR NUMBER_OF_REVIEWS
-                statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] = no_of_reviews_for_bnss[timeKey-1]+no_of_reviews_for_bnss[timeKey]
+                statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] =\
+                 no_of_reviews_for_bnss[timeKey-1]+no_of_reviews_for_bnss[timeKey]
+                
                 #POST PROCESSING FOR AVERAGE RATING
                 if no_of_reviews_for_bnss[timeKey] > 0:
                     sum_of_ratings = (statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey-1]*no_of_reviews_for_bnss[timeKey-1])
@@ -206,22 +252,12 @@ def generateStatistics(superGraph, cross_time_graphs,\
                     statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = sum_of_ratings/no_of_reviews_for_bnss[timeKey]
                 else:
                     statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = 0
+                
             else:
                 if no_of_reviews_for_bnss[timeKey] > 0:
                     statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /=  statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
-            
-            #POST PROCESSING FOR RATING ENTROPY
-            if timeKey in statistics_for_bnss[StatConstants.RATING_DISTRIBUTION]:
-                entropy = entropyFn(statistics_for_bnss[StatConstants.RATING_DISTRIBUTION][timeKey])
-                if StatConstants.RATING_ENTROPY not in statistics_for_bnss:
-                    statistics_for_bnss[StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
-                statistics_for_bnss[StatConstants.RATING_ENTROPY][timeKey] = entropy
-
-            
+        print '--------------------------------------------------'    
     return bnss_statistics
-
-
-
         
 
 if __name__ == '__main__':
@@ -249,16 +285,21 @@ if __name__ == '__main__':
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes() if bnss_type == SIAUtil.PRODUCT]
+    #and 'Reading Termi' in bnssIdToBusinessDict[bnss_key].getName()]
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
     bnssKeySet = set(bnssKeys[:100])
     
+    
+    
     afterGraphConstructionTime = datetime.now()
     print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
     
     beforeStat = datetime.now()
-    bnss_statistics = generateStatistics(superGraph, cross_time_graphs, usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, bnssKeySet)
+    bnss_statistics = generateStatistics(superGraph, cross_time_graphs,\
+                                          usrIdToUserDict, bnssIdToBusinessDict,\
+                                           reviewIdToReviewsDict, bnssKeySet)
     afterStat = datetime.now()
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
@@ -267,14 +308,10 @@ if __name__ == '__main__':
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     
     inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
-    i=0
-    end = min([len(bnssKeys),100])
-    print end
     beforePlot = datetime.now()
-    while i<end:
+    for bnssKey in bnssKeySet:
         PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
-                                     bnssKeys[i], len(cross_time_graphs.keys()),\
+                                     bnssKey, len(cross_time_graphs.keys()),\
                                       inputDir, random.choice(colors))
-        i+=1
     afterPlot = datetime.now()
     print 'Time taken for Plot:',afterPlot-beforePlot

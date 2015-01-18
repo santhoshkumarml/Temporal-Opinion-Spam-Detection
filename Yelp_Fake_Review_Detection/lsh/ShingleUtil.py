@@ -1,13 +1,17 @@
-from __future__ import division
 '''
 Created on Jan 12, 2015
 
 @author: santhosh
 '''
-import re
+
+from __future__ import division
+
 import numpy
+import re
 import sys
+
 from util import PlotUtil
+
 
 skip_words = '[\n]|[ ]|[\t]'
 
@@ -24,7 +28,7 @@ def createAndReturnShingles(texts, n):
     for text in texts:
         shingle = ''
         for t in text:
-            if t != ' ':
+            if t != ' ' and t!='\x00':
                 shingle = shingle+t
             if(len(shingle) == n):
                 if shingle not in shingle_dict:
@@ -46,7 +50,16 @@ def createAndReturnWords(texts):
     for text in texts:
         lines = text.splitlines()
         for line in lines:
-            words = line.split()
+            words = []
+            for word in line.split():
+                try :
+                    word = word.decode('unicode_escape').encode('ascii','ignore')
+                    words.append(word)
+                except UnicodeDecodeError as ex:
+#                     print word
+#                     print ex
+                    words.append(word)
+                    
             for word in words:
                 if word not in shingle_dict:
                     shingle_dict[word] = numpy.zeros(len(texts))

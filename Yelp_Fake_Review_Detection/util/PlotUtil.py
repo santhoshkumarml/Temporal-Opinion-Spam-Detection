@@ -7,6 +7,7 @@ Created on Jan 10, 2015
 import matplotlib.pyplot as plt
 from os.path import join
 from util import StatConstants
+import numpy
 
 # def plotReviewTimeVelocity(bnss_statistics, bnssIdToBusinessDict,\
 #                         bnss_key, total_time_slots, inputDir, clr):
@@ -49,6 +50,10 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
+            
+        if measure_key == StatConstants.MAX_TEXT_SIMILARITY:
+            maxSimilarity = numpy.amax(bnss_statistics[bnss_key][measure_key])
+            plt.ylim(ymin = 1,ymax = maxSimilarity+1)
         #print bnss_name, measure_key,bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],bnss_statistics[bnss_key][measure_key],bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:]
         plt.plot(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:],\

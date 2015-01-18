@@ -69,18 +69,22 @@ class SuperGraph(networkx.Graph):
                                          review)
         return graph
 def checkPlot():
-    x1 = [0, 1, 2, 3, 4, 5]
-    y1 = [1, 1, 3, 4, 5, 1]
-    plt.figure(figsize=(16, 18))
-    for i in range(1, 10):
-        ax = plt.subplot(len(range(1, 10)), 1, i)
-        #plt.ylim((1,5))
-        plt.yticks(range(1, 6))
-        ax.grid('off')
-        ax.plot(x1, y1, 'yo-')
-        plt.title('A tale of 2 subplots')
-        plt.ylabel('Damped oscillation' + str(i))
-    plt.tight_layout()
+    x1 = [0, 1, 2, 3, 4]
+    y1 = [1, 1, 1, 1, 1]
+    #plt.figure(figsize=(16, 18))
+    plt.title('A tale of 2 subplots')
+    plt.ylabel('Damped oscillation')
+    plt.ylim(1,max(y1)+1)
+    plt.plot(x1, y1)
+#     for i in range(1, 10):
+#         ax = plt.subplot(len(range(1, 10)), 1, i)
+#         #plt.ylim((1,5))
+#         plt.yticks(range(1, 6))
+#         ax.grid('off')
+#         ax.plot(x1, y1, 'yo-')
+#         plt.title('A tale of 2 subplots')
+#         plt.ylabel('Damped oscillation' + str(i))
+#     plt.tight_layout()
     plt.show()    
 
 def checklshash():
@@ -192,4 +196,4 @@ def checkBucketTree():
     
     print rating_velocity_prob_dist
 
-checkBucketTree()
+checkPlot()
