@@ -81,10 +81,6 @@ class ScrappedDataReader:
                     review_id = (usr.getId(), bnss.getId())
                     
                     revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
-                    
-                    
-                    if review_id in self.reviewIdToReviewDict:
-                        print 'yes', review_id
                         
                     self.reviewIdToReviewDict[revw.getId()] = revw
 
@@ -112,9 +108,6 @@ class ScrappedDataReader:
                     review_id = (usr.getId(), bnss.getId())
                     
                     revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
-                    
-                    if review_id in self.reviewIdToReviewDict:
-                        print 'yes', review_id 
             
                     self.reviewIdToReviewDict[revw.getId()] = revw
             

@@ -160,7 +160,8 @@ def generateStatistics(superGraph, cross_time_graphs,\
                 current_temporal_review = G.getReview(usrId, bnssId)
                 allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
                               for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
-                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))  
+                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
+                    
                 if firstReview.getId() == current_temporal_review.getId():
                     noOfFirstTimers+=1
             
@@ -170,6 +171,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
             if StatConstants.YOUTH_SCORE not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.YOUTH_SCORE] = numpy.zeros(total_time_slots)
             youth_scores = []
+            
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
                 allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
@@ -290,7 +292,10 @@ if __name__ == '__main__':
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes() if bnss_type == SIAUtil.PRODUCT and 'Verlaine' in bnssIdToBusinessDict[bnss_key].getName()]
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+                 if bnss_type == SIAUtil.PRODUCT] 
+                 #and \
+                 #'Tommy DiNic' in bnssIdToBusinessDict[bnss_key].getName()]
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
