@@ -38,7 +38,7 @@ class ScrappedDataReader:
     def getReviewIdToReviewDict(self):
         return self.reviewIdToReviewDict
         
-    def readDataForBnss(self, inputDirName, fileName, reviewIDIncrementer):
+    def readDataForBnss(self, inputDirName, fileName):
         content = 'data='
         with open(join(inputDirName, fileName), mode='r') as f:
             data = dict()
@@ -58,9 +58,7 @@ class ScrappedDataReader:
             #print bnssName, len(rReviews), len(nrReviews)
                 
                 for r in rReviews:
-                    reviewIDIncrementer += 1
                     review_rating = r[RATING]
-                    review_id = reviewIDIncrementer
                     review_text = r[REVIEW_TEXT]
                     review_date = r[REVIEW_DATE].split('Updated review')[0]
                     
@@ -72,23 +70,27 @@ class ScrappedDataReader:
                         print "Continue"
                         continue
                     usrId = r['usrId']
-                    usrExtra = (usr_location, usr_review_count, usr_friend_count)
                 
                     if usrId in self.usrIdToUsrDict:
                         usr = self.usrIdToUsrDict[usrId]
                     else:
+                        usrExtra = (usr_location, usr_review_count, usr_friend_count)
                         usr = user(usrId, usr_name, usrExtra)
                         self.usrIdToUsrDict[usr.getId()] = usr
                     
+                    review_id = (usr.getId(), bnss.getId())
+                    
                     revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
-                    self.usrIdToUsrDict[usr.getId()] = usr
+                    
+                    
+                    if review_id in self.reviewIdToReviewDict:
+                        print 'yes', review_id
+                        
                     self.reviewIdToReviewDict[revw.getId()] = revw
 
                     
                 for nr in nrReviews:
-                    reviewIDIncrementer += 1
                     review_rating = nr[RATING]
-                    review_id = reviewIDIncrementer
                     review_text = nr[REVIEW_TEXT]
                     review_date = nr[REVIEW_DATE].split('Updated review')[0]
                     
@@ -107,17 +109,20 @@ class ScrappedDataReader:
                         usr = user(usrId, usr_name, usrExtra)
                         self.usrIdToUsrDict[usr.getId()] = usr
                     
+                    review_id = (usr.getId(), bnss.getId())
+                    
                     revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
+                    
+                    if review_id in self.reviewIdToReviewDict:
+                        print 'yes', review_id 
             
                     self.reviewIdToReviewDict[revw.getId()] = revw
             
-            
-        return reviewIDIncrementer
+        
         
     def readData(self, inputDirName):
         zipDirectories = [join(inputDirName,f) for f in listdir(inputDirName) if not isfile(join(inputDirName,f)) ]
         onlyfiles = [(zipDir,f) for zipDir in zipDirectories for f in listdir(zipDir) if isfile(join(zipDir,f))]
-        reviewIDIncrementer = 0
         for dirName,fileName in onlyfiles:
-            reviewIDIncrementer = self.readDataForBnss(dirName, fileName, reviewIDIncrementer)
+            self.readDataForBnss(dirName, fileName)
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)

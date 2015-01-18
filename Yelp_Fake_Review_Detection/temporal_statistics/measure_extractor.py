@@ -135,30 +135,35 @@ def generateStatistics(superGraph, cross_time_graphs,\
             #NumberOfReviews
             if StatConstants.NO_OF_REVIEWS not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots)
+                
             noOfReviews = len(neighboring_usr_nodes)
             bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS][timeKey] = noOfReviews
             
             #Ratio of Singletons
             if StatConstants.RATIO_OF_SINGLETONS not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS] = numpy.zeros(total_time_slots)
+                
             noOfSingleTons = 0
             for neighbor in neighboring_usr_nodes:
                 if len(superGraph.neighbors(neighbor)) == 1:
                     noOfSingleTons+=1
+                    
             bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS][timeKey] = float(noOfSingleTons)/float(len(reviews_for_bnss))        
             
             #Ratio of First Timers
             if StatConstants.RATIO_OF_FIRST_TIMERS not in bnss_statistics[bnssId]: 
                 bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS] = numpy.zeros(total_time_slots)
+                
             noOfFirstTimers = 0
             for usr_neighbor in neighboring_usr_nodes:
                 (usrId, usr_type) = usr_neighbor
                 current_temporal_review = G.getReview(usrId, bnssId)
                 allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
                               for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
-                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
+                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))  
                 if firstReview.getId() == current_temporal_review.getId():
                     noOfFirstTimers+=1
+            
             bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS][timeKey] = float(noOfFirstTimers)/float(len(reviews_for_bnss))
             
             #Youth Score
@@ -170,10 +175,11 @@ def generateStatistics(superGraph, cross_time_graphs,\
                 allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
                               for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
                 allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
-                current_temporal_review = G.getReview(usrId, bnssId)
+                current_temporal_review = G.getReview(usrId, bnssId)  
                 reviewAge = (SIAUtil.getDateForReview(current_temporal_review)-SIAUtil.getDateForReview(allReviews[0])).days
                 youth_score = 1-sigmoid_prime(reviewAge)
                 youth_scores.append(youth_score)
+                
             bnss_statistics[bnssId][StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
             
             #Entropy Score
@@ -284,8 +290,7 @@ if __name__ == '__main__':
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              '2-M', False)
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes() if bnss_type == SIAUtil.PRODUCT]
-    #and 'Reading Termi' in bnssIdToBusinessDict[bnss_key].getName()]
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes() if bnss_type == SIAUtil.PRODUCT and 'Verlaine' in bnssIdToBusinessDict[bnss_key].getName()]
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
