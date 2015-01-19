@@ -227,8 +227,8 @@ def generateStatistics(superGraph, cross_time_graphs,\
                     maxTextSimilarity = 1
                 else:
                     bin_count = numpy.bincount(candidateGroups)
-#                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
-#                                          bnssId, reviewTextsInThisTimeBlock) 
+                    printSimilarReviews(bin_count, candidateGroups, timeKey,\
+                                         bnssId, reviewTextsInThisTimeBlock) 
                     maxTextSimilarity = numpy.amax(bin_count)
                                     
             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
@@ -244,7 +244,6 @@ def generateStatistics(superGraph, cross_time_graphs,\
         no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         #print statistics_for_bnss
-        print '--------------------------------------------------'
         for timeKey in range(total_time_slots):
             if timeKey > firstTimeKey:
                 fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
@@ -264,7 +263,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
             else:
                 if no_of_reviews_for_bnss[timeKey] > 0:
                     statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /=  statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
-        print '--------------------------------------------------'    
+            
     return bnss_statistics
         
 
