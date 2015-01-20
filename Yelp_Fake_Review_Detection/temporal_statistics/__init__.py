@@ -196,4 +196,24 @@ def checkBucketTree():
     
     print rating_velocity_prob_dist
 
-checkPlot()
+def checkUsersWithOnlyNotRecommendedReviews():
+    inputDirName = 'D:\\workspace\\datalab\\data\\z'
+    rdr = ScrappedDataReader()
+    rdr.readData(inputDirName)
+    G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
+    allUserIds = [id for (id,type) in G.nodes() if type == SIAUtil.USER]
+    usersWithNotRecommendedReviews = set()
+    for usrId in allUserIds:
+        bnss_nodes = G.neighbors((usrId,SIAUtil.USER))
+        allReviews = [G.getReview(usrId, bnssId) for bnssId,bnssType in bnss_nodes if not G.getReview(usrId, bnssId).isRecommended()]
+        allNotRecommended = True
+        for revw in allReviews:
+            if revw.isRecommended():
+                allNotRecommended = False
+                break
+        if allNotRecommended:
+            usersWithNotRecommendedReviews.add(usrId)
+    print len(usersWithNotRecommendedReviews)
+    
+checkUsersWithOnlyNotRecommendedReviews()
+    
