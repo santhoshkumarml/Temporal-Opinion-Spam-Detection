@@ -12,62 +12,9 @@ from os.path import join
 import json
 from util.ScrappedDataReader import ScrappedDataReader
 from temporal_statistics import measure_extractor
+from util.GraphUtil import SuperGraph
+import sys
 
-
-class SuperGraph(networkx.Graph):
-    def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict(), parent_reviews= dict()):
-        super(SuperGraph, self).__init__()
-        self.userIdToUserDict = parentUserIdToUserDict
-        self.businessIdToBusinessDict = parentBusinessIdToBusinessDict
-        self.reviewIdToReviewDict = parent_reviews
-    
-    
-    def addNodesAndEdge(self, usr, bnss, review):
-        self.userIdToUserDict[usr.getId()] = usr
-        self.businessIdToBusinessDict[bnss.getId()] = bnss
-        self.reviewIdToReviewDict[review.getId()] = review
-        
-        if not super(SuperGraph, self).has_node((usr.getId(),SIAUtil.USER)):
-            super(SuperGraph, self).add_node((usr.getId(),SIAUtil.USER))
-        
-        if not super(SuperGraph, self).has_node((bnss.getId(),SIAUtil.PRODUCT)):
-            super(SuperGraph, self).add_node((bnss.getId(),SIAUtil.PRODUCT))
-            
-        if super(SuperGraph, self).has_edge((usr.getId(),SIAUtil.USER),\
-                                              (bnss.getId(),SIAUtil.PRODUCT)):
-            usrId = usr.getId()
-            bnssId = bnss.getId()
-            alreadyPresentReview =\
-             self.reviewIdToReviewDict[self.get_edge_data(\
-                                                          (usrId,SIAUtil.USER),\
-                                                           (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
-            if self.businessIdToBusinessDict[bnssId].getName() == 'Silver Rice':
-                print alreadyPresentReview.getTimeOfReview(), self.userIdToUserDict[alreadyPresentReview.getUserId()].getName(), alreadyPresentReview.getBusinessID()
-                print review.getTimeOfReview(), self.userIdToUserDict[review.getUserId()].getName(), review.getBusinessID()
-                print alreadyPresentReview.getReviewText() == review.getReviewText(), review.getReviewText() 
-        else:
-            super(SuperGraph, self).add_edge((usr.getId(),SIAUtil.USER),\
-                                              (bnss.getId(),SIAUtil.PRODUCT),\
-                                               attr_dict={SIAUtil.REVIEW_EDGE_DICT_CONST: review.getId()})
-    
-    def getUser(self, userId):
-        return self.userIdToUserDict[userId]
-    
-    def getBusiness(self, businessId):
-        return self.businessIdToBusinessDict[businessId]
-        
-    def getReview(self,usrId, bnssId):
-        return self.reviewIdToReviewDict[self.get_edge_data((usrId,SIAUtil.USER), (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
-    
-    @staticmethod
-    def createGraph(usrIdToUserDict,bnssIdToBusinessDict, parent_reviews):
-        graph = SuperGraph()
-        for reviewKey in parent_reviews.iterkeys():
-            review = parent_reviews[reviewKey]
-            graph.addNodesAndEdge(usrIdToUserDict[review.getUserId()],\
-                                         bnssIdToBusinessDict[review.getBusinessID()],\
-                                         review)
-        return graph
 def checkPlot():
     x1 = [0, 1, 2, 3, 4]
     y1 = [1, 1, 1, 1, 1]
@@ -195,25 +142,60 @@ def checkBucketTree():
     rating_velocity_prob_dist = {(begin,end):(count_data/(6)) for (begin, end, count_data) in bucketTree}
     
     print rating_velocity_prob_dist
+    
+def checkYelpAPI():
+    inputDirName = '/home/santhosh'
+    rdr = ScrappedDataReader()
+    rdr.readDataForBnss(inputDirName, 'Boho Cafe.txt')
+    revws1 = rdr.getReviewIdToReviewDict().values()
+    content = 'data='
+    revws2 = []
+    with open(join(inputDirName, 'bnss'), mode='r') as f:
+        data = dict()
+        content = content+f.readline()
+        exec(content)
+        revws2 = data['reviews']
+    print len(revws1),len(revws2)
 
 def checkUsersWithOnlyNotRecommendedReviews():
-    inputDirName = 'D:\\workspace\\datalab\\data\\z'
+#     inputDirName = 'D:\\workspace\\datalab\\data\\z'
+    inputDirName = '/media/santhosh/Data/workspace/datalab/data/z'
     rdr = ScrappedDataReader()
     rdr.readData(inputDirName)
+    print 'Read Data'
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
-    allUserIds = [id for (id,type) in G.nodes() if type == SIAUtil.USER]
-    usersWithNotRecommendedReviews = set()
+    print 'Graph Constructed'
+    allUserIds = set([usrid for (usrid,usrtype) in G.nodes() if usrtype == SIAUtil.USER])
+    usersWithAleastOneRecReviews = set()
+    usersWithOnlyOneReview = set()
     for usrId in allUserIds:
+        usr = rdr.getUsrIdToUsrDict()[usrId]
+        usrExtra = usr.getUsrExtra()
+        reviewCountString = usrExtra[1]
+        reviewCountSplit = reviewCountString.split()
+        reviewCount = int(reviewCountSplit[0])
+        if reviewCount == 1:
+            usersWithOnlyOneReview.add(usrId)
+
         bnss_nodes = G.neighbors((usrId,SIAUtil.USER))
-        allReviews = [G.getReview(usrId, bnssId) for bnssId,bnssType in bnss_nodes if not G.getReview(usrId, bnssId).isRecommended()]
-        allNotRecommended = True
+        allReviews = [G.getReview(usrId, bnssId) for bnssId,bnssType in bnss_nodes]
+        hasOneRecommended = False
         for revw in allReviews:
             if revw.isRecommended():
-                allNotRecommended = False
+                hasOneRecommended = True
                 break
-        if allNotRecommended:
-            usersWithNotRecommendedReviews.add(usrId)
-    print len(usersWithNotRecommendedReviews)
+        if hasOneRecommended:
+            usersWithAleastOneRecReviews.add(usrId)
     
+    usersWithNotRecommendedReviewsAlone = allUserIds-usersWithAleastOneRecReviews
+    usersWithMultipleReviewsAndNotRecommendedReviewsAlone =\
+     usersWithNotRecommendedReviewsAlone-usersWithOnlyOneReview
+     
+    print 'Total Users',len(allUserIds)
+    print 'usersWithOnlyOneReview', len(usersWithOnlyOneReview)
+    print 'usersWithAlteastOneRecReviews', len(usersWithAleastOneRecReviews)
+    print 'usersWithNotRecommendedReviewsAlone', len(usersWithNotRecommendedReviewsAlone)  
+    print 'usersWithMultipleNotRecReviewsAlone',len(usersWithMultipleReviewsAndNotRecommendedReviewsAlone)
+        
 checkUsersWithOnlyNotRecommendedReviews()
     
