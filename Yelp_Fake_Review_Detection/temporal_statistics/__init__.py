@@ -197,5 +197,11 @@ def checkUsersWithOnlyNotRecommendedReviews():
     print 'usersWithNotRecommendedReviewsAlone', len(usersWithNotRecommendedReviewsAlone)  
     print 'usersWithMultipleNotRecReviewsAlone',len(usersWithMultipleReviewsAndNotRecommendedReviewsAlone)
         
-checkUsersWithOnlyNotRecommendedReviews()
-    
+def checkBnss():
+#     inputDirName = 'D:\\workspace\\datalab\\data\\z'
+    inputDirName = '/media/santhosh/Data/workspace/datalab/data/r'
+    rdr = ScrappedDataReader()
+    rdr.readData(inputDirName)
+    print len(rdr.getBnssIdToBnssDict())
+
+checkBnss()
