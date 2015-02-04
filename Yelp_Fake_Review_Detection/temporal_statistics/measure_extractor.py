@@ -228,8 +228,8 @@ def generateStatistics(superGraph, cross_time_graphs,\
                     maxTextSimilarity = 1
                 else:
                     bin_count = numpy.bincount(candidateGroups)
-                    printSimilarReviews(bin_count, candidateGroups, timeKey,\
-                                         bnssId, reviewTextsInThisTimeBlock) 
+#                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
+#                                          bnssId, reviewTextsInThisTimeBlock) 
                     maxTextSimilarity = numpy.amax(bin_count)
                                     
             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity

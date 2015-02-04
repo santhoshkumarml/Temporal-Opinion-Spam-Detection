@@ -37,7 +37,7 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
     plot = 1
-    plt.figure(figsize=(20,20))
+    plt.figure(figsize=(total_time_slots,total_time_slots))
     for measure_key in StatConstants.MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
