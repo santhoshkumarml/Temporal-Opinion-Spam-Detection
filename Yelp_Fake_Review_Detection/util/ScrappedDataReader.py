@@ -3,14 +3,17 @@ Created on Jan 4, 2015
 
 @author: Santhosh
 '''
-from util.SIAUtil import business, user, review
 from os import listdir
 from os.path import isfile, join
 import re
 import sys
 
-NOT_RECOMMENDED = 'nonReccomended'
-RECOMMENDED = 'Reccomended'
+from util.SIAUtil import business, user, review
+
+
+NOT_RECOMMENDED = 'NotRecommended'
+RECOMMENDED = 'Recommended'
+BNSS_NAME = 'BnssName'
 ADDRESS = 'Address'
 RATING = 'Rating'
 REVIEW_COUNT = 'reviewCount'
@@ -21,7 +24,7 @@ USR_LOCATION = 'Place'
 REVIEW_TEXT = 'ReviewComment'
 REVIEW_DATE = 'Date'
 IMG_SRC = 'imgSrc'
-URL = 'URL'
+URL = 'BnssUrl'
 
 class ScrappedDataReader:
     def __init__(self):
@@ -44,7 +47,7 @@ class ScrappedDataReader:
             data = dict()
             content = content+f.readline()
             exec(content)
-            bnssName = fileName.strip('.txt')
+            bnssName = data[BNSS_NAME]
             bnssAddress = data[ADDRESS]
             bnssUrl = data[URL]
             bnssId = (bnssUrl, bnssAddress)
@@ -111,9 +114,13 @@ class ScrappedDataReader:
             
                     self.reviewIdToReviewDict[revw.getId()] = revw
             
-        
-        
     def readData(self, inputDirName):
+        onlyfiles = [f for f in listdir(inputDirName) if isfile(join(inputDirName,f))]
+        for fileName in onlyfiles:
+            self.readDataForBnss(inputDirName, fileName)
+        return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)    
+        
+    def readDataWithZipDirs(self, inputDirName):
         zipDirectories = [join(inputDirName,f) for f in listdir(inputDirName) if not isfile(join(inputDirName,f)) ]
         onlyfiles = [(zipDir,f) for zipDir in zipDirectories for f in listdir(zipDir) if isfile(join(zipDir,f))]
         for dirName,fileName in onlyfiles:
