@@ -8,6 +8,23 @@ from datetime import datetime,timedelta
 import re
 import SIAUtil
 
+def getDayIncrements(timeSplit):
+    if not re.match('[0-9]+-[WDMY]', timeSplit):
+        print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
+        timeSplit = '1-D'
+    numeric = int(timeSplit.split('-')[0])
+    incrementStr = timeSplit.split('-')[1]
+    dayIncrement = 1
+    if incrementStr == 'D':
+        dayIncrement = numeric
+    elif incrementStr == 'W':
+        dayIncrement = numeric * 7
+    elif incrementStr == 'M':
+        dayIncrement = numeric * 30
+    else:
+        dayIncrement = numeric * 365
+    return dayIncrement
+
 class SuperGraph(networkx.Graph):
     def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict(), parent_reviews= dict()):
         super(SuperGraph, self).__init__()
@@ -90,22 +107,12 @@ class TemporalGraph(networkx.Graph):
     def getReview(self,usrId, bnssId):
         return self.reviewIdToReviewDict[self.get_edge_data((usrId,SIAUtil.USER), (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
 
+
+    
     @staticmethod
     def createTemporalGraph(userIdToUserDict,businessIdToBusinessDict, parent_reviews,\
                           timeSplit ='1-D', initializePriors=True):
-        if not re.match('[0-9]+-[DMY]', timeSplit):
-            print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
-            timeSplit ='1-D'
-
-        numeric = int(timeSplit.split('-')[0])
-        incrementStr = timeSplit.split('-')[1]
-        dayIncrement = 1
-        if incrementStr=='D':
-            dayIncrement = numeric
-        elif incrementStr=='M':
-            dayIncrement = numeric*30
-        else:
-            dayIncrement = numeric*365
+        dayIncrement = getDayIncrements(timeSplit)
         
         all_reviews = [SIAUtil.getDateForReview(r)\
                  for r in parent_reviews.values() ]

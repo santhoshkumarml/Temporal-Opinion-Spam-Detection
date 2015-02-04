@@ -10,7 +10,7 @@ import os
 from os.path import join
 import random
 import sys
-from util import PlotUtil
+from util import PlotUtil, GraphUtil
 from util import SIAUtil
 from util import StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
@@ -18,6 +18,7 @@ from util.ScrappedDataReader import ScrappedDataReader
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
 
+timeLength = '1-W'
 
 def printSimilarReviews(bin_count, candidateGroups, timeKey, bnss_key, reviewTextsInThisTimeBlock):
     bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
@@ -191,7 +192,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
                 bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
                 
             if noOfReviews >= 2:
-                bucketTree = constructIntervalTree(60)
+                bucketTree = constructIntervalTree(GraphUtil.getDayIncrements(timeLength))
                 allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
                 allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key = lambda x: SIAUtil.getDateForReview(x))
                 allReviewVelocity = [ (SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x+1]) - \
@@ -290,7 +291,7 @@ if __name__ == '__main__':
     cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
-                                             '2-M', False)
+                                             timeLength, False)
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT] 
                  #and \
@@ -298,7 +299,7 @@ if __name__ == '__main__':
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
-    bnssKeySet = set(bnssKeys[:100])
+    bnssKeySet = set(bnssKeys[:1])
     
     
     

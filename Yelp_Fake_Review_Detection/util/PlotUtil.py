@@ -79,3 +79,9 @@ def plotCurve(a,b):
     plt.title('Plot')
     plt.plot(a,b)
     plt.show()
+
+def plotAny(a):
+    plt.title('Plot')
+    for i in range(a.size):
+        plt.plot(i,a[i],'go-')
+    plt.show()
