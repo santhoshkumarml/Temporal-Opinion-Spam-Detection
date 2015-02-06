@@ -268,12 +268,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
     return bnss_statistics
         
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print 'Usage: python temporal_statistics.py fileName'
-        sys.exit()
-    inputFileName = sys.argv[1]
-    
+def extractMeasures(inputFileName):
     beforeDataReadTime = datetime.now()
     
     rdr = ScrappedDataReader()
