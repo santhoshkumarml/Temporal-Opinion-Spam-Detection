@@ -37,7 +37,7 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
     plot = 1
-    plt.figure(figsize=(total_time_slots,total_time_slots))
+    plt.figure(figsize=(20,20))
     for measure_key in StatConstants.MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
@@ -45,7 +45,12 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
         plt.title('Business statistics')
         plt.xlabel('Time in multiples of 2 months')
         plt.xlim((bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots-1))
-        plt.xticks(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots))
+
+        step = 1
+        if total_time_slots>70:
+         step = total_time_slots/100
+           
+        plt.xticks(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots, step))
         plt.ylabel(measure_key)
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))

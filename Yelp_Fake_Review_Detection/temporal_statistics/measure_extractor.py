@@ -18,7 +18,7 @@ from util.ScrappedDataReader import ScrappedDataReader
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
 
-timeLength = '1-W'
+timeLength = '1-M'
 
 def printSimilarReviews(bin_count, candidateGroups, timeKey, bnss_key, reviewTextsInThisTimeBlock):
     bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
