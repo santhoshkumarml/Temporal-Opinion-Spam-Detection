@@ -26,7 +26,7 @@ REVIEW_DATE = 'Date'
 IMG_SRC = 'imgSrc'
 URL = 'BnssUrl'
 
-class ScrappedDataReader:
+class YelpDataReader:
     def __init__(self):
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}

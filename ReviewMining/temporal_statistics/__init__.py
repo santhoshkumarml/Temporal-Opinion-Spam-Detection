@@ -6,11 +6,12 @@ Simple demo with multiple subplots.
 import numpy as np
 import matplotlib.pyplot as plt
 from lshash import LSHash
-from util import dataReader as dr, SIAUtil
+from util import SIAUtil
 import networkx
 from os.path import join
 import json
-from util.ScrappedDataReader import ScrappedDataReader
+from yelp_utils import YelpDataReader.ScrappedDataReader
+from yelp_utils import dataReader as dr
 from temporal_statistics import measure_extractor
 from util.GraphUtil import SuperGraph
 import sys
@@ -59,7 +60,7 @@ def checkNewReader():
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/zips'
     #\\2 Duck Goose.txt
     #\\Cafe Habana.txt
-    rdr = ScrappedDataReader()
+    rdr = YelpDataReader()
     rdr.readData(inputDirName)    
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
     
@@ -111,7 +112,7 @@ def checkNewReader():
     
 def doIndexForRestaurants():
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/zips'
-    rdr = ScrappedDataReader()
+    rdr = YelpDataReader()
     rdr.readData(inputDirName)
     result = dict()
     restaurants = []
@@ -145,7 +146,7 @@ def checkBucketTree():
     
 def checkYelpAPI():
     inputDirName = '/home/santhosh'
-    rdr = ScrappedDataReader()
+    rdr = YelpDataReader()
     rdr.readDataForBnss(inputDirName, 'Boho Cafe.txt')
     revws1 = rdr.getReviewIdToReviewDict().values()
     content = 'data='
@@ -160,7 +161,7 @@ def checkYelpAPI():
 def checkUsersWithOnlyNotRecommendedReviews():
 #     inputDirName = 'D:\\workspace\\datalab\\data\\z'
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/z'
-    rdr = ScrappedDataReader()
+    rdr = YelpDataReader()
     rdr.readData(inputDirName)
     print 'Read Data'
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
@@ -200,8 +201,10 @@ def checkUsersWithOnlyNotRecommendedReviews():
 def checkBnss():
 #     inputDirName = 'D:\\workspace\\datalab\\data\\z'
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/r'
-    rdr = ScrappedDataReader()
+    rdr = YelpDataReader()
     rdr.readData(inputDirName)
     print len(rdr.getBnssIdToBnssDict())
 
-checkBnss()
+def plotDirCreation(inputFileName):
+    import os
+    inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')

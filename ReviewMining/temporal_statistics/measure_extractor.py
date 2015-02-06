@@ -14,7 +14,6 @@ from util import PlotUtil, GraphUtil
 from util import SIAUtil
 from util import StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
-from util.ScrappedDataReader import ScrappedDataReader
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
 
@@ -268,16 +267,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
     return bnss_statistics
         
 
-def extractMeasures(inputFileName):
-    beforeDataReadTime = datetime.now()
-    
-    rdr = ScrappedDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
-    
-    afterDataReadTime = datetime.now()
-    
-    print 'TimeTaken for Reading data:',afterDataReadTime-beforeDataReadTime
-    
+def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, plotDir):
     beforeGraphConstructionTime = datetime.now()
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
@@ -312,11 +302,10 @@ def extractMeasures(inputFileName):
     
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     
-    inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
         PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
                                      bnssKey, len(cross_time_graphs.keys()),\
-                                      inputDir, random.choice(colors))
+                                      plotDir, random.choice(colors))
     afterPlot = datetime.now()
     print 'Time taken for Plot:',afterPlot-beforePlot
