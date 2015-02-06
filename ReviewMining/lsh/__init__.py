@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from util.ScrappedDataReader import YelpDataReader as sdr
+from yelp_utils.YelpDataReader import YelpDataReader as sdr
 from util.GraphUtil import TemporalGraph
 from util import SIAUtil
 import ShingleUtil

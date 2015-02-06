@@ -10,7 +10,7 @@ from util import SIAUtil
 import networkx
 from os.path import join
 import json
-from yelp_utils import YelpDataReader.ScrappedDataReader
+from yelp_utils.YelpDataReader import YelpDataReader
 from yelp_utils import dataReader as dr
 from temporal_statistics import measure_extractor
 from util.GraphUtil import SuperGraph
