@@ -7,7 +7,8 @@ import pandas as pd
 import sys
 from os.path import join
 from util.SIAUtil import user, business, review
-from datetime import datetime
+from datetime import datetime, date
+import dateutil
 
 #appid,review id,userid,username,stars,version,date,number of helpful votes,total votes,unix timestamp
 META_BNSS_ID = 'bnss_id'
@@ -50,7 +51,8 @@ class ItunesDataReader:
         df1 = pd.read_csv(reviewMetaFile,escapechar='\\',header=None,\
                               dtype=object, names = META_COLS)
         
-        #df1 =  df1.dropna(axis=0, how='all')
+        df1 =  df1.dropna(axis=0, how='all')
+        
         reviewFile = join(reviewFolder, REVIEW_FILE)
         
         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
@@ -67,7 +69,19 @@ class ItunesDataReader:
             stars = row[META_IDX_DICT[META_STARS]]
             review_date = row[META_IDX_DICT[META_DATE]]
             
-            print bnss_id, user_id, user_name, review_id, stars, review_date
+            try :
+                date_object = dateutil.parser.parse(review_date)
+                date_object = date_object.date()
+            except:
+                e = sys.exc_info()[0]
+                print e
+                continue
+            try:
+                stars = float(stars)
+            except:
+                e = sys.exc_info()[0]
+                print e
+                continue
             
             if bnss_id not in self.bnssIdToBnssDict:
                 self.bnssIdToBnssDict[bnss_id] = business(bnss_id, bnss_id)
@@ -77,17 +91,18 @@ class ItunesDataReader:
                 self.usrIdToUsrDict[user_id] = user(user_id, user_name)    
             usr = self.usrIdToUsrDict[user_id]
             
-            date_object = datetime.strptime(review_date, '%b %d,%Y')
             
             revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
             
             self.reviewIdToReviewDict[review_id] = revw
     
             
-        for row in df2.iterrows():
-            print row
+        for row in df2.itertuples():
             review_id = row[REVW_IDX_DICT[REVIEW_ID]]
             review_text = row[REVW_IDX_DICT[CONTENT]]
+            if review_id not in self.reviewIdToReviewDict:
+                print 'Not Present', review_id
+                continue
             self.reviewIdToReviewDict[review_id].setReviewText(review_text)
         
-        print len(self.reviewIdToReviewDict.keys())
+        return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)

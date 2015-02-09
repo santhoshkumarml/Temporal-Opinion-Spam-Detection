@@ -83,7 +83,7 @@ class YelpDataReader:
                     
                     review_id = (usr.getId(), bnss.getId())
                     
-                    revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, True)
+                    revw = review(review_id, usr.getId(), bnss.getId(), float(review_rating), review_date, review_text, True)
                         
                     self.reviewIdToReviewDict[revw.getId()] = revw
 
@@ -110,7 +110,7 @@ class YelpDataReader:
                     
                     review_id = (usr.getId(), bnss.getId())
                     
-                    revw = review(review_id, usr.getId(), bnss.getId(), review_rating, review_date, review_text, False)
+                    revw = review(review_id, usr.getId(), bnss.getId(), float(review_rating), review_date, review_text, False)
             
                     self.reviewIdToReviewDict[revw.getId()] = revw
             

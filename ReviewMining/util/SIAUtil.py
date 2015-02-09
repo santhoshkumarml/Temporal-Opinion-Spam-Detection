@@ -244,7 +244,7 @@ class review(SIALink):
     def __init__(self, _id, usrId, bnId, rating, timeOfReview, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
-        self.rating = float(rating)
+        self.rating = rating
         self.usrId = usrId
         self.bnId = bnId
         self.timeOfReview = timeOfReview
@@ -290,9 +290,11 @@ def getDateForReview(r):
     if '-' in r.getTimeOfReview():
         review_date = re.split('-', r.getTimeOfReview())
         review_date =  date(int(review_date[0]), int(review_date[1]), int(review_date[2]))
-    else:
+    elif '/' in r.getTimeOfReview():
         review_date = re.split('/', r.getTimeOfReview())
         review_date = date(int(review_date[2].strip('\\')), int(review_date[0].strip('\\')), int(review_date[1].strip('\\')))
+    else:
+        review_date = r.getTimeOfReview()
     return review_date
 
 
