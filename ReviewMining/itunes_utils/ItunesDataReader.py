@@ -24,12 +24,16 @@ META_COLS = [META_BNSS_ID,  META_REVIEW_ID, META_USER_ID, META_USER_NAME, \
              META_STARS, META_BNSS_VERSION, META_DATE, META_HELPFUL_VOTES, \
              META_TOTAL_VOTES, META_TIMESTAMP]
 
+META_IDX_DICT = {META_COLS[i]:i for i in range(len(META_COLS))}
+
 #appid,review id,title,content
 BNSS_ID = 'bnss_id'
 REVIEW_ID = 'review_id'
 TITLE = 'title'
 CONTENT = 'content' 
 COLS = [BNSS_ID, REVIEW_ID, TITLE, CONTENT]
+
+REVW_IDX_DICT = {COLS[i]:i for i in range(len(COLS))}
 
 META_FILE = 'itunes3_reviews_meta.csv'
 REVIEW_FILE = 'itunes3_reviews_text.csv'
@@ -54,13 +58,16 @@ class ItunesDataReader:
         
         df2 = df2.dropna(axis=0, how='all')
         
-        for row in df1.iterrows():
-            bnss_id = row[META_BNSS_ID]
-            user_id = row[META_USER_ID]
-            user_name = row[META_USER_NAME]
-            review_id = row[META_REVIEW_ID]
-            stars = row[META_STARS]
-            review_date = row[META_DATE]
+        for row in df1.itertuples():
+            row = row[0]
+            bnss_id = row[META_IDX_DICT[META_BNSS_ID]]
+            user_id = row[META_IDX_DICT[META_USER_ID]]
+            user_name = row[META_IDX_DICT[META_USER_NAME]]
+            review_id = row[META_IDX_DICT[META_REVIEW_ID]]
+            stars = row[META_IDX_DICT[META_STARS]]
+            review_date = row[META_IDX_DICT[META_DATE]]
+            
+            print bnss_id, user_id, user_name, review_id, stars, review_date
             
             if bnss_id not in self.bnssIdToBnssDict:
                 self.bnssIdToBnssDict[bnss_id] = business(bnss_id, bnss_id)
@@ -78,8 +85,9 @@ class ItunesDataReader:
     
             
         for row in df2.iterrows():
-            review_id = row[REVIEW_ID]
-            review_text = row[CONTENT]
+            print row
+            review_id = row[REVW_IDX_DICT[REVIEW_ID]]
+            review_text = row[REVW_IDX_DICT[CONTENT]]
             self.reviewIdToReviewDict[review_id].setReviewText(review_text)
         
         print len(self.reviewIdToReviewDict.keys())
