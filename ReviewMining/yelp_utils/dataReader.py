@@ -6,7 +6,7 @@
 
 import re
 
-from SIAUtil import user, business, review
+from util.SIAUtil import user, business, review
 import sys
 B = []
 R = []

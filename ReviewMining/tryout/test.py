@@ -4,26 +4,33 @@ Created on Feb 9, 2015
 @author: santhosh
 '''
 # -*- coding: utf-8 -*-
+from __future__ import division
+
 from datetime import datetime
 import json
 from lshash import LSHash
 import networkx
+import numpy
 import os
 from os.path import join
 import sys
 
+import cusum
 from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
 import matplotlib.pyplot as plt
-import numpy
 from temporal_statistics import measure_extractor
-from util import SIAUtil
-from util.GraphUtil import SuperGraph
-from util.GraphUtil import TemporalGraph
+from util import SIAUtil, PlotUtil
+from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
 
 
+def checkCusum():
+    x = 2*numpy.sin(2*numpy.pi*numpy.arange(0, 3, .01))
+    ta, tai, taf, amp = cusum.cusum(x, 1, .05)
+    print ta, tai, taf, amp
+    
 def checkJacDocHash(inputDirName):
     scr = YelpDataReader()
     usrIdToUsrDict, bnssIdToBnssDict, reviewIdToReviewDict = scr.readData(inputDirName)
