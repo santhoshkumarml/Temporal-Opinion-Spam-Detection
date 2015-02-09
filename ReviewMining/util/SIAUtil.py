@@ -7,7 +7,7 @@ Created on Nov 3, 2014
 Node Types
 '''
 
-from datetime import date
+from datetime import date, datetime
 import numpy
 import re
 
@@ -287,14 +287,16 @@ class review(SIALink):
 
 def getDateForReview(r):
     review_date = ''
+    
+    if isinstance(r.getTimeOfReview(),datetime.date):
+        return r.getTimeOfReview()
+    
     if '-' in r.getTimeOfReview():
         review_date = re.split('-', r.getTimeOfReview())
         review_date =  date(int(review_date[0]), int(review_date[1]), int(review_date[2]))
-    elif '/' in r.getTimeOfReview():
+    else:
         review_date = re.split('/', r.getTimeOfReview())
         review_date = date(int(review_date[2].strip('\\')), int(review_date[0].strip('\\')), int(review_date[1].strip('\\')))
-    else:
-        review_date = r.getTimeOfReview()
     return review_date
 
 
