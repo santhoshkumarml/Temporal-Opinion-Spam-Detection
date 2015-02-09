@@ -275,6 +275,9 @@ class review(SIALink):
     def getReviewText(self):
         return self.text
     
+    def setReviewText(self, txt):
+        self.text = txt
+    
     def isRecommended(self):
         return self.recommended
     
