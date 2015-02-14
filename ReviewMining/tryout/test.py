@@ -116,7 +116,16 @@ def checkPlot():
 #         plt.title('A tale of 2 subplots')
 #         plt.ylabel('Damped oscillation' + str(i))
 #     plt.tight_layout()
-    plt.show()    
+    plt.show()
+    
+def checkPlot2():    
+    fig = plt.figure()
+    data = (0, 2, 3, 5, 5, 5, 9, 7, 8, 6, 6)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(data, 'r-', linewidth=4)
+    ax.axvline(x=5, ymin=0, ymax=data[5] / max(data), linewidth=4)
+    #ax.text(5, 4, 'your text here')
+    plt.show()
 
 def checklshash():
     lsh = LSHash(6, 8)
@@ -312,5 +321,5 @@ def tryTemporalStatisticsForItunes():
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
     measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir)
 
-checkCusum()
+checkPlot2()
 #tryTemporalStatisticsForItunes()
