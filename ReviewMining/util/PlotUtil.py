@@ -48,7 +48,7 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
 
         step = 1
         if total_time_slots>70:
-         step = total_time_slots/100
+            step = total_time_slots/100
            
         plt.xticks(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots, step))
         plt.ylabel(measure_key)
@@ -70,7 +70,9 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
     plt.tight_layout()
-    plt.savefig(join(inputDir, bnss_name+"_stat")+'.png',\
+    imgFile = join(inputDir, bnss_name+"_stat")+'.png'
+    print bnss_name+" stats are logged to "+imgFile
+    plt.savefig(imgFile,\
                  additional_artists=art,\
                  bbox_inches="tight")
     plt.close()

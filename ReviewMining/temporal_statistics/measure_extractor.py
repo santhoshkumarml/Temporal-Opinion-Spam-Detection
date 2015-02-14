@@ -267,7 +267,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
     return bnss_statistics
         
 
-def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, plotDir):
+def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, plotDir, top_n_bnss=-1):
     beforeGraphConstructionTime = datetime.now()
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
@@ -284,7 +284,7 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, 
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
-    bnssKeySet = set(bnssKeys[:1])
+    bnssKeySet = set(bnssKeys[:top_n_bnss])
     
     
     

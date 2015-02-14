@@ -15,7 +15,7 @@ import os
 from os.path import join
 import sys
 
-import cusum
+import cusum.cusum as cm
 from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ from yelp_utils.YelpDataReader import YelpDataReader
 
 def checkCusum():
     x = 2*numpy.sin(2*numpy.pi*numpy.arange(0, 3, .01))
-    ta, tai, taf, amp = cusum.cusum(x, 1, .05)
+    ta, tai, taf, amp = cm.cusum(x, 1, .05)
     print ta, tai, taf, amp
     
 def checkJacDocHash(inputDirName):
@@ -307,8 +307,10 @@ def tryTemporalStatisticsForItunes():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
+    print len(usrIdToUserDict.keys()), len(bnssIdToBusinessDict.keys()),len(reviewIdToReviewsDict.keys())
+    sys.exit()
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
     measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir)
-    
-    
-tryTemporalStatisticsForItunes()
+
+checkCusum()
+#tryTemporalStatisticsForItunes()
