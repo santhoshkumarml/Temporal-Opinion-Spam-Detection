@@ -316,10 +316,9 @@ def tryTemporalStatisticsForItunes():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
-    print len(usrIdToUserDict.keys()), len(bnssIdToBusinessDict.keys()),len(reviewIdToReviewsDict.keys())
     sys.exit()
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
     measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir)
 
-checkPlot2()
-#tryTemporalStatisticsForItunes()
+#checkPlot2()
+tryTemporalStatisticsForItunes()

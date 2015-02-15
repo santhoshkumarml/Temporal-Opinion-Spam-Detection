@@ -45,15 +45,18 @@ class ItunesDataReader:
         self.bnssIdToBnssDict = {}
         self.reviewIdToReviewDict = {}
     def readData(self, reviewFolder):
+        beforeDataReadTime = datetime.now()
         reviewMetaFile = join(reviewFolder, META_FILE)
         reviewFile = join(reviewFolder, REVIEW_FILE)
+        skippedMeta,skippedData = 0,0
         with open(reviewMetaFile, 'r') as f:
             lines = f.read().splitlines()
             for line in lines:
                 line = line.replace('\,','')
                 row = line.split(',')
-                if len(row) > len(META_COLS):
-                    print 'skipping'
+                if len(row) < len(META_COLS):
+                    print 'skipping Meta:',line,row
+                    skippedMeta+=1
                     continue
                 bnss_id = row[META_IDX_DICT[META_BNSS_ID]]
                 user_id = row[META_IDX_DICT[META_USER_ID]]
@@ -64,15 +67,15 @@ class ItunesDataReader:
                 
                 length = len(review_date)
                 review_date = review_date[0:length-4]+','+review_date[length-4:]
-                print bnss_id, review_id, user_id, user_name, stars, review_date
+                #print bnss_id, review_id, user_id, user_name, stars, review_date
                 review_id = (bnss_id, review_id)
                 try :
                     date_object = dateutil.parser.parse(review_date)
                     date_object = date_object.date()
                     stars = float(stars)
                 except:
-                    e = sys.exc_info()[0]
-                    print 'skipping'
+                    print 'skipping Meta:',line,row
+                    skippedMeta+=1
                     continue
             
                 if bnss_id not in self.bnssIdToBnssDict:
@@ -87,7 +90,7 @@ class ItunesDataReader:
                 revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
             
                 if review_id in self.reviewIdToReviewDict:
-                    print 'already there',review_id
+                    print 'Already Read Meta - ReviewId:',review_id
                 
                 self.reviewIdToReviewDict[review_id] = revw
             
@@ -97,17 +100,27 @@ class ItunesDataReader:
             for line in lines:
                 line = line.replace('\,','')
                 row = line.split(',')
-                if len(row) != len(COLS):
+                if len(row) < len(COLS):
+                    print 'skipping Data:',line,row
+                    skippedData+=1
                     continue
                 bnss_id = row[0]
                 review_id = row[1]
                 review_id = (bnss_id, review_id)
                 review_text = row[3]
                 if review_id not in self.reviewIdToReviewDict:
-                    #print 'Not Present', review_id
-                    continue
-                
+                    print 'Not Read Meta Data - ReviewId:', review_id
+                    continue        
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
+        
+        afterDataReadTime = datetime.now()
+        
+        print 'Data Read Time:',(afterDataReadTime - beforeDataReadTime)
+        print 'Skipped Count:', skippedMeta, skippedData
+        
+        print 'Users:',len(self.usrIdToUserDict.keys()),\
+         'Products:',len(self.bnssIdToBusinessDict.keys()),\
+         'Reviews:',len(self.reviewIdToReviewDict.keys())
         
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
         
