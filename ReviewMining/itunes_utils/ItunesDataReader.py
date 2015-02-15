@@ -118,8 +118,8 @@ class ItunesDataReader:
         print 'Data Read Time:',(afterDataReadTime - beforeDataReadTime)
         print 'Skipped Count:', skippedMeta, skippedData
         
-        print 'Users:',len(self.usrIdToUserDict.keys()),\
-         'Products:',len(self.bnssIdToBusinessDict.keys()),\
+        print 'Users:',len(self.usrIdToUsrDict.keys()),\
+         'Products:',len(self.bnssIdToBnssDict.keys()),\
          'Reviews:',len(self.reviewIdToReviewDict.keys())
         
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
