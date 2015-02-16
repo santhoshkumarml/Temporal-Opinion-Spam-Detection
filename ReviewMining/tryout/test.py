@@ -24,6 +24,7 @@ from util import SIAUtil, PlotUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
+import csv
 
 
 def checkCusum():
@@ -316,9 +317,8 @@ def tryTemporalStatisticsForItunes():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
-    sys.exit()
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
-    measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir)
+    measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir, 100)
 
 #checkPlot2()
 tryTemporalStatisticsForItunes()
