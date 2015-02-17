@@ -48,7 +48,12 @@ def createAndReturnWords(texts):
     shingle_dict = dict()
     text_index = 0
     for text in texts:
-        lines = text.splitlines()
+        lines = []
+        try:
+            lines = text.splitlines()
+        except:
+            e = sys.exc_info()[0]
+            print text, e
         for line in lines:
             words = []
             for word in line.split():

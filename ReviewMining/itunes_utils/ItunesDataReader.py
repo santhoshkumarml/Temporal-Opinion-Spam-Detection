@@ -75,6 +75,17 @@ class ItunesDataReader:
                 try :
                     date_object = dateutil.parser.parse(review_date)
                     date_object = date_object.date()
+#                     t = ''
+#                     for i in range(13,8,-1):
+#                         if row[i]:
+#                             t = row[i]
+#                             break
+#                         
+#                     if not t:
+#                         print 'No date'
+#                     else:
+#                         print t
+#                     sys.exit()
                     stars = float(stars)
                 except:
                     #print 'skipping Meta:', line, row
