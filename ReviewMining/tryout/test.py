@@ -6,6 +6,7 @@ Created on Feb 9, 2015
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import csv
 from datetime import datetime
 import json
 from lshash import LSHash
@@ -13,6 +14,7 @@ import networkx
 import numpy
 import os
 from os.path import join
+import rpy2
 import sys
 
 import cusum.cusum as cm
@@ -24,13 +26,22 @@ from util import SIAUtil, PlotUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
-import csv
 
 
 def checkCusum():
-    x = 2*numpy.sin(2*numpy.pi*numpy.arange(0, 3, .01))
-    ta, tai, taf, amp = cm.cusum(x, 1, .05)
+    x = numpy.random.randn(300)/5
+    x[100:200] += numpy.arange(0, 4, 4/100)
+    ta, tai, taf, amp = cm.detect_cusum(x, 2, .02, True, True)
     print ta, tai, taf, amp
+    
+def checkCallRFromPy():
+    x = 2*numpy.sin(2*numpy.pi*numpy.arange(0, 3, .01))
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    qcc = importr("qcc")
+    data = robjects.vectors.FloatVector(x)
+    q1 = qcc.cusum(data)
+    print q1[-1]
     
 def checkJacDocHash(inputDirName):
     scr = YelpDataReader()
@@ -321,4 +332,6 @@ def tryTemporalStatisticsForItunes():
     measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir, 100)
 
 #checkPlot2()
-tryTemporalStatisticsForItunes()
+#tryTemporalStatisticsForItunes()
+#checkCallRFromPy()
+checkCusum()
