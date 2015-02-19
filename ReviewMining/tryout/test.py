@@ -363,11 +363,13 @@ def tryTemporalStatisticsForItunes():
     #bnssKeySet = set(['338464438','339532909'])
 
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
-                     superGraph, cross_time_graphs, plotDir, bnssKeySet)
+                     superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength)
     
     total_time_slots = len(cross_time_graphs.keys())
     
     PlotUtil.plotter(bnssKeySet, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir)
     
-    
+
+
+setMemUsage()    
 tryTemporalStatisticsForItunes()
