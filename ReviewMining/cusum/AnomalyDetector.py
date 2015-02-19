@@ -15,7 +15,7 @@ def detectChPtsAndOutliers(bnss_statistics):
         firstKey = bnss_statistics[bnssKey][StatConstants.FIRST_TIME_KEY]
         chPtsOutliers[bnssKey] = dict()
         for measure_key in StatConstants.MEASURES:
-            if measure_key in bnss_statistics:
+            if measure_key in bnss_statistics[bnssKey]:
                 ta, tai, taf, amp  = cusum.detect_cusum(bnss_statistics[bnssKey][measure_key][firstKey:],\
                                                                           threshold=1, drift=0, ending=True, show=False)
                 print ta, tai, taf, amp

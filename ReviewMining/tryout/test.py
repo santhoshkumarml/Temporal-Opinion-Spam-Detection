@@ -370,7 +370,8 @@ def tryTemporalStatisticsForItunes():
     
     total_time_slots = len(cross_time_graphs.keys())
     
-    PlotUtil.plotter(bnssKeySet, chPtsOutliers, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir)
+    PlotUtil.plotter(bnssKeySet, bnss_statistics, chPtsOutliers,\
+                      bnssIdToBusinessDict, total_time_slots, plotDir)
     
 
 
