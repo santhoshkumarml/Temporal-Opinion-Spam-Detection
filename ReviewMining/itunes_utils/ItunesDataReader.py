@@ -86,6 +86,9 @@ class ItunesDataReader:
 #                     else:
 #                         print t
 #                     sys.exit()
+                    float_bnss_id = float(bnss_id)
+                    float_user_id = float(user_id)
+                    float_review_id = float(review_id)
                     stars = float(stars)
                 except:
                     #print 'skipping Meta:', line, row
@@ -108,7 +111,7 @@ class ItunesDataReader:
                 
                 self.reviewIdToReviewDict[review_id] = revw
         
-        
+#         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
                               dtype=object, names = COLS)
         review_ids = []

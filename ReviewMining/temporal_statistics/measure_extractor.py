@@ -230,7 +230,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
 #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
 #                                          bnssId, reviewTextsInThisTimeBlock) 
                     maxTextSimilarity = numpy.amax(bin_count)
-                                    
+                                  
             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
             
             if timeKey in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
@@ -272,6 +272,8 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, 
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict)
+
+    print "Super Graph Created"
     
     cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
