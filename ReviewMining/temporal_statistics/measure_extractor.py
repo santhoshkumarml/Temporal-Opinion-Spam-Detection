@@ -83,7 +83,7 @@ def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
 
 def generateStatistics(superGraph, cross_time_graphs,\
                         usrIdToUserDict, bnssIdToBusinessDict,\
-                         reviewIdToReviewsDict, bnssKeys):
+                         reviewIdToReviewsDict, bnssKeys, timeLength):
     bnss_statistics = dict()
     total_time_slots = len(cross_time_graphs.keys())
     
@@ -267,12 +267,12 @@ def generateStatistics(superGraph, cross_time_graphs,\
         
 
 def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
-                     superGraph, cross_time_graphs, plotDir, bnssKeySet):
+                     superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength):
     
     beforeStat = datetime.now()
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs,\
                                           usrIdToUserDict, bnssIdToBusinessDict,\
-                                           reviewIdToReviewsDict, bnssKeySet)
+                                           reviewIdToReviewsDict, bnssKeySet, timeLength)
     afterStat = datetime.now()
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
