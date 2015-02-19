@@ -35,15 +35,20 @@ import random
 #                  bbox_inches="tight")
 #     plt.close()
 
-def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
+def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
+    chPtsOutliersForBnss = dict()
+    
+    if bnss_key in chPtsOutliers:
+        chPtsOutliersForBnss = chPtsOutliers[bnss_key]
+        print chPtsOutliersForBnss
     plot = 1
     plt.figure(figsize=(20,20))
     for measure_key in StatConstants.MEASURES:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
-        plt.subplot(len(StatConstants.MEASURES), 1, plot)
+        ax = plt.subplot(len(StatConstants.MEASURES), 1, plot)
         plt.title('Business statistics')
         plt.xlabel('Time in multiples of 2 months')
         plt.xlim((bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots-1))
@@ -67,6 +72,13 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
                 clr+'o-',\
                 label= "bnss")
                 #align="center")
+                
+#         if measure_key in chPtsOutliersForBnss:
+#             ta, tai, taf, amp = chPtsOutliersForBnss[measure_key]
+#             if len(ta) > 0:
+#                 for idx in ta:
+#                     ax.axvline(x=bnss_statistics[measure_key], ymin=0, ymax= bnss_statistics[measure_key][idx], linewidth=4)
+
         plot+=1
     art = []
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
@@ -79,16 +91,16 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
                  bbox_inches="tight")
     plt.close()
         
-def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
+def plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
-    plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
+    plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
     
     
-def plotter(bnssKeySet, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir):
+def plotter(bnssKeySet, bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, total_time_slots, plotDir):
     colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
-        plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
+        plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                                      bnssKey, total_time_slots,\
                                       plotDir, random.choice(colors))
     afterPlot = datetime.now()

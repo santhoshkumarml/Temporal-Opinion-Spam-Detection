@@ -27,6 +27,7 @@ from util import SIAUtil, PlotUtil, GraphUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
+from cusum import AnomalyDetector
 
 
 def checkCusum():
@@ -358,16 +359,18 @@ def tryTemporalStatisticsForItunes():
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
-    bnssKeySet = set(bnssKeys[:10])
+    bnssKeySet = set(bnssKeys[:1])
     
     #bnssKeySet = set(['338464438','339532909'])
 
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength)
     
+    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics) 
+    
     total_time_slots = len(cross_time_graphs.keys())
     
-    PlotUtil.plotter(bnssKeySet, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir)
+    PlotUtil.plotter(bnssKeySet, chPtsOutliers, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir)
     
 
 
