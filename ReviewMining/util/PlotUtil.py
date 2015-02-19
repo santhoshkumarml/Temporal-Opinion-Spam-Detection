@@ -38,11 +38,14 @@ import random
 def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
+    
     chPtsOutliersForBnss = dict()
     
     if bnss_key in chPtsOutliers:
         chPtsOutliersForBnss = chPtsOutliers[bnss_key]
         print chPtsOutliersForBnss
+        
+    
     plot = 1
     plt.figure(figsize=(20,20))
     for measure_key in StatConstants.MEASURES:
