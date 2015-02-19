@@ -17,8 +17,6 @@ from util.GraphUtil import SuperGraph, TemporalGraph
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
 
-timeLength = '1-M'
-
 def printSimilarReviews(bin_count, candidateGroups, timeKey, bnss_key, reviewTextsInThisTimeBlock):
     bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
     bucketIndexListPair = []
@@ -74,7 +72,8 @@ def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
 #     changed = False
     noOfReviewsInTime = statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
     for measure_key in StatConstants.MEASURES:
-        if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING:
+        if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING \
+        and measure_key != StatConstants.MAX_TEXT_SIMILARITY:
             if noOfReviewsInTime == 0:
                 statistics_for_bnss[measure_key][timeKey] = statistics_for_bnss[measure_key][timeKey - 1]
 #                 changed = True
@@ -213,25 +212,25 @@ def generateStatistics(superGraph, cross_time_graphs,\
             
             
             #Max Text Similarity
-            if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]: 
-                bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
-                
-            reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
-                                           for (usrId, usr_type) in neighboring_usr_nodes]
-            
-            maxTextSimilarity = 1
-            if len(reviewTextsInThisTimeBlock) > 1:
-                data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
-                candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
-                if len(set(candidateGroups)) == noOfReviews:
-                    maxTextSimilarity = 1
-                else:
-                    bin_count = numpy.bincount(candidateGroups)
-#                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
-#                                          bnssId, reviewTextsInThisTimeBlock) 
-                    maxTextSimilarity = numpy.amax(bin_count)
-                                  
-            bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+#             if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]: 
+#                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
+#                   
+#             reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
+#                                            for (usrId, usr_type) in neighboring_usr_nodes]
+#               
+#             maxTextSimilarity = 1
+#             if len(reviewTextsInThisTimeBlock) > 1:
+#                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
+#                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
+#                 if len(set(candidateGroups)) == noOfReviews:
+#                     maxTextSimilarity = 1
+#                 else:
+#                     bin_count = numpy.bincount(candidateGroups)
+# #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
+# #                                          bnssId, reviewTextsInThisTimeBlock) 
+#                     maxTextSimilarity = numpy.amax(bin_count)
+#                                     
+#             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
             
             if timeKey in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
                 entropy = entropyFn(bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey])
@@ -267,31 +266,8 @@ def generateStatistics(superGraph, cross_time_graphs,\
     return bnss_statistics
         
 
-def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, plotDir, top_n_bnss=-1):
-    beforeGraphConstructionTime = datetime.now()
-    superGraph = SuperGraph.createGraph(usrIdToUserDict,\
-                                             bnssIdToBusinessDict,\
-                                             reviewIdToReviewsDict)
-
-    print "Super Graph Created"
-    
-    cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
-                                             bnssIdToBusinessDict,\
-                                             reviewIdToReviewsDict,\
-                                             timeLength, False)
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-                 if bnss_type == SIAUtil.PRODUCT] 
-                 #and \
-                 #'Tommy DiNic' in bnssIdToBusinessDict[bnss_key].getName()]
-    
-    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
-    
-    bnssKeySet = set(bnssKeys[:top_n_bnss])
-    
-    
-    
-    afterGraphConstructionTime = datetime.now()
-    print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
+def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
+                     superGraph, cross_time_graphs, plotDir, bnssKeySet):
     
     beforeStat = datetime.now()
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs,\
@@ -301,13 +277,5 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, 
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
     
+    return bnss_statistics
     
-    colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
-    
-    beforePlot = datetime.now()
-    for bnssKey in bnssKeySet:
-        PlotUtil.plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
-                                     bnssKey, len(cross_time_graphs.keys()),\
-                                      plotDir, random.choice(colors))
-    afterPlot = datetime.now()
-    print 'Time taken for Plot:',afterPlot-beforePlot

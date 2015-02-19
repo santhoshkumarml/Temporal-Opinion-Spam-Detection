@@ -8,6 +8,7 @@ from datetime import datetime,timedelta
 import re
 import SIAUtil
 
+
 def getDayIncrements(timeSplit):
     if not re.match('[0-9]+-[WDMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
@@ -25,6 +26,8 @@ def getDayIncrements(timeSplit):
         dayIncrement = numeric * 365
     return dayIncrement
 
+
+#---------------------------------------------------------------------------------------------------------
 class SuperGraph(networkx.Graph):
     def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict(), parent_reviews= dict()):
         super(SuperGraph, self).__init__()
@@ -135,3 +138,25 @@ class TemporalGraph(networkx.Graph):
                                          businessIdToBusinessDict[review.getBusinessID()],\
                                          review)
         return cross_time_graphs
+
+
+
+
+#---------------------------------------------------------------------------------------------------------
+def createGraphs(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, timeLength):
+    beforeGraphConstructionTime = datetime.now()
+    superGraph = SuperGraph.createGraph(usrIdToUserDict,\
+                                             bnssIdToBusinessDict,\
+                                             reviewIdToReviewsDict)
+
+    print "Super Graph Created"
+    
+    cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
+                                             bnssIdToBusinessDict,\
+                                             reviewIdToReviewsDict,\
+                                             timeLength, False)
+    afterGraphConstructionTime = datetime.now()
+    print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
+
+    return superGraph, cross_time_graphs
+

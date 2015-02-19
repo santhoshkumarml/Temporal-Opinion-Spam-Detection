@@ -15,6 +15,7 @@ import numpy
 import os
 from os.path import join
 import rpy2
+import random
 import sys
 
 import cusum.cusum as cm
@@ -22,7 +23,7 @@ from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
 import matplotlib.pyplot as plt
 from temporal_statistics import measure_extractor
-from util import SIAUtil, PlotUtil
+from util import SIAUtil, PlotUtil, GraphUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
@@ -324,15 +325,49 @@ def tryTemporalStatisticsForYelp():
     afterDataReadTime = datetime.now()
     
     print 'TimeTaken for Reading data:',afterDataReadTime-beforeDataReadTime
+
+
+def setMemUsage():
+    import resource
+    rsrc = resource.RLIMIT_DATA
+    soft, hard = resource.getrlimit(rsrc)
+    print 'Soft limit starts as  :', soft
+
+    resource.setrlimit(rsrc, (4194304, hard)) #limit to one kilobyte
+
+    soft, hard = resource.getrlimit(rsrc)
+    print 'Soft limit changed to :', soft
     
+        
 def tryTemporalStatisticsForItunes():
+    
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
-    plotDir =  join(join(csvFolder, os.pardir), 'latest')
-    measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir, 100)
+    
+    timeLength = '1-M'
+    
+    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
+                                                           bnssIdToBusinessDict,\
+                                                            reviewIdToReviewsDict, timeLength)
 
-#checkPlot2()
+    plotDir =  join(join(csvFolder, os.pardir), 'latest')  
+      
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+                 if bnss_type == SIAUtil.PRODUCT] 
+    
+    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+    
+    bnssKeySet = set(bnssKeys[:10])
+    
+    #bnssKeySet = set(['338464438','339532909'])
+
+    bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
+                     superGraph, cross_time_graphs, plotDir, bnssKeySet)
+    
+    total_time_slots = len(cross_time_graphs.keys())
+    
+    PlotUtil.plotter(bnssKeySet, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir)
+    
+    
 tryTemporalStatisticsForItunes()
-#checkCallRFromPy()
-#checkCusum()

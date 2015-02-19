@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from os.path import join
 from util import StatConstants
 import numpy
+from datetime import datetime
+import random
 
 # def plotReviewTimeVelocity(bnss_statistics, bnssIdToBusinessDict,\
 #                         bnss_key, total_time_slots, inputDir, clr):
@@ -80,6 +82,17 @@ def plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict,\
 def plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     plotAllOtherMeasures(bnss_statistics, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
+    
+    
+def plotter(bnssKeySet, bnss_statistics, bnssIdToBusinessDict, total_time_slots, plotDir):
+    colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
+    beforePlot = datetime.now()
+    for bnssKey in bnssKeySet:
+        plotBnssStatistics(bnss_statistics, bnssIdToBusinessDict,\
+                                     bnssKey, total_time_slots,\
+                                      plotDir, random.choice(colors))
+    afterPlot = datetime.now()
+    print 'Time taken for Plot:',afterPlot-beforePlot
 
 def plotCurve(a,b):
     #plt.figure(figsize=(20,20))

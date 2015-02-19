@@ -111,7 +111,12 @@ class ItunesDataReader:
                 
                 self.reviewIdToReviewDict[review_id] = revw
         
-#         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
+        print 'Users:',len(self.usrIdToUsrDict.keys()),\
+         'Products:',len(self.bnssIdToBnssDict.keys()),\
+         'Reviews:',len(self.reviewIdToReviewDict.keys())
+        return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
+    
+    
         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
                               dtype=object, names = COLS)
         review_ids = []
