@@ -35,7 +35,8 @@ def checkCusum():
     print ta, tai, taf, amp
     
 def checkCallRFromPy():
-    x = 2*numpy.sin(2*numpy.pi*numpy.arange(0, 3, .01))
+    x = numpy.random.randn(300)/5
+    x[100:200] += numpy.arange(0, 4, 4/100)
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     qcc = importr("qcc")
@@ -332,6 +333,6 @@ def tryTemporalStatisticsForItunes():
     measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, plotDir, 100)
 
 #checkPlot2()
-#tryTemporalStatisticsForItunes()
+tryTemporalStatisticsForItunes()
 #checkCallRFromPy()
-checkCusum()
+#checkCusum()

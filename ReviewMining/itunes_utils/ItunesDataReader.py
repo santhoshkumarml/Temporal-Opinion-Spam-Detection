@@ -71,7 +71,7 @@ class ItunesDataReader:
                 length = len(review_date)
                 review_date = review_date[0:length-4]+','+review_date[length-4:]
                 #print bnss_id, review_id, user_id, user_name, stars, review_date
-                review_id = (bnss_id, review_id)
+                #review_id = (bnss_id, review_id)
                 try :
                     date_object = dateutil.parser.parse(review_date)
                     date_object = date_object.date()
@@ -125,7 +125,7 @@ class ItunesDataReader:
                     self.reviewIdToReviewDict[review_id].setReviewText(review_text)
                 continue
             
-            review_id = (bnss_id, review_id)
+            #review_id = (bnss_id, review_id)
             review_ids.append(review_id)
             
             if review_id in self.reviewIdToReviewDict:
