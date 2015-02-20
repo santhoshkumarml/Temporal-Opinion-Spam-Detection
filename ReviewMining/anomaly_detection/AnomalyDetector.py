@@ -6,7 +6,7 @@ Created on Feb 19, 2015
 
 from datetime import datetime
 from util import StatConstants
-import cusum
+import anomaly_detection
 import changefinder
 
 

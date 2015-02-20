@@ -18,7 +18,7 @@ import rpy2
 import random
 import sys
 
-import cusum.cusum as cm
+import anomaly_detection.cusum as cm
 from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ from util import SIAUtil, PlotUtil, GraphUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
-from cusum import AnomalyDetector
+from anomaly_detection import AnomalyDetector
 import changefinder
 
 
