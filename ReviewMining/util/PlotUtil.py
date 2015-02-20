@@ -43,8 +43,6 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
     
     if bnss_key in chPtsOutliers:
         chPtsOutliersForBnss = chPtsOutliers[bnss_key]
-        print chPtsOutliersForBnss
-        
     
     plot = 1
     plt.figure(figsize=(20,20))
@@ -70,17 +68,22 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
             maxSimilarity = numpy.amax(bnss_statistics[bnss_key][measure_key])
             plt.ylim(ymin = 1,ymax = maxSimilarity+1)
         #print bnss_name, measure_key,bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],bnss_statistics[bnss_key][measure_key],bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:]
-        plt.plot(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
+        ax.plot(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:],\
                 clr+'o-',\
                 label= "bnss")
                 #align="center")
                 
-#         if measure_key in chPtsOutliersForBnss:
-#             ta, tai, taf, amp = chPtsOutliersForBnss[measure_key]
-#             if len(ta) > 0:
-#                 for idx in ta:
-#                     ax.axvline(x=bnss_statistics[measure_key], ymin=0, ymax= bnss_statistics[measure_key][idx], linewidth=4)
+        if measure_key in chPtsOutliersForBnss:
+            change_idx = chPtsOutliersForBnss[measure_key]
+            for idx in change_idx:
+                firstKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY] 
+                idx = firstKey+idx
+                    
+                print bnss_key, measure_key, idx
+                ax.axvline(x=idx,\
+                            ymin= bnss_statistics[bnss_key][measure_key][idx]/max(bnss_statistics[bnss_key][measure_key][firstKey:]),\
+                            linewidth = 2, color = 'r')
 
         plot+=1
     art = []
@@ -100,7 +103,7 @@ def plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
     
     
 def plotter(bnssKeySet, bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, total_time_slots, plotDir):
-    colors = ['g', 'c', 'r', 'b', 'm', 'y', 'k']
+    colors = ['g', 'c', 'b', 'm', 'y', 'k']
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
         plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\

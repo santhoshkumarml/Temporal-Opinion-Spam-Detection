@@ -28,6 +28,7 @@ from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
 from cusum import AnomalyDetector
+import changefinder
 
 
 def checkCusum():
@@ -138,7 +139,7 @@ def checkPlot2():
     data = (0, 2, 3, 5, 5, 5, 9, 7, 8, 6, 6)
     ax = fig.add_subplot(1, 1, 1)
     ax.plot(data, 'r-', linewidth=4)
-    ax.axvline(x=5, ymin=0, ymax=data[5] / max(data), linewidth=4)
+    ax.axvline(x=5, ymin=data[5]/max(data), linewidth=2, color='r')
     #ax.text(5, 4, 'your text here')
     plt.show()
 
@@ -339,6 +340,9 @@ def setMemUsage():
     soft, hard = resource.getrlimit(rsrc)
     print 'Soft limit changed to :', soft
     
+
+    
+    
         
 def tryTemporalStatisticsForItunes():
     
@@ -359,7 +363,7 @@ def tryTemporalStatisticsForItunes():
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
-    bnssKeySet = set(bnssKeys[:1])
+    bnssKeySet = set(bnssKeys[:5])
     
     #bnssKeySet = set(['338464438','339532909'])
 
@@ -374,6 +378,28 @@ def tryTemporalStatisticsForItunes():
                       bnssIdToBusinessDict, total_time_slots, plotDir)
     
 
+def testChangeFinder():
+#     data=np.concatenate([numpy.random.normal(0.7, 0.05, 300),
+#                          numpy.random.normal(1.5, 0.05, 300),
+#                          numpy.random.normal(0.6, 0.05, 300),
+#                          numpy.random.normal(1.3, 0.05, 300)])
 
-setMemUsage()    
+    data = (1,2,3,4,5,6,7,8,9,50,51,54,56,57)
+    cf = changefinder.ChangeFinder(r = 0.5, order = 1, smooth = 5)
+
+    ret = []
+    for i in data:
+        score = cf.update(i)
+        ret.append(score)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(ret)
+    ax2 = ax.twinx()
+    ax2.plot(data,'r')
+    plt.show()
+
+setMemUsage()
+#testChangeFinder() 
 tryTemporalStatisticsForItunes()
+#checkPlot2()
