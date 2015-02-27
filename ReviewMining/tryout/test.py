@@ -363,7 +363,7 @@ def tryTemporalStatisticsForItunes():
     
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
     
-    bnssKeySet = set(bnssKeys[:5])
+    bnssKeySet = set(bnssKeys[:1])
     
     #bnssKeySet = set(['338464438','339532909'])
 
