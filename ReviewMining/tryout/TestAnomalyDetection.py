@@ -71,13 +71,13 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
         if total_time_slots>70:
             step = total_time_slots/100
 
-        plt.title('Business statistics')
-        plt.xlabel('Time in multiples of 1 months')
-        plt.xlim((firstTimeKey,total_time_slots-1))
-        plt.xticks(range(firstTimeKey,total_time_slots, step))
-
         ax1 = plt.subplot(len(toBeUsedMeasures)*2, 1, plot)
 
+        plt.title('Business statistics')
+        plt.xlabel('Time in multiples of 1 months')
+
+        plt.xlim((firstTimeKey,total_time_slots-1))
+        plt.xticks(range(firstTimeKey,total_time_slots, step))
 
         plt.ylabel(measure_key)
 
@@ -95,9 +95,17 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
 
         ax2 = plt.subplot(len(toBeUsedMeasures)*2, 1, plot)
 
+        plt.title('Business statistics')
+        plt.xlabel('Time in multiples of 1 months')
+
+        plt.xlim((firstTimeKey,total_time_slots-1))
+        plt.xticks(range(firstTimeKey,total_time_slots, step))
+
+        plt.ylabel("Anomaly Scores for "+measure_key)
+
 
         ax2.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
-                chPtsOutliers[bnss_key][measure_key][firstTimeKey:],\
+                chPtsOutliers[bnss_key][measure_key],\
                 'b'+'o-',\
                 label= "bnss")
 
