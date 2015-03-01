@@ -65,14 +65,16 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
         if measure_key not in bnss_statistics[bnss_key]:
             continue
 
+        firstTimeKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]
+
         step = 1
         if total_time_slots>70:
             step = total_time_slots/100
 
         plt.title('Business statistics')
         plt.xlabel('Time in multiples of 1 months')
-        plt.xlim((bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots-1))
-        plt.xticks(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots, step))
+        plt.xlim((firstTimeKey,total_time_slots-1))
+        plt.xticks(range(firstTimeKey,total_time_slots, step))
 
         ax1 = plt.subplot(len(toBeUsedMeasures)*2, 1, plot)
 
@@ -83,8 +85,8 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
             plt.ylim((1,5))
             plt.yticks(range(1,6))
 
-        ax1.plot(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
-                bnss_statistics[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:],\
+        ax1.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
+                bnss_statistics[bnss_key][measure_key][firstTimeKey:],\
                 'g'+'o-',\
                 label= "bnss")
                 #align="center")
@@ -94,11 +96,10 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
         ax2 = plt.subplot(len(toBeUsedMeasures)*2, 1, plot)
 
 
-        ax2.plot(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],len(bnss_statistics[bnss_key][measure_key])),\
-                chPtsOutliers[bnss_key][measure_key][bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]:],\
+        ax2.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
+                chPtsOutliers[bnss_key][measure_key][firstTimeKey:],\
                 'b'+'o-',\
                 label= "bnss")
-                #align="center")
 
         plot+=1
 
