@@ -19,7 +19,7 @@ import changefinder
 def tryChangeFinderOnProductDimensions():
 
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
-    
+
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
 
@@ -45,18 +45,15 @@ def tryChangeFinderOnProductDimensions():
 
     total_time_slots = len(cross_time_graphs.keys())
 
-    plotMeasures(bnssKeySet, bnss_statistics, chPtsOutliers,\
-                      bnssIdToBusinessDict, total_time_slots, plotDir)
+    for bnssKey in bnssKeySet:
+        plotMeasures( bnss_statistics, chPtsOutliers,\
+                          bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir)
 
 
 def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir):
+
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
-
-    chPtsOutliersForBnss = dict()
-
-    if bnss_key in chPtsOutliers:
-        chPtsOutliersForBnss = chPtsOutliers[bnss_key]
 
     toBeUsedMeasures = [StatConstants.AVERAGE_RATING, StatConstants.RATING_ENTROPY]
 
