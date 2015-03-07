@@ -29,6 +29,7 @@ from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
 from anomaly_detection import AnomalyDetector
 import changefinder
+from scipy.signal import argrelextrema
 
 
 def checkCusum():
@@ -37,15 +38,15 @@ def checkCusum():
     ta, tai, taf, amp = cm.detect_cusum(x, 2, .02, True, True)
     print ta, tai, taf, amp
     
-def checkCallRFromPy():
-    x = numpy.random.randn(300)/5
-    x[100:200] += numpy.arange(0, 4, 4/100)
+def checkCusumCallRFromPy(x, shift = 1, decision_interval = 5):
+    # x = numpy.random.randn(300)/5
+    # x[100:200] += numpy.arange(0, 4, 4/100)
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     qcc = importr("qcc")
     data = robjects.vectors.FloatVector(x)
     q1 = qcc.cusum(data)
-    print q1[-1]
+    return q1[-1]
     
 def checkJacDocHash(inputDirName):
     scr = YelpDataReader()
@@ -377,27 +378,161 @@ def tryTemporalStatisticsForItunes():
 
 
 
+def testCusum():
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200),\
+                              numpy.random.normal(2.3, 0.05, 200)])
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200)])
+
+    a = checkCusumCallRFromPy(data)
+    print a
+
+
+def runChangeFinder(data):
+    ret = []
+    cf = changefinder.ChangeFinder(r=0.2, order=1, smooth=4)
+    fig = plt.figure()
+    for i in range(len(data)):
+        score = cf.update(data[i])
+        ret.append(score)
+
+    # idxs = argrelextrema(numpy.array(ret), numpy.greater)
+    #print idxs,type(idxs)
+    ax1 = fig.add_subplot(1, 1, 1)
+    ax1.plot(data, 'r')
+    ax2 = ax1.twinx()
+    ax2.plot(ret, 'b')
+    # for idx in idxs:
+    #     ax2.axvline(x=idx, ymin=ret[idx]/max(ret), linewidth=2, color='g')
+    plt.show()
+
+
 def testChangeFinder():
-    data=numpy.concatenate([numpy.random.normal(0.7, 0.05, 300),
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 300),
                          numpy.random.normal(1.5, 0.05, 300),
                          numpy.random.normal(0.6, 0.05, 300),
                          numpy.random.normal(1.3, 0.05, 300)])
-    #data = (1,2,3,4,5,6,7,8,9,50,51,54,56,57)
-    cf = changefinder.ChangeFinder(r = 0.01, order = 1, smooth = 7)
 
-    ret = []
-    for i in data:
-        score = cf.update(i)
-        ret.append(score)
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.1, 200), numpy.random.normal(1.5, 0.1, 200),\
+                              numpy.random.normal(2.3, 0.1, 200)])
+    data = numpy.random.normal(0.7, 0.05, 1000)
+
+    # data = numpy.random.normal(0.7, 0.05, 1000)
+    #
+    for i in range(200,240):
+        data[i] = 1.5
+        data[i+100] = 1.4
+        data[i+300] = 1.5
+        data[i+500] = 1.4
+        data[i+600] = 1.5
+
+    # data[199] = 1.5
+    # data[299] = 1.4
+    # data[499] = 1.5
+    # data[699] = 1.4
+    # data[899] = 1.5
+
+    # d0 = data[0]
+    # data = [data[i]+data[i-1] for i in range(1,len(data))]
+    # data = [d0]+data
+    # for i in range(1,len(data)):
+    #     data[i] += data[i-1]
+
+    runChangeFinder(data)
+
+
+def testCFForSomeMeasures():
+    data = []
+    # number of reviews - cumulative
+    data1 = [32.,    58.,    66.,\
+            71.,    73.,    83.,   110.,   119.,   125.,   129.,   146.,\
+            158.,   166.,   172.,   185.,   191.,   208.,   232.,   272.,\
+            307.,   352.,   371.,   442.,   482.,   560.,   657.,   700.,\
+            738.,   764.,   780.,   805.,   852.,   897.,   919.,   955.,\
+            1035.,  1066.,  1157.,  1210.,  1629.,  2046.,  2893.,  3010.,\
+            3999.,  4585.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,\
+            5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,\
+            5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,\
+            5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,\
+            5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.,  5182.]
+
+    # number of reviews - non cumulative
+    data_1 = [32.0, 26.0, 8.0,\
+              5.0, 2.0, 10.0, 27.0, 9.0, 6.0, 4.0, 17.0,\
+              12.0, 8.0, 6.0, 13.0, 6.0, 17.0, 24.0, 40.0,\
+              35.0, 45.0, 19.0, 71.0, 40.0, 78.0, 97.0, 43.0,\
+              38.0, 26.0, 16.0, 25.0, 47.0, 45.0, 22.0, 36.0, 80.0,\
+              31.0, 91.0, 53.0, 419.0, 417.0, 847.0, 117.0, 989.0, 586.0,\
+              597.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,\
+              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,\
+              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,\
+              0.0, 0.0, 0.0, 0.0]
+
+    data.append(data1)
+
+    # rating entropy
+    data2 = [1.98426583,\
+        2.15029501,  1.06127812,  1.52192809,  1.        ,  2.04643934,\
+        2.09512685,  1.65774273,  1.45914792,  0.81127812,  2.2066294 ,\
+        1.04085208,  1.40563906,  1.79248125,  1.91434118,  1.45914792,\
+        2.06355861,  1.95914792,  1.9507006 ,  2.03674971,  2.06454172,\
+        2.23399791,  2.16598914,  2.29918146,  2.07008564,  2.1730492 ,\
+        2.1085896 ,  1.88740944,  2.13393757,  1.74899922,  2.22863457,\
+        1.90942922,  1.93472066,  2.18670435,  1.72957396,  1.94059146,\
+        1.48771125,  2.21787176,  2.20576684,  1.17457661,  1.14170929,\
+        1.05168061,  1.32912829,  1.04355444,  1.05763042,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
+        0.97630203,  0.97630203]
+    data.append(data2)
+
+    #Avg rating
+    data3 = [3.84375   ,\
+        3.70689655,  3.77272727,  3.73239437,  3.71232877,  3.71084337,\
+        3.71818182,  3.7394958 ,  3.72      ,  3.72093023,  3.68493151,\
+        3.72151899,  3.71084337,  3.70930233,  3.7027027 ,  3.71727749,\
+        3.69230769,  3.67241379,  3.44117647,  3.29641694,  3.34375   ,\
+        3.33423181,  3.22171946,  3.21991701,  3.09285714,  2.99543379,\
+        2.95428571,  2.90921409,  2.89921466,  2.88076923,  2.87826087,\
+        2.83568075,  2.7993311 ,  2.79325354,  2.77905759,  2.72173913,\
+        2.69512195,  2.70872947,  2.71487603,  3.20012277,  3.49120235,\
+        3.83892153,  3.86511628,  4.06751688,  4.14547437,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052,  4.21015052,  4.21015052,  4.21015052,\
+        4.21015052,  4.21015052]
+    data.append(data3)
+
+
+    cf_params = [(0.2,1,8),(0.2,1,3),(0.2,1,8)]
 
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(ret)
-    ax2 = ax.twinx()
-    ax2.plot(data,'r')
+    for i in range(len(data)):
+        ret = []
+        param_r, param_order, param_smooth = cf_params[i]
+        cf = changefinder.ChangeFinder(r = param_r, order = param_order, smooth = param_smooth)
+        for j in range(len(data[i])):
+            score = cf.update(data[i][j])
+            ret.append(score)
+        print [(ret[idx],data[i][idx]) for idx in range(len(ret))]
+        ax = fig.add_subplot(3,1,i+1)
+        ax.plot(range(len(data[i])),ret, 'b')
+        ax2 = ax.twinx()
+        ax2.plot(range(len(data[i])),data[i],'r')
     plt.show()
 
-setMemUsage()
-#testChangeFinder() 
-tryTemporalStatisticsForItunes()
+
+#setMemUsage()
+testChangeFinder()
+#testCusum()
+#testCFForSomeMeasures()
+#tryTemporalStatisticsForItunes()
 #checkPlot2()

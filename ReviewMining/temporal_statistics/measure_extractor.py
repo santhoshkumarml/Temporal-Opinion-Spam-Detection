@@ -72,6 +72,8 @@ def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
 #     changed = False
     noOfReviewsInTime = statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
     for measure_key in StatConstants.MEASURES:
+        if measure_key not in statistics_for_bnss:
+            continue
         if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING \
         and measure_key != StatConstants.MAX_TEXT_SIMILARITY:
             if noOfReviewsInTime == 0:
@@ -81,9 +83,145 @@ def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
 #         print timeKey
 #         print statistics_for_bnss
 
+def calculateAvgRating(bnssId, bnss_statistics, ratings, timeKey, total_time_slots):
+    if StatConstants.AVERAGE_RATING not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.AVERAGE_RATING] = numpy.zeros(total_time_slots)
+    bnss_statistics[bnssId][StatConstants.AVERAGE_RATING][timeKey] = float(sum(ratings))
+
+
+def calculateRatingEntropy(bnssId, bnss_statistics, ratings, reviews_for_bnss, timeKey, total_time_slots):
+    sorted_rating_list = set(sorted(ratings))
+
+    if StatConstants.RATING_DISTRIBUTION not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION] = dict()
+
+    if StatConstants.RATING_ENTROPY not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
+
+    if timeKey not in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
+        bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey] = {key: 0.0 for key in sorted_rating_list}
+
+    for rating in ratings:
+        bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey][rating] += 1.0
+
+    for rating in sorted_rating_list:
+        bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey][rating] /= float(len(reviews_for_bnss))
+
+    if timeKey in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
+            entropy = entropyFn(bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey])
+            bnss_statistics[bnssId][StatConstants.RATING_ENTROPY][timeKey] = entropy
+
+
+        # NumberOfReviews
+
+
+def calculateNoOfReviews(bnssId, bnss_statistics, neighboring_usr_nodes, timeKey, total_time_slots):
+    if StatConstants.NO_OF_REVIEWS not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots)
+    noOfReviews = len(neighboring_usr_nodes)
+    bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS][timeKey] = noOfReviews
+    return noOfReviews
+
+
+def calculateRatioOfSingletons(bnssId, bnss_statistics, neighboring_usr_nodes, reviews_for_bnss, superGraph, timeKey,
+                               total_time_slots):
+    if StatConstants.RATIO_OF_SINGLETONS not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS] = numpy.zeros(total_time_slots)
+    noOfSingleTons = 0
+    for neighbor in neighboring_usr_nodes:
+        if len(superGraph.neighbors(neighbor)) == 1:
+            noOfSingleTons += 1
+    bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS][timeKey] = float(noOfSingleTons) / float(
+        len(reviews_for_bnss))
+
+
+def calculateRatioOfFirstTimers(G, bnssId, bnss_statistics, neighboring_usr_nodes, reviews_for_bnss, superGraph,
+                                timeKey, total_time_slots):
+    if StatConstants.RATIO_OF_FIRST_TIMERS not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS] = numpy.zeros(total_time_slots)
+    noOfFirstTimers = 0
+    for usr_neighbor in neighboring_usr_nodes:
+        (usrId, usr_type) = usr_neighbor
+        current_temporal_review = G.getReview(usrId, bnssId)
+        allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
+                      for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+        firstReview = min(allReviews, key=lambda x: SIAUtil.getDateForReview(x))
+
+        if firstReview.getId() == current_temporal_review.getId():
+            noOfFirstTimers += 1
+    bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS][timeKey] = float(noOfFirstTimers) / float(
+        len(reviews_for_bnss))
+
+
+def calculateYouthScore(G, bnssId, bnss_statistics, neighboring_usr_nodes, superGraph, timeKey, total_time_slots):
+    if StatConstants.YOUTH_SCORE not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.YOUTH_SCORE] = numpy.zeros(total_time_slots)
+    youth_scores = []
+    for usr_neighbor in neighboring_usr_nodes:
+        (usrId, usr_type) = usr_neighbor
+        allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
+                      for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
+        allReviews = sorted(allReviews, key=lambda x: SIAUtil.getDateForReview(x))
+        current_temporal_review = G.getReview(usrId, bnssId)
+        reviewAge = (SIAUtil.getDateForReview(current_temporal_review) - SIAUtil.getDateForReview(allReviews[0])).days
+        youth_score = 1 - sigmoid_prime(reviewAge)
+        youth_scores.append(youth_score)
+    bnss_statistics[bnssId][StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
+
+
+def calculateTemporalEntropyScore(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey, timeLength,
+                                  total_time_slots):
+    entropyScore = 0
+    if StatConstants.ENTROPY_SCORE not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
+    if noOfReviews >= 2:
+        bucketTree = constructIntervalTree(GraphUtil.getDayIncrements(timeLength))
+        allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
+        allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key=lambda x: SIAUtil.getDateForReview(x))
+        allReviewVelocity = [(SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x + 1]) - \
+                              SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
+                             for x in range(len(allReviewsInThisTimeBlock) - 1)]
+        for reviewTimeDiff in allReviewVelocity:
+            updateBucketTree(bucketTree, reviewTimeDiff)
+
+        if StatConstants.REVIEW_TIME_VELOCITY not in bnss_statistics[bnssId]:
+            bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY] = dict()
+
+        bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY][timeKey] = allReviewVelocity
+
+        rating_velocity_prob_dist = {(begin, end): (count_data / (noOfReviews - 1)) for (begin, end, count_data) in
+                                     bucketTree}
+
+        entropyScore = entropyFn(rating_velocity_prob_dist)
+
+        bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
+
+
+        # Max Text Similarity
+    # if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]:
+    #                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
+    #
+    #             reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
+    #                                            for (usrId, usr_type) in neighboring_usr_nodes]
+    #
+    #             maxTextSimilarity = 1
+    #             if len(reviewTextsInThisTimeBlock) > 1:
+    #                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
+    #                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
+    #                 if len(set(candidateGroups)) == noOfReviews:
+    #                     maxTextSimilarity = 1
+    #                 else:
+    #                     bin_count = numpy.bincount(candidateGroups)
+    # #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
+    # #                                          bnssId, reviewTextsInThisTimeBlock)
+    #                     maxTextSimilarity = numpy.amax(bin_count)
+    #
+    #             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+
+
 def generateStatistics(superGraph, cross_time_graphs,\
                         usrIdToUserDict, bnssIdToBusinessDict,\
-                         reviewIdToReviewsDict, bnssKeys, timeLength):
+                         reviewIdToReviewsDict, bnssKeys, timeLength, measuresToBeExtracted):
     bnss_statistics = dict()
     total_time_slots = len(cross_time_graphs.keys())
     
@@ -101,142 +239,43 @@ def generateStatistics(superGraph, cross_time_graphs,\
             bnss_name = bnssIdToBusinessDict[bnssId].getName()
             
             neighboring_usr_nodes = G.neighbors((bnssId,SIAUtil.PRODUCT))
-            #Average Rating
-            if StatConstants.AVERAGE_RATING not in bnss_statistics[bnssId]:
-                bnss_statistics[bnssId][StatConstants.AVERAGE_RATING] = numpy.zeros(total_time_slots)
-            
-            reviews_for_bnss = []
-            
-            for (usrId, usr_type) in neighboring_usr_nodes:
-                review_for_bnss = G.getReview(usrId,bnssId)
-                reviews_for_bnss.append(review_for_bnss)
+
+            reviews_for_bnss = [G.getReview(usrId,bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]
-            bnss_statistics[bnssId][StatConstants.AVERAGE_RATING][timeKey] = float(sum(ratings))
+
+            #Average Rating
+            if StatConstants.AVERAGE_RATING in measuresToBeExtracted:
+                calculateAvgRating(bnssId, bnss_statistics, ratings, timeKey, total_time_slots)
             
             #Rating Entropy
-            sorted_rating_list = set(sorted(ratings))
-            if StatConstants.RATING_DISTRIBUTION not in bnss_statistics[bnssId]:
-                bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION] = dict()
-                
-            if StatConstants.RATING_ENTROPY not in bnss_statistics[bnssId]:
-                    bnss_statistics[bnssId][StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
-                
-            if timeKey not in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
-                bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey] = {key:0.0 for key in sorted_rating_list}
-            
-            for rating in ratings:
-                bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey][rating] += 1.0
-            
-            for rating in sorted_rating_list:
-                bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey][rating] /= float(len(reviews_for_bnss)) 
-            
-            
-            #NumberOfReviews
-            if StatConstants.NO_OF_REVIEWS not in bnss_statistics[bnssId]: 
-                bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots)
-                
-            noOfReviews = len(neighboring_usr_nodes)
-            bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS][timeKey] = noOfReviews
+            if StatConstants.RATING_ENTROPY in measuresToBeExtracted:
+                calculateRatingEntropy(bnssId, bnss_statistics, ratings, reviews_for_bnss, timeKey, total_time_slots)
+
+            #No of Reviews
+            # if StatConstants.NO_OF_REVIEWS in measuresToBeExtracted:
+            noOfReviews = calculateNoOfReviews(bnssId, bnss_statistics, neighboring_usr_nodes, timeKey, total_time_slots)
             
             #Ratio of Singletons
-            if StatConstants.RATIO_OF_SINGLETONS not in bnss_statistics[bnssId]: 
-                bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS] = numpy.zeros(total_time_slots)
-                
-            noOfSingleTons = 0
-            for neighbor in neighboring_usr_nodes:
-                if len(superGraph.neighbors(neighbor)) == 1:
-                    noOfSingleTons+=1
-                    
-            bnss_statistics[bnssId][StatConstants.RATIO_OF_SINGLETONS][timeKey] = float(noOfSingleTons)/float(len(reviews_for_bnss))        
+            if StatConstants.RATIO_OF_SINGLETONS in measuresToBeExtracted:
+                calculateRatioOfSingletons(bnssId, bnss_statistics, neighboring_usr_nodes, reviews_for_bnss, superGraph,\
+                                           timeKey, total_time_slots)
             
             #Ratio of First Timers
-            if StatConstants.RATIO_OF_FIRST_TIMERS not in bnss_statistics[bnssId]: 
-                bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS] = numpy.zeros(total_time_slots)
-                
-            noOfFirstTimers = 0
-            for usr_neighbor in neighboring_usr_nodes:
-                (usrId, usr_type) = usr_neighbor
-                current_temporal_review = G.getReview(usrId, bnssId)
-                allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
-                              for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
-                firstReview = min(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
-                    
-                if firstReview.getId() == current_temporal_review.getId():
-                    noOfFirstTimers+=1
-            
-            bnss_statistics[bnssId][StatConstants.RATIO_OF_FIRST_TIMERS][timeKey] = float(noOfFirstTimers)/float(len(reviews_for_bnss))
+            if StatConstants.RATIO_OF_FIRST_TIMERS in measuresToBeExtracted:
+                calculateRatioOfFirstTimers(G, bnssId, bnss_statistics, neighboring_usr_nodes, reviews_for_bnss, superGraph,\
+                                            timeKey, total_time_slots)
             
             #Youth Score
-            if StatConstants.YOUTH_SCORE not in bnss_statistics[bnssId]: 
-                bnss_statistics[bnssId][StatConstants.YOUTH_SCORE] = numpy.zeros(total_time_slots)
-            youth_scores = []
-            
-            for usr_neighbor in neighboring_usr_nodes:
-                (usrId, usr_type) = usr_neighbor
-                allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
-                              for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
-                allReviews = sorted(allReviews, key= lambda x: SIAUtil.getDateForReview(x))
-                current_temporal_review = G.getReview(usrId, bnssId)  
-                reviewAge = (SIAUtil.getDateForReview(current_temporal_review)-SIAUtil.getDateForReview(allReviews[0])).days
-                youth_score = 1-sigmoid_prime(reviewAge)
-                youth_scores.append(youth_score)
-                
-            bnss_statistics[bnssId][StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
+            if StatConstants.YOUTH_SCORE in measuresToBeExtracted:
+                calculateYouthScore(G, bnssId, bnss_statistics, neighboring_usr_nodes, superGraph, timeKey,
+                                    total_time_slots)
             
             #Entropy Score
-            entropyScore= 0
-            
-            if StatConstants.ENTROPY_SCORE not in bnss_statistics[bnssId]:
-                bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
-                
-            if noOfReviews >= 2:
-                bucketTree = constructIntervalTree(GraphUtil.getDayIncrements(timeLength))
-                allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
-                allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key = lambda x: SIAUtil.getDateForReview(x))
-                allReviewVelocity = [ (SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x+1]) - \
-                                       SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
-                                     for x in range(len(allReviewsInThisTimeBlock)-1)]
-                for reviewTimeDiff in allReviewVelocity:
-                    updateBucketTree(bucketTree, reviewTimeDiff)
-                
-                if StatConstants.REVIEW_TIME_VELOCITY not in bnss_statistics[bnssId]:
-                    bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY] = dict()
-                    
-                bnss_statistics[bnssId][StatConstants.REVIEW_TIME_VELOCITY][timeKey] = allReviewVelocity
-                 
-                rating_velocity_prob_dist = {(begin,end):(count_data/(noOfReviews-1)) for (begin, end, count_data) in bucketTree}
-                
-                entropyScore = entropyFn(rating_velocity_prob_dist)
-                
-                bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
-            
-            
-            #Max Text Similarity
-#             if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]: 
-#                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
-#                   
-#             reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
-#                                            for (usrId, usr_type) in neighboring_usr_nodes]
-#               
-#             maxTextSimilarity = 1
-#             if len(reviewTextsInThisTimeBlock) > 1:
-#                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
-#                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
-#                 if len(set(candidateGroups)) == noOfReviews:
-#                     maxTextSimilarity = 1
-#                 else:
-#                     bin_count = numpy.bincount(candidateGroups)
-# #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
-# #                                          bnssId, reviewTextsInThisTimeBlock) 
-#                     maxTextSimilarity = numpy.amax(bin_count)
-#                                     
-#             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
-            
-            if timeKey in bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION]:
-                entropy = entropyFn(bnss_statistics[bnssId][StatConstants.RATING_DISTRIBUTION][timeKey])
-                bnss_statistics[bnssId][StatConstants.RATING_ENTROPY][timeKey] = entropy
-                
-    
+            if StatConstants.ENTROPY_SCORE in measuresToBeExtracted:
+                calculateTemporalEntropyScore(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey,
+                                              timeLength, total_time_slots)
+
+
     #POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     for bnss_key in bnss_statistics:
         statistics_for_bnss = bnss_statistics[bnss_key]
@@ -267,12 +306,14 @@ def generateStatistics(superGraph, cross_time_graphs,\
         
 
 def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
-                     superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength):
+                     superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,\
+                     measures_To_Be_Extracted = StatConstants.MEASURES):
     
     beforeStat = datetime.now()
     bnss_statistics = generateStatistics(superGraph, cross_time_graphs,\
                                           usrIdToUserDict, bnssIdToBusinessDict,\
-                                           reviewIdToReviewsDict, bnssKeySet, timeLength)
+                                           reviewIdToReviewsDict, bnssKeySet,\
+                                          timeLength, measures_To_Be_Extracted)
     afterStat = datetime.now()
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
