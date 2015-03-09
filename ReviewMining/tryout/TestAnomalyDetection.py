@@ -8,14 +8,15 @@ import matplotlib.pyplot as plt
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from anomaly_detection import AnomalyDetector
-from scipy.signal import argrelextrema
+#from scipy.signal import argrelextrema
 import  numpy
+from datetime import datetime
 
 import changefinder
 
 def tryChangeFinderOnProductDimensions():
 
-    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
+    csvFolder = '/home/localdirs/sbleman1/stufs1/smanavasilak/data/itunes'
 
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
@@ -37,9 +38,9 @@ def tryChangeFinderOnProductDimensions():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeySet = set(bnssKeys[1:10])
+    bnssKeySet = set(bnssKeys[:25])
 
-    toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.RATING_ENTROPY, StatConstants.NO_OF_REVIEWS])
+    toBeUsedMeasures = set(StatConstants.MEASURES)
 
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength, toBeUsedMeasures)
@@ -48,11 +49,13 @@ def tryChangeFinderOnProductDimensions():
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
 
     total_time_slots = len(cross_time_graphs.keys())
-
+    
+    beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
         plotMeasures( bnss_statistics, chPtsOutliers,\
                           bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir, toBeUsedMeasures)
-
+    afterPlot = datetime.now()
+    print 'Time taken for plot',afterPlot-beforePlot
 
 def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, toBeUsedMeasures):
