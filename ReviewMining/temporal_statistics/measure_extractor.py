@@ -196,27 +196,27 @@ def calculateTemporalEntropyScore(G, bnssId, bnss_statistics, neighboring_usr_no
 
         bnss_statistics[bnssId][StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
 
+def calculateMaxTextSimilarity(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey, timeLength,
+                                  total_time_slots):
+    if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]:
+        bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
 
-        # Max Text Similarity
-    # if StatConstants.MAX_TEXT_SIMILARITY not in bnss_statistics[bnssId]:
-    #                 bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
-    #
-    #             reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
-    #                                            for (usrId, usr_type) in neighboring_usr_nodes]
-    #
-    #             maxTextSimilarity = 1
-    #             if len(reviewTextsInThisTimeBlock) > 1:
-    #                 data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
-    #                 candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
-    #                 if len(set(candidateGroups)) == noOfReviews:
-    #                     maxTextSimilarity = 1
-    #                 else:
-    #                     bin_count = numpy.bincount(candidateGroups)
-    # #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
-    # #                                          bnssId, reviewTextsInThisTimeBlock)
-    #                     maxTextSimilarity = numpy.amax(bin_count)
-    #
-    #             bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+    reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
+                                    for (usrId, usr_type) in neighboring_usr_nodes]
+    maxTextSimilarity = 1
+    if len(reviewTextsInThisTimeBlock) > 1:
+        data_matrix = ShingleUtil.formDataMatrix(reviewTextsInThisTimeBlock)
+        candidateGroups = ShingleUtil.jac_doc_hash(data_matrix, 20, 50)
+        if len(set(candidateGroups)) == noOfReviews:
+            maxTextSimilarity = 1
+        else:
+            bin_count = numpy.bincount(candidateGroups)
+    #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
+    #                                          bnssId, reviewTextsInThisTimeBlock)
+            maxTextSimilarity = numpy.amax(bin_count)
+
+    bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
+
 
 
 def generateStatistics(superGraph, cross_time_graphs,\
@@ -275,6 +275,13 @@ def generateStatistics(superGraph, cross_time_graphs,\
                 calculateTemporalEntropyScore(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey,
                                               timeLength, total_time_slots)
 
+            # Max Text Similarity
+            if StatConstants.MAX_TEXT_SIMILARITY in measuresToBeExtracted:
+                calculateMaxTextSimilarity(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey,
+                                              timeLength, total_time_slots)
+
+
+
 
     #POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     for bnss_key in bnss_statistics:
@@ -303,7 +310,18 @@ def generateStatistics(superGraph, cross_time_graphs,\
                     statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /=  statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
             
     return bnss_statistics
-        
+
+
+def trySmoothing(bnss_statistics, measures_To_Be_Extracted):
+    for bnss_key in bnss_statistics:
+        for measure_key in measures_To_Be_Extracted:
+            if measure_key in {StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS}:
+                continue
+            stat = bnss_statistics[bnss_key][measure_key]
+            firstKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]
+            for i in range(firstKey+1,len(stat)-1):
+                stat[i] = stat[i-1]+stat[i+1]
+                stat[i] /= 3
 
 def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,\
@@ -315,6 +333,8 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                                            reviewIdToReviewsDict, bnssKeySet,\
                                           timeLength, measures_To_Be_Extracted)
     afterStat = datetime.now()
+
+    #trySmoothing(bnss_statistics, measures_To_Be_Extracted)
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
     

@@ -16,7 +16,7 @@ import changefinder
 
 def tryChangeFinderOnProductDimensions():
 
-    csvFolder = '/home/localdirs/sbleman1/stufs1/smanavasilak/data/itunes'
+    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
 
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
@@ -87,9 +87,9 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
 
         plt.ylabel(measure_key)
 
-        # if measure_key == StatConstants.AVERAGE_RATING:
-        #     plt.ylim((1,5))
-        #     plt.yticks(range(1,6))
+        if measure_key == StatConstants.AVERAGE_RATING:
+            plt.ylim((1,5))
+            plt.yticks(range(1,6))
 
         ax1.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
                 bnss_statistics[bnss_key][measure_key][firstTimeKey:], 'g', label = 'bnss')
