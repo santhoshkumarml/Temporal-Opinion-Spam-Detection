@@ -38,9 +38,9 @@ def tryChangeFinderOnProductDimensions():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeySet = set(bnssKeys[:25])
+    bnssKeySet = set(bnssKeys[:1])
 
-    toBeUsedMeasures = set(StatConstants.MEASURES)
+    toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
 
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength, toBeUsedMeasures)
