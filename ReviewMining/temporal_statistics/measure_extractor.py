@@ -218,6 +218,35 @@ def calculateMaxTextSimilarity(G, bnssId, bnss_statistics, neighboring_usr_nodes
     bnss_statistics[bnssId][StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
 
 
+def doPostProcessingForStatistics(bnss_statistics, total_time_slots):
+    # POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
+    for bnss_key in bnss_statistics:
+        statistics_for_bnss = bnss_statistics[bnss_key]
+        no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        #print statistics_for_bnss
+        for timeKey in range(total_time_slots):
+            if timeKey > firstTimeKey:
+                fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
+                #POST PROCESSING FOR NUMBER_OF_REVIEWS
+                statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] = \
+                    no_of_reviews_for_bnss[timeKey - 1] + no_of_reviews_for_bnss[timeKey]
+                #POST PROCESSING FOR AVERAGE RATING
+                if no_of_reviews_for_bnss[timeKey] > 0:
+                    sum_of_ratings = (
+                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey - 1] * no_of_reviews_for_bnss[
+                        timeKey - 1])
+                    sum_of_ratings += statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
+                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = sum_of_ratings / \
+                                                                                 no_of_reviews_for_bnss[timeKey]
+                else:
+                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = 0
+
+            else:
+                if no_of_reviews_for_bnss[timeKey] > 0:
+                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /= \
+                    statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
+
 
 def generateStatistics(superGraph, cross_time_graphs,\
                         usrIdToUserDict, bnssIdToBusinessDict,\
@@ -280,34 +309,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
                 calculateMaxTextSimilarity(G, bnssId, bnss_statistics, neighboring_usr_nodes, noOfReviews, timeKey,
                                               timeLength, total_time_slots)
 
-
-
-
-    #POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
-    for bnss_key in bnss_statistics:
-        statistics_for_bnss = bnss_statistics[bnss_key]
-        no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        #print statistics_for_bnss
-        for timeKey in range(total_time_slots):
-            if timeKey > firstTimeKey:
-                fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
-                        
-                #POST PROCESSING FOR NUMBER_OF_REVIEWS
-                statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] =\
-                 no_of_reviews_for_bnss[timeKey-1]+no_of_reviews_for_bnss[timeKey]
-                
-                #POST PROCESSING FOR AVERAGE RATING
-                if no_of_reviews_for_bnss[timeKey] > 0:
-                    sum_of_ratings = (statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey-1]*no_of_reviews_for_bnss[timeKey-1])
-                    sum_of_ratings += statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
-                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = sum_of_ratings/no_of_reviews_for_bnss[timeKey]
-                else:
-                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = 0
-                
-            else:
-                if no_of_reviews_for_bnss[timeKey] > 0:
-                    statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /=  statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
+    doPostProcessingForStatistics(bnss_statistics, total_time_slots)
             
     return bnss_statistics
 
