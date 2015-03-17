@@ -482,51 +482,67 @@ def tryAr():
     ar_mod = ar.fit()
     print ar_mod.params
     print ar_mod.predict()
-    
-def runChangeFinder(data):
+
+def runChangeFinder(data, show=True):
     ret = []
-    cf = changefinder.ChangeFinder(r=0.2, order=1, smooth=3)
+    cf = changefinder.ChangeFinder(r=0.2, order=1, smooth=4)
     fig = plt.figure()
     for i in range(len(data)):
         score = cf.update(data[i])
         ret.append(score)
+    print ret
+    if show:
+        # idxs = argrelextrema(numpy.array(ret), numpy.greater)
+        #print idxs,type(idxs)
+        ax1 = fig.add_subplot(1, 1, 1)
+        ax1.plot(data, 'r')
+        #plt.ylim((0,3))
+        ax2 = ax1.twinx()
+        ax2.plot(ret, 'b')
+        # for idx in idxs:
+        #     ax2.axvline(x=idx, ymin=ret[idx]/max(ret), linewidth=2, color='g')
+        plt.show()
 
-    # idxs = argrelextrema(numpy.array(ret), numpy.greater)
-    #print idxs,type(idxs)
-    ax1 = fig.add_subplot(1, 1, 1)
-    ax1.plot(data, 'r')
-    ax2 = ax1.twinx()
-    ax2.plot(ret, 'b')
-    # for idx in idxs:
-    #     ax2.axvline(x=idx, ymin=ret[idx]/max(ret), linewidth=2, color='g')
-    plt.show()
+
 
 
 def testChangeFinder():
-    data = [1.98426583,\
-        2.15029501,  1.06127812,  1.52192809,  1.        ,  2.04643934,\
-        2.09512685,  1.65774273,  1.45914792,  0.81127812,  2.2066294 ,\
-        1.04085208,  1.40563906,  1.79248125,  1.91434118,  1.45914792,\
-        2.06355861,  1.95914792,  1.9507006 ,  2.03674971,  2.06454172,\
-        2.23399791,  2.16598914,  2.29918146,  2.07008564,  2.1730492 ,\
-        2.1085896 ,  1.88740944,  2.13393757,  1.74899922,  2.22863457,\
-        1.90942922,  1.93472066,  2.18670435,  1.72957396,  1.94059146,\
-        1.48771125,  2.21787176,  2.20576684,  1.17457661,  1.14170929,\
-        1.05168061,  1.32912829,  1.04355444,  1.05763042,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203,  0.97630203,  0.97630203,  0.97630203,\
-        0.97630203,  0.97630203]
+    data = numpy.concatenate([numpy.random.normal(5,3,10),numpy.random.normal(10,3,10)])
+    # for i in range(1,len(data)):
+    #     data[i] += data[i-1]
     #data = numpy.concatenate([numpy.array([0.8,0.9,0.7,1,0.4,0.9,0.6,1.1]),numpy.random.normal(0.7,0.05,10)])
+    data = [ 51,2059,5640,7973,11302,13875,18269,23166,27936,35568,39055,41634
+            ,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239
+            ,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239,42239
+            ,42239,42239,42239,42239,42239,42239,42239,42239,42241,42242,42245,42247
+            ,42247]
     runChangeFinder(data)
+
+def testCumsumWithData():
+    data =numpy.random.normal(0.7,0.05,100)
+    data[20] = 1.3
+    data[30] = 1.5
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200),\
+                              numpy.random.normal(2.3, 0.05, 200)])
+    data =numpy.random.normal(20,3,100)
+    data[20] = 200
+    data[30] = 220
+    for i in range(1,len(data)):
+        data[i]+=data[i-1]
+
+    data = [155,171,171,176,184,189,661,1194,1612,2186,2697,2982,3223,3300,3300
+            ,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300
+            ,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300,3300
+            ,3300,3300,3300,3300,3300]
+
+    ta, tai, taf, amp = cm.detect_cusum(data,threshold=100,show=True)
+    runChangeFinder(data,show=True)
+    print ta, tai, taf, amp
+
 
 #testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
 #setMemUsage()
-testChangeFinder()
+testCumsumWithData()

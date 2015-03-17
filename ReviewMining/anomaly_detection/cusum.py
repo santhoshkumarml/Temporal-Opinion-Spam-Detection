@@ -1,10 +1,4 @@
 from __future__ import division, print_function
-'''
-Created on Jan 23, 2015
-
-@author: santhosh
-'''
-
 """Cumulative sum algorithm (CUSUM) to detect abrupt changes in data."""
 import numpy as np
 
@@ -149,7 +143,8 @@ def _plot(x, threshold, drift, ending, ax, ta, tai, taf, gp, gn):
         print('matplotlib is not available.')
     else:
         if ax is None:
-            _, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+            #_, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+            ax1 = plt.subplot(1,1,1)
 
         t = range(x.size)
         ax1.plot(t, x, 'b-', lw=2)
@@ -171,15 +166,15 @@ def _plot(x, threshold, drift, ending, ax, ta, tai, taf, gp, gn):
         ax1.set_title('Time series and detected changes ' +
                       '(threshold= %.3g, drift= %.3g): N changes = %d'
                       % (threshold, drift, len(tai)))
-        ax2.plot(t, gp, 'y-', label='+')
-        ax2.plot(t, gn, 'm-', label='-')
-        ax2.set_xlim(-.01*x.size, x.size*1.01-1)
-        ax2.set_xlabel('Data #', fontsize=14)
-        ax2.set_ylim(-0.01*threshold, 1.1*threshold)
-        ax2.axhline(threshold, color='r')
-        ax1.set_ylabel('Amplitude', fontsize=14)
-        ax2.set_title('Time series of the cumulative sums of ' +
-                      'positive and negative changes')
-        ax2.legend(loc='best', framealpha=.5)
-        plt.tight_layout()
+        # ax2.plot(t, gp, 'y-', label='+')
+        # ax2.plot(t, gn, 'm-', label='-')
+        # ax2.set_xlim(-.01*x.size, x.size*1.01-1)
+        # ax2.set_xlabel('Data #', fontsize=14)
+        # ax2.set_ylim(-0.01*threshold, 1.1*threshold)
+        # ax2.axhline(threshold, color='r')
+        # ax1.set_ylabel('Amplitude', fontsize=14)
+        # ax2.set_title('Time series of the cumulative sums of ' +
+        #               'positive and negative changes')
+        # ax2.legend(loc='best', framealpha=.5)
+        # plt.tight_layout()
         plt.show()

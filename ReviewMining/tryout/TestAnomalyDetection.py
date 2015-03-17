@@ -14,6 +14,25 @@ from datetime import datetime
 
 import changefinder
 
+
+def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
+                          superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict):
+    bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, \
+                                                        superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,
+                                                        toBeUsedMeasures)
+    for bnssKey in bnssKeySet:
+        firstTimeKey = bnss_statistics[bnssKey][StatConstants.FIRST_TIME_KEY]
+        print 'No Of Reviews'
+        print bnss_statistics[bnssKey][StatConstants.NO_OF_REVIEWS][firstTimeKey:]
+    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
+    beforePlot = datetime.now()
+    for bnssKey in bnssKeySet:
+        plotMeasures(bnss_statistics, chPtsOutliers, \
+                     bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir, toBeUsedMeasures)
+    afterPlot = datetime.now()
+    print 'Time taken for plot', afterPlot - beforePlot
+
+
 def tryChangeFinderOnProductDimensions():
 
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -38,24 +57,19 @@ def tryChangeFinderOnProductDimensions():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeySet = set(bnssKeys[:1])
+    start = 0
+    end = 50
+    bnssKeys = bnssKeys[start:end]
 
     toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
+    maxText = set([StatConstants.MAX_TEXT_SIMILARITY])
+    toBeUsedMeasures = set(StatConstants.MEASURES) - maxText
 
-    bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
-                     superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength, toBeUsedMeasures)
-
-
-    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
-
-    total_time_slots = len(cross_time_graphs.keys())
-    
-    beforePlot = datetime.now()
-    for bnssKey in bnssKeySet:
-        plotMeasures( bnss_statistics, chPtsOutliers,\
-                          bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir, toBeUsedMeasures)
-    afterPlot = datetime.now()
-    print 'Time taken for plot',afterPlot-beforePlot
+    for i in range(1,end-start+1):
+        bnssKeySet = set(bnssKeys[i-1:i])
+        total_time_slots = len(cross_time_graphs.keys())
+        generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
+                              superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict)
 
 def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, toBeUsedMeasures):
@@ -74,7 +88,7 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
 
         step = 1
 
-        if total_time_slots>70:
+        if total_time_slots>50:
             step = total_time_slots/100
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)

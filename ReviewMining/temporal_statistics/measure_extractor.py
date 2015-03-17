@@ -117,7 +117,7 @@ def calculateRatingEntropy(bnssId, bnss_statistics, ratings, reviews_for_bnss, t
 
 def calculateNoOfReviews(bnssId, bnss_statistics, neighboring_usr_nodes, timeKey, total_time_slots):
     if StatConstants.NO_OF_REVIEWS not in bnss_statistics[bnssId]:
-        bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots)
+        bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS] = numpy.zeros(total_time_slots, dtype=int)
     noOfReviews = len(neighboring_usr_nodes)
     bnss_statistics[bnssId][StatConstants.NO_OF_REVIEWS][timeKey] = noOfReviews
     return noOfReviews
@@ -320,8 +320,9 @@ def trySmoothing(bnss_statistics, measures_To_Be_Extracted):
             if measure_key in {StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS}:
                 continue
             stat = bnss_statistics[bnss_key][measure_key]
+            r,order,smooth = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
             firstKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]
-            for i in range(firstKey+1,len(stat)-1):
+            for i in range(firstKey+1,smooth):
                 stat[i] = stat[i-1]+stat[i+1]
                 stat[i] /= 3
 
@@ -336,7 +337,7 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                                           timeLength, measures_To_Be_Extracted)
     afterStat = datetime.now()
 
-    #trySmoothing(bnss_statistics, measures_To_Be_Extracted)
+    trySmoothing(bnss_statistics, measures_To_Be_Extracted)
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
     
