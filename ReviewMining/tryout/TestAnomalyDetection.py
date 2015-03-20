@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from anomaly_detection import AnomalyDetector
-#from scipy.signal import argrelextrema
-import  numpy
+import scipy
+import numpy
 from datetime import datetime
 
 import changefinder
@@ -52,13 +52,16 @@ def tryChangeFinderOnProductDimensions():
     #             '284819997', '405862075', '289190113', '312575632',\
     #             '404593641', '364873934']
     #bnssKeys = ['284819997']
+
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT]
+
+    bnssKeys = ['284417350']
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
     start = 0
-    end = 50
+    end = 1
     bnssKeys = bnssKeys[start:end]
 
     toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
@@ -109,18 +112,24 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                 bnss_statistics[bnss_key][measure_key][firstTimeKey:], 'g', label = 'bnss')
                 #align="center")
 
-        ax2 = ax1.twinx()
-
         chOutlierScores = chPtsOutliers[bnss_key][measure_key]
 
-        ax2.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
-                 chOutlierScores, 'r', label = 'bnss')
+        idxs = None
 
-        # result = argrelextrema(numpy.array(chOutlierScores), numpy.greater)
-        # idxs = result[0]
-        # idxs = [idx+firstTimeKey for idx in idxs]
-        # for idx in idxs:
-        #     ax2.axvline(x=idx, ymin = chOutlierScores[idx-firstTimeKey]/max(chOutlierScores), linewidth=2, color='b')
+        if measure_key == StatConstants.AVERAGE_RATING:
+            ta, tai, taf, amp = chOutlierScores
+            idxs = ta
+        else:
+            ax2 = ax1.twinx()
+            ax2.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
+                 chOutlierScores, 'r', label = 'bnss')
+            result = scipy.signal.argrelextrema(numpy.array(chOutlierScores), numpy.greater)
+            idxs = result[0]
+
+        idxs = [idx+firstTimeKey for idx in idxs]
+
+        for idx in idxs:
+            ax1.axvline(x=idx,linewidth=2, color='r')
 
         plot += 1
 

@@ -8,6 +8,7 @@ from datetime import datetime
 from util import StatConstants
 import anomaly_detection
 import changefinder
+import cusum
 
 
 
@@ -24,13 +25,18 @@ def detectChPtsAndOutliers(bnss_statistics):
         for measure_key in StatConstants.MEASURES:
             if measure_key in bnss_statistics[bnssKey]:
                 data = bnss_statistics[bnssKey][measure_key][firstKey:]
-                r,order,smooth = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
-                cf = changefinder.ChangeFinder(r,order,smooth)
-                change_scores = []
-                for i in range(len(data)):
-                    score = cf.update(data[i])
-                    change_scores.append(score)
-                chPtsOutliers[bnssKey][measure_key] = change_scores 
+                algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
+                if algo == StatConstants.AR_UNIFYING:
+                    r,order,smooth = params
+                    cf = changefinder.ChangeFinder(r,order,smooth)
+                    change_scores = []
+                    for i in range(len(data)):
+                        score = cf.update(data[i])
+                        change_scores.append(score)
+                    chPtsOutliers[bnssKey][measure_key] = change_scores
+                elif algo == StatConstants.CUSUM:
+                    chPtsOutliers[bnssKey][measure_key] = cusum.detect_cusum(data, threshold=params, show=False)
+
     
     afterDetection = datetime.now()
     print 'Time Taken For Anamoly Detection', afterDetection-beforeDetection

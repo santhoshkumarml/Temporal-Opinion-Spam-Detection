@@ -337,7 +337,7 @@ def extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                                           timeLength, measures_To_Be_Extracted)
     afterStat = datetime.now()
 
-    trySmoothing(bnss_statistics, measures_To_Be_Extracted)
+    #trySmoothing(bnss_statistics, measures_To_Be_Extracted)
     
     print 'TimeTaken for Statistics:',afterStat-beforeStat
     
