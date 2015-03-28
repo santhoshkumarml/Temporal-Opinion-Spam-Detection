@@ -24,6 +24,8 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
         firstTimeKey = bnss_statistics[bnssKey][StatConstants.FIRST_TIME_KEY]
         print 'No Of Reviews'
         print bnss_statistics[bnssKey][StatConstants.NO_OF_REVIEWS][firstTimeKey:]
+        print 'Average Rating'
+        print bnss_statistics[bnssKey][StatConstants.AVERAGE_RATING][firstTimeKey:]
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
@@ -56,12 +58,13 @@ def tryChangeFinderOnProductDimensions():
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT]
 
-    bnssKeys = ['284417350']
+    bnssKeys = ['284235722', '284417350', '284819997', '290338603', '295785957', '307906541', '308537544',\
+                '319035264', '327586041', '329691437', '329913454', '342792525', '346205042', '363590051']
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
     start = 0
-    end = 1
+    end = 14
     bnssKeys = bnssKeys[start:end]
 
     toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
