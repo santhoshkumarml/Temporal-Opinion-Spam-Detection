@@ -117,16 +117,19 @@ class TemporalGraph(networkx.Graph):
                           timeSplit ='1-D', initializePriors=True):
         dayIncrement = getDayIncrements(timeSplit)
         
-        all_reviews = [SIAUtil.getDateForReview(r)\
+        all_review_dates = [SIAUtil.getDateForReview(r)\
                  for r in parent_reviews.values() ]
-        minDate =  min(all_reviews)
-        maxDate =  max(all_reviews)
+        minDate =  min(all_review_dates)
+        maxDate =  max(all_review_dates)
 
         cross_time_graphs = dict()
         time_key = 0
+
+        time_dict = dict()
     
         while time_key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
             cross_time_graphs[time_key] = TemporalGraph()
+            time_dict[time_key] = minDate+timedelta(days=time_key*dayIncrement)
             time_key+=1
         
         for reviewKey in parent_reviews.iterkeys():
@@ -137,7 +140,7 @@ class TemporalGraph(networkx.Graph):
             temporalGraph.addNodesAndEdge(userIdToUserDict[review.getUserId()],\
                                          businessIdToBusinessDict[review.getBusinessID()],\
                                          review)
-        return cross_time_graphs
+        return cross_time_graphs, time_dict
 
 
 
@@ -151,12 +154,12 @@ def createGraphs(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, tim
 
     print "Super Graph Created"
     
-    cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
+    cross_time_graphs, time_dict = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              timeLength, False)
     afterGraphConstructionTime = datetime.now()
     print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
 
-    return superGraph, cross_time_graphs
+    return superGraph, cross_time_graphs, time_dict
 

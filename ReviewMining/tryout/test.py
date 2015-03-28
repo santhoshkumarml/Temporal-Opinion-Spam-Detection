@@ -7,7 +7,7 @@ Created on Feb 9, 2015
 from __future__ import division
 
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from lshash import LSHash
 import networkx
@@ -30,6 +30,36 @@ from yelp_utils.YelpDataReader import YelpDataReader
 from anomaly_detection import AnomalyDetector
 import changefinder
 from scipy.signal import argrelextrema
+
+
+def checkGraphUtils():
+    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
+    rdr = ItunesDataReader()
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
+
+    timeLength = '1-M'
+    superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
+                                                                    reviewIdToReviewsDict, timeLength)
+    print time_dict
+def checkDataFrame():
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    qcc = importr("AnomalyDetection")
+    dataf = robjects.DataFrame({})
+    robjects.r('''
+        rdateFn <- createRDate(d,m,y, verbose=FALSE) {
+            dat <- paste(paste(toString(d),toString(m),sep="/"),toString(y), sep="/")
+            return dat
+        }
+        ''')
+    rdateFn = robjects.globalenv['rdateFn']
+    dates = [datetime.date()-timedelta(i) for i in range(24)]
+    dates = [dates[i] for i in range(23,-1,-1)]
+    values = [i for i in range(5)]
+    values[21] = 300
+    for i in range(len(dates)):
+        rdateFn()
+
 
 
 def testCFForSomeMeasures():
@@ -442,7 +472,7 @@ def tryTemporalStatisticsForItunes():
     
     timeLength = '1-M'
     
-    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
+    superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
 
@@ -555,4 +585,5 @@ def testCumsumWithData():
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
 #setMemUsage()
-testCumsumWithData()
+#testCumsumWithData()
+checkGraphUtils()
