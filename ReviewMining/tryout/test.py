@@ -44,21 +44,25 @@ def checkGraphUtils():
 def checkDataFrame():
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
-    qcc = importr("AnomalyDetection")
-    dataf = robjects.DataFrame({})
+    importr("AnomalyDetection")
+    anomaly_detection = robjects.r['AnomalyDetectionTs']
+
     robjects.r('''
-        rdateFn <- createRDate(d,m,y, verbose=FALSE) {
+        rdateFn <- function(d , m, y) {
             dat <- paste(paste(toString(d),toString(m),sep="/"),toString(y), sep="/")
-            return dat
+            return(dat)
         }
         ''')
     rdateFn = robjects.globalenv['rdateFn']
-    dates = [datetime.date()-timedelta(i) for i in range(24)]
-    dates = [dates[i] for i in range(23,-1,-1)]
-    values = [i for i in range(5)]
+    dates = [datetime.today().date() - timedelta(i) for i in range(24)]
+    dates = [datetime.combine(dates[i], datetime.min.time()) for i in range(23,-1,-1)]
+    values = [i for i in range(24)]
     values[21] = 300
-    for i in range(len(dates)):
-        rdateFn()
+    date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
+    dataf = robjects.DataFrame(date_value_dict)
+    res = anomaly_detection(dataf, plot= True)
+    anoms_data_f = res[res.names.index('anoms')]
+    print datetime.fromtimestamp(anoms_data_f.rx2(1)[0])
 
 
 
@@ -586,4 +590,4 @@ def testCumsumWithData():
 #checkPlot2()
 #setMemUsage()
 #testCumsumWithData()
-checkGraphUtils()
+checkDataFrame()
