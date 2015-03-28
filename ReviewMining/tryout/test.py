@@ -41,6 +41,7 @@ def checkGraphUtils():
     superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
                                                                     reviewIdToReviewsDict, timeLength)
     print time_dict
+    
 def checkDataFrame():
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
