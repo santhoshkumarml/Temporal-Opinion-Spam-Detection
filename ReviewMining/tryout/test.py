@@ -41,7 +41,7 @@ def checkGraphUtils():
     superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
                                                                     reviewIdToReviewsDict, timeLength)
     print time_dict
-    
+
 def checkDataFrame():
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
@@ -511,12 +511,21 @@ def testCusum():
     print a
 
 def tryAr():
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1, 1, 1)
     import statsmodels.api as sm
-    data = [i**2 for i in range(1,10)]
+    data = numpy.random.normal(0.7,0.05,100)
+    ax1.plot(data, 'b')
     ar = sm.tsa.AR(data)
     ar_mod = ar.fit()
     print ar_mod.params
-    print ar_mod.predict()
+
+    # import statsmodels.tsa.arima_model as ari
+    #
+    # model=ari.ARMA(data[:20],(1,1))
+    # ar_res= model.fit()
+    # preds=ar_res.predict(21,100)
+    # print preds
 
 def runChangeFinder(data, show=True):
     ret = []
@@ -591,4 +600,5 @@ def testCumsumWithData():
 #checkPlot2()
 #setMemUsage()
 #testCumsumWithData()
-checkDataFrame()
+# checkDataFrame()
+tryAr()

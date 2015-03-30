@@ -16,7 +16,7 @@ import changefinder
 
 
 def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
-                          superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict):
+                          superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict, time_dict):
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, \
                                                         superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,
                                                         toBeUsedMeasures)
@@ -26,6 +26,8 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
         print bnss_statistics[bnssKey][StatConstants.NO_OF_REVIEWS][firstTimeKey:]
         print 'Average Rating'
         print bnss_statistics[bnssKey][StatConstants.AVERAGE_RATING][firstTimeKey:]
+        print 'Time keys'
+        print [time_dict[key] for key in range(firstTimeKey, total_time_slots)]
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
@@ -44,9 +46,9 @@ def tryChangeFinderOnProductDimensions():
 
     timeLength = '1-M'
 
-    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
-                                                           bnssIdToBusinessDict,\
-                                                            reviewIdToReviewsDict, timeLength)
+    superGraph, cross_time_graphs, time_dict = GraphUtil.createGraphs(usrIdToUserDict,\
+                                                                   bnssIdToBusinessDict,\
+                                                                    reviewIdToReviewsDict, timeLength)
 
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
 
@@ -75,7 +77,7 @@ def tryChangeFinderOnProductDimensions():
         bnssKeySet = set(bnssKeys[i-1:i])
         total_time_slots = len(cross_time_graphs.keys())
         generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
-                              superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict)
+                              superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict, time_dict)
 
 def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, toBeUsedMeasures):
@@ -94,8 +96,8 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
 
         step = 1
 
-        if total_time_slots>50:
-            step = total_time_slots/100
+        if total_time_slots > 50:
+            step = total_time_slots/50
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 

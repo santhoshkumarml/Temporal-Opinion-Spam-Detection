@@ -90,6 +90,9 @@ class ItunesDataReader:
                     float_user_id = float(user_id)
                     float_review_id = float(review_id)
                     stars = float(stars)
+                    if stars < 0 or stars > 5:
+                        #print 'Invalid Rating', bnss_id
+                        raise Exception('Invalid Rating')
                 except:
                     #print 'skipping Meta:', line, row
                     skippedMeta+=1
