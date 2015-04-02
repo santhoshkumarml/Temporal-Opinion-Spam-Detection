@@ -67,20 +67,6 @@ def detect_cusum(x, threshold=1, drift=0, ending=False, show=True, ax=None):
     ----------
     .. [1] Gustafsson (2000) Adaptive Filtering and Change Detection.
     .. [2] hhttp://nbviewer.ipython.org/github/demotu/BMC/blob/master/notebooks/DetectCUSUM.ipynb
-
-    Examples
-    --------
-    >>> from detect_cusum import detect_cusum
-    >>> x = np.random.randn(300)/5
-    >>> x[100:200] += np.arange(0, 4, 4/100)
-    >>> ta, tai, taf, amp = detect_cusum(x, 2, .02, True, True)
-
-    >>> x = np.random.randn(300)
-    >>> x[100:200] += 6
-    >>> detect_cusum(x, 4, 1.5, True, True)
-
-    >>> x = 2*np.sin(2*np.pi*np.arange(0, 3, .01))
-    >>> ta, tai, taf, amp = detect_cusum(x, 1, .05, True, True)
     """
 
     x = np.atleast_1d(x).astype('float64')

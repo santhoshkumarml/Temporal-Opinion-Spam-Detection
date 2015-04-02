@@ -28,6 +28,10 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
         print bnss_statistics[bnssKey][StatConstants.AVERAGE_RATING][firstTimeKey:]
         print 'Time keys'
         print [time_dict[key] for key in range(firstTimeKey, total_time_slots)]
+        print 'Rating Entropy'
+        print bnss_statistics[bnssKey][StatConstants.RATING_ENTROPY][firstTimeKey:]
+        print 'Entropy Gap'
+        print bnss_statistics[bnssKey][StatConstants.ENTROPY_SCORE][firstTimeKey:]
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
@@ -62,6 +66,7 @@ def tryChangeFinderOnProductDimensions():
 
     bnssKeys = ['284235722', '284417350', '284819997', '290338603', '295785957', '307906541', '308537544',\
                 '319035264', '327586041', '329691437', '329913454', '342792525', '346205042', '363590051']
+    #bnssKeys = ['308537544']
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 

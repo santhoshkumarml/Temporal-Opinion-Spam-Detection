@@ -31,7 +31,6 @@ from anomaly_detection import AnomalyDetector
 import changefinder
 from scipy.signal import argrelextrema
 
-
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
@@ -505,10 +504,25 @@ def tryTemporalStatisticsForItunes():
 def testCusum():
     data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200),\
                               numpy.random.normal(2.3, 0.05, 200)])
-    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200)])
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(0.7, 0.4, 200)])
+    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(0.7, 0.2, 200)])
+    data = [0.71912204,0.87731491,1.04376258,1.40563906,0.88967452,0.54856211
+            ,0.53175152,0.55124426,0.55343821,0.62240886,0.74833934,0.85191151
+            ,0.7632238,0.79266917,0.94361834,1.04220472,1.02522303,0.52746524
+            ,0.19799156,0.6144071,0.58449179,0.63295556,0.93026894,0.7709049
+            ,0.53611494,0.74182611,0.96449673,0.8470438,0.98779719,0.81249067
+            ,0.84709773,0.87185117,0.82816918,0.27686884,0.04748681,0.12145272
+            ,0.1041873,0.31396252,0.07103816,0.15854998,0.10125327,0.09326488
+            ,0.07942194,0.03908175,0.11218925,0.10670825,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
+            ,0.2035722,0.2035722,0.2035722,0.0,0.0]
 
-    a = checkCusumCallRFromPy(data)
-    print a
+    ta, tai, tapi, tani, taf, amp = cm.detect_cusum(data, 0.5, 0, show=True)
+    print ta, tai, tapi, tani, taf, amp
 
 def tryAr():
     fig = plt.figure()
@@ -594,11 +608,11 @@ def testCumsumWithData():
 
 
 
-#testCusum()
+testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
 #setMemUsage()
 #testCumsumWithData()
 # checkDataFrame()
-tryAr()
+#tryAr()
