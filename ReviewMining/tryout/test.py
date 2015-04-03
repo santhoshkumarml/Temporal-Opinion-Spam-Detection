@@ -30,6 +30,7 @@ from yelp_utils.YelpDataReader import YelpDataReader
 from anomaly_detection import AnomalyDetector
 import changefinder
 from scipy.signal import argrelextrema
+import  math
 
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -64,7 +65,57 @@ def checkDataFrame():
     anoms_data_f = res[res.names.index('anoms')]
     print datetime.fromtimestamp(anoms_data_f.rx2(1)[0])
 
-
+def checkR():
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    data=[3.32919255,3.64074074,3.84269663,3.90813648,4.00207039,4.12747875
+            ,4.17529039,4.2212766,4.24964639,4.22222222,4.22419725,4.2175552
+            ,4.23211606,4.24624765,4.25167936,4.25248166,4.2575,4.25680787
+            ,4.29813318,4.30547474,4.29731762,4.29461078,4.28444652,4.26276548
+            ,4.24914237,4.23062539,4.20832483,4.15762171,4.13535749,4.0970021
+            ,4.06199813,4.03958944,4.0111131,4.07295029,4.46319569,4.50791645
+            ,4.5365574,4.53393311,4.58877685,4.59767227,4.57510136,4.58629547
+            ,4.59982221,4.60221015,4.61307239,4.62219092,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+            ,4.62106638,4.62106638,4.62106638,4.62105966,4.62105966]
+    x = numpy.atleast_1d(data).astype('float64')
+    data = numpy.atleast_1d(data).astype('float64')
+    qcc = importr("qcc")
+    data = robjects.vectors.FloatVector(data)
+    robjects.r('''
+            cusum_run <- function(data) {
+            	idx <- 1
+	            changes <- c()
+	            index <- 1
+	            for (i in 2:length(data))
+	            {
+		            out <- cusum(data[idx:i-1], se.shift=0.5, newdata=data[i], plot=FALSE)
+		            if(length(out$violations$upper)>0) {
+		            if (i-idx %in% out$violations$upper) {
+	 		            idx = i
+			            changes[index] = idx
+			            index <- index+1
+		            }
+		            } else if(length(out$violations$lower)>0) {
+		                if (i-idx %in% out$violations$lower) {
+    		            idx=i
+			            changes[index] = idx
+			            index <- index+1
+		            }
+		            }
+	            }
+	            return (changes)
+                }
+            ''')
+    cusum_run = robjects.globalenv['cusum_run']
+    changes = cusum_run(data)
+    changes = list([v-1 for k,v in changes.items()])
+    print x
+    plotCusumChanges(changes, x)
 
 def testCFForSomeMeasures():
     data = []
@@ -161,15 +212,31 @@ def checkCusum():
     ta, tai, taf, amp = cm.detect_cusum(x, 2, .02, True, True)
     print ta, tai, taf, amp
     
-def checkCusumCallRFromPy(x, shift = 1, decision_interval = 5):
+def checkCusumCallRFromPy(x, shift = 1,stdev = None,decision_interval = 5, new_data = []):
     # x = numpy.random.randn(300)/5
     # x[100:200] += numpy.arange(0, 4, 4/100)
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
     qcc = importr("qcc")
     data = robjects.vectors.FloatVector(x)
-    q1 = qcc.cusum(data)
-    return q1[-1]
+    robjects.r('''
+                cusum_rpy <- function(data, shift, new_data, std_dev=-1) {
+                    if (std_dev == -1) {
+                        out<-cusum(data, se.shift=shift, newdata=new_data, decision.interval=3, plot=FALSE)
+                        return (out$violations)
+                    }
+                        out<-cusum(data, se.shift=shift, std.dev=std_dev, newdata=new_data, decision.interval=3, plot=FALSE)
+                        return (out$violations)
+                }
+                ''')
+    cusum_rpy = robjects.globalenv['cusum_rpy']
+    if stdev != None:
+        out = cusum_rpy(data, shift, new_data, std_dev = stdev)
+    else:
+        out = cusum_rpy(data, shift, new_data)
+    output = dict(out.items())
+    output = {k:[val-1 for val in list(v)] for k,v in output.items()}
+    return output['upper'],output['lower']
     
 def checkJacDocHash(inputDirName):
     scr = YelpDataReader()
@@ -500,6 +567,47 @@ def tryTemporalStatisticsForItunes():
                       bnssIdToBusinessDict, total_time_slots, plotDir)
 
 
+def cusum_using_call_to_r_py(x):
+    changes = []
+    idx = 0
+    std_dev = None
+    for i in range(1, x.size):
+        # print '-------------------------------'
+        # print i
+        #print x[idx:i], x[i]
+        if std_dev == None:
+            upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=0.5, new_data=x[i])
+        # else:
+        #     upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=0.5, stdev=std_dev, new_data=x[i])
+        std_dev = None
+        # print 'sample<-c(',
+        # for j in range(idx,i):
+        # print x[j],
+        #     if j != i:
+        #         print ',',
+        # print ')'
+        # print 'new_d<-c(',x[i],')'
+        #print [idx + val for val in upper_l], [idx + val for val in lower_l]
+        # print '-------------------------------'
+        if i - idx in upper_l or i - idx in lower_l:
+            # if std_dev == None:
+            #     std_dev = numpy.std(x[idx:i])
+            idx = i
+            changes.append(idx)
+    return changes
+
+
+def plotCusumChanges(changes, x,):
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1, 1, 1)
+    ax1.plot(x)
+    plt.ylim((1,5))
+    plt.yticks(numpy.arange(1,5.5,0.5))
+    ax1.plot(changes, x[changes], 'o', mfc='r', mec='r', mew=1, ms=5,
+             label='Alarm')
+    plt.show()
+
 
 def testCusum():
     data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200),\
@@ -520,9 +628,27 @@ def testCusum():
             ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
             ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
             ,0.2035722,0.2035722,0.2035722,0.0,0.0]
+    data = [3.32919255,3.64074074,3.84269663,3.90813648,4.00207039,4.12747875
+,4.17529039,4.2212766,4.24964639,4.22222222,4.22419725,4.2175552
+,4.23211606,4.24624765,4.25167936,4.25248166,4.2575,4.25680787
+,4.29813318,4.30547474,4.29731762,4.29461078,4.28444652,4.26276548
+,4.24914237,4.23062539,4.20832483,4.15762171,4.13535749,4.0970021
+,4.06199813,4.03958944,4.0111131,4.07295029,4.46319569,4.50791645
+,4.5365574,4.53393311,4.58877685,4.59767227,4.57510136,4.58629547
+,4.59982221,4.60221015,4.61307239,4.62219092,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62105966,4.62105966]
 
-    ta, tai, tapi, tani, taf, amp = cm.detect_cusum(data, 0.5, 0, show=True)
-    print ta, tai, tapi, tani, taf, amp
+    x = numpy.atleast_1d(data).astype('float64')
+    changes = cusum_using_call_to_r_py(x)
+    plotCusumChanges(changes, x)
+
+    ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
+    plotCusumChanges(ta, x)
 
 def tryAr():
     fig = plt.figure()
@@ -608,7 +734,89 @@ def testCumsumWithData():
 
 
 
-testCusum()
+
+def testAVGplot():
+    data1=[3.32919255,3.64074074,3.84269663,3.90813648,4.00207039,4.12747875
+,4.17529039,4.2212766,4.24964639,4.22222222,4.22419725,4.2175552
+,4.23211606,4.24624765,4.25167936,4.25248166,4.2575,4.25680787
+,4.29813318,4.30547474,4.29731762,4.29461078,4.28444652,4.26276548
+,4.24914237,4.23062539,4.20832483,4.15762171,4.13535749,4.0970021
+,4.06199813,4.03958944,4.0111131,4.07295029,4.46319569,4.50791645
+,4.5365574,4.53393311,4.58877685,4.59767227,4.57510136,4.58629547
+,4.59982221,4.60221015,4.61307239,4.62219092,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
+,4.62106638,4.62106638,4.62106638,4.62105966,4.62105966]
+
+
+    data2 = [3.36,3.28712871,3.3483871,3.4173913,3.59032258,3.58791209
+,3.60294118,3.62700229,3.61684211,3.61320755,3.63427562,3.64548495
+,3.64808917,3.6578125,3.65846154,3.64497041,3.62716763,3.63496503
+,3.61580381,3.61170213,3.57474227,3.57088608,3.5408039,3.51306413
+,3.49655172,3.44555556,3.41550054,4.19930676,4.59377971,4.62541237
+,4.64245544,4.65523777,4.68450056,4.68450056,4.68450056,4.69760116
+,4.70102499,4.71395594,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626,4.71809626
+,4.71809626,4.71809626,4.71809626]
+
+
+    data3 = [3.83221477,3.55299539,3.25,3.18020305,3.64212077,3.65085837
+,3.59494333,3.50950629,3.48125808,3.43387739,3.39578898,3.22815285
+,3.17549029,3.14201898,3.08793062,3.03221516,3.01286648,3.00580919
+,3.00536102,3.00515498,2.96031996,2.94514013,2.93650337,2.92073815
+,2.89103543,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88905178,2.88905178,2.88905178
+,2.8891623,2.8891623]
+
+
+    data4 = [2.66666667,4.30120482,4.31009957,4.33190091,4.33910035,4.33901866
+,4.35712855,4.36539133,4.37286401,4.37955437,4.37966194,4.37904216
+,4.37781558,4.37735977,4.37623695,4.37168679,4.36491841,4.34945627
+,4.34415109,4.34063163,4.33732945,4.3366638,4.2955183,4.29255423
+,4.28257202,4.28099495,4.27846383,4.27801822,4.27700045,4.27543792
+,4.27494371,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592,4.27506592
+,4.27506592,4.27506592]
+
+    data5 = [4.68181818,4.64930556,4.67321429,4.69469599,4.68819599,4.68023833
+,4.66281139,4.65711879,4.64947623,4.62684251,4.6029318,4.52859779
+,4.50938776,4.50338681,4.48964837,4.49208812,4.49186047,4.49156902
+,4.49156902,4.49156902,4.49156902,4.49156902,4.49156902,4.49156902
+,4.49156902,4.49156902,4.49536387,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
+,4.50124688,4.50124688,4.50124688,4.50124688]
+
+    data = [data1,data2,data3,data4,data5]
+    data = [numpy.concatenate([numpy.random.normal(3.5,0.1,100),numpy.random.normal(4.1,0.2,100)])]
+    for d in data:
+        d = numpy.atleast_1d(d).astype('float64')
+        #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(d,threshold=0.5)
+        up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
+        changes = sorted(up+low)
+        plotCusumChanges(changes, d)
+
+
+
+#testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
@@ -616,3 +824,4 @@ testCusum()
 #testCumsumWithData()
 # checkDataFrame()
 #tryAr()
+checkR()
