@@ -34,8 +34,10 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
         # print bnss_statistics[bnssKey][StatConstants.ENTROPY_SCORE][firstTimeKey:]
 
     beforePlot = datetime.now()
+    chPtsOutliers = dict()
     for bnssKey in bnssKeySet:
-        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics[bnssKey])
+        chPtsOutliers_for_bnss = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics[bnssKey])
+        chPtsOutliers[bnssKey] = chPtsOutliers_for_bnss
         plotMeasures(bnss_statistics, chPtsOutliers, \
                      bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir, toBeUsedMeasures)
     afterPlot = datetime.now()
