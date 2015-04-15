@@ -39,9 +39,8 @@ def checkGraphUtils():
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
 
     timeLength = '1-M'
-    superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
+    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
                                                                     reviewIdToReviewsDict, timeLength)
-    print time_dict
 
 def checkDataFrame():
     import rpy2.robjects as robjects
@@ -592,7 +591,7 @@ def tryTemporalStatisticsForItunes():
     
     timeLength = '1-M'
     
-    superGraph,cross_time_graphs,time_dict = GraphUtil.createGraphs(usrIdToUserDict,\
+    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
 

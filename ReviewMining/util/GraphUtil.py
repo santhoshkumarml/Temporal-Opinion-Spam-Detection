@@ -67,11 +67,12 @@ class SuperGraph(networkx.Graph):
 
 class TemporalGraph(networkx.Graph):
     
-    def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict(), parent_reviews= dict()):
+    def __init__(self, parentUserIdToUserDict=dict(),parentBusinessIdToBusinessDict=dict(), parent_reviews= dict(), time = None):
         super(TemporalGraph, self).__init__()
         self.userIdToUserDict = parentUserIdToUserDict
         self.businessIdToBusinessDict = parentBusinessIdToBusinessDict
         self.reviewIdToReviewDict = parent_reviews
+        self.time = time
     
     def addNodesAndEdge(self, usr, bnss, review):
         self.userIdToUserDict[usr.getId()] = usr
@@ -124,12 +125,9 @@ class TemporalGraph(networkx.Graph):
 
         cross_time_graphs = dict()
         time_key = 0
-
-        time_dict = dict()
     
         while time_key < ((maxDate-minDate+timedelta(dayIncrement))/dayIncrement).days:
-            cross_time_graphs[time_key] = TemporalGraph()
-            time_dict[time_key] = minDate+timedelta(days=time_key*dayIncrement)
+            cross_time_graphs[time_key] = TemporalGraph(time=datetime.combine(minDate+timedelta(days=time_key*dayIncrement),datetime.min.time()))
             time_key+=1
         
         for reviewKey in parent_reviews.iterkeys():
@@ -140,10 +138,7 @@ class TemporalGraph(networkx.Graph):
             temporalGraph.addNodesAndEdge(userIdToUserDict[review.getUserId()],\
                                          businessIdToBusinessDict[review.getBusinessID()],\
                                          review)
-        return cross_time_graphs, time_dict
-
-
-
+        return cross_time_graphs
 
 #---------------------------------------------------------------------------------------------------------
 def createGraphs(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, timeLength):
@@ -154,12 +149,12 @@ def createGraphs(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, tim
 
     print "Super Graph Created"
     
-    cross_time_graphs, time_dict = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
+    cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict,\
                                              bnssIdToBusinessDict,\
                                              reviewIdToReviewsDict,\
                                              timeLength, False)
     afterGraphConstructionTime = datetime.now()
     print 'TimeTaken for Graph Construction:',afterGraphConstructionTime-beforeGraphConstructionTime
 
-    return superGraph, cross_time_graphs, time_dict
+    return superGraph, cross_time_graphs
 

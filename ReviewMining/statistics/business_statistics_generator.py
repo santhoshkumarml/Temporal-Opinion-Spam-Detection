@@ -3,24 +3,38 @@ __author__ = 'santhosh'
 from util import StatConstants
 from datetime import datetime
 import numpy
+import os
 from util import StatUtil
 from util import SIAUtil
 
 
 def extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
-                     measuresToBeExtracted = StatConstants.MEASURES):
+                     measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
     beforeStat = datetime.now()
     print 'Statistics for Bnss', bnssKey
     statistics_for_current_bnss = dict()
     statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
-    for time_key in cross_time_graphs:
-        G = cross_time_graphs[time_key]
+    bnssStatFile = None
+    if logStats:
+        bnssStatFile = open(os.path.join(plotDir,bnssKey+'.stats'),'w')
+
+    total_time_slots = len(cross_time_graphs.keys())
+
+    for timeKey in cross_time_graphs:
+        G = cross_time_graphs[timeKey]
         if bnssKey in G.getBusinessIds():
             neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
-
             reviews_for_bnss = [G.getReview(usrId, bnssKey) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]
+
+            if logStats:
+                bnssStatFile.write('Reviews in Time Period:'+str(timeKey)+' '+str())
+                for review in reviews_for_bnss:
+                    bnssStatFile.write()
+                bnssStatFile.write('\n')
+                bnssStatFile.write('Number of reviews:', len(neighboring_usr_nodes))
+
 
             #Average Rating
             if StatConstants.AVERAGE_RATING in measuresToBeExtracted:

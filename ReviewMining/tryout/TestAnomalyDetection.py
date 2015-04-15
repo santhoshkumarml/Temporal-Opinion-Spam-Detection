@@ -52,7 +52,7 @@ def tryChangeFinderOnProductDimensions():
 
     timeLength = '1-M'
 
-    superGraph, cross_time_graphs, time_dict = GraphUtil.createGraphs(usrIdToUserDict,\
+    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                                    bnssIdToBusinessDict,\
                                                                     reviewIdToReviewsDict, timeLength)
 
