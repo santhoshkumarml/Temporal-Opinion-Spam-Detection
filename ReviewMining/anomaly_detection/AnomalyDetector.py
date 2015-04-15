@@ -47,33 +47,68 @@ def detect_outliers_using_cusum(x, threshold=1):
             gp[i], gn[i] = 0, 0
             # gp[i], gn[i] = threshold, threshold      # reset alarm
     return ta, tai, tapi, tani
-            
+
+
+
+
+def twitterAnomalyDetection(dates, values):
+    import rpy2.robjects as robjects
+    from rpy2.robjects.packages import importr
+    importr("AnomalyDetection")
+    anomaly_detection = robjects.r['AnomalyDetectionTs']
+
+    # robjects.r('''
+    #     rdateFn <- function(d , m, y) {
+    #         dat <- paste(paste(toString(d),toString(m),sep="/"),toString(y), sep="/")
+    #         return(dat)
+    #     }
+    #     ''')
+    # rdateFn = robjects.globalenv['rdateFn']
+
+    dates = []
+    dates = [datetime.combine(dates[i], datetime.min.time()) for i in range(len(dates))]
+    date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
+    dataf = robjects.DataFrame(date_value_dict)
+    res = anomaly_detection(dataf, plot= True)
+    anoms_data_f = res[res.names.index('anoms')]
+    anoms_dates = set()
+    for d in anoms_data_f.rx2(1):
+        anoms_dates.add(datetime.fromtimestamp(d).date())
+    idxs = []
+    dates = [dates[i].date() for i in range(len(dates))]
+    for i in range(len(dates)):
+        if dates[i] in anoms_dates:
+            idxs.append(i)
+    values = numpy.atleast_1d(values).astype('int64')
+    return idxs
+
 # r - Coefficient of forgetting type AR model. 0 <r <1
 # order - Degree of forgetting type AR model
 # smooth - section length of time to be moving average smoothing the calculated outliers score
 
-def detectChPtsAndOutliers(bnss_statistics):
+def detectChPtsAndOutliers(statistics_for_bnss):
     chPtsOutliers = dict()
     beforeDetection = datetime.now()
-    for bnssKey in bnss_statistics:
-        firstKey = bnss_statistics[bnssKey][StatConstants.FIRST_TIME_KEY]
-        chPtsOutliers[bnssKey] = dict()
-        for measure_key in StatConstants.MEASURES:
-            if measure_key in bnss_statistics[bnssKey]:
-                data = bnss_statistics[bnssKey][measure_key][firstKey:]
-                algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
-                if algo == StatConstants.AR_UNIFYING:
-                    r,order,smooth = params
-                    cf = changefinder.ChangeFinder(r,order,smooth)
-                    change_scores = []
-                    for i in range(len(data)):
-                        score = cf.update(data[i])
-                        change_scores.append(score)
-                    chPtsOutliers[bnssKey][measure_key] = change_scores
-                elif algo == StatConstants.CUSUM:
-                    chPtsOutliers[bnssKey][measure_key] = cusum.detect_cusum(data, threshold=params, show=False)
-
+    firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+    chPtsOutliers= dict()
+    for measure_key in StatConstants.MEASURES:
+        if measure_key in statistics_for_bnss:
+            data = statistics_for_bnss[measure_key][firstKey:]
+            algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
+            if algo == StatConstants.AR_UNIFYING:
+                r,order,smooth = params
+                cf = changefinder.ChangeFinder(r,order,smooth)
+                change_scores = []
+                for i in range(len(data)):
+                    score = cf.update(data[i])
+                    change_scores.append(score)
+                    chPtsOutliers[measure_key] = change_scores
+            elif algo == StatConstants.CUSUM:
+                chPtsOutliers[measure_key] = cusum.detect_cusum(data, threshold=params, show=False)
+            elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
+                chPtsOutliers[measure_key] = twitterAnomalyDetection(data,data)
     
     afterDetection = datetime.now()
-    print 'Time Taken For Anamoly Detection', afterDetection-beforeDetection
+    print 'Time Taken For Anamoly Detection for Bnss Key',statistics_for_bnss[StatConstants.BNSS_ID],\
+        ':', afterDetection-beforeDetection
     return chPtsOutliers
