@@ -924,7 +924,7 @@ def tryBusinessMeasureExtractor():
 
 
     business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKeys[0],\
-                                                                           timeLength, measuresToBeExtracted)
+                                                                           timeLength, measuresToBeExtracted, logStats=True)
 
 #testCusum()
 #testCFForSomeMeasures()

@@ -33,7 +33,8 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                 bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime()))
 
         if bnssKey in G.getBusinessIds():
-            bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
+            if logStats:
+                bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
             neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
             reviews_for_bnss = [G.getReview(usrId, bnssKey) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]
@@ -41,7 +42,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
             if logStats:
                 bnssStatFile.write('Reviews in Time Period:'+str(timeKey)+' '+str(G.getDateTime()))
                 bnssStatFile.write('\n')
-                bnssStatFile.write('Number of reviews:', len(neighboring_usr_nodes))
+                bnssStatFile.write('Number of reviews:'+str(len(neighboring_usr_nodes)))
                 bnssStatFile.write('\n')
                 for review in reviews_for_bnss:
                     bnssStatFile.write(review.toString())
