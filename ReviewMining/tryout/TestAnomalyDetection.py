@@ -33,9 +33,9 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
         # print 'Entropy Gap'
         # print bnss_statistics[bnssKey][StatConstants.ENTROPY_SCORE][firstTimeKey:]
 
-    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
+        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics[bnssKey])
         plotMeasures(bnss_statistics, chPtsOutliers, \
                      bnssIdToBusinessDict, bnssKey, total_time_slots, plotDir, toBeUsedMeasures)
     afterPlot = datetime.now()
@@ -43,7 +43,6 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
 
 
 def tryChangeFinderOnProductDimensions():
-
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
 
     rdr = ItunesDataReader()
@@ -76,9 +75,9 @@ def tryChangeFinderOnProductDimensions():
     bnssKeys = bnssKeys[start:end]
 
     # toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
-    # toBeUsedMeasures = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
+    toBeUsedMeasures = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
     # #toBeUsedMeasures = set([StatConstants.AVERAGE_RATING])
-    toBeUsedMeasures = [measure for measure in StatConstants.MEASURES]
+    #toBeUsedMeasures = [measure for measure in StatConstants.MEASURES]
 
     for i in range(1,end-start+1):
         bnssKeySet = set(bnssKeys[i-1:i])

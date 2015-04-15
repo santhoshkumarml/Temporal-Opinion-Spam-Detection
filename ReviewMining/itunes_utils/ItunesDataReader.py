@@ -46,7 +46,7 @@ class ItunesDataReader:
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}
         self.reviewIdToReviewDict = {}
-    def readData(self, reviewFolder):
+    def readData(self, reviewFolder, readReviewsText=True):
         beforeDataReadTime = datetime.now()
         reviewMetaFile = join(reviewFolder, META_FILE)
         reviewFile = join(reviewFolder, REVIEW_FILE)
@@ -119,7 +119,9 @@ class ItunesDataReader:
          'Reviews:',len(self.reviewIdToReviewDict.keys())
         # return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
     
-    
+        if not readReviewsText:
+            return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
+        
         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
                               dtype=object, names = COLS)
         review_ids = []
