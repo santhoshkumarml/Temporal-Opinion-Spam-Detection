@@ -284,6 +284,10 @@ class review(SIALink):
     def calculateBeliefVals(self, user, business):
         self.score = user.getMessageFromNeighbor(business)
 
+    def toString(self):
+        return 'Review by Usr:'+self.usrId+' Rating:'+str(self.rating)+' Review Time:'+\
+               str(getDateForReview(self))+' Review Comment:'+ str(self.getReviewText())
+
 
 def getDateForReview(r):
     review_date = ''

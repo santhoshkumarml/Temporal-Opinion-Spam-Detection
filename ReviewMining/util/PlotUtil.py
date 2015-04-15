@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 from os.path import join
 from util import StatConstants
 import numpy
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
+import GraphUtil
 
 # def plotReviewTimeVelocity(bnss_statistics, bnssIdToBusinessDict,\
 #                         bnss_key, total_time_slots, inputDir, clr):
@@ -123,3 +124,74 @@ def plotAny(a):
     for i in range(a.size):
         plt.plot(i,a[i],'go-')
     plt.show()
+
+
+def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, total_time_slots, inputDir, toBeUsedMeasures, timeLength = '1M'):
+
+    plot = 1
+
+    fig = plt.figure(figsize=(20,20))
+
+    avg_idxs = None
+
+    dayIncrement = GraphUtil.getDayIncrements(timeLength)
+
+    for measure_key in toBeUsedMeasures:
+        if measure_key not in statistics_for_bnss:
+            continue
+
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
+        firstDimensionValues = [(firstDateTime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in range(firstTimeKey, total_time_slots)]
+        xlim = (firstDimensionValues[0], firstDimensionValues[-1])
+        xticks = [(firstDateTime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in range(firstTimeKey, total_time_slots,step)]
+
+        step = 5
+
+        # if total_time_slots > 50:
+        #     step = total_time_slots/50
+        #
+        # step = 3
+
+        ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
+
+        plt.title('Business statistics')
+        plt.xlabel('Time in multiples of 1 months')
+
+        plt.xlim(xlim)
+        plt.xticks(xticks)
+
+        plt.ylabel(measure_key)
+
+        if measure_key == StatConstants.AVERAGE_RATING:
+            plt.ylim((1,5))
+            plt.yticks(range(1,6))
+
+        ax1.plot(firstDimensionValues,\
+                statistics_for_bnss[measure_key][firstTimeKey:], 'g', label=measure_key)
+
+        chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
+
+        if len(chPtsOutlierScores) > 0:
+            ax2 = ax1.twinx()
+            ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
+
+        for idx in chOutlierIdxs:
+            ax1.axvline(x=idx, linewidth=2, color='r')
+
+        plot += 1
+
+    art = []
+    lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
+    art.append(lgd)
+    plt.tight_layout()
+    plt.gcf().autofmt_xdate()
+
+    imgFile = join(inputDir, statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")+'.png'
+
+    print statistics_for_bnss[StatConstants.BNSS_ID]+" stats are logged to "+imgFile
+
+    plt.savefig(imgFile,\
+                 additional_artists=art,\
+                 bbox_inches="tight")
+    plt.close()

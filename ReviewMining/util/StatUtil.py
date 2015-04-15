@@ -205,11 +205,13 @@ def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock):
             print reviewTextsInThisTimeBlock[index]
         print '-------------------------'
 
-def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots):
+def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measuresToBeExtracted = StatConstants.MEASURES):
     # POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-    #print statistics_for_bnss
+    if StatConstants.NON_CUM_NO_OF_REVIEWS in measuresToBeExtracted:
+        statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS] = numpy.copy(statistics_for_bnss[StatConstants.NO_OF_REVIEWS])
+        
     for timeKey in range(total_time_slots):
         if timeKey > firstTimeKey:
             fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)

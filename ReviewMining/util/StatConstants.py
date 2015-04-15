@@ -5,6 +5,7 @@ Created on Jan 10, 2015
 '''
 
 FIRST_TIME_KEY = 'First Time Key'
+FIRST_DATE_TIME = 'First Date Time'
 BNSS_ID = 'BNSS_ID'
 
 AVERAGE_RATING = 'Average Rating'

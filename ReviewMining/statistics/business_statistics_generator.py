@@ -20,20 +20,29 @@ def extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict,bnssIdToBusinessDic
         bnssStatFile = open(os.path.join(plotDir,bnssKey+'.stats'),'w')
 
     total_time_slots = len(cross_time_graphs.keys())
-
+    firstTimeKey = None
     for timeKey in cross_time_graphs:
         G = cross_time_graphs[timeKey]
+        if not firstTimeKey:
+            firstTimeKey = timeKey
+            statistics_for_current_bnss[StatConstants.BNSS_ID] = firstTimeKey
+            statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
+            if logStats:
+                bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime()))
+
         if bnssKey in G.getBusinessIds():
             neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
             reviews_for_bnss = [G.getReview(usrId, bnssKey) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]
 
             if logStats:
-                bnssStatFile.write('Reviews in Time Period:'+str(timeKey)+' '+str())
-                for review in reviews_for_bnss:
-                    bnssStatFile.write()
+                bnssStatFile.write('Reviews in Time Period:'+str(timeKey)+' '+str(G.getDateTime()))
                 bnssStatFile.write('\n')
                 bnssStatFile.write('Number of reviews:', len(neighboring_usr_nodes))
+                bnssStatFile.write('\n')
+                for review in reviews_for_bnss:
+                    bnssStatFile.write(review.toString())
+                    bnssStatFile.write('\n')
 
 
             #Average Rating
@@ -73,7 +82,8 @@ def extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict,bnssIdToBusinessDic
                 StatUtil.calculateMaxTextSimilarity(G, statistics_for_current_bnss, neighboring_usr_nodes, noOfReviews, timeKey,
                                               timeLength, total_time_slots)
 
-            StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots)
+            StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots, measuresToBeExtracted)
 
     afterStat = datetime.now()
-
+    if logStats:
+        bnssStatFile.close()
