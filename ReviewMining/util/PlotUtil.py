@@ -126,7 +126,7 @@ def plotAny(a):
     plt.show()
 
 
-def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, total_time_slots, inputDir, toBeUsedMeasures, timeLength = '1M'):
+def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, timeLength = '1-M'):
 
     plot = 1
 
@@ -134,17 +134,16 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, total_time_sl
 
     avg_idxs = None
 
-    dayIncrement = GraphUtil.getDayIncrements(timeLength)
+    total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss:
             continue
-
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = [(firstDateTime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in range(firstTimeKey, total_time_slots)]
+        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
         xlim = (firstDimensionValues[0], firstDimensionValues[-1])
-        xticks = [(firstDateTime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in range(firstTimeKey, total_time_slots,step)]
+        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots,step), timeLength)
 
         step = 5
 

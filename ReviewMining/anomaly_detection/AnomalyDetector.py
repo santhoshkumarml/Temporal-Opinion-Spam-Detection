@@ -10,6 +10,8 @@ import anomaly_detection
 import changefinder
 import cusum
 import numpy
+from util import GraphUtil
+import scipy
 
 def detect_outliers_using_cusum(x, threshold=1):
     x = numpy.atleast_1d(x).astype('float64')
@@ -65,8 +67,6 @@ def twitterAnomalyDetection(dates, values):
     #     ''')
     # rdateFn = robjects.globalenv['rdateFn']
 
-    dates = []
-    dates = [datetime.combine(dates[i], datetime.min.time()) for i in range(len(dates))]
     date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
     dataf = robjects.DataFrame(date_value_dict)
     res = anomaly_detection(dataf, plot= True)
@@ -82,16 +82,84 @@ def twitterAnomalyDetection(dates, values):
     values = numpy.atleast_1d(values).astype('int64')
     return idxs
 
+
+
+
+def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, measure_key,\
+                               statistics_for_measure, avg_idxs, algo):
+    if algo == StatConstants.AR_UNIFYING:
+        result = scipy.signal.argrelextrema(numpy.array(choutlierScores), numpy.greater)
+        idxs = result[0]
+    else:
+        idxs = choutlierIdxs
+
+        # print idxs
+        # idxs = [i for i in range(1,len(chOutlierScores))\
+        #           if (chOutlierScores[i]!=len(chOutlierScores)-1 and\
+        #               chOutlierScores[i-1]<chOutlierScores[i] and chOutlierScores[i-1]<=chOutlierScores[i])\
+        #           or (chOutlierScores[i]==len(chOutlierScores)-1 and\
+        #               chOutlierScores[i-1]<chOutlierScores[i])]
+        # print idxs
+
+    new_idxs = set()
+
+    if StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.INCREASE:
+        for idx in idxs:
+            idxRangePresent = False
+            for range_idx in range(idx-2,idx+3):
+                if range_idx in avg_idxs:
+                    idxRangePresent = True
+                    break
+            if idxRangePresent:
+                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.greater)
+                new_idx = new_idx[0]
+                new_idx = [idx-2+indx for indx in new_idx]
+                print idx, new_idx
+                for indx in new_idx:
+                    new_idxs.add(indx)
+    elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
+        for idx in idxs:
+            idxRangePresent = False
+            for range_idx in range(idx-2,idx+3):
+                if range_idx in avg_idxs:
+                    idxRangePresent = True
+                    break
+            if idxRangePresent:
+                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.less)
+                new_idx = new_idx[0]
+                new_idx = [idx-2+indx for indx in new_idx]
+                print idx,new_idx
+                for indx in new_idx:
+                    new_idxs.add(indx)
+    else:
+        for idx in idxs:
+            idxRangePresent = False
+            for range_idx in range(idx-2,idx+3):
+                if range_idx in avg_idxs:
+                    idxRangePresent = True
+                    break
+            if idxRangePresent:
+                new_idxs.add(idx)
+
+    choutlierIdxs = sorted([idx for idx in list(new_idxs)])
+
+    return choutlierIdxs, choutlierScores
+
 # r - Coefficient of forgetting type AR model. 0 <r <1
 # order - Degree of forgetting type AR model
 # smooth - section length of time to be moving average smoothing the calculated outliers score
 
-def detectChPtsAndOutliers(statistics_for_bnss):
+def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
+    dayIncrements = GraphUtil.getDayIncrements(timeLength)
     chPtsOutliers = dict()
     beforeDetection = datetime.now()
     firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+    firstDateTime = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+    total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
     chPtsOutliers= dict()
+    avg_idxs = None
     for measure_key in StatConstants.MEASURES:
+        chOutlierIdxs, chOutlierScores = [], []
         if measure_key in statistics_for_bnss:
             data = statistics_for_bnss[measure_key][firstKey:]
             algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
@@ -102,13 +170,26 @@ def detectChPtsAndOutliers(statistics_for_bnss):
                 for i in range(len(data)):
                     score = cf.update(data[i])
                     change_scores.append(score)
-                    chPtsOutliers[measure_key] = change_scores
+                chOutlierScores = change_scores
+
+
             elif algo == StatConstants.CUSUM:
-                chPtsOutliers[measure_key] = cusum.detect_cusum(data, threshold=params, show=False)
+                chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
+
             elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                chPtsOutliers[measure_key] = twitterAnomalyDetection(data,data)
+                chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots))\
+                    ,data)
+
+            chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
+                                                                          measure_key, statistics_for_bnss[measure_key],\
+                                                                          avg_idxs, algo)
+            if measure_key == StatConstants.AVERAGE_RATING:
+                    avg_idxs = set(chOutlierIdxs)
+
+            chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     
     afterDetection = datetime.now()
     print 'Time Taken For Anamoly Detection for Bnss Key',statistics_for_bnss[StatConstants.BNSS_ID],\
         ':', afterDetection-beforeDetection
+
     return chPtsOutliers

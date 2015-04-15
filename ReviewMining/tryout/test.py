@@ -8,6 +8,7 @@ from __future__ import division
 
 import csv
 from datetime import datetime, timedelta
+from statistics import business_statistics_generator
 import json
 from lshash import LSHash
 import networkx
@@ -898,6 +899,33 @@ def checkCusum2():
     print detection_times
     plotCusumChanges(x, changes, detection_times)
 
+
+
+def tryBusinessMeasureExtractor():
+    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
+    rdr = ItunesDataReader()
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
+
+    timeLength = '1-M'
+
+    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
+                                                           bnssIdToBusinessDict,\
+                                                            reviewIdToReviewsDict, timeLength)
+
+    plotDir =  join(join(csvFolder, os.pardir), 'latest')
+
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+                 if bnss_type == SIAUtil.PRODUCT]
+
+    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+
+
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
+
+    business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict,\
+                                                                           superGraph, cross_time_graphs, plotDir, bnssKeys[:1],\
+                                                                           timeLength, measuresToBeExtracted)
+
 #testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
@@ -907,4 +935,5 @@ def checkCusum2():
 #checkDataFrame()
 #tryAr()
 #testAVGplot()
-checkCusum2()
+#checkCusum2()
+tryBusinessMeasureExtractor()

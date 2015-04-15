@@ -9,6 +9,7 @@ import re
 import SIAUtil
 
 
+
 def getDayIncrements(timeSplit):
     if not re.match('[0-9]+-[WDMY]', timeSplit):
         print 'Time Increment does not follow the correct Pattern - Time Increment Set to 1 Day'
@@ -25,6 +26,10 @@ def getDayIncrements(timeSplit):
     else:
         dayIncrement = numeric * 365
     return dayIncrement
+
+def getDates(firstDatetime, timeKeys, timeLength ='1-M'):
+    dayIncrement = getDayIncrements(timeLength)
+    return [(firstDatetime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in timeKeys]
 
 
 #---------------------------------------------------------------------------------------------------------

@@ -151,6 +151,7 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
             # print idxs
 
         idxs = [idx+firstTimeKey for idx in idxs]
+
         new_idxs = set()
 
         if StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.INCREASE:

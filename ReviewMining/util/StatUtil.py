@@ -211,7 +211,7 @@ def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measure
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     if StatConstants.NON_CUM_NO_OF_REVIEWS in measuresToBeExtracted:
         statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS] = numpy.copy(statistics_for_bnss[StatConstants.NO_OF_REVIEWS])
-        
+
     for timeKey in range(total_time_slots):
         if timeKey > firstTimeKey:
             fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
