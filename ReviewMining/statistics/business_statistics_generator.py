@@ -28,6 +28,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
         if not firstTimeKey:
             firstTimeKey = timeKey
             statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
+            statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = firstTimeKey
             statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
             if logStats:
                 bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime()))
@@ -72,7 +73,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                 noOfReviews = StatUtil.calculateNoOfReviews(statistics_for_current_bnss, neighboring_usr_nodes, timeKey, total_time_slots)
                 if logStats:
                     bnssStatFile.write(StatConstants.NO_OF_REVIEWS+':'+\
-                                       noOfReviews)
+                                       str(noOfReviews))
                     bnssStatFile.write('\n')
 
             #Ratio of Singletons

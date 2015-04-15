@@ -133,13 +133,17 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                     new_idxs.add(indx)
     else:
         for idx in idxs:
-            idxRangePresent = False
-            for range_idx in range(idx-2,idx+3):
-                if range_idx in avg_idxs:
-                    idxRangePresent = True
-                    break
-            if idxRangePresent:
-                new_idxs.add(idx)
+            if measure_key == StatConstants.AVERAGE_RATING:
+                new_idxs = set(idxs)
+                break
+            else:
+                idxRangePresent = False
+                for range_idx in range(idx-2,idx+3):
+                    if range_idx in avg_idxs:
+                        idxRangePresent = True
+                        break
+                if idxRangePresent:
+                    new_idxs.add(idx)
 
     choutlierIdxs = sorted([idx for idx in list(new_idxs)])
 
