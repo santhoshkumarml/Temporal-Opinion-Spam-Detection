@@ -5,6 +5,7 @@ Created on Jan 10, 2015
 '''
 
 FIRST_TIME_KEY = 'First Time Key'
+BNSS_ID = 'BNSS_ID'
 
 AVERAGE_RATING = 'Average Rating'
 RATING_ENTROPY = 'Rating entropy'

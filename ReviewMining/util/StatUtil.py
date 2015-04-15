@@ -6,6 +6,8 @@ import numpy
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
 from util import StatUtil
+from util import SIAUtil
+from util import GraphUtil
 
 def entropyFn(probability_dict):
     entropy = 0
@@ -115,7 +117,7 @@ def calculateRatioOfFirstTimers(G, statistics_for_bnss, neighboring_usr_nodes, r
     noOfFirstTimers = 0
     for usr_neighbor in neighboring_usr_nodes:
         (usrId, usr_type) = usr_neighbor
-        current_temporal_review = G.getReview(usrId, bnssId)
+        current_temporal_review = G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
         allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
                       for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
         firstReview = min(allReviews, key=lambda x: SIAUtil.getDateForReview(x))
@@ -135,7 +137,7 @@ def calculateYouthScore(G, statistics_for_bnss, neighboring_usr_nodes, superGrap
         allReviews = [superGraph.getReview(usrId, super_graph_bnssId) \
                       for (super_graph_bnssId, super_graph_bnss_type) in superGraph.neighbors(usr_neighbor)]
         allReviews = sorted(allReviews, key=lambda x: SIAUtil.getDateForReview(x))
-        current_temporal_review = G.getReview(usrId, bnssId)
+        current_temporal_review = G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
         reviewAge = (SIAUtil.getDateForReview(current_temporal_review) - SIAUtil.getDateForReview(allReviews[0])).days
         youth_score = 1 - StatUtil.sigmoid_prime(reviewAge)
         youth_scores.append(youth_score)
@@ -149,7 +151,7 @@ def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes,
         statistics_for_bnss[StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
     if noOfReviews >= 2:
         bucketTree = constructIntervalTree(GraphUtil.getDayIncrements(timeLength))
-        allReviewsInThisTimeBlock = [G.getReview(usrId, bnssId) for (usrId, usr_type) in neighboring_usr_nodes]
+        allReviewsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID]) for (usrId, usr_type) in neighboring_usr_nodes]
         allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key=lambda x: SIAUtil.getDateForReview(x))
         allReviewVelocity = [(SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x + 1]) - \
                               SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
@@ -174,7 +176,7 @@ def calculateMaxTextSimilarity(G, statistics_for_bnss, neighboring_usr_nodes, no
     if StatConstants.MAX_TEXT_SIMILARITY not in statistics_for_bnss:
         statistics_for_bnss[StatConstants.MAX_TEXT_SIMILARITY] = numpy.zeros(total_time_slots)
 
-    reviewTextsInThisTimeBlock = [G.getReview(usrId,bnssId).getReviewText()\
+    reviewTextsInThisTimeBlock = [G.getReview(usrId,statistics_for_bnss[StatConstants.BNSS_ID]).getReviewText()\
                                     for (usrId, usr_type) in neighboring_usr_nodes]
     maxTextSimilarity = 1
     if len(reviewTextsInThisTimeBlock) > 1:
@@ -191,13 +193,12 @@ def calculateMaxTextSimilarity(G, statistics_for_bnss, neighboring_usr_nodes, no
     statistics_for_bnss[StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
 
 
-def printSimilarReviews(bin_count, candidateGroups, timeKey, bnss_key, reviewTextsInThisTimeBlock):
+def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock):
     bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
     bucketIndexListPair = []
     for bucketNumber in bucketNumbers:
         indexes = [i for i in range(len(candidateGroups)) if candidateGroups[i]==bucketNumber]
         bucketIndexListPair.append((bucketNumber,indexes))
-    print bnss_key, timeKey
     for bucketNumber,indexes in bucketIndexListPair:
         print '-------------------------'
         print bucketNumber
