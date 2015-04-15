@@ -17,10 +17,17 @@ def detect_outliers_using_cusum(x, threshold=1):
     ta, tai, tapi, tani = numpy.array([[], [], [], []], dtype=int)
     tap, tan = 0, 0
     # Find changes (online form)
-    for i in range(1, x.size):
+    i = 1
+    while i < x.size:
         idx = 0 if not ta.size else ta[-1]
-        #s = x[i] - x[i-1]
-        s = x[i] - numpy.mean(x[idx:i])
+        prev_idx = 0 if ta.size <=1 else ta[-2]
+        # s = x[i] - x[i-1]
+        # s = -1
+        if prev_idx != idx:
+            sd = numpy.std(x[prev_idx:idx])
+            s = (threshold/sd)*(x[i] - numpy.mean(x[idx:i]) - (threshold/2))
+        else:
+            s = x[i] - numpy.mean(x[idx:i])
         #print i, idx, x[i], numpy.mean(x[idx:i]),x[i] - numpy.mean(x[idx:i]), gp[i-1]+s, gn[i-1]-s
 
         gp[i] = gp[i-1] + s  # cumulative sum for + change

@@ -31,6 +31,7 @@ from anomaly_detection import AnomalyDetector
 import changefinder
 from scipy.signal import argrelextrema
 import  math
+from datetime import date
 
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -55,15 +56,63 @@ def checkDataFrame():
         }
         ''')
     rdateFn = robjects.globalenv['rdateFn']
-    dates = [datetime.today().date() - timedelta(i) for i in range(24)]
-    dates = [datetime.combine(dates[i], datetime.min.time()) for i in range(23,-1,-1)]
-    values = [i for i in range(24)]
-    values[21] = 300
+    dates = [date(2008, 7, 10), date(2008, 8, 9), date(2008, 9, 8),\
+             date(2008, 10, 8), date(2008, 11, 7), date(2008, 12, 7),\
+             date(2009, 1, 6), date(2009, 2, 5), date(2009, 3, 7),\
+             date(2009, 4, 6), date(2009, 5, 6), date(2009, 6, 5),\
+             date(2009, 7, 5), date(2009, 8, 4), date(2009, 9, 3),\
+             date(2009, 10, 3), date(2009, 11, 2), date(2009, 12, 2),\
+             date(2010, 1, 1), date(2010, 1, 31), date(2010, 3, 2),\
+             date(2010, 4, 1), date(2010, 5, 1), date(2010, 5, 31),\
+             date(2010, 6, 30), date(2010, 7, 30), date(2010, 8, 29),\
+             date(2010, 9, 28), date(2010, 10, 28), date(2010, 11, 27),\
+             date(2010, 12, 27), date(2011, 1, 26), date(2011, 2, 25),\
+             date(2011, 3, 27), date(2011, 4, 26), date(2011, 5, 26),\
+             date(2011, 6, 25), date(2011, 7, 25), date(2011, 8, 24),\
+             date(2011, 9, 23), date(2011, 10, 23), date(2011, 11, 22),\
+             date(2011, 12, 22), date(2012, 1, 21), date(2012, 2, 20),\
+             date(2012, 3, 21), date(2012, 4, 20), date(2012, 5, 20),\
+             date(2012, 6, 19), date(2012, 7, 19), date(2012, 8, 18),\
+             date(2012, 9, 17), date(2012, 10, 17), date(2012, 11, 16),\
+             date(2012, 12, 16), date(2013, 1, 15), date(2013, 2, 14),\
+             date(2013, 3, 16), date(2013, 4, 15), date(2013, 5, 15),\
+             date(2013, 6, 14), date(2013, 7, 14), date(2013, 8, 13),\
+             date(2013, 9, 12), date(2013, 10, 12), date(2013, 11, 11),\
+             date(2013, 12, 11), date(2014, 1, 10), date(2014, 2, 9),\
+             date(2014, 3, 11), date(2014, 4, 10), date(2014, 5, 10),\
+             date(2014, 6, 9), date(2014, 7, 9), date(2014, 8, 8),\
+             date(2014, 9, 7), date(2014, 10, 7), date(2014, 11, 6),\
+             date(2014, 12, 6), date(2015, 1, 5), date(2015, 2, 4),\
+             date(2015, 3, 6), date(2015, 4, 5)]
+
+    dates = [datetime.combine(dates[i], datetime.min.time()) for i in range(len(dates))]
+    values = [161,109,86,25,102,223,241,228,239,188,142,113,142,133,101,
+            84,83,244,945,192,208,186,107,144,238,149,88,111,93,132,
+            118,101,123,617,5501,1756,1373,513,2909,1256,2200,2434,2860,240,1938,
+            2062,158,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,1,0]
+
     date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
     dataf = robjects.DataFrame(date_value_dict)
     res = anomaly_detection(dataf, plot= True)
     anoms_data_f = res[res.names.index('anoms')]
-    print datetime.fromtimestamp(anoms_data_f.rx2(1)[0])
+    anoms_dates = set()
+    for d in anoms_data_f.rx2(1):
+        anoms_dates.add(datetime.fromtimestamp(d).date())
+    idxs = []
+    dates = [dates[i].date() for i in range(len(dates))]
+    for i in range(len(dates)):
+        if dates[i] in anoms_dates:
+            idxs.append(i)
+    print idxs
+    values = numpy.atleast_1d(values).astype('int64')
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1, 1, 1)
+    ax1.plot(values)
+    ax1.plot(idxs, values[idxs], 'o', mfc='r', mec='r', mew=1, ms=5,
+             label='Alarm')
+    plt.show()
 
 def checkR():
     import rpy2.robjects as robjects
@@ -597,7 +646,7 @@ def cusum_using_call_to_r_py(x):
     return changes
 
 
-def plotCusumChanges(changes, x,):
+def plotCusumChanges(x, changes, detection_times=[]):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
@@ -606,6 +655,9 @@ def plotCusumChanges(changes, x,):
     plt.yticks(numpy.arange(1,5.5,0.5))
     ax1.plot(changes, x[changes], 'o', mfc='r', mec='r', mew=1, ms=5,
              label='Alarm')
+    if len(detection_times) > 0:
+        ax1.plot(detection_times, x[detection_times], 'o', mfc='g', mec='g', mew=1, ms=5,
+                 label='Detection')
     plt.show()
 
 
@@ -647,7 +699,8 @@ def testCusum():
     changes = cusum_using_call_to_r_py(x)
     plotCusumChanges(changes, x)
 
-    ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
+    #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
+    #print ta
     plotCusumChanges(ta, x)
 
 def tryAr():
@@ -806,15 +859,45 @@ def testAVGplot():
 ,4.50124688,4.50124688,4.50124688,4.50124688]
 
     data = [data1,data2,data3,data4,data5]
-    data = [numpy.concatenate([numpy.random.normal(3.5,0.1,100),numpy.random.normal(4.1,0.2,100)])]
+    #data = [numpy.concatenate([numpy.random.normal(3.5,0.1,100),numpy.random.normal(4.1,0.2,100)])]
     for d in data:
         d = numpy.atleast_1d(d).astype('float64')
-        #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(d,threshold=0.5)
-        up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
-        changes = sorted(up+low)
-        plotCusumChanges(changes, d)
+        ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(d,threshold=0.5)
+        # up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
+        # changes = sorted(up+low)
+        plotCusumChanges(ta, d)
 
-
+def checkCusum2():
+    changes = []
+    detection_times = []
+    idx = 0
+    data = [3.83221477,3.55299539,3.25,3.18020305,3.64212077,3.65085837
+,3.59494333,3.50950629,3.48125808,3.43387739,3.39578898,3.22815285
+,3.17549029,3.14201898,3.08793062,3.03221516,3.01286648,3.00580919
+,3.00536102,3.00515498,2.96031996,2.94514013,2.93650337,2.92073815
+,2.89103543,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
+,2.88920306,2.88920306,2.88920306,2.88905178,2.88905178,2.88905178
+,2.8891623,2.8891623]
+    x = numpy.atleast_1d(data).astype('float64')
+    i = 1
+    print x.size
+    for i in range(1, x.size):
+        upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=1, new_data=x[i])
+        if len(upper_l) > 0 or len(lower_l)>0:
+            ch = sorted([idx+j for j in upper_l]+[idx+j for j in lower_l])
+            print idx,i,x[idx:i],x[i]
+            changes = changes+ch
+            detection_times.append(i)
+            idx = i
+        #i+=1
+    changes = sorted(list(set(changes)))
+    print changes
+    print detection_times
+    plotCusumChanges(x, changes, detection_times)
 
 #testCusum()
 #testCFForSomeMeasures()
@@ -822,6 +905,7 @@ def testAVGplot():
 #checkPlot2()
 #setMemUsage()
 #testCumsumWithData()
-# checkDataFrame()
+#checkDataFrame()
 #tryAr()
-checkR()
+#testAVGplot()
+checkCusum2()

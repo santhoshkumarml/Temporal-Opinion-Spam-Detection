@@ -22,16 +22,17 @@ def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, p
                                                         toBeUsedMeasures)
     for bnssKey in bnssKeySet:
         firstTimeKey = bnss_statistics[bnssKey][StatConstants.FIRST_TIME_KEY]
-        print 'No Of Reviews'
-        print bnss_statistics[bnssKey][StatConstants.NO_OF_REVIEWS][firstTimeKey:]
-        print 'Average Rating'
-        print bnss_statistics[bnssKey][StatConstants.AVERAGE_RATING][firstTimeKey:]
-        print 'Time keys'
-        print [time_dict[key] for key in range(firstTimeKey, total_time_slots)]
-        print 'Rating Entropy'
-        print bnss_statistics[bnssKey][StatConstants.RATING_ENTROPY][firstTimeKey:]
-        print 'Entropy Gap'
-        print bnss_statistics[bnssKey][StatConstants.ENTROPY_SCORE][firstTimeKey:]
+        # print 'No Of Reviews'
+        # print bnss_statistics[bnssKey][StatConstants.NO_OF_REVIEWS][firstTimeKey:]
+        # print 'Average Rating'
+        # print bnss_statistics[bnssKey][StatConstants.AVERAGE_RATING][firstTimeKey:]
+        # print 'Time keys'
+        # print [time_dict[key] for key in range(firstTimeKey, total_time_slots)]
+        # print 'Rating Entropy'
+        # print bnss_statistics[bnssKey][StatConstants.RATING_ENTROPY][firstTimeKey:]
+        # print 'Entropy Gap'
+        # print bnss_statistics[bnssKey][StatConstants.ENTROPY_SCORE][firstTimeKey:]
+
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
     beforePlot = datetime.now()
     for bnssKey in bnssKeySet:
@@ -64,19 +65,20 @@ def tryChangeFinderOnProductDimensions():
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT]
 
-    bnssKeys = ['284235722', '284417350', '284819997', '290338603', '295785957', '307906541', '308537544',\
-                '319035264', '327586041', '329691437', '329913454', '342792525', '346205042', '363590051']
-    #bnssKeys = ['308537544']
+    # bnssKeys = ['284235722', '284417350', '284819997', '290338603', '295785957', '307906541', '308537544',\
+    #             '319035264', '327586041', '329691437', '329913454', '342792525', '346205042', '363590051']
+    #bnssKeys = ['329913454']
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
     start = 0
-    end = 14
+    end = 90
     bnssKeys = bnssKeys[start:end]
 
-    toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
-    maxText = set([StatConstants.MAX_TEXT_SIMILARITY])
-    toBeUsedMeasures = set(StatConstants.MEASURES) - maxText
+    # toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])
+    # toBeUsedMeasures = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
+    # #toBeUsedMeasures = set([StatConstants.AVERAGE_RATING])
+    toBeUsedMeasures = [measure for measure in StatConstants.MEASURES]
 
     for i in range(1,end-start+1):
         bnssKeySet = set(bnssKeys[i-1:i])
@@ -92,17 +94,19 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
     plot = 1
 
     fig = plt.figure(figsize=(20,20))
-
+    avg_idxs = None
     for measure_key in toBeUsedMeasures:
         if measure_key not in bnss_statistics[bnss_key]:
             continue
 
         firstTimeKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]
 
-        step = 1
+        step = 5
 
-        if total_time_slots > 50:
-            step = total_time_slots/50
+        # if total_time_slots > 50:
+        #     step = total_time_slots/50
+        #
+        # step = 3
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 
@@ -129,17 +133,68 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
         if measure_key == StatConstants.AVERAGE_RATING:
             ta, tai, taf, amp = chOutlierScores
             idxs = ta
+            avg_idxs = set([idx+firstTimeKey for idx in idxs])
         else:
             ax2 = ax1.twinx()
             ax2.plot(range(firstTimeKey,len(bnss_statistics[bnss_key][measure_key])),\
                  chOutlierScores, 'r', label = 'bnss')
+            print measure_key
             result = scipy.signal.argrelextrema(numpy.array(chOutlierScores), numpy.greater)
             idxs = result[0]
+            # print idxs
+            # idxs = [i for i in range(1,len(chOutlierScores))\
+            #           if (chOutlierScores[i]!=len(chOutlierScores)-1 and\
+            #               chOutlierScores[i-1]<chOutlierScores[i] and chOutlierScores[i-1]<=chOutlierScores[i])\
+            #           or (chOutlierScores[i]==len(chOutlierScores)-1 and\
+            #               chOutlierScores[i-1]<chOutlierScores[i])]
+            # print idxs
 
         idxs = [idx+firstTimeKey for idx in idxs]
+        new_idxs = set()
+
+        if StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.INCREASE:
+            for idx in idxs:
+                idxRangePresent = False
+                for range_idx in range(idx-2,idx+3):
+                    if range_idx in avg_idxs:
+                        idxRangePresent = True
+                        break
+                if idxRangePresent:
+                    new_idx = scipy.signal.argrelextrema(numpy.array(bnss_statistics[bnss_key][measure_key][idx-2:idx+3]), numpy.greater)
+                    new_idx = new_idx[0]
+                    new_idx = [idx-2+indx for indx in new_idx]
+                    print idx, new_idx
+                    for indx in new_idx:
+                        new_idxs.add(indx)
+        elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
+            for idx in idxs:
+                idxRangePresent = False
+                for range_idx in range(idx-2,idx+3):
+                    if range_idx in avg_idxs:
+                        idxRangePresent = True
+                        break
+                if idxRangePresent:
+                    new_idx = scipy.signal.argrelextrema(numpy.array(bnss_statistics[bnss_key][measure_key][idx-2:idx+3]), numpy.less)
+                    new_idx = new_idx[0]
+                    new_idx = [idx-2+indx for indx in new_idx]
+                    print idx,new_idx
+                    for indx in new_idx:
+                        new_idxs.add(indx)
+        else:
+            for idx in idxs:
+                idxRangePresent = False
+                for range_idx in range(idx-2,idx+3):
+                    if range_idx in avg_idxs:
+                        idxRangePresent = True
+                        break
+                if idxRangePresent:
+                    new_idxs.add(idx)
+
+        idxs = sorted([idx for idx in list(new_idxs)])
+        print 'Final idxs', idxs
 
         for idx in idxs:
-            ax1.axvline(x=idx,linewidth=2, color='r')
+            ax1.axvline(x=idx, linewidth=2, color='r')
 
         plot += 1
 

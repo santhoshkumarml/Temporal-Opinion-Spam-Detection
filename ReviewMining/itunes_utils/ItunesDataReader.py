@@ -117,7 +117,7 @@ class ItunesDataReader:
         print 'Users:',len(self.usrIdToUsrDict.keys()),\
          'Products:',len(self.bnssIdToBnssDict.keys()),\
          'Reviews:',len(self.reviewIdToReviewDict.keys())
-        return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
+        # return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
     
     
         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
