@@ -25,6 +25,7 @@ def generateStatistics(superGraph, cross_time_graphs,\
             if bnssId not in bnss_statistics:
                 bnss_statistics[bnssId] = dict()
                 bnss_statistics[bnssId][StatConstants.FIRST_TIME_KEY] = timeKey
+                bnss_statistics[bnssId][StatConstants.BNSS_ID] = bnssId
             statistics_for_current_bnss = bnss_statistics[bnssId]
                     
             bnss_name = bnssIdToBusinessDict[bnssId].getName()

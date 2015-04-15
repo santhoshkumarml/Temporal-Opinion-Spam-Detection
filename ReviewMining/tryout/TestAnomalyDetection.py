@@ -46,7 +46,7 @@ def tryChangeFinderOnProductDimensions():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
 
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
     timeLength = '1-M'
 
@@ -71,7 +71,7 @@ def tryChangeFinderOnProductDimensions():
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
     start = 0
-    end = 90
+    end = 1
     bnssKeys = bnssKeys[start:end]
 
     # toBeUsedMeasures = set([StatConstants.AVERAGE_RATING, StatConstants.ENTROPY_SCORE, StatConstants.NO_OF_REVIEWS])

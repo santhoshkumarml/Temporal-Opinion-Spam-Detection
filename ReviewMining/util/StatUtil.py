@@ -5,7 +5,6 @@ import StatConstants
 import numpy
 from intervaltree import IntervalTree
 from lsh import ShingleUtil
-from util import StatUtil
 from util import SIAUtil
 from util import GraphUtil
 
@@ -139,7 +138,7 @@ def calculateYouthScore(G, statistics_for_bnss, neighboring_usr_nodes, superGrap
         allReviews = sorted(allReviews, key=lambda x: SIAUtil.getDateForReview(x))
         current_temporal_review = G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
         reviewAge = (SIAUtil.getDateForReview(current_temporal_review) - SIAUtil.getDateForReview(allReviews[0])).days
-        youth_score = 1 - StatUtil.sigmoid_prime(reviewAge)
+        youth_score = 1 - sigmoid_prime(reviewAge)
         youth_scores.append(youth_score)
     statistics_for_bnss[StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
 
@@ -167,7 +166,7 @@ def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes,
         rating_velocity_prob_dist = {(begin, end): (count_data / (noOfReviews - 1)) for (begin, end, count_data) in
                                      bucketTree}
 
-        entropyScore = StatUtil.entropyFn(rating_velocity_prob_dist)
+        entropyScore = entropyFn(rating_velocity_prob_dist)
 
         statistics_for_bnss[StatConstants.ENTROPY_SCORE][timeKey] = entropyScore
 
