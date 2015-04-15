@@ -207,6 +207,7 @@ def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock):
 
 def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measuresToBeExtracted = StatConstants.MEASURES):
     # POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
+    print statistics_for_bnss
     no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     if StatConstants.NON_CUM_NO_OF_REVIEWS in measuresToBeExtracted:

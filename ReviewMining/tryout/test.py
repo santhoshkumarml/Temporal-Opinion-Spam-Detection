@@ -904,7 +904,7 @@ def checkCusum2():
 def tryBusinessMeasureExtractor():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
     timeLength = '1-M'
 
@@ -922,8 +922,8 @@ def tryBusinessMeasureExtractor():
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
-    business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict,\
-                                                                           superGraph, cross_time_graphs, plotDir, bnssKeys[:1],\
+
+    business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKeys[0],\
                                                                            timeLength, measuresToBeExtracted)
 
 #testCusum()

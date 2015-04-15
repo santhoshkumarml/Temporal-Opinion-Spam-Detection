@@ -9,8 +9,7 @@ from util import SIAUtil
 from anomaly_detection import AnomalyDetector
 from util import PlotUtil
 
-def extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
-                     superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
+def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
                      measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
     print '--------------------------------------------------------------------------------------------------------------------'
     beforeStat = datetime.now()
@@ -28,7 +27,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(usrIdToUserDict,bnssIdToBusinessDic
         G = cross_time_graphs[timeKey]
         if not firstTimeKey:
             firstTimeKey = timeKey
-            statistics_for_current_bnss[StatConstants.BNSS_ID] = firstTimeKey
+            statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
             statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
             if logStats:
                 bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime()))
