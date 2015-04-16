@@ -90,6 +90,9 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
     if algo == StatConstants.AR_UNIFYING:
         result = scipy.signal.argrelextrema(numpy.array(choutlierScores), numpy.greater)
         idxs = result[0]
+    elif algo == StatConstants.CUSUM:
+        ta, tai, taf, amp = choutlierIdxs
+        idxs = ta
     else:
         idxs = choutlierIdxs
 
@@ -134,7 +137,9 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
     else:
         for idx in idxs:
             if measure_key == StatConstants.AVERAGE_RATING:
-                new_idxs = set(idxs)
+                print idxs
+                for indx in range(0,len(idxs)):
+                    new_idxs.add(idxs[indx])
                 break
             else:
                 idxRangePresent = False

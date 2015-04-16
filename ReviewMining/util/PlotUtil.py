@@ -136,21 +136,23 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
 
-    for measure_key in toBeUsedMeasures:
-        if measure_key not in statistics_for_bnss:
-            continue
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
-        xlim = (firstDimensionValues[0], firstDimensionValues[-1])
-        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots,step), timeLength)
-
-        step = 5
+    step = 5
 
         # if total_time_slots > 50:
         #     step = total_time_slots/50
         #
         # step = 3
+
+
+    for measure_key in toBeUsedMeasures:
+        if measure_key not in statistics_for_bnss:
+            continue
+
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
+        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
+        xlim = (firstDimensionValues[0], firstDimensionValues[-1])
+        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 

@@ -29,7 +29,7 @@ def getDayIncrements(timeSplit):
 
 def getDates(firstDatetime, timeKeys, timeLength ='1-M'):
     dayIncrement = getDayIncrements(timeLength)
-    return [(firstDatetime+timedelta(timeKey*dayIncrement)).getDate() for timeKey in timeKeys]
+    return [(firstDatetime+timedelta(timeKey*dayIncrement)).date() for timeKey in timeKeys]
 
 
 #---------------------------------------------------------------------------------------------------------
