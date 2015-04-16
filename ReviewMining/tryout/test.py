@@ -914,11 +914,12 @@ def tryBusinessMeasureExtractor():
 
     plotDir =  join(join(csvFolder, os.pardir), 'latest')
 
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-                 if bnss_type == SIAUtil.PRODUCT]
+    # bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+    #              if bnss_type == SIAUtil.PRODUCT]
 
-    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+    #bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
+    bnssKeys = ['284235722']
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 

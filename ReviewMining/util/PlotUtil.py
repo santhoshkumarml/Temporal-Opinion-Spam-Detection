@@ -150,9 +150,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
+        firstDimensionValues = [d.strftime('%m/%d/%Y') for d in GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)]
         xlim = (firstDimensionValues[0], firstDimensionValues[-1])
-        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
+        xticks = [d.strftime('%m/%d/%Y') for d in GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)]
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 

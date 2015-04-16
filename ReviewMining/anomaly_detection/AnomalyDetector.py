@@ -117,7 +117,7 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                 new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.greater)
                 new_idx = new_idx[0]
                 new_idx = [idx-2+indx for indx in new_idx]
-                print idx, new_idx
+                #print idx, new_idx
                 for indx in new_idx:
                     new_idxs.add(indx)
     elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
@@ -131,13 +131,13 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                 new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.less)
                 new_idx = new_idx[0]
                 new_idx = [idx-2+indx for indx in new_idx]
-                print idx,new_idx
+                #print idx,new_idx
                 for indx in new_idx:
                     new_idxs.add(indx)
     else:
         for idx in idxs:
             if measure_key == StatConstants.AVERAGE_RATING:
-                print idxs
+                #print idxs
                 for indx in range(0,len(idxs)):
                     new_idxs.add(idxs[indx])
                 break
@@ -159,8 +159,6 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
 # smooth - section length of time to be moving average smoothing the calculated outliers score
 
 def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
-    dayIncrements = GraphUtil.getDayIncrements(timeLength)
-    chPtsOutliers = dict()
     beforeDetection = datetime.now()
     firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     firstDateTime = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
@@ -186,7 +184,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                 chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
 
             elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots))\
+                chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                     ,data)
 
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\

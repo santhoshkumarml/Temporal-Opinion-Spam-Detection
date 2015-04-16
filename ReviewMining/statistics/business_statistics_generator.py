@@ -18,8 +18,8 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     bnssStatFile = None
     if logStats:
         bnssStatFile = open(os.path.join(plotDir,bnssKey+'.stats'),'w')
-        bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
-        bnssStatFile.write('Statistics for Bnss:'+bnssKey)
+        bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
+        bnssStatFile.write('Statistics for Bnss:'+bnssKey+'\n')
 
     total_time_slots = len(cross_time_graphs.keys())
     firstTimeKey = None
@@ -31,11 +31,11 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
             statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = firstTimeKey
             statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
             if logStats:
-                bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime()))
+                bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime())+'\n')
 
         if bnssKey in G.getBusinessIds():
             if logStats:
-                bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
+                bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
             neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
             reviews_for_bnss = [G.getReview(usrId, bnssKey) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]
@@ -120,7 +120,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                     bnssStatFile.write(StatConstants.MAX_TEXT_SIMILARITY+':'+\
                                        str(statistics_for_current_bnss[StatConstants.MAX_TEXT_SIMILARITY][timeKey]))
                     bnssStatFile.write('\n')
-            bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
+            bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
 
     StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots, measuresToBeExtracted)
     # if logStats:
@@ -128,7 +128,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     #             bnssStatFile.write(measure_key+':'+\
     #                                     str(statistics_for_current_bnss[StatConstants.measure_key]))
     #             bnssStatFile.write('\n')
-    bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------')
+    bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
 
     afterStat = datetime.now()
 
