@@ -136,14 +136,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     avg_idxs = None
 
-    years  = mdates.YearLocator()   # every year
-    months = mdates.MonthLocator()  # every month
-    day = mdates.DayLocator()   #every date
-    dateFMT = mdates.DateFormatter('%d-%m-%Y')
-
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
 
-    step = 5
+    step = 3
 
         # if total_time_slots > 50:
         #     step = total_time_slots/50
@@ -174,6 +169,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         plt.ylabel(measure_key)
 
+        ax1.xaxis.set_major_formatter(daysFmt)
+
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
@@ -188,7 +185,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
             ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
-            ax1.axvline(x=idx, linewidth=2, color='r')
+            ax1.axvline(x=firstDimensionValues[idx-firstTimeKey], linewidth=2, color='r')
 
         plot += 1
 
