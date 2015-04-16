@@ -192,8 +192,6 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                     ta, tai, taf, amp = chOutlierIdxs
                     avg_idxs = set(ta)
 
-            print measure_key, chOutlierIdxs
-
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
                                                                           measure_key, statistics_for_bnss[measure_key],\
                                                                           avg_idxs, algo)
