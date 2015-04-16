@@ -22,14 +22,14 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
         bnssStatFile.write('Statistics for Bnss:'+bnssKey+'\n')
 
     total_time_slots = len(cross_time_graphs.keys())
-    firstTimeKey = None
+    isInitialized = False
     for timeKey in cross_time_graphs:
         G = cross_time_graphs[timeKey]
-        if not firstTimeKey:
-            firstTimeKey = timeKey
+        if not isInitialized:
             statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
-            statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = firstTimeKey
+            statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = timeKey
             statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
+            isInitialized = True
             if logStats:
                 bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime())+'\n')
 

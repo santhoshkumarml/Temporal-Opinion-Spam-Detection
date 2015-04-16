@@ -287,7 +287,7 @@ def testCFForSomeMeasures():
 def checkCusum():
     x = numpy.random.randn(300)/5
     x[100:200] += numpy.arange(0, 4, 4/100)
-    ta, tai, taf, amp = cm.detect_cusum(x, 2, .02, True, True)
+    ta, tai, taf, amp = cm.detect_cusum(x, threshold=0.5)
     print ta, tai, taf, amp
     
 def checkCusumCallRFromPy(x, shift = 1,stdev = None,decision_interval = 5, new_data = []):
@@ -684,6 +684,8 @@ def plotCusumChanges(x, changes, detection_times=[]):
     plt.yticks(numpy.arange(1,5.5,0.5))
     ax1.plot(changes, x[changes], 'o', mfc='r', mec='r', mew=1, ms=5,
              label='Alarm')
+    for idx in changes:
+            ax1.axvline(x=idx, linewidth=2, color='r')
     if len(detection_times) > 0:
         ax1.plot(detection_times, x[detection_times], 'o', mfc='g', mec='g', mew=1, ms=5,
                  label='Detection')
@@ -886,15 +888,31 @@ def testAVGplot():
 ,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
 ,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688,4.50124688
 ,4.50124688,4.50124688,4.50124688,4.50124688]
+    data6 = [4.10091743,4.26666667,4.33181818,4.33850932,4.36330275,4.34860051
+            ,4.36291913,4.367917,4.32199861,4.31522426,4.30188679,4.31120783
+            ,4.32115677,4.32335907,4.32142857,4.3242519, 4.3169553, 4.34364061
+            ,4.34889503,4.33803553,4.33333333,4.32176656,4.29800703,4.2820342
+            ,4.26182287,4.23818565,4.18511647,4.16161003,4.1213554, 4.08471313
+            ,4.0611898, 4.03137689,4.09279205,4.47902219,4.5221938, 4.54981248
+            ,4.54671235,4.59998894,4.60823037,4.58441257,4.59473662,4.60744495
+            ,4.60977952,4.62019645,4.62888953,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62771834]
 
-    data = [data1,data2,data3,data4,data5]
+
+    data = [data6]
     #data = [numpy.concatenate([numpy.random.normal(3.5,0.1,100),numpy.random.normal(4.1,0.2,100)])]
     for d in data:
         d = numpy.atleast_1d(d).astype('float64')
-        ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(d,threshold=0.5)
+        ta, tai, tapi, tani = cm.detect_cusum(d,threshold=0.5, show=False)
+        print d
         # up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
         # changes = sorted(up+low)
-        plotCusumChanges(ta, d)
+        plotCusumChanges(d,ta)
 
 def checkCusum2():
     changes = []
@@ -911,6 +929,20 @@ def checkCusum2():
 ,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306,2.88920306
 ,2.88920306,2.88920306,2.88920306,2.88905178,2.88905178,2.88905178
 ,2.8891623,2.8891623]
+    data = [4.10091743,4.26666667,4.33181818,4.33850932,4.36330275,4.34860051
+            ,4.36291913,4.367917,4.32199861,4.31522426,4.30188679,4.31120783
+            ,4.32115677,4.32335907,4.32142857,4.3242519, 4.3169553, 4.34364061
+            ,4.34889503,4.33803553,4.33333333,4.32176656,4.29800703,4.2820342
+            ,4.26182287,4.23818565,4.18511647,4.16161003,4.1213554, 4.08471313
+            ,4.0611898, 4.03137689,4.09279205,4.47902219,4.5221938, 4.54981248
+            ,4.54671235,4.59998894,4.60823037,4.58441257,4.59473662,4.60744495
+            ,4.60977952,4.62019645,4.62888953,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531,4.62772531
+            ,4.62772531,4.62772531,4.62772531,4.62771834]
     x = numpy.atleast_1d(data).astype('float64')
     i = 1
     print x.size
@@ -918,9 +950,9 @@ def checkCusum2():
         upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=1, new_data=x[i])
         if len(upper_l) > 0 or len(lower_l)>0:
             ch = sorted([idx+j for j in upper_l]+[idx+j for j in lower_l])
-            print idx,i,x[idx:i],x[i]
+            #print idx,i,x[idx:i],x[i]
             changes = changes+ch
-            detection_times.append(i)
+            #detection_times.append(i)
             idx = i
         #i+=1
     changes = sorted(list(set(changes)))
@@ -948,7 +980,7 @@ def tryBusinessMeasureExtractor():
 
     #bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = ['284235722']
+    bnssKeys = ['284417350','284235722']
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
@@ -968,5 +1000,5 @@ def tryBusinessMeasureExtractor():
 #tryAr()
 #testAVGplot()
 #checkCusum2()
-datesFormatinPlots()
-#tryBusinessMeasureExtractor()
+#datesFormatinPlots()
+tryBusinessMeasureExtractor()

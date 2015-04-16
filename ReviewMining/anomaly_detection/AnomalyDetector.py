@@ -169,10 +169,12 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
         chOutlierIdxs, chOutlierScores = [], []
         if measure_key in statistics_for_bnss:
             data = statistics_for_bnss[measure_key][firstKey:]
+
             algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
+
             if algo == StatConstants.AR_UNIFYING:
-                r,order,smooth = params
-                cf = changefinder.ChangeFinder(r,order,smooth)
+                r, order, smooth = params
+                cf = changefinder.ChangeFinder(r, order, smooth)
                 change_scores = []
                 for i in range(len(data)):
                     score = cf.update(data[i])
@@ -189,6 +191,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
                     avg_idxs = set(ta)
+
+            print measure_key, chOutlierIdxs
 
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
                                                                           measure_key, statistics_for_bnss[measure_key],\
