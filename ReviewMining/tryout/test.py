@@ -980,7 +980,7 @@ def tryBusinessMeasureExtractor():
 
     #bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = ['284417350','284235722']
+    bnssKeys = ['284235722','284417350']
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
