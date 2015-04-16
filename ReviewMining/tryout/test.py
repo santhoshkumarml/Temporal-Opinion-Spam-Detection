@@ -967,5 +967,5 @@ def tryBusinessMeasureExtractor():
 #tryAr()
 #testAVGplot()
 #checkCusum2()
-#tryBusinessMeasureExtractor()
-datesFormatinPlots()
+#datesFormatinPlots()
+tryBusinessMeasureExtractor()
