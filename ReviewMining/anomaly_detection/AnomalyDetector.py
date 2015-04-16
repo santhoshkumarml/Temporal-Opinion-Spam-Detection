@@ -136,19 +136,19 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                     new_idxs.add(indx)
     else:
         for idx in idxs:
-            if measure_key == StatConstants.AVERAGE_RATING:
-                #print idxs
-                for indx in range(0,len(idxs)):
-                    new_idxs.add(idxs[indx])
-                break
-            else:
-                idxRangePresent = False
-                for range_idx in range(idx-2,idx+3):
-                    if range_idx in avg_idxs:
-                        idxRangePresent = True
-                        break
-                if idxRangePresent:
-                    new_idxs.add(idx)
+            # if measure_key == StatConstants.AVERAGE_RATING:
+            #     #print idxs
+            #     for indx in range(0,len(idxs)):
+            #         new_idxs.add(idxs[indx])
+            #     break
+            # else:
+            idxRangePresent = False
+            for range_idx in range(idx-2,idx+3):
+                if range_idx in avg_idxs:
+                    idxRangePresent = True
+                    break
+            if idxRangePresent:
+                new_idxs.add(idx)
 
     choutlierIdxs = sorted([idx for idx in list(new_idxs)])
 
@@ -179,7 +179,6 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                     change_scores.append(score)
                 chOutlierScores = change_scores
 
-
             elif algo == StatConstants.CUSUM:
                 chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
 
@@ -187,11 +186,13 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                 chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                     ,data)
 
+            if measure_key == StatConstants.AVERAGE_RATING:
+                    ta, tai, taf, amp = chOutlierIdxs
+                    avg_idxs = set(ta)
+
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
                                                                           measure_key, statistics_for_bnss[measure_key],\
                                                                           avg_idxs, algo)
-            if measure_key == StatConstants.AVERAGE_RATING:
-                    avg_idxs = set(chOutlierIdxs)
 
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     

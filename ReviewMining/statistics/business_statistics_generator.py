@@ -49,13 +49,21 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                     bnssStatFile.write(review.toString())
                     bnssStatFile.write('\n')
 
+            #No of Reviews
+            noOfReviews = -1
+            if StatConstants.NO_OF_REVIEWS in measuresToBeExtracted:
+                noOfReviews = StatUtil.calculateNoOfReviews(statistics_for_current_bnss, neighboring_usr_nodes, timeKey, total_time_slots)
+                if logStats:
+                    bnssStatFile.write(StatConstants.NO_OF_REVIEWS+':'+\
+                                       str(noOfReviews))
+                    bnssStatFile.write('\n')
 
             #Average Rating
             if StatConstants.AVERAGE_RATING in measuresToBeExtracted:
                 StatUtil.calculateAvgRating(statistics_for_current_bnss, ratings, timeKey, total_time_slots)
                 if logStats:
                     bnssStatFile.write(StatConstants.AVERAGE_RATING+':'+\
-                                       str(statistics_for_current_bnss[StatConstants.AVERAGE_RATING][timeKey]))
+                                       str(statistics_for_current_bnss[StatConstants.AVERAGE_RATING][timeKey]/noOfReviews))
                     bnssStatFile.write('\n')
 
 
@@ -65,15 +73,6 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                 if logStats:
                     bnssStatFile.write(StatConstants.RATING_ENTROPY+':'+\
                                        str(statistics_for_current_bnss[StatConstants.RATING_ENTROPY][timeKey]))
-                    bnssStatFile.write('\n')
-
-            #No of Reviews
-            noOfReviews = -1
-            if StatConstants.NO_OF_REVIEWS in measuresToBeExtracted:
-                noOfReviews = StatUtil.calculateNoOfReviews(statistics_for_current_bnss, neighboring_usr_nodes, timeKey, total_time_slots)
-                if logStats:
-                    bnssStatFile.write(StatConstants.NO_OF_REVIEWS+':'+\
-                                       str(noOfReviews))
                     bnssStatFile.write('\n')
 
             #Ratio of Singletons
