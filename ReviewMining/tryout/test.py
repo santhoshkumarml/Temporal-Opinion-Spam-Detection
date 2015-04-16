@@ -972,21 +972,37 @@ def tryBusinessMeasureExtractor():
     superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
+    currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
 
-    plotDir =  join(join(csvFolder, os.pardir), 'latest')
+    plotDir = join(join(join(csvFolder, os.pardir), 'stats'),currentDateTime)
 
-    # bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-    #              if bnss_type == SIAUtil.PRODUCT]
+    if not os.path.exists(plotDir):
+        os.makedirs(plotDir)
 
-    #bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+    # import networkx
+    # networkx.write_gml(superGraph, join(plotDir,'superGraph.gml'))
+    # for timeKey in cross_time_graphs:
+    #     networkx.write_gml(superGraph, join(plotDir,str(timeKey)+'.gml'))
+    #
+    #
+    # import sys
+    # sys.exit()
 
-    bnssKeys = ['284235722','284417350']
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+                 if bnss_type == SIAUtil.PRODUCT]
+
+    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+
+    bnssKeys = bnssKeys[:100]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
-
-    business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKeys[0],\
-                                                                           timeLength, measuresToBeExtracted, logStats=True)
+    for bnss_key in bnssKeys:
+        business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
+                                                                               cross_time_graphs,\
+                                                                               plotDir, bnss_key,\
+                                                                               timeLength,\
+                                                                               measuresToBeExtracted, logStats=True)
 
 
 
