@@ -11,6 +11,8 @@ import numpy
 from datetime import datetime, timedelta
 import random
 import GraphUtil
+import matplotlib.dates as mdates
+
 
 # def plotReviewTimeVelocity(bnss_statistics, bnssIdToBusinessDict,\
 #                         bnss_key, total_time_slots, inputDir, clr):
@@ -134,6 +136,11 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     avg_idxs = None
 
+    years  = mdates.YearLocator()   # every year
+    months = mdates.MonthLocator()  # every month
+    day = mdates.DayLocator()   #every date
+    dateFMT = mdates.DateFormatter('%d-%m-%Y')
+
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
 
     step = 5
@@ -143,23 +150,26 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         #
         # step = 3
 
+    years   = mdates.YearLocator()   # every year
+    months  = mdates.MonthLocator()  # every month
+    days = mdates.DayLocator()
+    daysFmt = mdates.DateFormatter('%b-%Y')
+
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss:
             continue
-
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = [d.strftime('%m/%d/%Y') for d in GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)]
-        xlim = (firstDimensionValues[0], firstDimensionValues[-1])
-        xticks = [d.strftime('%m/%d/%Y') for d in GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)]
+        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
+        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 
         plt.title('Business statistics')
-        plt.xlabel('Time in multiples of 1 months')
+        plt.xlabel('Date')
 
-        plt.xlim(xlim)
+        plt.xlim(firstDimensionValues[0], firstDimensionValues[-1])
         plt.xticks(xticks)
 
         plt.ylabel(measure_key)
@@ -185,8 +195,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     art = []
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
+    fig.autofmt_xdate()
     plt.tight_layout()
-    plt.gcf().autofmt_xdate()
 
     imgFile = join(inputDir, statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")+'.png'
 

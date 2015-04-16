@@ -43,6 +43,34 @@ def checkGraphUtils():
     superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, bnssIdToBusinessDict,\
                                                                     reviewIdToReviewsDict, timeLength)
 
+
+
+def datesFormatinPlots():
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+
+    years   = mdates.YearLocator()   # every year
+    months  = mdates.MonthLocator()  # every month
+    days = mdates.DayLocator()
+    daysFmt = mdates.DateFormatter('%b-%Y')
+    d = datetime(2015,1,1)
+    x = [(d+timedelta(days=i)).date() for i in range(0,2400,30)]
+    xlim = (x[0],x[-1])
+    xticks = [(d+timedelta(days=i)).date() for i in range(0,2400,60)]
+    y = [i for i in range(0,2400,30)]
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1, 1, 1)
+    ax1.plot(x,y)
+    #ax1.format_xdata = mdates.DateFormatter('%M-%d')
+    #ax1.xaxis.set_major_locator(months)
+    ax1.xaxis.set_major_formatter(daysFmt)
+    #plt.xlim(xlim)
+    plt.xticks(xticks)
+    fig.autofmt_xdate()
+
+    plt.show()
 def checkDataFrame():
     import rpy2.robjects as robjects
     from rpy2.robjects.packages import importr
@@ -927,6 +955,8 @@ def tryBusinessMeasureExtractor():
     business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKeys[0],\
                                                                            timeLength, measuresToBeExtracted, logStats=True)
 
+
+
 #testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
@@ -937,4 +967,5 @@ def tryBusinessMeasureExtractor():
 #tryAr()
 #testAVGplot()
 #checkCusum2()
-tryBusinessMeasureExtractor()
+#tryBusinessMeasureExtractor()
+datesFormatinPlots()
