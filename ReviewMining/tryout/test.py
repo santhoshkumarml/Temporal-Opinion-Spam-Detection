@@ -61,15 +61,16 @@ def datesFormatinPlots():
     xticks = [(d+timedelta(days=i)).date() for i in range(0,2400,60)]
     y = [i for i in range(0,2400,30)]
     fig = plt.figure()
-    ax1 = fig.add_subplot(1, 1, 1)
-    ax1.plot(x,y)
-    #ax1.format_xdata = mdates.DateFormatter('%M-%d')
-    #ax1.xaxis.set_major_locator(months)
-    ax1.xaxis.set_major_formatter(daysFmt)
-    #plt.xlim(xlim)
-    plt.xticks(xticks)
-    fig.autofmt_xdate()
+    for plot in range(1,3):
+        ax1 = fig.add_subplot(2, 1, plot)
+        ax1.plot(x, y)
+        ax1.xaxis.set_major_formatter(daysFmt)
+        plt.xticks(xticks)
+        for label in ax1.xaxis.get_ticklabels():
+            label.set_rotation(30)
 
+    fig.subplots_adjust(hspace=0.35, bottom=0.125)
+    fig.autofmt_xdate()
     plt.show()
 def checkDataFrame():
     import rpy2.robjects as robjects
@@ -967,5 +968,5 @@ def tryBusinessMeasureExtractor():
 #tryAr()
 #testAVGplot()
 #checkCusum2()
-#datesFormatinPlots()
-tryBusinessMeasureExtractor()
+datesFormatinPlots()
+#tryBusinessMeasureExtractor()
