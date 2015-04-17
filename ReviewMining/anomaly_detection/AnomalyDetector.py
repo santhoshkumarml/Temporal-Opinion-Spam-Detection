@@ -20,11 +20,12 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
     dimensions = 0
     windows = None
     numberOfReviewsInEachTimeStamp = dict()
+    firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     scores = dict()
     for measure_key in StatConstants.MEASURES:
         if measure_key not in statistics_for_bnss:
             continue
-        statistics = statistics_for_bnss[measure_key]
+        statistics = statistics_for_bnss[measure_key][firstTimeKey:]
         chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
         if measure_key == StatConstants.AVERAGE_RATING:
                 windows = [(idx-2,idx+3) for idx in chOutlierIdxs]
@@ -45,6 +46,7 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
                             localMinima = numpy.amin(statistics[idx1:idx2])
                             score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
                             scores[window] += score_for_window
+
     for window in windows:
         scores[window] /= dimensions
         scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
@@ -229,10 +231,11 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
                     avg_idxs = set(ta)
-
-            chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
-                                                                          measure_key, statistics_for_bnss[measure_key],\
-                                                                          avg_idxs, algo)
+                    print avg_idxs
+            if len(avg_idxs) > 0:
+                chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
+                                                                              measure_key, statistics_for_bnss[measure_key][firstKey:],\
+                                                                              avg_idxs, algo)
 
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     

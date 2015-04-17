@@ -156,8 +156,10 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
             continue
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
-        xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
+        firstDimensionValues = range(firstTimeKey, total_time_slots)
+        xticks = range(firstTimeKey, total_time_slots, step)
+        # firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
+        # xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
 
         ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
 
@@ -169,7 +171,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         plt.ylabel(measure_key)
 
-        ax1.xaxis.set_major_formatter(daysFmt)
+        #ax1.xaxis.set_major_formatter(daysFmt)
 
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
@@ -185,14 +187,14 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
             ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
-            ax1.axvline(x=firstDimensionValues[idx-firstTimeKey], linewidth=2, color='r')
+            ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='r')
 
         plot += 1
 
     art = []
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
-    fig.autofmt_xdate()
+    #fig.autofmt_xdate()
     plt.tight_layout()
 
     imgFile = join(inputDir, statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")+'.png'

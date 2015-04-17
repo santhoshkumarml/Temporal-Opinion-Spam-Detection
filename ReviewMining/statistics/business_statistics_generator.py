@@ -25,17 +25,18 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     isInitialized = False
     for timeKey in cross_time_graphs:
         G = cross_time_graphs[timeKey]
-        if not isInitialized:
-            statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
-            statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = timeKey
-            statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
-            isInitialized = True
-            if logStats:
-                bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime())+'\n')
-
         if bnssKey in G.getBusinessIds():
+            if not isInitialized:
+                statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
+                statistics_for_current_bnss[StatConstants.FIRST_TIME_KEY] = timeKey
+                statistics_for_current_bnss[StatConstants.FIRST_DATE_TIME] = G.getDateTime()
+                isInitialized = True
+                if logStats:
+                    bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime())+'\n')
+
             if logStats:
                 bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
+
             neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
             reviews_for_bnss = [G.getReview(usrId, bnssKey) for (usrId, usr_type) in neighboring_usr_nodes]
             ratings = [review.getRating() for review in reviews_for_bnss]

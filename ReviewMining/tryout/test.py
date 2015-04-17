@@ -44,6 +44,22 @@ def checkGraphUtils():
                                                                     reviewIdToReviewsDict, timeLength)
 
 
+def testPlot():
+    data = [ 1.91079812,2.19664269,2.27588424,2.2967706, 2.3353566, 2.38813638
+    ,2.38973707,2.39438291,2.39977435,2.42619392,2.43355657,2.45093379
+    ,2.47486563,2.49725426,2.52620654,2.53696789,2.54032453,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54545455]
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    plt.xlim((1,5))
+    plt.yticks(numpy.arange(1,5.5,0.5))
+    ax.plot(data)
+    plt.show()
 
 def datesFormatinPlots():
 
@@ -993,7 +1009,7 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:100]
+    bnssKeys = ['405862075']
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
@@ -1005,8 +1021,8 @@ def tryBusinessMeasureExtractor():
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
                                                                                        measuresToBeExtracted, logStats=True)
-        print ranking_scores
-        business_ranking_scores = {(bnss_key,time_window):ranking_scores[time_window] for time_window in ranking_scores}
+        for time_window in ranking_scores:
+            business_ranking_scores[(bnss_key, time_window)] = ranking_scores[time_window]
 
     print '---------------------------------------------------------------------------------------------------------------'
 
@@ -1028,3 +1044,4 @@ def tryBusinessMeasureExtractor():
 #checkCusum2()
 #datesFormatinPlots()
 tryBusinessMeasureExtractor()
+#testPlot()
