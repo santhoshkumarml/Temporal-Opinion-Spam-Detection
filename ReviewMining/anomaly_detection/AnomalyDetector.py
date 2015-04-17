@@ -12,6 +12,45 @@ import cusum
 import numpy
 from util import GraphUtil
 import scipy
+import math
+
+
+
+def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
+    dimensions = 0
+    windows = None
+    numberOfReviewsInEachTimeStamp = dict()
+    scores = dict()
+    for measure_key in StatConstants.MEASURES:
+        if measure_key not in statistics_for_bnss:
+            continue
+        statistics = statistics_for_bnss[measure_key]
+        chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
+        if len(chOutlierIdxs) > 0:
+            if measure_key == StatConstants.AVERAGE_RATING:
+                windows = [(idx-2,idx+3) for idx in chOutlierIdxs]
+                scores = {key:0.0 for key in windows}
+                continue
+            elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+                    numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
+                                                      for idx1, idx2 in windows}
+            elif measure_key != StatConstants.NO_OF_REVIEWS:
+                dimensions += 1
+                globalMaxima = numpy.amax(statistics)
+                globalMinima = numpy.amin(statistics)
+                for window in windows:
+                    idx1, idx2 = window
+                    if numpy.any(numpy.array([True for idx in chOutlierIdxs if idx in range(idx1,idx2)])):
+                        localMaxima = numpy.amax(statistics[idx1:idx2])
+                        localMinima = numpy.amin(statistics[idx1:idx2])
+                        score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
+                        scores[window] += score_for_window
+    for window in windows:
+        scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
+        scores[window] /= dimensions
+    return scores
+
+
 
 def detect_outliers_using_cusum(x, threshold=1):
     x = numpy.atleast_1d(x).astype('float64')

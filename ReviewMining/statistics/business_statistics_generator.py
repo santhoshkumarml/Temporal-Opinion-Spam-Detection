@@ -150,4 +150,5 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     afterPlotTime = datetime.now()
 
     print 'Plot Generation Time for bnss:', bnssKey, 'in', afterStat-beforeStat
+    print AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
     print '------------------------------------------------------------------------------------------------------------------------------'

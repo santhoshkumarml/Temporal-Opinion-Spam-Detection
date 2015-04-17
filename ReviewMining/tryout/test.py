@@ -993,7 +993,7 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:100]
+    bnssKeys = bnssKeys[:1]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
@@ -1003,7 +1003,6 @@ def tryBusinessMeasureExtractor():
                                                                                plotDir, bnss_key,\
                                                                                timeLength,\
                                                                                measuresToBeExtracted, logStats=True)
-
 
 
 #testCusum()
