@@ -16,6 +16,16 @@ import math
 
 
 
+def getRangeIdxs(idx):
+    start = 2
+    end = 3
+    while start < end:
+        if idx - start < 0:
+            start -= 1
+        else:
+            break
+    return (idx-start, idx+end)
+
 def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
     dimensions = 0
     windows = None
@@ -28,7 +38,7 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
         statistics = statistics_for_bnss[measure_key][firstTimeKey:]
         chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
         if measure_key == StatConstants.AVERAGE_RATING:
-                windows = [(idx-2,idx+3) for idx in chOutlierIdxs ]
+                windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
                 scores = {key:0.0 for key in windows}
         elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
                 numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
@@ -46,7 +56,6 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
                             localMinima = numpy.amin(statistics[idx1:idx2])
                             score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
                             scores[window] += score_for_window
-
     for window in windows:
         scores[window] /= dimensions
         scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
@@ -154,9 +163,10 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                     idxRangePresent = True
                     break
             if idxRangePresent:
-                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.greater)
+                idx1,idx2 = getRangeIdxs(idx)
+                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx1:idx2]), numpy.greater)
                 new_idx = new_idx[0]
-                new_idx = [idx-2+indx for indx in new_idx]
+                new_idx = [idx1+indx for indx in new_idx]
                 #print idx, new_idx
                 for indx in new_idx:
                     new_idxs.add(indx)
@@ -168,9 +178,10 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                     idxRangePresent = True
                     break
             if idxRangePresent:
-                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx-2:idx+3]), numpy.less)
+                idx1,idx2 = getRangeIdxs(idx)
+                new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx1:idx2]), numpy.less)
                 new_idx = new_idx[0]
-                new_idx = [idx-2+indx for indx in new_idx]
+                new_idx = [idx1+indx for indx in new_idx]
                 #print idx,new_idx
                 for indx in new_idx:
                     new_idxs.add(indx)

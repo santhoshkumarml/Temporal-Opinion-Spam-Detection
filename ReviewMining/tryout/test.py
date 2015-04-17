@@ -1016,17 +1016,22 @@ def tryBusinessMeasureExtractor():
     business_ranking_scores = dict()
 
     for bnss_key in bnssKeys:
-        ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
+        statistics_for_bnss, ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
                                                                                       cross_time_graphs,\
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
                                                                                        measuresToBeExtracted, logStats=True)
+
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+
         for time_window in ranking_scores:
-            business_ranking_scores[(bnss_key, time_window)] = ranking_scores[time_window]
+            time1, time2 = time_window
+            time1, time2 = time1+firstTimeKey, time2+firstTimeKey
+            business_ranking_scores[(bnss_key, (time1, time2))] = ranking_scores[time_window]
 
     print '---------------------------------------------------------------------------------------------------------------'
 
-    sorted_suspicious_ranking =  sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key])
+    sorted_suspicious_ranking = sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key], reverse=True)
 
     for bnss_key,time_window in sorted_suspicious_ranking:
         print bnss_key, time_window

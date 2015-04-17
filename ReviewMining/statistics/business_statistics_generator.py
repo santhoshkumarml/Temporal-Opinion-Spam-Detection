@@ -154,4 +154,4 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     ranking_score = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
     print '------------------------------------------------------------------------------------------------------------------------------'
 
-    return ranking_score
+    return statistics_for_current_bnss, ranking_score
