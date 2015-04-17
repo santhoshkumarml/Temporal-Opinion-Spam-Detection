@@ -993,16 +993,27 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:1]
+    bnssKeys = bnssKeys[:100]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
 
+    business_ranking_scores = dict()
+
     for bnss_key in bnssKeys:
-        business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
-                                                                               cross_time_graphs,\
-                                                                               plotDir, bnss_key,\
-                                                                               timeLength,\
-                                                                               measuresToBeExtracted, logStats=True)
+        ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
+                                                                                      cross_time_graphs,\
+                                                                                       plotDir, bnss_key,\
+                                                                                       timeLength,\
+                                                                                       measuresToBeExtracted, logStats=True)
+        print ranking_scores
+        business_ranking_scores = {(bnss_key,time_window):ranking_scores[time_window] for time_window in ranking_scores}
+
+    print '---------------------------------------------------------------------------------------------------------------'
+
+    sorted_suspicious_ranking =  sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key])
+
+    for bnss_key,time_window in sorted_suspicious_ranking:
+        print bnss_key, time_window
 
 
 #testCusum()
