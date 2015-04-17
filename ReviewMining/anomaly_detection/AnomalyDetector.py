@@ -28,7 +28,7 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
         statistics = statistics_for_bnss[measure_key][firstTimeKey:]
         chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
         if measure_key == StatConstants.AVERAGE_RATING:
-                windows = [(idx-2,idx+3) for idx in chOutlierIdxs]
+                windows = [(idx-2,idx+3) for idx in chOutlierIdxs ]
                 scores = {key:0.0 for key in windows}
         elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
                 numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
