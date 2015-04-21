@@ -981,7 +981,7 @@ def checkCusum2():
 def tryBusinessMeasureExtractor():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
 
     timeLength = '1-M'
 
@@ -1011,7 +1011,7 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = bnssKeys[:50]
 
-    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY]
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
 
     business_ranking_scores = dict()
 

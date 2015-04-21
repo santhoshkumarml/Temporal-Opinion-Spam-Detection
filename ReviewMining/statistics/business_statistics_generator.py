@@ -46,7 +46,8 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                 bnssStatFile.write('\n')
                 bnssStatFile.write('Number of reviews:'+str(len(neighboring_usr_nodes)))
                 bnssStatFile.write('\n')
-                for review in reviews_for_bnss:
+                reviews_sorted = sorted(reviews_for_bnss, key = lambda  key: SIAUtil.getDateForReview(key))
+                for review in reviews_sorted:
                     bnssStatFile.write(review.toString())
                     bnssStatFile.write('\n')
 

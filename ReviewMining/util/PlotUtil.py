@@ -152,7 +152,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
 
     for measure_key in toBeUsedMeasures:
-        if measure_key not in statistics_for_bnss:
+        if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
             continue
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
@@ -176,9 +176,14 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
+        data = statistics_for_bnss[measure_key][firstTimeKey:]
+        if measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+            import math
+            data = numpy.array([math.log(d) for d in data])
+
 
         ax1.plot(firstDimensionValues,\
-                statistics_for_bnss[measure_key][firstTimeKey:], 'g', label=measure_key)
+                data, 'g', label=measure_key)
 
         chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
 

@@ -185,26 +185,28 @@ def calculateMaxTextSimilarity(G, statistics_for_bnss, neighboring_usr_nodes, no
             maxTextSimilarity = 1
         else:
             bin_count = numpy.bincount(candidateGroups)
-    #                     printSimilarReviews(bin_count, candidateGroups, timeKey,\
-    #                                          bnssId, reviewTextsInThisTimeBlock)
+            printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock, timeKey,\
+                                 statistics_for_bnss[StatConstants.BNSS_ID])
             maxTextSimilarity = numpy.amax(bin_count)
 
     statistics_for_bnss[StatConstants.MAX_TEXT_SIMILARITY][timeKey] = maxTextSimilarity
 
 
-def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock):
+def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock, time_key, bnssKey,):
     bucketNumbers = set([i for i in range(len(bin_count)) if bin_count[i]>1])
     bucketIndexListPair = []
     for bucketNumber in bucketNumbers:
         indexes = [i for i in range(len(candidateGroups)) if candidateGroups[i]==bucketNumber]
         bucketIndexListPair.append((bucketNumber,indexes))
+    print '-------------------------'
+    print bnssKey, time_key
     for bucketNumber,indexes in bucketIndexListPair:
         print '-------------------------'
         print bucketNumber
         for index in indexes:
             print reviewTextsInThisTimeBlock[index]
         print '-------------------------'
-
+    print '-------------------------'
 def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measuresToBeExtracted = StatConstants.MEASURES):
     # POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
