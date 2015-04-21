@@ -31,28 +31,44 @@ def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_c
     for idx in range(len(induced_outlier_or_chpts)):
         induced_outlier_ch_idx, induced_outlier_ch_magnitude, persistence_time = induced_outlier_or_chpts[idx]
         outlier_ch_type = outlier_ch_types[idx]
+
         assert induced_outlier_ch_idx not in outlier_ch_idxs_visited
+
         if outlier_ch_type == OUTLIER_INCREASE or outlier_ch_type == OUTLIER_DECREASE:
             assert persistence_time == 1
             if outlier_ch_type == OUTLIER_INCREASE:
                 data[induced_outlier_ch_idx] = mean+induced_outlier_ch_magnitude
             else:
                 data[induced_outlier_ch_idx] = mean-induced_outlier_ch_magnitude
+            outlier_ch_idxs_visited.add(induced_outlier_ch_idx)
         elif outlier_ch_type == CHPT_CONST_INCREASE:
             start = induced_outlier_ch_idx
             end = start+persistence_time
             val = data[start-1] if start >=1 else mean
             data[start:end] = val+induced_outlier_ch_magnitude
+            outlier_ch_idxs_visited |= set([indx for indx in range(start, end)])
         elif outlier_ch_type == CHPT_CONST_DECREASE:
             start = induced_outlier_ch_idx
             end = start+persistence_time
             val = data[start-1] if start >=1 else mean
             data[start:end] = val-induced_outlier_ch_magnitude
+            outlier_ch_idxs_visited |= set([indx for indx in range(start, end)])
         elif outlier_ch_type == CHPT_NORMAL_INCREASE:
             start = induced_outlier_ch_idx
             end = start+persistence_time
-            data[start:end] = numpy.random.normal(mean+induced_outlier_ch_magnitude, varaince, persistence_time)
+            val = data[start-1] if start >=1 else mean
+            data[start:end] = numpy.random.normal(val+induced_outlier_ch_magnitude, varaince, persistence_time)
+            outlier_ch_idxs_visited |= set([indx for indx in range(start, end)])
         elif outlier_ch_type == CHPT_NORMAL_DECREASE:
             start = induced_outlier_ch_idx
             end = start+persistence_time
-            data[start:end] = numpy.random.normal(mean-induced_outlier_ch_magnitude, varaince, persistence_time)
+            val = data[start-1] if start >=1 else mean
+            data[start:end] = numpy.random.normal(val-induced_outlier_ch_magnitude, varaince, persistence_time)
+            outlier_ch_idxs_visited |= set([indx for indx in range(start, end)])
+    return data
+
+data = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(20,2,20), (40,3,20)],\
+                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE])
+plotDataAndChanges(data)
+
