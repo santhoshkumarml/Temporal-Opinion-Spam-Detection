@@ -3,6 +3,11 @@ __author__ = 'santhosh'
 import numpy
 import matplotlib.pyplot as plt
 
+CHPT1 = 'INCREASE_AND_DECREASE'
+CHPT2 = 'INCREASE_AND_INCREASE'
+OUTLIER1 = 'OUTLIER_INCREASE'
+OUTLIER2 = 'OUTLIER_DECREASE'
+
 def plotDataAndChanges(data, scores=[], changes=[]):
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
@@ -17,6 +22,10 @@ def plotDataAndChanges(data, scores=[], changes=[]):
     plt.show()
 
 
-def makeNormalData(mean=0.7, varaince =0.05,data_size = 200,outierOrChGap = 10, chptSize = 5):
+def makeNormalData(mean=0.7, varaince =0.05, data_size = 200,\
+                   outierOrChGap = 0, chptSize = 0, noOfOutliers = 0,\
+                   noOfChPts = 0):
+
     data = numpy.random.normal(mean, varaince, data_size)
+
     plotDataAndChanges(data)
