@@ -22,10 +22,6 @@ def plotDataAndChanges(data, scores=[], changes=[]):
     plt.show()
 
 
-def makeNormalData(mean=0.7, varaince =0.05, data_size = 200,\
-                   outierOrChGap = 0, chptSize = 0, noOfOutliers = 0,\
-                   noOfChPts = 0):
-
+def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_chpts=[], outlier_types = []):
     data = numpy.random.normal(mean, varaince, data_size)
-
-    plotDataAndChanges(data)
+    assert len(outlier_types) == len(induced_outlier_or_chpts)
