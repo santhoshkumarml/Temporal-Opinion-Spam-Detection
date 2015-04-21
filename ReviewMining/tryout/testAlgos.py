@@ -2,6 +2,10 @@ __author__ = 'santhosh'
 
 import numpy
 import matplotlib.pyplot as plt
+from anomaly_detection import AnomalyDetector
+from util import StatConstants
+from anomaly_detection import cusum
+import changefinder
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
@@ -17,7 +21,8 @@ def plotDataAndChanges(data, scores=[], changes=[]):
 
     if len(scores) > 0:
         ax2 = ax.twinx()
-        ax2.plot(range(len(data)), data,'r')
+        ax2.plot(range(len(scores)), scores,'r')
+
     for idx in changes:
         ax.axvline(x=idx, linewidth=2, color='r')
 
@@ -67,8 +72,22 @@ def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_c
             outlier_ch_idxs_visited |= set([indx for indx in range(start, end)])
     return data
 
-data = makeNormalData(0.07, 0.05, 200,\
-                      induced_outlier_or_chpts=[(20,2,20), (40,3,20)],\
-                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE])
-plotDataAndChanges(data)
 
+def runChangeFinder(data):
+    r, order, smooth = 0.2, 2, 4
+    cf = changefinder.ChangeFinder(r, order, smooth)
+    change_scores = []
+    for i in range(len(data)):
+        score = cf.update(data[i])
+        change_scores.append(score)
+    chOutlierScores = change_scores
+    return chOutlierScores
+
+data = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(20,2,20), (40,3,20), (80,3,1)],\
+                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE, OUTLIER_DECREASE])
+
+change_scores = runChangeFinder(data)
+
+
+plotDataAndChanges(data, scores=change_scores)
