@@ -74,7 +74,7 @@ def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_c
 
 
 def runChangeFinder(data):
-    r, order, smooth = 0.2, 2, 4
+    r, order, smooth = 0.2, 3, 4
     cf = changefinder.ChangeFinder(r, order, smooth)
     change_scores = []
     for i in range(len(data)):
@@ -84,8 +84,8 @@ def runChangeFinder(data):
     return chOutlierScores
 
 data = makeNormalData(0.07, 0.05, 200,\
-                      induced_outlier_or_chpts=[(20,2,20), (40,3,20), (80,3,1)],\
-                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE, OUTLIER_DECREASE])
+                      induced_outlier_or_chpts=[(20,2,20),(40,3,20), (80,2,20)],\
+                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE])
 
 change_scores = runChangeFinder(data)
 
