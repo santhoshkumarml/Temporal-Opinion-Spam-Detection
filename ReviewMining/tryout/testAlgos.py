@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
 from anomaly_detection import cusum
-import changefinder
+from anomaly_detection import ChangeFinder as cfr
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
@@ -13,6 +13,10 @@ CHPT_NORMAL_INCREASE = 'INCREASE_NORMAL'
 CHPT_NORMAL_DECREASE = 'DECREASE_NORMAL'
 OUTLIER_INCREASE = 'OUTLIER_INCREASE'
 OUTLIER_DECREASE = 'OUTLIER_DECREASE'
+
+
+AR = 'AR'
+ARMA = 'ARMA'
 
 def plotDataAndChanges(data, scores=[], changes=[]):
     fig = plt.figure()
@@ -29,16 +33,13 @@ def plotDataAndChanges(data, scores=[], changes=[]):
     plt.show()
 
 
-def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_chpts=[], outlier_ch_types = []):
+def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_chpts=[]):
     data = numpy.random.normal(mean, varaince, data_size)
     outlier_ch_idxs_visited = set()
-    assert len(outlier_ch_types) == len(induced_outlier_or_chpts)
     for idx in range(len(induced_outlier_or_chpts)):
-        induced_outlier_ch_idx, induced_outlier_ch_magnitude, persistence_time = induced_outlier_or_chpts[idx]
-        outlier_ch_type = outlier_ch_types[idx]
+        induced_outlier_ch_idx, induced_outlier_ch_magnitude, persistence_time, outlier_ch_type = induced_outlier_or_chpts[idx]
 
         assert induced_outlier_ch_idx not in outlier_ch_idxs_visited
-
         if outlier_ch_type == OUTLIER_INCREASE or outlier_ch_type == OUTLIER_DECREASE:
             assert persistence_time == 1
             if outlier_ch_type == OUTLIER_INCREASE:
@@ -73,9 +74,14 @@ def makeNormalData(mean=0.7, varaince =0.05, data_size=200, induced_outlier_or_c
     return data
 
 
-def runChangeFinder(data):
-    r, order, smooth = 0.2, 3, 4
-    cf = changefinder.ChangeFinder(r, order, smooth)
+def runChangeFinder(data, algo):
+    if algo == AR:
+        r, order, smooth = 0.2, 2, 4
+        cf = cfr.ChangeFinder(r, order, smooth)
+    else:
+        term, smooth, order = 4, 3, (2, 0)
+        cf = cfr.ChangeFinderARIMA(term, smooth, order)
+
     change_scores = []
     for i in range(len(data)):
         score = cf.update(data[i])
@@ -83,11 +89,48 @@ def runChangeFinder(data):
     chOutlierScores = change_scores
     return chOutlierScores
 
-data = makeNormalData(0.07, 0.05, 200,\
-                      induced_outlier_or_chpts=[(20,2,20),(40,3,20), (80,2,20)],\
-                      outlier_ch_types=[CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE, CHPT_NORMAL_INCREASE])
 
-change_scores = runChangeFinder(data)
+change_scores = []
+
+data1 = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(100,2,20,CHPT_NORMAL_INCREASE),\
+                                                (140,3,20,CHPT_NORMAL_INCREASE)])
+
+change_scores1 = runChangeFinder(data1, 'ARMA')
+plotDataAndChanges(data1, scores=change_scores1)
+
+data2 = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(100,2,20,CHPT_NORMAL_INCREASE),\
+                                                (140,3,20,CHPT_NORMAL_DECREASE)])
+change_scores2 = runChangeFinder(data1, 'ARMA')
+plotDataAndChanges(data2, scores=change_scores2)
 
 
-plotDataAndChanges(data, scores=change_scores)
+data3 = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(100,2,1,OUTLIER_INCREASE),\
+                                                (140,3,1,OUTLIER_INCREASE),\
+                                                (160,1,1,OUTLIER_INCREASE)])
+change_scores3 = runChangeFinder(data1, 'ARMA')
+plotDataAndChanges(data3, scores=change_scores3)
+
+
+data4 = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(100,2,1,OUTLIER_DECREASE),\
+                                                (160,3,1,OUTLIER_DECREASE)])
+change_scores4 = runChangeFinder(data1, 'ARMA')
+plotDataAndChanges(data4, scores=change_scores4)
+
+
+data5 = makeNormalData(0.07, 0.05, 200,\
+                      induced_outlier_or_chpts=[(20,2,1,OUTLIER_DECREASE),\
+                                                (60,3,1,OUTLIER_INCREASE)])
+change_scores5 = runChangeFinder(data1, 'ARMA')
+plotDataAndChanges(data5, scores=change_scores5)
+
+# change_scores = runChangeFinder(data1, 'AR')
+#
+# plotDataAndChanges(data, scores=change_scores)
+#
+# change_scores = runChangeFinder(data1, 'ARMA')
+#
+# plotDataAndChanges(data, scores=change_scores)

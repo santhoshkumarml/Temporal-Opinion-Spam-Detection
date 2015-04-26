@@ -124,11 +124,11 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
             bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
 
     StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots, measuresToBeExtracted)
-    # if logStats:
-    #         for measure_key in measuresToBeExtracted:
-    #             bnssStatFile.write(measure_key+':'+\
-    #                                     str(statistics_for_current_bnss[StatConstants.measure_key]))
-    #             bnssStatFile.write('\n')
+    if logStats:
+            for measure_key in measuresToBeExtracted:
+                bnssStatFile.write(measure_key+':'+\
+                                        str(statistics_for_current_bnss[measure_key]))
+                bnssStatFile.write('\n')
     bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
 
     afterStat = datetime.now()

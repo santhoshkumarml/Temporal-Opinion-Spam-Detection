@@ -205,6 +205,7 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
     art.append(lgd)
     plt.tight_layout()
 
+
     imgFile = join(inputDir, bnss_name+"_stat")+'.png'
 
     print bnss_name+" stats are logged to "+imgFile
