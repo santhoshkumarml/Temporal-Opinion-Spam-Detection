@@ -981,7 +981,7 @@ def checkCusum2():
 def tryBusinessMeasureExtractor():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
     timeLength = '1-M'
 
@@ -1009,7 +1009,7 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = ['284235722']
+    bnssKeys = bnssKeys[15:30]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
 
