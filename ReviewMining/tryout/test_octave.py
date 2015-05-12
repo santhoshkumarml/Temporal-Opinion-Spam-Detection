@@ -13,7 +13,7 @@ oc = Oct2Py()
 
 
 
-def plotSeries(real_vals, predicted_vals):
+def plotSeriesWithScores(real_vals, predicted_vals):
     import matplotlib.pyplot as plt
     assert real_vals.shape == predicted_vals.shape
 
@@ -28,12 +28,27 @@ def plotSeries(real_vals, predicted_vals):
 
         ax1 = fig.add_subplot(r, 1, s+1)
 
-        plt.yticks(numpy.arange(ymin, ymax, 0.2))
+        # plt.yticks(numpy.arange(ymin, ymax, 0.2))
         ax1.plot(r_val, 'b')
 
         ax2 = ax1.twinx()
-        plt.yticks(numpy.arange(ymin, ymax, 0.2))
+        # plt.yticks(numpy.arange(ymin, ymax, 0.2))
         ax2.plot(p_val, 'r')
+
+    plt.show()
+
+
+def plotSeries(data):
+    import matplotlib.pyplot as plt
+    r, c = data.shape
+    fig = plt.figure()
+
+    for s in range(r):
+        r_val = data[s,:]
+
+        ax1 = fig.add_subplot(r, 1, s+1)
+
+        ax1.plot(r_val, 'b')
 
     plt.show()
 
@@ -60,11 +75,24 @@ def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, lag_start = 2
     optim_lag, optim_lambda = lag_start, lambda_end
     min_log_loss = float('inf')
 
+    real_vals = data[:, range(tr_id_start-1, tr_id_end)]
+
     for lambda_param in range(lambda_start, lambda_end):
         for lag in range(lag_start, lag_end):
+            total_log_loss = 0
+            train_size = tr_id_end-tr_id_start+1
+            # c_tr_size = train_size/10
+            # start = tr_id_start
+            # while start < tr_id_end:
+            #     c_tr_start = start
+            #     c_tr_end = start+10-lag
+            #     c_te_start = c_tr_end+1
+            #     c_te_end = start+10
             predicted_vals = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, tr_id_start, tr_id_end, lag, lambda_param)
+            # plotSeries(real_vals, predicted_vals)
             log_loss = calculateLogLoss(tr_id_start, tr_id_end, data, predicted_vals)
             log_loss = numpy.sum(numpy.sum(log_loss))
+            print lambda_param, lag, log_loss
             if log_loss < min_log_loss:
                 min_log_loss = log_loss
                 optim_lag, optim_lambda = lag, lambda_param
@@ -119,11 +147,22 @@ tr_id_end = 30
 te_id_start = 31
 te_id_end = 37
 
-optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 4, 3, 20)
+# optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 4, 3, 20)
 
-predicted_vals = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start, te_id_end, optim_lag, optim_lambda)
+optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 6, 3, 20)
 
-real_vals = data[:, range(te_id_start-1, te_id_end)]
+
+train_data = data[:, range(tr_id_start-1, tr_id_end)]
+
+
+predicted_vals = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end,\
+                                                   tr_id_start, tr_id_end, optim_lag, optim_lambda)
+
+# plotSeries(train_data)
+# plotSeries(predicted_vals)
+
+#
+# real_vals = data[:, range(te_id_start-1, te_id_end)]
 
 # for s in range(no_of_series):
 #         print 'Series', s
@@ -132,6 +171,8 @@ real_vals = data[:, range(te_id_start-1, te_id_end)]
 #
 # plotSeries(real_vals, predicted_vals)
 
-log_loss_vals = calculateLogLoss(te_id_start, te_id_end, data, predicted_vals)
-plotSeries(data, log_loss_vals)
+# predicted_vals = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start, te_id_end, optim_lag, optim_lambda)
+
+# log_loss_vals = calculateLogLoss(te_id_start, te_id_end, data, predicted_vals)
+# plotSeriesWithScores(data, log_loss_vals)
 
