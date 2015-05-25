@@ -16,7 +16,7 @@ import changefinder
 
 
 def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
-                          superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict, time_dict):
+                          superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict):
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, \
                                                         superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,
                                                         toBeUsedMeasures)
@@ -85,7 +85,7 @@ def tryChangeFinderOnProductDimensions():
         bnssKeySet = set(bnssKeys[i-1:i])
         total_time_slots = len(cross_time_graphs.keys())
         generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
-                              superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict, time_dict)
+                              superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict)
 
 def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, toBeUsedMeasures):
@@ -204,7 +204,6 @@ def plotMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
     lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
     art.append(lgd)
     plt.tight_layout()
-
 
     imgFile = join(inputDir, bnss_name+"_stat")+'.png'
 
