@@ -978,65 +978,6 @@ def checkCusum2():
 
 
 
-def tryBusinessMeasureExtractor():
-    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
-    rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
-
-    timeLength = '1-M'
-
-    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
-                                                           bnssIdToBusinessDict,\
-                                                            reviewIdToReviewsDict, timeLength)
-    currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-
-    plotDir = join(join(join(csvFolder, os.pardir), 'stats'),currentDateTime)
-
-    if not os.path.exists(plotDir):
-        os.makedirs(plotDir)
-
-    # import networkx
-    # networkx.write_gml(superGraph, join(plotDir,'superGraph.gml'))
-    # for timeKey in cross_time_graphs:
-    #     networkx.write_gml(superGraph, join(plotDir,str(timeKey)+'.gml'))
-    #
-    #
-    # import sys
-    # sys.exit()
-
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-                 if bnss_type == SIAUtil.PRODUCT]
-
-    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
-
-    bnssKeys = bnssKeys[15:30]
-
-    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
-
-    business_ranking_scores = dict()
-
-    for bnss_key in bnssKeys:
-        statistics_for_bnss, ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
-                                                                                      cross_time_graphs,\
-                                                                                       plotDir, bnss_key,\
-                                                                                       timeLength,\
-                                                                                       measuresToBeExtracted, logStats=True)
-
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-
-        for time_window in ranking_scores:
-            time1, time2 = time_window
-            time1, time2 = time1+firstTimeKey, time2+firstTimeKey
-            business_ranking_scores[(bnss_key, (time1, time2))] = ranking_scores[time_window]
-
-    print '---------------------------------------------------------------------------------------------------------------'
-
-    sorted_suspicious_ranking = sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key], reverse=True)
-
-    for bnss_key,time_window in sorted_suspicious_ranking:
-        print bnss_key, time_window
-
-
 #testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()

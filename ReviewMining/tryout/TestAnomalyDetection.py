@@ -50,7 +50,7 @@ def tryChangeFinderOnProductDimensions():
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
-    timeLength = '1-M'
+    timeLength = '1-W'
 
     superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                                    bnssIdToBusinessDict,\

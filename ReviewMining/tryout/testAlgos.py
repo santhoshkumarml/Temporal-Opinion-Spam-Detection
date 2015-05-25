@@ -9,6 +9,13 @@ from anomaly_detection import ChangeFinder as cfr
 # import changefinder
 import copy
 import math
+from statistics import business_statistics_generator
+from util import GraphUtil
+from itunes_utils.ItunesDataReader import ItunesDataReader
+import os
+from os.path import join
+from util import SIAUtil
+from datetime import datetime, timedelta
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
@@ -95,7 +102,7 @@ def runChangeFinder(data, algo):
     return chOutlierScores
 
 
-change_scores = []
+# change_scores = []
 
 # data1 = makeNormalData(0.07, 0.05, 200,\
 #                         induced_outlier_or_chpts=[(100,2,20,CHPT_NORMAL_INCREASE),\
@@ -103,26 +110,26 @@ change_scores = []
 
 
 
-data1 = makeNormalData(0.07, 0.05, 200,\
-                      induced_outlier_or_chpts=[(100,2,20,CHPT_NORMAL_INCREASE),\
-                                                (140,3,20,CHPT_NORMAL_INCREASE)])
-
-data2 = makeNormalData(0.07, 0.05, 200,\
-                      induced_outlier_or_chpts=[(100,2,1,OUTLIER_INCREASE),\
-                                                (140,3,1,OUTLIER_INCREASE),\
-                                                (180,2,1,OUTLIER_INCREASE)])
-
-
-change_scores = runChangeFinder(data1, 'AR')
-
-alarms = [idx for idx in range(len(change_scores)) if change_scores[idx][1]]
-change_scores = [change_score for change_score, isAlarm in change_scores]
-plotDataAndChanges(data2, scores=change_scores, changes = alarms)
-
-change_scores = runChangeFinder(data2, 'AR')
-alarms = [idx for idx in range(len(change_scores)) if change_scores[idx][1]]
-change_scores = [change_score for change_score, isAlarm in change_scores]
-plotDataAndChanges(data2, scores=change_scores, changes = alarms)
+# data1 = makeNormalData(0.07, 0.05, 200,\
+#                       induced_outlier_or_chpts=[(100,2,20,CHPT_NORMAL_INCREASE),\
+#                                                 (140,3,20,CHPT_NORMAL_INCREASE)])
+#
+# data2 = makeNormalData(0.07, 0.05, 200,\
+#                       induced_outlier_or_chpts=[(100,2,1,OUTLIER_INCREASE),\
+#                                                 (140,3,1,OUTLIER_INCREASE),\
+#                                                 (180,2,1,OUTLIER_INCREASE)])
+#
+#
+# change_scores = runChangeFinder(data1, 'AR')
+#
+# alarms = [idx for idx in range(len(change_scores)) if change_scores[idx][1]]
+# change_scores = [change_score for change_score, isAlarm in change_scores]
+# plotDataAndChanges(data2, scores=change_scores, changes = alarms)
+#
+# change_scores = runChangeFinder(data2, 'AR')
+# alarms = [idx for idx in range(len(change_scores)) if change_scores[idx][1]]
+# change_scores = [change_score for change_score, isAlarm in change_scores]
+# plotDataAndChanges(data2, scores=change_scores, changes = alarms)
 
 
 #
@@ -233,3 +240,65 @@ plotDataAndChanges(data2, scores=change_scores, changes = alarms)
 # # scores = out
 #
 # plotDataAndChanges(data, scores=scores)
+
+
+def tryBusinessMeasureExtractor():
+    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
+    rdr = ItunesDataReader()
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
+
+    timeLength = '1-W'
+
+    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
+                                                           bnssIdToBusinessDict,\
+                                                            reviewIdToReviewsDict, timeLength)
+    currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
+
+    plotDir = join(join(join(csvFolder, os.pardir), 'stats'),currentDateTime)
+
+    if not os.path.exists(plotDir):
+        os.makedirs(plotDir)
+
+    # import networkx
+    # networkx.write_gml(superGraph, join(plotDir,'superGraph.gml'))
+    # for timeKey in cross_time_graphs:
+    #     networkx.write_gml(superGraph, join(plotDir,str(timeKey)+'.gml'))
+    #
+    #
+    # import sys
+    # sys.exit()
+
+    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
+                 if bnss_type == SIAUtil.PRODUCT]
+
+    bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
+
+    bnssKeys = bnssKeys[:30]
+
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
+
+    business_ranking_scores = dict()
+
+    for bnss_key in bnssKeys:
+        statistics_for_bnss, ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
+                                                                                      cross_time_graphs,\
+                                                                                       plotDir, bnss_key,\
+                                                                                       timeLength,\
+                                                                                       measuresToBeExtracted, logStats=True)
+
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+
+        for time_window in ranking_scores:
+            time1, time2 = time_window
+            time1, time2 = time1+firstTimeKey, time2+firstTimeKey
+            business_ranking_scores[(bnss_key, (time1, time2))] = ranking_scores[time_window]
+
+    print '---------------------------------------------------------------------------------------------------------------'
+
+    sorted_suspicious_ranking = sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key], reverse=True)
+
+    for bnss_key,time_window in sorted_suspicious_ranking:
+        print bnss_key, time_window
+
+
+tryBusinessMeasureExtractor()
