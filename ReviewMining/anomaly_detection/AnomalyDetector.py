@@ -58,7 +58,10 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
                             scores[window] += score_for_window
     for window in windows:
         scores[window] /= dimensions
-        scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
+        if numberOfReviewsInEachTimeStamp[window] == 0:
+            scores[window] = 0
+        else:
+            scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
     return scores
 
 

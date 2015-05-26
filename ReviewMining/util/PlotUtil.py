@@ -138,7 +138,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
 
-    step = 3
+    step = 5
 
         # if total_time_slots > 50:
         #     step = total_time_slots/50
