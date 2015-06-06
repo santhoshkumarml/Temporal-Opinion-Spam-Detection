@@ -7,6 +7,9 @@ from intervaltree import IntervalTree
 from lsh import ShingleUtil
 from util import SIAUtil
 from util import GraphUtil
+import nltk
+
+nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
 
 def entropyFn(probability_dict):
     entropy = 0
@@ -47,19 +50,14 @@ def updateBucketTree(bucketTree, point):
     bucketTree[begin:end] = data + 1.0
 
 def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
-#   changed = False
     noOfReviewsInTime = statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
     for measure_key in StatConstants.MEASURES:
-        if measure_key not in statistics_for_bnss:
+        if measure_key not in statistics_for_bnss or measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
             continue
-        if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING \
-        and measure_key != StatConstants.MAX_TEXT_SIMILARITY:
+        if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING and\
+                        measure_key != StatConstants.MAX_TEXT_SIMILARITY:
             if noOfReviewsInTime == 0:
                 statistics_for_bnss[measure_key][timeKey] = statistics_for_bnss[measure_key][timeKey - 1]
-#                 changed = True
-#     if changed:
-#         print timeKey
-#         print statistics_for_bnss
 
 def calculateAvgRating(statistics_for_bnss, ratings, timeKey, total_time_slots):
     if StatConstants.AVERAGE_RATING not in statistics_for_bnss:
@@ -207,6 +205,50 @@ def printSimilarReviews(bin_count, candidateGroups, reviewTextsInThisTimeBlock, 
             print reviewTextsInThisTimeBlock[index]
         print '-------------------------'
     print '-------------------------'
+
+
+def calculateTopTFIDF(G, statistics_for_bnss, neighboring_usr_nodes, noOfReviews, timeKey, total_time_slots):
+    if StatConstants.TF_IDF not in statistics_for_bnss:
+        statistics_for_bnss[StatConstants.TF_IDF] = numpy.zeros(total_time_slots)
+
+    reviewTextsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID]).getReviewText()\
+                                    for (usrId, usr_type) in neighboring_usr_nodes]
+    all_words_cnt_dict = dict()
+
+    all_reviewTexts_in_curr_time_stamp = [G.getReviewFromReviewId(reviewId).getReviewText() for reviewId in G.getReviewIds()]
+    # for usrId in G.getUserIds():
+    #     for bnssId in G.getBusinessIds():
+    #         review = G.getReview(usrId, bnssId).getReviewText()
+    #         all_reviews_in_curr_time_stamp.append(review)
+
+    for reviewText in all_reviewTexts_in_curr_time_stamp:
+        words = nltk.word_tokenize(reviewText.decode('utf8'))
+        for word in words:
+            if word not in all_words_cnt_dict:
+                all_words_cnt_dict[word] = 0.0
+            all_words_cnt_dict[word] += 1.0
+
+    current_bnss_cnt_dict = dict()
+    for reviewText in reviewTextsInThisTimeBlock:
+        words = nltk.word_tokenize(reviewText.decode('utf8'))
+        for word in words:
+            if word not in current_bnss_cnt_dict:
+                current_bnss_cnt_dict[word] = 0.0
+            current_bnss_cnt_dict[word] += 1.0
+
+    tota_freq = sum(current_bnss_cnt_dict.values())
+    tf = current_bnss_cnt_dict
+    tf = {key: tf[key]/tota_freq for key in tf.keys()}
+
+    no_of_reviews_in_time_stamp = len(all_reviewTexts_in_curr_time_stamp)
+    idf = all_words_cnt_dict
+    idf = {key: math.log(no_of_reviews_in_time_stamp/idf[key]) for key in idf.keys()}
+    tfidf = {key:tf[key]*idf[key] for key in tf.keys()}
+
+    top_tf_idf_word = max(tfidf.keys(), key=lambda key: tfidf[key])
+    statistics_for_bnss[StatConstants.TF_IDF][timeKey] = tfidf[top_tf_idf_word]
+    return top_tf_idf_word
+
 def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measuresToBeExtracted = StatConstants.MEASURES):
     # POST PROCESSING FOR REVIEW AVERAGE_RATING and NO_OF_REVIEWS
     no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]

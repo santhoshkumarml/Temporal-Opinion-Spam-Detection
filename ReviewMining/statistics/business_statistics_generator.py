@@ -12,6 +12,7 @@ from util import PlotUtil
 def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
                      measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
     print '--------------------------------------------------------------------------------------------------------------------'
+    print 'Stats Generation for bnss:', bnssKey
     beforeStat = datetime.now()
     statistics_for_current_bnss = dict()
     statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
@@ -33,6 +34,8 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                 isInitialized = True
                 if logStats:
                     bnssStatFile.write('Business Reviews Started at:'+str(timeKey)+' '+str(G.getDateTime())+'\n')
+            statistics_for_current_bnss[StatConstants.LAST_TIME_KEY] = timeKey
+            statistics_for_current_bnss[StatConstants.LAST_DATE_TIME] = G.getDateTime()
 
             if logStats:
                 bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
@@ -67,7 +70,6 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                     bnssStatFile.write(StatConstants.AVERAGE_RATING+':'+\
                                        str(statistics_for_current_bnss[StatConstants.AVERAGE_RATING][timeKey]/noOfReviews))
                     bnssStatFile.write('\n')
-
 
             #Rating Entropy
             if StatConstants.RATING_ENTROPY in measuresToBeExtracted:
@@ -121,6 +123,15 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                     bnssStatFile.write(StatConstants.MAX_TEXT_SIMILARITY+':'+\
                                        str(statistics_for_current_bnss[StatConstants.MAX_TEXT_SIMILARITY][timeKey]))
                     bnssStatFile.write('\n')
+
+            # TOP TF IDF
+            if StatConstants.TF_IDF in measuresToBeExtracted:
+                top_tf_idf_word = StatUtil.calculateTopTFIDF(G, statistics_for_current_bnss, neighboring_usr_nodes, noOfReviews, timeKey, total_time_slots)
+                if logStats:
+                    bnssStatFile.write(StatConstants.TF_IDF+':'+top_tf_idf_word.encode('ascii', 'ignore')+'-'+\
+                                       str(statistics_for_current_bnss[StatConstants.TF_IDF][timeKey]))
+                    bnssStatFile.write('\n')
+
             bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
 
     StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots, measuresToBeExtracted)

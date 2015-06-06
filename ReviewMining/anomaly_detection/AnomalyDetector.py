@@ -17,8 +17,8 @@ import math
 
 
 def getRangeIdxs(idx):
-    start = 2
-    end = 3
+    start = 3
+    end = 4
     while start < end:
         if idx - start < 0:
             start -= 1
@@ -161,7 +161,7 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
     if StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.INCREASE:
         for idx in idxs:
             idxRangePresent = False
-            for range_idx in range(idx-2,idx+3):
+            for range_idx in range(idx-2, idx+3):
                 if range_idx in avg_idxs:
                     idxRangePresent = True
                     break
@@ -172,7 +172,10 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                 new_idx = [idx1+indx for indx in new_idx]
                 #print idx, new_idx
                 for indx in new_idx:
-                    new_idxs.add(indx)
+                    diff = math.fabs(statistics_for_measure[indx]-min(statistics_for_measure[idx1:indx+1]))
+                    if not StatConstants.MEASURE_CHANGE_THRES[measure_key] \
+                            or diff > StatConstants.MEASURE_CHANGE_THRES[measure_key]:
+                        new_idxs.add(indx)
     elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
         for idx in idxs:
             idxRangePresent = False
@@ -187,7 +190,11 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                 new_idx = [idx1+indx for indx in new_idx]
                 #print idx,new_idx
                 for indx in new_idx:
-                    new_idxs.add(indx)
+                    diff = math.fabs(statistics_for_measure[indx]-max(statistics_for_measure[idx1:indx+1]))
+                    print indx, diff
+                    if not StatConstants.MEASURE_CHANGE_THRES[measure_key] \
+                            or diff > StatConstants.MEASURE_CHANGE_THRES[measure_key]:
+                        new_idxs.add(indx)
     else:
         for idx in idxs:
             # if measure_key == StatConstants.AVERAGE_RATING:
@@ -215,6 +222,7 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
 def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
     beforeDetection = datetime.now()
     firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+    lastKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
     firstDateTime = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
     chPtsOutliers= dict()
@@ -222,7 +230,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
     for measure_key in StatConstants.MEASURES:
         chOutlierIdxs, chOutlierScores = [], []
         if measure_key in statistics_for_bnss:
-            data = statistics_for_bnss[measure_key][firstKey:]
+            data = statistics_for_bnss[measure_key][firstKey:lastKey+1]
 
             algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
 

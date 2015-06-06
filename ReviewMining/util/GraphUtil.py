@@ -113,8 +113,11 @@ class TemporalGraph(networkx.Graph):
     def getBusiness(self, businessId):
         return self.businessIdToBusinessDict[businessId]
         
-    def getReview(self,usrId, bnssId):
+    def getReview(self, usrId, bnssId):
         return self.reviewIdToReviewDict[self.get_edge_data((usrId,SIAUtil.USER), (bnssId,SIAUtil.PRODUCT))[SIAUtil.REVIEW_EDGE_DICT_CONST]]
+
+    def getReviewFromReviewId(self, reviewId):
+        return self.reviewIdToReviewDict[reviewId]
 
     def getDateTime(self):
         return self.date_time

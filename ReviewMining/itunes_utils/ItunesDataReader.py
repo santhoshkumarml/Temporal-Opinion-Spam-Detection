@@ -46,6 +46,7 @@ class ItunesDataReader:
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}
         self.reviewIdToReviewDict = {}
+
     def readData(self, reviewFolder, readReviewsText=True):
         beforeDataReadTime = datetime.now()
         reviewMetaFile = join(reviewFolder, META_FILE)
@@ -105,8 +106,7 @@ class ItunesDataReader:
                 if user_id not in self.usrIdToUsrDict:
                     self.usrIdToUsrDict[user_id] = user(user_id, user_name)    
                 usr = self.usrIdToUsrDict[user_id]
-            
-            
+
                 revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
             
                 if review_id in self.reviewIdToReviewDict:
@@ -142,7 +142,7 @@ class ItunesDataReader:
             review_ids.append(review_id)
             
             if review_id in self.reviewIdToReviewDict:
-                review_text = content
+                review_text = str(content)
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
                 skippedData+=1

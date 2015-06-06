@@ -99,7 +99,8 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                  additional_artists=art,\
                  bbox_inches="tight")
     plt.close()
-        
+
+
 def plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
@@ -136,9 +137,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     avg_idxs = None
 
-    total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
-
-    step = 5
+    step = 10
 
         # if total_time_slots > 50:
         #     step = total_time_slots/50
@@ -150,14 +149,16 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     days = mdates.DayLocator()
     daysFmt = mdates.DateFormatter('%b-%Y')
 
+    firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+    lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
+    firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
+    firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
+    total_time_slots = lastTimeKey-firstTimeKey+1
+    xticks = range(firstTimeKey, lastTimeKey+1, step)
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
             continue
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-        firstDimensionValues = range(firstTimeKey, total_time_slots)
-        xticks = range(firstTimeKey, total_time_slots, step)
         # firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
         # xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
 
@@ -166,7 +167,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         plt.title('Business statistics')
         plt.xlabel('Date')
 
-        plt.xlim(firstDimensionValues[0], firstDimensionValues[-1])
+        plt.xlim(firstTimeKey, lastTimeKey)
         plt.xticks(xticks)
 
         plt.ylabel(measure_key)
@@ -176,20 +177,19 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
-        data = statistics_for_bnss[measure_key][firstTimeKey:]
-        if measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
-            import math
-            data = numpy.array([math.log(d) for d in data])
-
+        data = statistics_for_bnss[measure_key][firstTimeKey:lastTimeKey+1]
+        # if measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+        #     import math
+        #     data = numpy.array([math.log(d) for d in data])
 
         ax1.plot(firstDimensionValues,\
                 data, 'g', label=measure_key)
 
         chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
 
-        if len(chPtsOutlierScores) > 0:
-            ax2 = ax1.twinx()
-            ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
+        # if len(chPtsOutlierScores) > 0:
+        #     ax2 = ax1.twinx()
+        #     ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
             ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='r')
