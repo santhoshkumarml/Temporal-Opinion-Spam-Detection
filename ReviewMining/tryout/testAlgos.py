@@ -245,7 +245,7 @@ def runChangeFinder(data, algo):
 def tryBusinessMeasureExtractor():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
     timeLength = '1-W'
 
@@ -273,16 +273,17 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:1]
+    bnssKeys = bnssKeys[:150]
     # bnssKeys = ['284235722']
 
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
-    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
+                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
 
-    business_ranking_scores = dict()
+    business_ranking_and_changed_dims = dict()
 
     for bnss_key in bnssKeys:
-        statistics_for_bnss, ranking_scores = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
+        statistics_for_bnss, ranking_scores, changed_dims = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
                                                                                       cross_time_graphs,\
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
@@ -293,14 +294,15 @@ def tryBusinessMeasureExtractor():
         for time_window in ranking_scores:
             time1, time2 = time_window
             time1, time2 = time1+firstTimeKey, time2+firstTimeKey
-            business_ranking_scores[(bnss_key, (time1, time2))] = ranking_scores[time_window]
+            business_ranking_and_changed_dims[(bnss_key, (time1, time2))] = (ranking_scores[time_window], changed_dims[time_window])
 
     print '---------------------------------------------------------------------------------------------------------------'
 
-    sorted_suspicious_ranking = sorted(business_ranking_scores.keys(), key= lambda key : business_ranking_scores[key], reverse=True)
+    sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
+                                       key= lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
 
-    for bnss_key,time_window in sorted_suspicious_ranking:
-        print bnss_key, time_window
+    for bnss_key, time_window in sorted_suspicious_ranking:
+        print bnss_key, time_window, business_ranking_and_changed_dims[(bnss_key, time_window)][1]
 
 
 tryBusinessMeasureExtractor()

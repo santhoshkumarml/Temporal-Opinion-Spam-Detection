@@ -32,6 +32,7 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
     numberOfReviewsInEachTimeStamp = dict()
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     scores = dict()
+    changed_dimensions = dict()
     for measure_key in StatConstants.MEASURES:
         if measure_key not in statistics_for_bnss:
             continue
@@ -40,6 +41,7 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
         if measure_key == StatConstants.AVERAGE_RATING:
                 windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
                 scores = {key:0.0 for key in windows}
+                changed_dimensions = {key: set() for key in windows}
         elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
                 numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
                                                     for idx1, idx2 in windows}
@@ -56,13 +58,14 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
                             localMinima = numpy.amin(statistics[idx1:idx2])
                             score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
                             scores[window] += score_for_window
+                            changed_dimensions[window].add(measure_key)
     for window in windows:
         scores[window] /= dimensions
         if numberOfReviewsInEachTimeStamp[window] == 0:
             scores[window] = 0
         else:
             scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
-    return scores
+    return scores, changed_dimensions
 
 
 def detect_outliers_using_cusum(x, threshold=1):
