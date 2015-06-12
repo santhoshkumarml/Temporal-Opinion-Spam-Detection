@@ -13,6 +13,8 @@ import numpy
 from util import GraphUtil
 import scipy
 import math
+from statsmodels.tsa.ar_model import AR
+from statsmodels.tsa.arima_model import ARMA
 
 
 
@@ -105,7 +107,30 @@ def detect_outliers_using_cusum(x, threshold=1):
             # gp[i], gn[i] = threshold, threshold      # reset alarm
     return ta, tai, tapi, tani
 
+def squaredResidualError(actual_data, pred_data):
+    data_length = len(actual_data)
+    loss = numpy.zeros(data_length)
+    for i in range(data_length):
+        loss[i] = math.fabs(actual_data[i]-pred_data[i])**2
+    return loss
 
+def makeARPredictions(data, params, input_length, pred_length):
+    pred = list(data[:input_length])
+    pred = []
+    order = len(params)
+    for i in range(0, input_length + pred_length - 1):
+        val = 0
+        for p in range(order):
+            val += data[i-(order - p - 1)] * params[p]
+        # val += numpy.random.normal(0, 1, 1)*math.exp(10**(-6))
+        pred.append(val)
+    return pred
+
+def localAR(data, input_length):
+    ar_mod = AR(data[:input_length])
+    ar_res = ar_mod.fit(ic='bic')
+    print ar_res.fittedvalues()
+    order = len(ar_res.params)
 
 
 def twitterAnomalyDetection(dates, values):
@@ -252,6 +277,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
             elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
                 chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                     ,data)
+            elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
+                pass
 
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
