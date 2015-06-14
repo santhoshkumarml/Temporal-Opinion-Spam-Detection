@@ -177,6 +177,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
+
         data = statistics_for_bnss[measure_key][firstTimeKey:lastTimeKey+1]
         # if measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
         #     import math
@@ -187,9 +188,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
 
-        # if len(chPtsOutlierScores) > 0:
-        #     ax2 = ax1.twinx()
-        #     ax2.plot(firstDimensionValues, chPtsOutlierScores, 'r', label='Outlier Scores')
+        if len(chPtsOutlierScores) > 0:
+            ax2 = ax1.twinx()
+            ax2.plot(range(firstTimeKey,firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
             ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='r')

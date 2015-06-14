@@ -111,14 +111,13 @@ def squaredResidualError(actual_data, pred_data):
     data_length = len(actual_data)
     loss = numpy.zeros(data_length)
     for i in range(data_length):
-        loss[i] = math.fabs(actual_data[i]-pred_data[i])**2
+        loss[i] = (actual_data[i]-pred_data[i])**2
     return loss
 
-def makeARPredictions(data, params, input_length, pred_length):
-    pred = list(data[:input_length])
+def makeARPredictions(data, params, te_idx_start, te_idx_end):
     pred = []
     order = len(params)
-    for i in range(0, input_length + pred_length - 1):
+    for i in range(te_idx_start, te_idx_end+1):
         val = 0
         for p in range(order):
             val += data[i-(order - p - 1)] * params[p]
@@ -126,11 +125,61 @@ def makeARPredictions(data, params, input_length, pred_length):
         pred.append(val)
     return pred
 
-def localAR(data, input_length):
-    ar_mod = AR(data[:input_length])
-    ar_res = ar_mod.fit(ic='bic')
-    print ar_res.fittedvalues()
-    order = len(ar_res.params)
+def localAR(data, avg_idxs):
+    diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
+    diff_train_windows = []
+    start = 0
+    total_length = len(data)
+    for window in diff_test_windows:
+        idx1, idx2 = window
+        end = idx1-1
+        length_of_training_data = end-start+1
+        if length_of_training_data <= 6:
+            if(len(diff_train_windows)) > 0:
+                last_tr_window = diff_train_windows[-1]
+                diff_train_windows.append(last_tr_window)
+            else:
+                diff_train_windows.append((start, total_length-1))
+        else:
+            diff_train_windows.append((start, end))
+        start = idx2+1
+
+    no_of_windows = len(diff_train_windows)
+    scores = []
+    for wid in range(no_of_windows):
+        tr_idx_start, tr_idx_end = diff_train_windows[wid]
+        te_idx_start, te_idx_end = diff_test_windows[wid]
+        ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
+        ar_res = ar_mod.fit(ic='bic')
+        train_pred = makeARPredictions(data, ar_res.params, tr_idx_start, tr_idx_end)
+        train_error_scores = squaredResidualError(data[tr_idx_start:tr_idx_end+1], train_pred)
+        last_filled_idx = len(scores)-1
+
+        if last_filled_idx > te_idx_start:
+            te_idx_start = last_filled_idx+1
+
+        corr_start = 0
+        corr_end = te_idx_start-1
+
+        if (tr_idx_end-tr_idx_start+1) == total_length:
+            corr_start = last_filled_idx+1
+        elif tr_idx_start > last_filled_idx:
+            corr_end = tr_idx_end-tr_idx_start
+        else:
+            corr_start = last_filled_idx-tr_idx_start+1
+            corr_end = tr_idx_end-tr_idx_start
+        print corr_start, corr_end
+        scores.extend(train_error_scores[corr_start:corr_end+1])
+        test_pred = makeARPredictions(data, ar_res.params, te_idx_start, te_idx_end)
+        test_error_scores = squaredResidualError(data[te_idx_start:te_idx_end+1], test_pred)
+        scores.extend(test_error_scores)
+        print tr_idx_start, tr_idx_end, len(train_error_scores)
+        print te_idx_start, te_idx_end, len(test_error_scores)
+        print len(scores)
+    # print scores, len(scores), len(data)
+    print '-----------------------------------------------------'
+    return scores
+
 
 
 def twitterAnomalyDetection(dates, values):
@@ -219,7 +268,7 @@ def compactChOutlierScoresAndIdx(firstTimeKey, choutlierIdxs, choutlierScores, m
                 #print idx,new_idx
                 for indx in new_idx:
                     diff = math.fabs(statistics_for_measure[indx]-max(statistics_for_measure[idx1:indx+1]))
-                    print indx, diff
+                    # print indx, diff
                     if not StatConstants.MEASURE_CHANGE_THRES[measure_key] \
                             or diff > StatConstants.MEASURE_CHANGE_THRES[measure_key]:
                         new_idxs.add(indx)
@@ -270,24 +319,27 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                     score = cf.update(data[i])
                     change_scores.append(score)
                 chOutlierScores = change_scores
-
+                # chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
+                #                                                             measure_key, statistics_for_bnss[measure_key][firstKey:],\
+                #                                                             avg_idxs, algo)
             elif algo == StatConstants.CUSUM:
                 chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
 
             elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                chOutlierIdxs = twitterAnomalyDetection(GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
+                chOutlierIdxs = twitterAnomalyDetection(\
+                    GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                     ,data)
-            elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                pass
+            elif algo == StatConstants.LOCAL_AR:
+                chOutlierScores = localAR(data, avg_idxs)
 
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
                     avg_idxs = set(ta)
+                    chOutlierIdxs = avg_idxs
 
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
                                                                             measure_key, statistics_for_bnss[measure_key][firstKey:],\
                                                                             avg_idxs, algo)
-
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     
     afterDetection = datetime.now()
