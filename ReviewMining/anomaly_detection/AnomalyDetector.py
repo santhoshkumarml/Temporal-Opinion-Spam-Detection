@@ -319,9 +319,9 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                     score = cf.update(data[i])
                     change_scores.append(score)
                 chOutlierScores = change_scores
-                # chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
-                #                                                             measure_key, statistics_for_bnss[measure_key][firstKey:],\
-                #                                                             avg_idxs, algo)
+                chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
+                                                                            measure_key, statistics_for_bnss[measure_key][firstKey:],\
+                                                                            avg_idxs, algo)
             elif algo == StatConstants.CUSUM:
                 chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
 
@@ -334,12 +334,9 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
 
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
+                    chOutlierIdxs = ta
                     avg_idxs = set(ta)
-                    # chOutlierIdxs = avg_idxs
 
-            chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
-                                                                            measure_key, statistics_for_bnss[measure_key][firstKey:],\
-                                                                            avg_idxs, algo)
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     
     afterDetection = datetime.now()
