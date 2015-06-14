@@ -10,7 +10,7 @@ from anomaly_detection import AnomalyDetector
 from util import PlotUtil
 
 def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
-                     measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
+                     measuresToBeExtracted = StatConstants.MEASURES, logStats = False, doPlot=True):
     print '--------------------------------------------------------------------------------------------------------------------'
     print 'Stats Generation for bnss:', bnssKey
     beforeStat = datetime.now()
@@ -156,13 +156,12 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
         bnssStatFile.close()
     print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterStat-beforeStat
 
-    beforePlotTime = datetime.now()
-
-    PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
-
-    afterPlotTime = datetime.now()
-
-    print 'Plot Generation Time for bnss:', bnssKey, 'in', afterStat-beforeStat
+    if doPlot:
+        beforePlotTime = datetime.now()
+        PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
+        afterPlotTime = datetime.now()
+        print 'Plot Generation Time for bnss:', bnssKey, 'in', afterStat-beforeStat
+        
     ranking_score, changed_dims = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
     print '------------------------------------------------------------------------------------------------------------------------------'
 

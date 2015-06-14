@@ -335,7 +335,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs
                     avg_idxs = set(ta)
-                    chOutlierIdxs = avg_idxs
+                    # chOutlierIdxs = avg_idxs
 
             chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(firstKey, chOutlierIdxs, chOutlierScores,\
                                                                             measure_key, statistics_for_bnss[measure_key][firstKey:],\
