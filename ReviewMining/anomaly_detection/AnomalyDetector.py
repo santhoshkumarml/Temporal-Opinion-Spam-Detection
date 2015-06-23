@@ -14,6 +14,7 @@ from util import GraphUtil
 import scipy
 import math
 from statsmodels.tsa.ar_model import AR
+import copy
 from statsmodels.tsa.arima_model import ARMA
 
 
@@ -108,24 +109,21 @@ def detect_outliers_using_cusum(x, threshold=1):
     return ta, tai, tapi, tani
 
 def squaredResidualError(actual_data, pred_data):
-    data_length = len(actual_data)
-    loss = numpy.zeros(data_length)
-    for i in range(data_length):
-        loss[i] = (actual_data[i]-pred_data[i])**2
-    return loss
+    return (actual_data-pred_data)**2
 
-def makeARPredictions(data, params, te_idx_start, te_idx_end):
-    pred = []
+def makeARPredictions(data, params, idx):
     order = len(params)
-    for i in range(te_idx_start, te_idx_end+1):
-        val = 0
-        for p in range(order):
-            val += data[i-(order - p - 1)] * params[p]
-        # val += numpy.random.normal(0, 1, 1)*math.exp(10**(-6))
-        pred.append(val)
-    return pred
+    val = 0
+    for p in range(order):
+        # val += data[idx-(order - p - 1)] * params[p]
+        val += data[idx-p-1] * params[p]
+    # val += numpy.random.normal(0, 1, 1)*math.exp(10**(-6))
+    return val
 
-def localAR(data, avg_idxs):
+def localAR(data, avg_idxs, measure_key):
+    thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
+    needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
+    val_change_thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
     diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
     diff_train_windows = []
     start = 0
@@ -145,18 +143,21 @@ def localAR(data, avg_idxs):
         start = idx2+1
 
     no_of_windows = len(diff_train_windows)
-    scores = []
+    outierIds = []
+    outies_scores = []
     for wid in range(no_of_windows):
         tr_idx_start, tr_idx_end = diff_train_windows[wid]
         te_idx_start, te_idx_end = diff_test_windows[wid]
+
+        last_filled_idx = len(outies_scores)-1
+
         ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
         ar_res = ar_mod.fit(ic='bic')
-        train_pred = makeARPredictions(data, ar_res.params, tr_idx_start, tr_idx_end)
-        train_error_scores = squaredResidualError(data[tr_idx_start:tr_idx_end+1], train_pred)
-        last_filled_idx = len(scores)-1
 
         if last_filled_idx > te_idx_start:
             te_idx_start = last_filled_idx+1
+
+        copied_data = copy.copy(data)
 
         corr_start = 0
         corr_end = te_idx_start-1
@@ -168,17 +169,44 @@ def localAR(data, avg_idxs):
         else:
             corr_start = last_filled_idx-tr_idx_start+1
             corr_end = tr_idx_end-tr_idx_start
-        print corr_start, corr_end
-        scores.extend(train_error_scores[corr_start:corr_end+1])
-        test_pred = makeARPredictions(data, ar_res.params, te_idx_start, te_idx_end)
-        test_error_scores = squaredResidualError(data[te_idx_start:te_idx_end+1], test_pred)
-        scores.extend(test_error_scores)
-        print tr_idx_start, tr_idx_end, len(train_error_scores)
-        print te_idx_start, te_idx_end, len(test_error_scores)
-        print len(scores)
-    # print scores, len(scores), len(data)
+
+        train_pred = []
+        train_error_scores = []
+        for i in range(corr_start, corr_end+1):
+            pred = makeARPredictions(copied_data, ar_res.params, i)
+            error = squaredResidualError(copied_data[tr_idx_start+i], pred)
+            train_pred.append(pred)
+            train_error_scores.append(error)
+
+        outies_scores.extend(train_error_scores)
+        # print len(train_error_scores), tr_idx_start, tr_idx_end, corr_start, corr_end, corr_end-corr_start+1, len(scores)
+
+        test_pred = []
+        test_error_scores = []
+        for i in range(te_idx_start, te_idx_end+1):
+            if i >= len(copied_data):
+                break
+            pred = makeARPredictions(copied_data, ar_res.params, i)
+            error = squaredResidualError(copied_data[i], pred)
+            direction = copied_data[i]-copied_data[i-1]
+            diff = math.fabs(direction)
+            if direction < 0:
+                direction = StatConstants.DECREASE
+            else:
+                direction = StatConstants.INCREASE
+            if thres and error >= thres and diff>=val_change_thres:
+                if needed_direction == StatConstants.BOTH or direction == needed_direction:
+                    outierIds.append(i)
+                    # copied_data[i] = pred
+            test_pred.append(pred)
+            test_error_scores.append(error)
+        if measure_key == StatConstants.ENTROPY_SCORE:
+            print te_idx_start, te_idx_end, data[te_idx_start:te_idx_end+1], test_pred
+        outies_scores.extend(test_error_scores)
+        # print len(test_error_scores), te_idx_start, te_idx_end, te_idx_end-te_idx_start+1, len(scores)
+        # print '-----------------------------------------------------'
     print '-----------------------------------------------------'
-    return scores
+    return outierIds, outies_scores
 
 
 
@@ -330,7 +358,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M'):
                     GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                     ,data)
             elif algo == StatConstants.LOCAL_AR:
-                chOutlierScores = localAR(data, avg_idxs)
+                chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key)
 
             if measure_key == StatConstants.AVERAGE_RATING:
                     ta, tai, taf, amp = chOutlierIdxs

@@ -186,11 +186,13 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         ax1.plot(firstDimensionValues,\
                 data, 'g', label=measure_key)
 
-        chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
-
-        if len(chPtsOutlierScores) > 0:
-            ax2 = ax1.twinx()
-            ax2.plot(range(firstTimeKey,firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores, 'r', label='Outlier Scores')
+        if chPtsOutliersForBnss:
+            chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
+        else:
+            chOutlierIdxs, chPtsOutlierScores = [],[]
+        # if len(chPtsOutlierScores) > 0:
+        #     ax2 = ax1.twinx()
+        #     ax2.plot(range(firstTimeKey,firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
             ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='r')

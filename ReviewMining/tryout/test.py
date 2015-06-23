@@ -989,5 +989,4 @@ def checkCusum2():
 #testAVGplot()
 #checkCusum2()
 #datesFormatinPlots()
-tryBusinessMeasureExtractor()
 #testPlot()

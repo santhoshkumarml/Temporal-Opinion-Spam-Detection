@@ -154,13 +154,13 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
 
     if logStats:
         bnssStatFile.close()
-    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterStat-beforeStat
+    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
 
     if doPlot:
         beforePlotTime = datetime.now()
         PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
         afterPlotTime = datetime.now()
-        print 'Plot Generation Time for bnss:', bnssKey, 'in', afterStat-beforeStat
+        print 'Plot Generation Time for bnss:', bnssKey, 'in', afterPlotTime-beforePlotTime
 
     ranking_score, changed_dims = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
     print '------------------------------------------------------------------------------------------------------------------------------'

@@ -213,6 +213,7 @@ def calculateTopTFIDF(G, statistics_for_bnss, neighboring_usr_nodes, noOfReviews
 
     reviewTextsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID]).getReviewText()\
                                     for (usrId, usr_type) in neighboring_usr_nodes]
+    # print reviewTextsInThisTimeBlock
     all_words_cnt_dict = dict()
 
     all_reviewTexts_in_curr_time_stamp = [G.getReviewFromReviewId(reviewId).getReviewText() for reviewId in G.getReviewIds()]

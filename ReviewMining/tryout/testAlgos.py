@@ -245,7 +245,7 @@ def runChangeFinder(data, algo):
 def tryBusinessMeasureExtractor():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
 
     timeLength = '1-W'
 
@@ -273,12 +273,13 @@ def tryBusinessMeasureExtractor():
 
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:15]
-    # bnssKeys = ['412629178']
+    bnssKeys = bnssKeys[1:50]
+    # bnssKeys = ['315215396']
 
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
+    measuresToBeExtracted = [StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS, StatConstants.TF_IDF]
 
     business_ranking_and_changed_dims = dict()
 
@@ -288,7 +289,6 @@ def tryBusinessMeasureExtractor():
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
                                                                                        measuresToBeExtracted, logStats=True)
-
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
 
         for time_window in ranking_scores:
@@ -301,8 +301,15 @@ def tryBusinessMeasureExtractor():
     sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
                                        key= lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
 
+    changed_dims_cnt = dict()
     for bnss_key, time_window in sorted_suspicious_ranking:
-        print bnss_key, time_window, business_ranking_and_changed_dims[(bnss_key, time_window)][1]
+        business_ranking, changed_dims = business_ranking_and_changed_dims[(bnss_key, time_window)]
+        print bnss_key, time_window, changed_dims
+        key = tuple(sorted(changed_dims))
+        if key not in changed_dims_cnt:
+            changed_dims_cnt[key] = 0
+        changed_dims_cnt[key] += 1
+    print changed_dims_cnt
 
 
 tryBusinessMeasureExtractor()
