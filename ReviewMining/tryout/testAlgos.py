@@ -16,6 +16,7 @@ import os
 from os.path import join
 from util import SIAUtil
 from datetime import datetime, timedelta
+import sys
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
@@ -242,10 +243,9 @@ def runChangeFinder(data, algo):
 # plotDataAndChanges(data, scores=scores)
 
 
-def tryBusinessMeasureExtractor():
-    csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
+def tryBusinessMeasureExtractor(csvFolder):
     rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
+    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
     timeLength = '1-W'
 
@@ -254,7 +254,7 @@ def tryBusinessMeasureExtractor():
                                                             reviewIdToReviewsDict, timeLength)
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
 
-    plotDir = join(join(join(csvFolder, os.pardir), 'stats'),currentDateTime)
+    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), currentDateTime)
 
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
@@ -279,7 +279,7 @@ def tryBusinessMeasureExtractor():
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
-    measuresToBeExtracted = [StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS, StatConstants.TF_IDF]
+    # measuresToBeExtracted = [StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS, StatConstants.TF_IDF]
 
     business_ranking_and_changed_dims = dict()
 
@@ -288,7 +288,8 @@ def tryBusinessMeasureExtractor():
                                                                                       cross_time_graphs,\
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
-                                                                                       measuresToBeExtracted, logStats=True)
+                                                                                       measuresToBeExtracted,\
+                                                                                        logStats=True, doPlot=False)
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
 
         for time_window in ranking_scores:
@@ -299,17 +300,25 @@ def tryBusinessMeasureExtractor():
     print '---------------------------------------------------------------------------------------------------------------'
 
     sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
-                                       key= lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
+                                       key=lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
 
+    res = open(os.path.join(plotDir, 'result.txt'),'w')
     changed_dims_cnt = dict()
     for bnss_key, time_window in sorted_suspicious_ranking:
         business_ranking, changed_dims = business_ranking_and_changed_dims[(bnss_key, time_window)]
-        print bnss_key, time_window, changed_dims
+        tup = (bnss_key,time_window, changed_dims)
+        res.write('result='+str(tup)+'\n')
         key = tuple(sorted(changed_dims))
         if key not in changed_dims_cnt:
             changed_dims_cnt[key] = 0
         changed_dims_cnt[key] += 1
     print changed_dims_cnt
+    res.close()
 
-
-tryBusinessMeasureExtractor()
+if __name__ == "__main__":
+    if(len(sys.argv)!=2):
+        print 'Usage: python -m \"tryout.testAlgos\" csvFolder'
+        sys.exit()
+    csvFolder = sys.argv[1]
+    #'/media/santhosh/Data/workspace/datalab/data/Itunes'
+    tryBusinessMeasureExtractor(csvFolder)
