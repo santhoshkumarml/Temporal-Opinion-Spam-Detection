@@ -22,8 +22,13 @@ def jaccard(gar_file, lar_file):
         lar_set = lar_dict[key]
         inter = gar_set.intersection(lar_set)
         uni = gar_set.union(lar_set)
-        jaccard_dict[key] = float(len(inter))/float(len(uni))
-    print jaccard_dict
+        if len(inter) == 0 or len(uni) == 0:
+            jaccard_dict[key] = 0.0
+        else:
+            jaccard_dict[key] = float(len(inter))/float(len(uni))
+    print sorted(jaccard_dict.items(), key=lambda item:item[1], reverse=True)
 
 
-
+gar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_gar.txt'
+lar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_lar.txt'
+jaccard(gar_file, lar_file)

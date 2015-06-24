@@ -200,8 +200,8 @@ def localAR(data, avg_idxs, measure_key):
                     # copied_data[i] = pred
             test_pred.append(pred)
             test_error_scores.append(error)
-        if measure_key == StatConstants.ENTROPY_SCORE:
-            print te_idx_start, te_idx_end, data[te_idx_start:te_idx_end+1], test_pred
+        # if measure_key == StatConstants.ENTROPY_SCORE:
+        #     print te_idx_start, te_idx_end, data[te_idx_start:te_idx_end+1], test_pred
         outies_scores.extend(test_error_scores)
         # print len(test_error_scores), te_idx_start, te_idx_end, te_idx_end-te_idx_start+1, len(scores)
         # print '-----------------------------------------------------'
