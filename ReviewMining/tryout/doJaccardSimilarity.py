@@ -6,11 +6,12 @@ def readFileAndReturnResult(fil):
     with open(fil) as f:
         result = tuple()
         for line in f:
-            content = 'result'
-            content = content+f.readline()
+            content = 'result='
+            content = content+line
             exec(content)
-            bnss_key, time_window, changed_dims = content
+            bnss_key, time_window, changed_dims = result
             result_Dict[(bnss_key, time_window)] = changed_dims
+    return result_Dict
 
 def jaccard(gar_file, lar_file):
     gar_dict = readFileAndReturnResult(gar_file)
