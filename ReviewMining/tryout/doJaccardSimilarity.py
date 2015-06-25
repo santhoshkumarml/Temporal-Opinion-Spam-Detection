@@ -26,9 +26,11 @@ def jaccard(gar_file, lar_file):
             jaccard_dict[key] = 0.0
         else:
             jaccard_dict[key] = float(len(inter))/float(len(uni))
-    print sorted(jaccard_dict.items(), key=lambda item:item[1], reverse=True)
+    return sorted(jaccard_dict.items(), key=lambda item:item[1], reverse=True)
 
 
 gar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_gar.txt'
 lar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_lar.txt'
-jaccard(gar_file, lar_file)
+sorted_dict = jaccard(gar_file, lar_file)
+for (bnss,time_window), simila in sorted_dict:
+    print bnss, time_window, simila
