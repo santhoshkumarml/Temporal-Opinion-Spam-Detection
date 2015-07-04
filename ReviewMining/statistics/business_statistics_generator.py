@@ -11,6 +11,7 @@ from util import PlotUtil
 
 def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
                      measuresToBeExtracted = StatConstants.MEASURES, logStats = False, doPlot=True):
+
     print '--------------------------------------------------------------------------------------------------------------------'
     print 'Stats Generation for bnss:', bnssKey
     beforeStat = datetime.now()
@@ -149,6 +150,19 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     beforeAnomalyDetection = datetime.now()
 
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength)
+
+    measure_logs = {key: os.path.join(plotDir, key + ".log") for key in measuresToBeExtracted
+                    if StatConstants.MEASURES_CHANGE_DETECTION_ALGO[key] == StatConstants.LOCAL_AR or
+                    StatConstants.MEASURES_CHANGE_DETECTION_ALGO[key] == StatConstants.AR_UNIFYING}
+
+    for key in measuresToBeExtracted:
+        chOutlierIdxs, chOutlierScores = chPtsOutliers[key]
+        algo = StatConstants.MEASURES_CHANGE_DETECTION_ALGO[key]
+        if algo == StatConstants.LOCAL_AR or algo == StatConstants.LOCAL_AR:
+            measure_log_file = open(measure_logs[key], 'a')
+            for score in chOutlierScores:
+                measure_log_file.write(str(score)+" ")
+            measure_log_file.close()
 
     afterAnomalyDetection = datetime.now()
 
