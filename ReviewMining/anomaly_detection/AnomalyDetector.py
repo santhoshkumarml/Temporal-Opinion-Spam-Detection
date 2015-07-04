@@ -120,6 +120,20 @@ def makeARPredictions(data, params, idx):
     # val += numpy.random.normal(0, 1, 1)*math.exp(10**(-6))
     return val
 
+def doLocalARCrossValidation(data, tr_idx_start, tr_idx_end):
+    length_of_training_data = tr_idx_end-tr_idx_start+1
+    ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
+    error_dict = dict()
+    for order in range(1, min([5, length_of_training_data])):
+        ar_res = ar_mod.fit(maxlag=order)
+        params = ar_res.params
+        error = 0
+        for idx in range(tr_idx_start, tr_idx_end+1):
+            pred = makeARPredictions(data, params, idx)
+            error += squaredResidualError(data[idx], pred)
+        error_dict[order] = error
+    return min(error_dict.keys(), key=lambda key: error_dict[key])
+
 def localAR(data, avg_idxs, measure_key):
     thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
@@ -151,8 +165,12 @@ def localAR(data, avg_idxs, measure_key):
 
         last_filled_idx = len(outies_scores)-1
 
+        order = doLocalARCrossValidation(data, tr_idx_start, tr_idx_end)
+
+        # print 'Low Error Order', order
+
         ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
-        ar_res = ar_mod.fit(ic='bic')
+        ar_res = ar_mod.fit(maxlag=order)
 
         if last_filled_idx > te_idx_start:
             te_idx_start = last_filled_idx+1
@@ -194,10 +212,11 @@ def localAR(data, avg_idxs, measure_key):
                 direction = StatConstants.DECREASE
             else:
                 direction = StatConstants.INCREASE
-            if thres and error >= thres and diff>=val_change_thres:
+            # and diff>=val_change_thres
+            if thres and error >= thres and diff>=val_change_thres and diff>=val_change_thres:
                 if needed_direction == StatConstants.BOTH or direction == needed_direction:
                     outierIds.append(i)
-                    # copied_data[i] = pred
+                    #copied_data[i] = pred
             test_pred.append(pred)
             test_error_scores.append(error)
         # if measure_key == StatConstants.ENTROPY_SCORE:

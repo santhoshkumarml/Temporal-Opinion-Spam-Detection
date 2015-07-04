@@ -274,7 +274,8 @@ def tryBusinessMeasureExtractor(csvFolder):
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
 
     # bnssKeys = bnssKeys[1:50]
-    # bnssKeys = ['315215396']
+    bnssKeys = ['332120854', '326066831', '391065642']
+    #0.75,0.6,0.4
 
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
@@ -289,7 +290,7 @@ def tryBusinessMeasureExtractor(csvFolder):
                                                                                        plotDir, bnss_key,\
                                                                                        timeLength,\
                                                                                        measuresToBeExtracted,\
-                                                                                        logStats=True, doPlot=False)
+                                                                                        logStats=False, doPlot=True)
         firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
 
         for time_window in ranking_scores:
