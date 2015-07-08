@@ -111,7 +111,7 @@ def detect_outliers_using_cusum(x, threshold=1):
 def squaredResidualError(actual_data, pred_data):
     return (actual_data-pred_data)**2
 
-def makeARPredictions(data, params, idx):
+def makeARPredictions(data, params, idx, measure_key = None):
     order = len(params)
     val = 0
     for p in range(order):
@@ -191,7 +191,7 @@ def localAR(data, avg_idxs, measure_key):
         train_pred = []
         train_error_scores = []
         for i in range(corr_start, corr_end+1):
-            pred = makeARPredictions(copied_data, ar_res.params, i)
+            pred = makeARPredictions(copied_data, ar_res.params, i, measure_key)
             error = squaredResidualError(copied_data[tr_idx_start+i], pred)
             train_pred.append(pred)
             train_error_scores.append(error)
@@ -204,7 +204,7 @@ def localAR(data, avg_idxs, measure_key):
         for i in range(te_idx_start, te_idx_end+1):
             if i >= len(copied_data):
                 break
-            pred = makeARPredictions(copied_data, ar_res.params, i)
+            pred = makeARPredictions(copied_data, ar_res.params, i, measure_key)
             error = squaredResidualError(copied_data[i], pred)
             direction = copied_data[i]-copied_data[i-1]
             diff = math.fabs(direction)
@@ -213,10 +213,16 @@ def localAR(data, avg_idxs, measure_key):
             else:
                 direction = StatConstants.INCREASE
             # and diff>=val_change_thres
-            if thres and error >= thres and diff>=val_change_thres and diff>=val_change_thres:
+            if thres and error >= thres:
                 if needed_direction == StatConstants.BOTH or direction == needed_direction:
                     outierIds.append(i)
-                    #copied_data[i] = pred
+                    # copied_data[i] = pred
+                    import tryout.ScoreHistogram as sc
+                    if measure_key in sc.THRES and error > sc.THRES[measure_key]:
+                        print '***************************************************************'
+                        print ar_res.params, i, [data[i-idx] for idx in range(1, order+1)],\
+                            data[i], pred, measure_key, error
+                        print '***************************************************************'
             test_pred.append(pred)
             test_error_scores.append(error)
         # if measure_key == StatConstants.ENTROPY_SCORE:
