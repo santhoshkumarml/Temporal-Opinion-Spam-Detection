@@ -15,11 +15,24 @@ import scipy
 import math
 from statsmodels.tsa.ar_model import AR
 import copy
+from oct2py import octave
+from oct2py import Oct2Py
+import numpy
+import os
+
+
+octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/GrangerAD/')
+octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/GrangerAD/lasso/')
+octave.addpath(os.getcwd())
+
+oc = Oct2Py()
+
 
 LIMITS = { StatConstants.RATING_ENTROPY: (0.0, None),\
                            StatConstants.RATIO_OF_SINGLETONS: (0.0, 1.0),\
                            StatConstants.RATIO_OF_FIRST_TIMERS: (0.0, 1.0), StatConstants.YOUTH_SCORE: (0.0, None),\
                            StatConstants.ENTROPY_SCORE: (0.0, None), StatConstants.NON_CUM_NO_OF_REVIEWS :(0.0, None)}
+
 
 def getRangeIdxs(idx):
     start = 2
@@ -30,6 +43,119 @@ def getRangeIdxs(idx):
         else:
             break
     return (idx-start, idx+end)
+
+def determineTimeWindows(avg_idxs, data):
+    diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
+    diff_train_windows = []
+    start = 0
+    total_length = len(data)
+    for window in diff_test_windows:
+        idx1, idx2 = window
+        end = idx1 - 1
+        length_of_training_data = end - start + 1
+        if length_of_training_data <= 6:
+            if (len(diff_train_windows)) > 0:
+                last_tr_window = diff_train_windows[-1]
+                diff_train_windows.append(last_tr_window)
+            else:
+                diff_train_windows.append((start, total_length - 1))
+        else:
+            diff_train_windows.append((start, end))
+        start = idx2 + 1
+    return diff_test_windows, diff_train_windows, total_length
+
+def logloss(real_val, pred_val):
+    import math
+    return -math.log(math.exp(-0.5*(real_val-pred_val)**2)/math.sqrt(2*math.pi))
+
+
+def calculateLogLoss(te_id_start, te_id_end, data, predicted_vals):
+    real_vals = data[:, range(te_id_start-1, te_id_end)]
+
+    no_of_series, series_length = data.shape
+
+    log_loss_vals = numpy.zeros(shape=(no_of_series, series_length), dtype=float)
+
+    for s in range(no_of_series):
+        for i in range(0, te_id_end-te_id_start+1):
+            score = logloss(real_vals[s][i], predicted_vals[s][i])
+            log_loss_vals[s][te_id_start+i] = score
+    return log_loss_vals
+
+
+def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, lag_start = 2, lag_end = 2, lambda_start=10, lambda_end = 10):
+    no_of_series, series_length = data.shape
+    optim_lag, optim_lambda = lag_start, lambda_end
+    min_log_loss = float('inf')
+
+    real_vals = data[:, range(tr_id_start-1, tr_id_end)]
+
+    for lambda_param in range(lambda_start, lambda_end):
+        for lag in range(lag_start, lag_end):
+            total_log_loss = 0
+            train_size = tr_id_end-tr_id_start+1
+            start = tr_id_start
+            while start < tr_id_end:
+                c_tr_start = start
+                c_tr_end = start+10-lag
+                c_te_start = c_tr_end+1
+                c_te_end = start+10
+                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start, c_tr_end, c_te_start, c_te_end, lag, lambda_param)
+                predicted_vals = makePredictionsUsingGranger(coeffMatrix, data, lag, c_te_start, c_te_end)
+            # plotSeries(real_vals, predicted_vals)
+                log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
+                log_loss = numpy.sum(numpy.sum(log_loss))
+                total_log_loss += log_loss
+                start = c_te_end
+            print lag, lambda_param, total_log_loss
+            if log_loss < min_log_loss:
+                min_log_loss = log_loss
+                optim_lag, optim_lambda = lag, lambda_param
+    return optim_lag, optim_lambda
+
+
+def makePredictionsUsingGranger(coeffPyMatrix, data, lag, idx):
+    no_of_series, series_length = data.shape
+    predicted_val = None
+    for s in range(no_of_series):
+        curr_matrix = coeffPyMatrix[s]
+        lagged_vals = numpy.array(
+            [[data[j][idx - i - 1] * curr_matrix[j][lag - i - 1] for i in range(lag - 1, -1, -1)] for j in
+             range(no_of_series)])
+        predicted_val = numpy.sum(numpy.sum(lagged_vals))
+    return predicted_val
+
+
+def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start, te_id_end, lag=2, lambda_param=10, print_coeff=False):
+    no_of_series, series_length = data.shape
+    octave.eval('pkg load communications')
+    coeffsMatrix = octave.ts_ls_gran(data, tr_id_start, tr_id_end, lag, lambda_param)
+    coeffPyMatrix = numpy.zeros(shape=(no_of_series, no_of_series, lag))
+
+    for idx in range(no_of_series):
+        coeffPyMatrix[idx] = numpy.reshape(coeffsMatrix[idx], newshape=(no_of_series, lag))
+
+    return coeffPyMatrix
+
+def runLocalGranger(data, avg_idxs, measure_key, find_outlier_idxs=True):
+
+    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, data)
+    no_of_windows = len(diff_test_windows)
+    for wid in range(no_of_windows):
+        tr_id_start, tr_id_end = diff_train_windows[wid]
+        te_id_start, te_id_end = diff_test_windows[wid]
+        optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 6, 3, 20)
+
+        optim_lag, optim_lambda = 1, 3
+        coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, \
+                                                        te_id_start, te_id_end, optim_lag, optim_lambda)
+
+        for idx in range(te_id_start, te_id_end+1):
+            predicted_val = makePredictionsUsingGranger(coeffMatrix, data, optim_lag, idx)
+            error = squaredResidualError(data[idx], predicted_val)
+
+
+
 
 def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
     dimensions = 0
@@ -110,23 +236,9 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
     thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
     val_change_thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
-    diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
-    diff_train_windows = []
-    start = 0
+    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, data)
+
     total_length = len(data)
-    for window in diff_test_windows:
-        idx1, idx2 = window
-        end = idx1-1
-        length_of_training_data = end-start+1
-        if length_of_training_data <= 6:
-            if(len(diff_train_windows)) > 0:
-                last_tr_window = diff_train_windows[-1]
-                diff_train_windows.append(last_tr_window)
-            else:
-                diff_train_windows.append((start, total_length-1))
-        else:
-            diff_train_windows.append((start, end))
-        start = idx2+1
 
     no_of_windows = len(diff_train_windows)
     outierIds = []
@@ -179,6 +291,8 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
             pred = makeARPredictions(copied_data, ar_res.params, i, measure_key)
             error = squaredResidualError(copied_data[i], pred)
             direction = copied_data[i]-copied_data[i-1]
+            test_pred.append(pred)
+            test_error_scores.append(error)
 
             if find_outlier_idxs:
                 diff = math.fabs(direction)
@@ -199,13 +313,12 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
                         outierIds.append(i)
                     # copied_data[i] = pred
 
-            test_pred.append(pred)
-            test_error_scores.append(error)
-
         outies_scores.extend(test_error_scores)
 
     print '-----------------------------------------------------'
     return outierIds, outies_scores
+
+
 
 
 
@@ -344,6 +457,11 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                                                                                   avg_idxs, algo)
             elif algo == StatConstants.CUSUM:
                 chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
+                if measure_key == StatConstants.AVERAGE_RATING:
+                    ta, tai, taf, amp = chOutlierIdxs
+                    chOutlierIdxs = [idx for idx in ta]
+                    chOutlierScores = []
+                    avg_idxs = set(ta)
 
             elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
                 chOutlierIdxs = twitterAnomalyDetection(\
@@ -351,17 +469,13 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                     ,data)
             elif algo == StatConstants.LOCAL_AR:
                 chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key, find_outlier_idxs)
-
-            if measure_key == StatConstants.AVERAGE_RATING:
-                    ta, tai, taf, amp = chOutlierIdxs
-                    chOutlierIdxs = [idx for idx in ta]
-                    chOutlierScores = []
-                    avg_idxs = set(ta)
+            elif algo == StatConstants.LOCAL_GRANGER:
+                chOutlierIdxs, chOutlierScores = runLocalGranger(data, avg_idxs, measure_key, find_outlier_idxs)
 
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
     
     afterDetection = datetime.now()
-    print 'Time Taken For Anamoly Detection for Bnss Key',statistics_for_bnss[StatConstants.BNSS_ID],\
+    print 'Time Taken For Anamoly Detection for Bnss Key', statistics_for_bnss[StatConstants.BNSS_ID],\
         ':', afterDetection-beforeDetection
 
     return chPtsOutliers

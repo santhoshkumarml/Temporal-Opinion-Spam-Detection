@@ -259,15 +259,6 @@ def tryBusinessMeasureExtractor(csvFolder):
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
 
-    # import networkx
-    # networkx.write_gml(superGraph, join(plotDir,'superGraph.gml'))
-    # for timeKey in cross_time_graphs:
-    #     networkx.write_gml(superGraph, join(plotDir,str(timeKey)+'.gml'))
-    #
-    #
-    # import sys
-    # sys.exit()
-
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT]
 

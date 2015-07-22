@@ -37,13 +37,13 @@ def jaccard(gar_file, lar_file):
     return jaccard_dict
 
 
-gar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_gar.txt'
-lar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_lar.txt'
-jaccard_dict = jaccard(gar_file, lar_file)
-print jaccard_dict
-simil_cnt_dict = {key:0.0 for key in jaccard_dict.values()}
-for (bnss,time_window),simila in jaccard_dict.iteritems():
-    simil_cnt_dict[simila] += 1
+# gar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_gar.txt'
+# lar_file = '/media/santhosh/Data/workspace/datalab/data/stats/result_lar.txt'
+# jaccard_dict = jaccard(gar_file, lar_file)
+# print jaccard_dict
+# simil_cnt_dict = {key:0.0 for key in jaccard_dict.values()}
+# for (bnss,time_window),simila in jaccard_dict.iteritems():
+#     simil_cnt_dict[simila] += 1
 
 # vals = [(0.8, 5.0), (0.6, 17.0), (0.4, 19.0), (0.2, 32.0),
 #         (0.75, 38.0), (0.25, 86.0), (0.6666666666666666, 91.0),

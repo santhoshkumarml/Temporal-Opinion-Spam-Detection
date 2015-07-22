@@ -15,10 +15,7 @@ BINS = {StatConstants.RATING_ENTROPY: numpy.arange(0.0, 15.0, 0.25),\
         StatConstants.ENTROPY_SCORE: numpy.arange(0.0, 6.0, 0.25)}
 
 def doScoreHistogram(measure_scores):
-
     for key in measure_scores.keys():
-        if key != StatConstants.YOUTH_SCORE:
-            continue
         fig = plt.figure()
         plt.title('Score histogram')
 
@@ -29,8 +26,8 @@ def doScoreHistogram(measure_scores):
 
         bins = BINS[key]
 
-        # if max_score > bins[-1]:
-        #     bins = numpy.append(bins, [max_score])
+        if max_score > bins[-1]:
+            bins = numpy.append(bins, [max_score])
 
         ax = fig.add_subplot(1, 1, 1)
 
@@ -129,31 +126,26 @@ def print_hist_bins(measure_scores):
 
 
 def main_fn():
-    scores = readScores('/media/santhosh/Data/workspace/datalab/data/stats/s4/')
+    # scores = readScoresFromMeasureLog('/media/santhosh/Data/workspace/datalab/data/stats/s5/measure_scores.log')
     measure_scores1 = readScoresFromMeasureLog(
-        '/media/santhosh/Data/workspace/datalab/data/stats/final/measure_scores.log')
-    # doScoreHistogram(measure_scores)
-    measure_scores2 = readScoresFromMeasureLog(
-        '/media/santhosh/Data/workspace/datalab/data/stats/s5/measure_scores.log')
+        '/media/santhosh/Data/workspace/datalab/data/stats/1/measure_scores.log')
+    # measure_scores2 = readScoresFromMeasureLog(
+    #     '/media/santhosh/Data/workspace/datalab/data/stats/Global AR/measure_scores.log')
+    # for measure_key in measure_scores1.keys():
+    #     scores1 = measure_scores1[measure_key]
+    #     scores2 = measure_scores2[measure_key]
+    #     print measure_key
+    #     print min(scores1), min(scores2)
+    #     print max(scores1), max(scores2)
+    doScoreHistogram(measure_scores1)
+    # measure_scores2 = readScoresFromMeasureLog(
+    #     '/media/santhosh/Data/workspace/datalab/data/stats/Local AR/measure_scores.log')
     # THRES_RANGE = StatConstants.RATING_ENTROPY: numpy.arange(0.25, 5),\
     #         StatConstants.RATIO_OF_SINGLETONS: numpy.arange(0.0, 1.0, 0.2),\
     #         StatConstants.RATIO_OF_FIRST_TIMERS: numpy.arange(0.0, 1.0, 0.2),\
     #         StatConstants.YOUTH_SCORE: numpy.arange(0.0, 3.0, 0.25),\
     #         StatConstants.ENTROPY_SCORE: numpy.arange(0.0, 6.0, 0.25)
-    for measure_key in measure_scores1.keys():
-        scores1 = measure_scores1[measure_key]
-        scores2 = measure_scores1[measure_key]
 
-        min_score1 = min(scores1)
-        max_score1 = max(scores1)
-
-        min_score2 = min(scores2)
-        max_score2 = max(scores2)
-
-        print measure_key
-        print min_score1, max_score1
-        print min_score2, max_score2
-        print min(scores[measure_key]), max(scores[measure_key])
 
 
 main_fn()
