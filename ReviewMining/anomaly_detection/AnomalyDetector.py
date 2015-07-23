@@ -116,14 +116,14 @@ def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, lag_start = 2
 
 def makePredictionsUsingGranger(coeffPyMatrix, data, lag, idx):
     no_of_series, series_length = data.shape
-    predicted_val = None
+    predicted_vals = numpy.zeros(no_of_series)
     for s in range(no_of_series):
         curr_matrix = coeffPyMatrix[s]
         lagged_vals = numpy.array(
             [[data[j][idx - i - 1] * curr_matrix[j][lag - i - 1] for i in range(lag - 1, -1, -1)] for j in
              range(no_of_series)])
-        predicted_val = numpy.sum(numpy.sum(lagged_vals))
-    return predicted_val
+        predicted_vals[s] = numpy.sum(numpy.sum(lagged_vals))
+    return predicted_vals
 
 
 def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start, te_id_end, lag=2, lambda_param=10, print_coeff=False):
@@ -137,7 +137,7 @@ def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start,
 
     return coeffPyMatrix
 
-def runLocalGranger(data, avg_idxs, measure_key, find_outlier_idxs=True):
+def runLocalGranger(data, avg_idxs, find_outlier_idxs=True):
 
     diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, data)
     no_of_windows = len(diff_test_windows)
