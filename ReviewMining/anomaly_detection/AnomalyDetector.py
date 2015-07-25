@@ -21,17 +21,12 @@ import numpy
 import os
 
 
-octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/GrangerAD/')
-octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/GrangerAD/lasso/')
-octave.addpath(os.getcwd())
-
-oc = Oct2Py()
-
 
 LIMITS = { StatConstants.RATING_ENTROPY: (0.0, None),\
                            StatConstants.RATIO_OF_SINGLETONS: (0.0, 1.0),\
                            StatConstants.RATIO_OF_FIRST_TIMERS: (0.0, 1.0), StatConstants.YOUTH_SCORE: (0.0, None),\
                            StatConstants.ENTROPY_SCORE: (0.0, None), StatConstants.NON_CUM_NO_OF_REVIEWS :(0.0, None)}
+
 
 
 def getRangeIdxs(idx):
@@ -44,11 +39,10 @@ def getRangeIdxs(idx):
             break
     return (idx-start, idx+end)
 
-def determineTimeWindows(avg_idxs, data):
+def determineTimeWindows(avg_idxs, total_length):
     diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
     diff_train_windows = []
     start = 0
-    total_length = len(data)
     for window in diff_test_windows:
         idx1, idx2 = window
         end = idx1 - 1
@@ -62,7 +56,7 @@ def determineTimeWindows(avg_idxs, data):
         else:
             diff_train_windows.append((start, end))
         start = idx2 + 1
-    return diff_test_windows, diff_train_windows, total_length
+    return diff_test_windows, diff_train_windows
 
 def logloss(real_val, pred_val):
     import math
@@ -100,7 +94,7 @@ def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, lag_start = 2
                 c_tr_end = start+10-lag
                 c_te_start = c_tr_end+1
                 c_te_end = start+10
-                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start, c_tr_end, c_te_start, c_te_end, lag, lambda_param)
+                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start, c_tr_end, lag, lambda_param)
                 predicted_vals = makePredictionsUsingGranger(coeffMatrix, data, lag, c_te_start, c_te_end)
             # plotSeries(real_vals, predicted_vals)
                 log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
@@ -126,7 +120,11 @@ def makePredictionsUsingGranger(coeffPyMatrix, data, lag, idx):
     return predicted_vals
 
 
-def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start, te_id_end, lag=2, lambda_param=10, print_coeff=False):
+def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, lag=2, lambda_param=10):
+    octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/')
+    octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/lasso/')
+    octave.addpath(os.getcwd())
+    oc = Oct2Py()
     no_of_series, series_length = data.shape
     octave.eval('pkg load communications')
     coeffsMatrix = octave.ts_ls_gran(data, tr_id_start, tr_id_end, lag, lambda_param)
@@ -137,22 +135,35 @@ def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, te_id_start,
 
     return coeffPyMatrix
 
-def runLocalGranger(data, avg_idxs, find_outlier_idxs=True):
+def runLocalGranger(statistics_for_bnss, GRANGER_MEASURES, avg_idxs, find_outlier_idxs=True):
+    GRANGER_MEASURES = [measure_key for measure_key in GRANGER_MEASURES if measure_key in statistics_for_bnss]
+    no_of_series = len(GRANGER_MEASURES)
+    series_length = len(statistics_for_bnss[GRANGER_MEASURES[0]])
 
-    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, data)
+    data = numpy.zeros(shape=(no_of_series, series_length), dtype=numpy.float)
+    for s in range(no_of_series):
+        measure_key = GRANGER_MEASURES[s]
+        data[s] = statistics_for_bnss[measure_key]
+
+    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, series_length)
     no_of_windows = len(diff_test_windows)
+    test_error_scores, test_outlier_idxs = {key:[] for key in GRANGER_MEASURES}, {key:[] for key in GRANGER_MEASURES}
     for wid in range(no_of_windows):
         tr_id_start, tr_id_end = diff_train_windows[wid]
         te_id_start, te_id_end = diff_test_windows[wid]
         optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 6, 3, 20)
 
-        optim_lag, optim_lambda = 1, 3
-        coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, \
-                                                        te_id_start, te_id_end, optim_lag, optim_lambda)
+        # optim_lag, optim_lambda = 1, 3
+        coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, optim_lag, optim_lambda)
 
         for idx in range(te_id_start, te_id_end+1):
             predicted_val = makePredictionsUsingGranger(coeffMatrix, data, optim_lag, idx)
-            error = squaredResidualError(data[idx], predicted_val)
+            for s in range(no_of_series):
+                error = squaredResidualError(data[s][idx], predicted_val[s])
+                test_error_scores[GRANGER_MEASURES[s]].append(error)
+                if find_outlier_idxs and error > StatConstants.MEASURE_CHANGE_LOCAL_GRANGER_THRES[GRANGER_MEASURES[s]]:
+                    test_outlier_idxs[GRANGER_MEASURES[s]].append(idx)
+    return test_error_scores, test_outlier_idxs
 
 
 
@@ -236,7 +247,7 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
     thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
     val_change_thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
-    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, data)
+    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, len(data))
 
     total_length = len(data)
 
@@ -430,6 +441,10 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
     chPtsOutliers= dict()
     avg_idxs = None
+    GRANGER_MEASURES = [measure_key for measure_key in StatConstants.MEASURES_CHANGE_FINDERS
+                        if StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key]
+                        == StatConstants.LOCAL_GRANGER]
+    isGrangerNeeded = False
 
     for measure_key in StatConstants.MEASURES:
         chOutlierIdxs, chOutlierScores = [], []
@@ -469,11 +484,19 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                     ,data)
             elif algo == StatConstants.LOCAL_AR:
                 chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key, find_outlier_idxs)
+
             elif algo == StatConstants.LOCAL_GRANGER:
-                chOutlierIdxs, chOutlierScores = runLocalGranger(data, avg_idxs, measure_key, find_outlier_idxs)
+                isGrangerNeeded = True
+                continue
 
             chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
-    
+
+    if isGrangerNeeded:
+        test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,
+                                                                 avg_idxs, find_outlier_idxs)
+        for measure_key in test_outlier_scores.keys():
+            chPtsOutliers[measure_key] = (test_outlier_idxs[measure_key], test_outlier_scores[measure_key])
+
     afterDetection = datetime.now()
     print 'Time Taken For Anamoly Detection for Bnss Key', statistics_for_bnss[StatConstants.BNSS_ID],\
         ':', afterDetection-beforeDetection
