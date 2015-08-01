@@ -47,7 +47,7 @@ def determineTimeWindows(avg_idxs, total_length):
         idx1, idx2 = window
         end = idx1 - 1
         length_of_training_data = end - start + 1
-        if length_of_training_data <= 6:
+        if length_of_training_data <= 8:
             if (len(diff_train_windows)) > 0:
                 last_tr_window = diff_train_windows[-1]
                 diff_train_windows.append(last_tr_window)
@@ -77,34 +77,46 @@ def calculateLogLoss(te_id_start, te_id_end, data, predicted_vals):
     return log_loss_vals
 
 
-def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, lag_start = 2, lag_end = 2, lambda_start=10, lambda_end = 10):
+def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end,
+                                     lag_start = 2, lag_end = 2,
+                                     lambda_start=10, lambda_end = 10):
     no_of_series, series_length = data.shape
     optim_lag, optim_lambda = lag_start, lambda_end
     min_log_loss = float('inf')
-
-    real_vals = data[:, range(tr_id_start-1, tr_id_end)]
 
     for lambda_param in range(lambda_start, lambda_end):
         for lag in range(lag_start, lag_end):
             total_log_loss = 0
             train_size = tr_id_end-tr_id_start+1
+            limit = train_size/10
+            if limit < 3:
+                limit = 8
             start = tr_id_start
-            while start < tr_id_end:
+            while start <= tr_id_end-limit:
                 c_tr_start = start
-                c_tr_end = start+10-lag
+                c_tr_end = start+int(math.fabs(0.60*limit))
                 c_te_start = c_tr_end+1
-                c_te_end = start+10
-                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start, c_tr_end, lag, lambda_param)
-                predicted_vals = makePredictionsUsingGranger(coeffMatrix, data, lag, c_te_start, c_te_end)
+                c_te_end = start+limit
+                print start, c_tr_start, c_tr_end, c_te_start,\
+                    c_te_end, int(math.fabs(0.60*limit)), c_tr_start+1, c_tr_end+1
+                print lag, lambda_param
+                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start+1, c_tr_end+1, lag, lambda_param)
+                for idx in range(c_te_start, c_te_end):
+                    pred = makePredictionsUsingGranger(coeffMatrix, data, lag, idx)
+                    for s in range(no_of_series):
+                        error = squaredResidualError(data[s][idx], pred[s])
+                        total_log_loss += error
+
             # plotSeries(real_vals, predicted_vals)
-                log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
-                log_loss = numpy.sum(numpy.sum(log_loss))
-                total_log_loss += log_loss
+            #     log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
+            #     log_loss = numpy.sum(numpy.sum(log_loss))
+            #     total_log_loss += log_loss
                 start = c_te_end
-            print lag, lambda_param, total_log_loss
-            if log_loss < min_log_loss:
-                min_log_loss = log_loss
+            # print lag, lambda_param, total_log_loss
+            if total_log_loss < min_log_loss:
+                min_log_loss = total_log_loss
                 optim_lag, optim_lambda = lag, lambda_param
+
     return optim_lag, optim_lambda
 
 
@@ -124,7 +136,7 @@ def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, lag=2, lambd
     octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/')
     octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/lasso/')
     octave.addpath(os.getcwd())
-    oc = Oct2Py()
+    # oc = Oct2Py()
     no_of_series, series_length = data.shape
     octave.eval('pkg load communications')
     coeffsMatrix = octave.ts_ls_gran(data, tr_id_start, tr_id_end, lag, lambda_param)
@@ -151,7 +163,8 @@ def runLocalGranger(statistics_for_bnss, GRANGER_MEASURES, avg_idxs, find_outlie
     for wid in range(no_of_windows):
         tr_id_start, tr_id_end = diff_train_windows[wid]
         te_id_start, te_id_end = diff_test_windows[wid]
-        optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 6, 3, 20)
+
+        optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 4, 5, 10)
 
         # optim_lag, optim_lambda = 1, 3
         coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, optim_lag, optim_lambda)

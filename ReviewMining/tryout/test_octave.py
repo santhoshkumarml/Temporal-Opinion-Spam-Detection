@@ -14,7 +14,7 @@ octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/Gr
 octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Granger_source/GrangerAD/lasso/')
 octave.addpath(os.getcwd())
 
-oc = Oct2Py()
+# oc = Oct2Py()
 
 
 
