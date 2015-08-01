@@ -470,8 +470,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
 
             if algo == StatConstants.AR_UNIFYING:
                 r, order, smooth = params
-                import ChangeFinderRes as ch
-                cf = ch.ChangeFinderRes(r, order, smooth)
+                import ChangeFinderSinglePass as ch
+                cf = ch.ChangeFinderSinglepass(r, order, smooth)
                 change_scores = []
                 for d in data:
                     score = cf.update(d)

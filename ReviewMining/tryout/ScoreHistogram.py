@@ -128,7 +128,7 @@ def print_hist_bins(measure_scores):
 def main_fn():
     # scores = readScoresFromMeasureLog('/media/santhosh/Data/workspace/datalab/data/stats/s5/measure_scores.log')
     measure_scores1 = readScoresFromMeasureLog(
-        '/media/santhosh/Data/workspace/datalab/data/stats/1/measure_scores.log')
+        '/media/santhosh/Data/workspace/datalab/data/stats/measure_scores.log')
     # measure_scores2 = readScoresFromMeasureLog(
     #     '/media/santhosh/Data/workspace/datalab/data/stats/Global AR/measure_scores.log')
     # for measure_key in measure_scores1.keys():
