@@ -5,8 +5,6 @@ import scipy as sp
 import math
 
 
-
-
 class DTO():
     def __init__(self, nh=8, p=0.125, lh=0.000195, rh=0.005,\
                  a=0.0, b=8.0):
@@ -32,7 +30,6 @@ class DTO():
         # print [self.a+((self.b-self.a)*(idx)/(self.nh-2)) for idx in range(self.nh)]
 
         threshold = self.a+((self.b-self.a)*(l+1)/(self.nh-2))
-
 
         whichH = [idx for idx in range(1, self.nh)\
                   if self.a+((self.b-self.a)*(idx-1)/(self.nh-2)) <= score\
@@ -133,10 +130,10 @@ class _SDAR_1Dim(object):
         what,e = LevinsonDurbin(self._c,self._order)
         xhat = np.dot(-what[1:],(term[::-1]  - self._mu))+self._mu
         self._sigma = (1-self._r)*self._sigma + self._r * (x-xhat) * (x-xhat)
-        return -math.log(math.exp(-0.5 *(x-xhat)**2/self._sigma)/((2 * math.pi)**0.5 * self._sigma**0.5))
+        return (x-xhat)**2
 
 class ChangeFinderSinglepass(object):
-    def __init__(self, r = 0.5, order = 1, smooth=7):
+    def __init__(self, r=0.5, order = 1, smooth=7):
         assert order > 0, "order must be 1 or more."
         assert smooth > 2, "term must be 3 or more."
         self._smooth = smooth

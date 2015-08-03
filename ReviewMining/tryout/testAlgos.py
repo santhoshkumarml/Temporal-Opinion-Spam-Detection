@@ -265,7 +265,7 @@ def tryBusinessMeasureExtractor(csvFolder):
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[1:50]
+    bnssKeys = bnssKeys[:2]
     #bnssKeys = ['476534368']
     #0.75,0.6,0.4
 

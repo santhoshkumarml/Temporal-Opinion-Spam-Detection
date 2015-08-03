@@ -63,6 +63,10 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                     bnssStatFile.write(StatConstants.NO_OF_REVIEWS+':'+\
                                        str(noOfReviews))
                     bnssStatFile.write('\n')
+            if StatConstants.NO_OF_POSITIVE_REVIEWS in measuresToBeExtracted \
+                    and StatConstants.NO_OF_NEGATIVE_REVIEWS in measuresToBeExtracted:
+                StatUtil.calculateNoOfPositiveAndNegativeReviews(G, statistics_for_current_bnss,\
+                                                                 neighboring_usr_nodes, timeKey, total_time_slots)
 
             #Average Rating
             if StatConstants.AVERAGE_RATING in measuresToBeExtracted:

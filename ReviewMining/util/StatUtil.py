@@ -94,6 +94,27 @@ def calculateNoOfReviews(statistics_for_bnss, neighboring_usr_nodes, timeKey, to
     statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] = noOfReviews
     return noOfReviews
 
+def calculateNoOfPositiveAndNegativeReviews(G, statistics_for_bnss, neighboring_usr_nodes, timeKey, total_time_slots):
+    if StatConstants.NO_OF_POSITIVE_REVIEWS not in statistics_for_bnss:
+        statistics_for_bnss[StatConstants.NO_OF_POSITIVE_REVIEWS] = numpy.zeros(total_time_slots, dtype=int)
+
+    if StatConstants.NO_OF_NEGATIVE_REVIEWS not in statistics_for_bnss:
+        statistics_for_bnss[StatConstants.NO_OF_NEGATIVE_REVIEWS] = numpy.zeros(total_time_slots, dtype=int)
+
+    noOfPReviews = 0
+    noOfNReviews = 0
+    for usr_neighbor in neighboring_usr_nodes:
+        (usrId, usr_type) = usr_neighbor
+        current_temporal_review = G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
+        reviewSentiment = current_temporal_review.getReviewSentiment()
+
+        if reviewSentiment == SIAUtil.REVIEW_TYPE_POSITIVE:
+            noOfPReviews += 1
+        else:
+            noOfNReviews += 1
+    statistics_for_bnss[StatConstants.NO_OF_POSITIVE_REVIEWS][timeKey] = noOfPReviews
+    statistics_for_bnss[StatConstants.NO_OF_NEGATIVE_REVIEWS][timeKey] = noOfNReviews
+
 
 def calculateRatioOfSingletons(statistics_for_bnss, neighboring_usr_nodes, reviews_for_bnss, superGraph, timeKey,
                                total_time_slots):
