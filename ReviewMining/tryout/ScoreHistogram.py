@@ -6,8 +6,6 @@ import os
 from util import StatConstants
 
 
-THRES = {StatConstants.ENTROPY_SCORE: 1090.0}
-
 BINS = {StatConstants.RATING_ENTROPY: numpy.arange(0.0, 15.0, 0.25),\
         StatConstants.RATIO_OF_SINGLETONS: numpy.arange(0.0, 1.0, 0.2),\
         StatConstants.RATIO_OF_FIRST_TIMERS: numpy.arange(0.0, 1.0, 0.2),\
@@ -24,10 +22,7 @@ def doScoreHistogram(measure_scores):
         max_score = max(scores)
         min_score = min(scores)
 
-        bins = BINS[key]
-
-        if max_score > bins[-1]:
-            bins = numpy.append(bins, [max_score])
+        bins = numpy.arange(min_score, max_score, 1)
 
         ax = fig.add_subplot(1, 1, 1)
 
@@ -45,17 +40,19 @@ def readScores(plotDir):
     for fil in onlyfiles:
         scores = []
         measure = fil.replace('.log', '')
-        if measure == StatConstants.NON_CUM_NO_OF_REVIEWS or measure == StatConstants.NO_OF_REVIEWS:
+        if measure == StatConstants.NON_CUM_NO_OF_REVIEWS or\
+                        measure == StatConstants.NO_OF_REVIEWS or\
+                        measure == StatConstants.AVERAGE_RATING:
             continue
         with open(os.path.join(plotDir, fil)) as f:
             string = f.read()
-            scores = [float(s) for s in string.split() if float(s) < 1090]
+            scores = [float(s) for s in string.split()]
 
-            bins = BINS[measure]
-            max_score = max(scores)
-
-            if max_score > bins[-1]:
-                bins = numpy.append(bins, [max_score])
+            # bins = BINS[measure]
+            # max_score = max(scores)
+            #
+            # if max_score > bins[-1]:
+            #     bins = numpy.append(bins, [max_score])
 
         #     anom_scores = [float(s) for s in string.split() if float(s) > THRES[measure]]
         # #     print measure, len(anom_scores)
@@ -87,23 +84,29 @@ def readScoresFromMeasureLog(measure_log):
                     diff_test_idxs.add(indx)
 
             for measure_key in chPtsOutliers.keys():
-                if measure_key == StatConstants.AVERAGE_RATING or measure_key not in BINS:
+                if measure_key == StatConstants.AVERAGE_RATING\
+                        or measure_key == StatConstants.NO_OF_REVIEWS or\
+                                measure_key == 'BNSS_ID':
                     continue
 
-                chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
+                chPtsOutliersEntry = chPtsOutliers[measure_key]
+
+                chOutlierIdxs, chOutlierScores = chPtsOutliersEntry
 
                 # bins = BINS[measure_key]
                 if measure_key not in measure_scores:
                     measure_scores[measure_key] = []
 
-                if measure_key in THRES:
-                    measure_scores[measure_key].extend([chOutlierScores[idx] for idx in range(len(chOutlierScores))\
-                                                        if chOutlierScores[idx] < THRES[measure_key]\
-                                                        and idx in diff_test_idxs])
-                else:
-
-                    measure_scores[measure_key].extend([chOutlierScores[idx] for idx in range(len(chOutlierScores))\
-                                                        if idx in diff_test_idxs])
+                # if measure_key in THRES:
+                #     measure_scores[measure_key].extend([chOutlierScores[idx] for idx in range(len(chOutlierScores))\
+                #                                         if chOutlierScores[idx] < THRES[measure_key]\
+                #                                         and idx in diff_test_idxs])
+                # else:
+                test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores))\
+                                                        if idx in diff_test_idxs]
+                measure_scores[measure_key].extend(test_measure_scores)
+    for measure_key in measure_scores.keys():
+        print measure_key, max(measure_scores[measure_key]), min(measure_scores[measure_key])
 
     return measure_scores
 
@@ -129,6 +132,7 @@ def main_fn():
     # scores = readScoresFromMeasureLog('/media/santhosh/Data/workspace/datalab/data/stats/s5/measure_scores.log')
     measure_scores1 = readScoresFromMeasureLog(
         '/media/santhosh/Data/workspace/datalab/data/stats/measure_scores.log')
+    # print max(measure_scores1[StatConstants.ENTROPY_SCORE])
     # measure_scores2 = readScoresFromMeasureLog(
     #     '/media/santhosh/Data/workspace/datalab/data/stats/Global AR/measure_scores.log')
     # for measure_key in measure_scores1.keys():
@@ -137,7 +141,7 @@ def main_fn():
     #     print measure_key
     #     print min(scores1), min(scores2)
     #     print max(scores1), max(scores2)
-    doScoreHistogram(measure_scores1)
+    # doScoreHistogram(measure_scores1)
     # measure_scores2 = readScoresFromMeasureLog(
     #     '/media/santhosh/Data/workspace/datalab/data/stats/Local AR/measure_scores.log')
     # THRES_RANGE = StatConstants.RATING_ENTROPY: numpy.arange(0.25, 5),\
