@@ -235,8 +235,8 @@ def makeARPredictions(data, params, idx, measure_key = None):
 
     if measure_key in LIMITS:
         start_limit, end_limit = LIMITS[measure_key]
-        if end_limit and val > end_limit:
-            val = end_limit
+        # if end_limit and val > end_limit:
+        #     val = end_limit
         if val < start_limit:
             val = start_limit
 

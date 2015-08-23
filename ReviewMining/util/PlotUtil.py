@@ -196,7 +196,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
             ax2.plot(range(firstTimeKey,firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores, 'r', label='Outlier Scores')
 
         for idx in chOutlierIdxs:
-            ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='r')
+            ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
         plot += 1
 
