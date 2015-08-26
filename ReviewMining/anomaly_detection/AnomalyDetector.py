@@ -455,8 +455,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
     chPtsOutliers= dict()
     avg_idxs = None
     GRANGER_MEASURES = [measure_key for measure_key in StatConstants.MEASURES_CHANGE_FINDERS
-                        if StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key]
-                        == StatConstants.LOCAL_GRANGER]
+                        if StatConstants.LOCAL_GRANGER in StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key]
+                        ]
     isGrangerNeeded = False
 
     for measure_key in StatConstants.MEASURES:
@@ -466,43 +466,45 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                 continue
             data = statistics_for_bnss[measure_key][firstKey:lastKey+1]
 
-            algo, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
+            algoList, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
 
-            if algo == StatConstants.AR_UNIFYING:
-                r, order, smooth = params
-                import ChangeFinderSinglePass as ch
-                cf = ch.ChangeFinderSinglepass(r, order, smooth)
-                change_scores = []
-                for d in data:
-                    score = cf.update(d)
-                    change_scores.append(score)
-                chOutlierScores = change_scores
+            for algo in algoList:
+                if algo == StatConstants.AR_UNIFYING:
+                    r, order, smooth = params
+                    import ChangeFinderSinglePass as ch
+                    cf = ch.ChangeFinderSinglepass(r, order, smooth)
+                    change_scores = []
+                    for d in data:
+                        score = cf.update(d)
+                        change_scores.append(score)
+                    chOutlierScores = change_scores
 
-                if find_outlier_idxs:
-                    chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(chOutlierIdxs,
-                                                                                  chOutlierScores, measure_key,
-                                                                                  statistics_for_bnss[measure_key][firstKey:],
-                                                                                  avg_idxs, algo)
-            elif algo == StatConstants.CUSUM:
-                chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
-                if measure_key == StatConstants.AVERAGE_RATING:
-                    ta, tai, taf, amp = chOutlierIdxs
-                    chOutlierIdxs = [idx for idx in ta]
-                    chOutlierScores = []
-                    avg_idxs = set(ta)
+                    if find_outlier_idxs:
+                        chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(chOutlierIdxs,
+                                                                                      chOutlierScores, measure_key,
+                                                                                      statistics_for_bnss[measure_key][firstKey:],
+                                                                                      avg_idxs, algo)
+                elif algo == StatConstants.CUSUM:
+                    chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
+                    if measure_key == StatConstants.AVERAGE_RATING:
+                        ta, tai, taf, amp = chOutlierIdxs
+                        chOutlierIdxs = [idx for idx in ta]
+                        chOutlierScores = []
+                        avg_idxs = set(ta)
 
-            elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                chOutlierIdxs = twitterAnomalyDetection(\
-                    GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
-                    ,data)
-            elif algo == StatConstants.LOCAL_AR:
-                chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key, find_outlier_idxs)
+                elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
+                    chOutlierIdxs = twitterAnomalyDetection(\
+                        GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
+                        ,data)
+                elif algo == StatConstants.LOCAL_AR:
+                    chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key, find_outlier_idxs)
 
-            elif algo == StatConstants.LOCAL_GRANGER:
-                isGrangerNeeded = True
-                continue
-
-            chPtsOutliers[measure_key] = (chOutlierIdxs, chOutlierScores)
+                elif algo == StatConstants.LOCAL_GRANGER:
+                    isGrangerNeeded = True
+                    continue
+                if algo not in chPtsOutliers:
+                    chPtsOutliers[measure_key] = dict()
+                chPtsOutliers[measure_key][algo]= (chOutlierIdxs, chOutlierScores)
 
     if isGrangerNeeded:
         test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,

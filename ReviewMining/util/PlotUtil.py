@@ -187,7 +187,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 data, 'g', label=measure_key)
 
         if chPtsOutliersForBnss:
-            chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key]
+            for algo in chPtsOutliersForBnss[measure_key]:
+                chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
         else:
             chOutlierIdxs, chPtsOutlierScores = [], []
 
