@@ -1,3 +1,4 @@
+__author__ = 'santhosh'
 '''
 Created on Feb 19, 2015
 
@@ -6,12 +7,17 @@ Created on Feb 19, 2015
 
 from datetime import datetime
 from util import StatConstants
+import anomaly_detection
+import changefinder
 import cusum
+import numpy
 from util import GraphUtil
 import scipy
 import math
 from statsmodels.tsa.ar_model import AR
 import copy
+from oct2py import octave
+from oct2py import Oct2Py
 import numpy
 import os
 
@@ -72,106 +78,106 @@ def calculateLogLoss(te_id_start, te_id_end, data, predicted_vals):
     return log_loss_vals
 
 
-# def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end,
-#                                      lag_start = 2, lag_end = 2,
-#                                      lambda_start=10, lambda_end = 10):
-#     no_of_series, series_length = data.shape
-#     optim_lag, optim_lambda = lag_start, lambda_end
-#     min_log_loss = float('inf')
-#
-#     for lambda_param in range(lambda_start, lambda_end):
-#         for lag in range(lag_start, lag_end):
-#             total_log_loss = 0
-#             train_size = tr_id_end-tr_id_start+1
-#             limit = train_size/10
-#             if limit < 3:
-#                 limit = 8
-#             start = tr_id_start
-#             while start <= tr_id_end-limit:
-#                 c_tr_start = start
-#                 c_tr_end = start+int(math.fabs(0.60*limit))
-#                 c_te_start = c_tr_end+1
-#                 c_te_end = start+limit
-#                 print start, c_tr_start, c_tr_end, c_te_start,\
-#                     c_te_end, int(math.fabs(0.60*limit)), c_tr_start+1, c_tr_end+1
-#                 print lag, lambda_param
-#                 coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start+1, c_tr_end+1, lag, lambda_param)
-#                 for idx in range(c_te_start, c_te_end):
-#                     pred = makePredictionsUsingGranger(coeffMatrix, data, lag, idx)
-#                     for s in range(no_of_series):
-#                         error = squaredResidualError(data[s][idx], pred[s])
-#                         total_log_loss += error
-#
-#             # plotSeries(real_vals, predicted_vals)
-#             #     log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
-#             #     log_loss = numpy.sum(numpy.sum(log_loss))
-#             #     total_log_loss += log_loss
-#                 start = c_te_end
-#             # print lag, lambda_param, total_log_loss
-#             if total_log_loss < min_log_loss:
-#                 min_log_loss = total_log_loss
-#                 optim_lag, optim_lambda = lag, lambda_param
-#
-#     return optim_lag, optim_lambda
-#
-#
-# def makePredictionsUsingGranger(coeffPyMatrix, data, lag, idx):
-#     no_of_series, series_length = data.shape
-#     predicted_vals = numpy.zeros(no_of_series)
-#     for s in range(no_of_series):
-#         curr_matrix = coeffPyMatrix[s]
-#         lagged_vals = numpy.array(
-#             [[data[j][idx - i - 1] * curr_matrix[j][lag - i - 1] for i in range(lag - 1, -1, -1)] for j in
-#              range(no_of_series)])
-#         predicted_vals[s] = numpy.sum(numpy.sum(lagged_vals))
-#     return predicted_vals
+def doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end,
+                                     lag_start = 2, lag_end = 2,
+                                     lambda_start=10, lambda_end = 10):
+    no_of_series, series_length = data.shape
+    optim_lag, optim_lambda = lag_start, lambda_end
+    min_log_loss = float('inf')
+
+    for lambda_param in range(lambda_start, lambda_end):
+        for lag in range(lag_start, lag_end):
+            total_log_loss = 0
+            train_size = tr_id_end-tr_id_start+1
+            limit = train_size/10
+            if limit < 3:
+                limit = 8
+            start = tr_id_start
+            while start <= tr_id_end-limit:
+                c_tr_start = start
+                c_tr_end = start+int(math.fabs(0.60*limit))
+                c_te_start = c_tr_end+1
+                c_te_end = start+limit
+                print start, c_tr_start, c_tr_end, c_te_start,\
+                    c_te_end, int(math.fabs(0.60*limit)), c_tr_start+1, c_tr_end+1
+                print lag, lambda_param
+                coeffMatrix = callOctaveAndFindGrangerCasuality(data, c_tr_start+1, c_tr_end+1, lag, lambda_param)
+                for idx in range(c_te_start, c_te_end):
+                    pred = makePredictionsUsingGranger(coeffMatrix, data, lag, idx)
+                    for s in range(no_of_series):
+                        error = squaredResidualError(data[s][idx], pred[s])
+                        total_log_loss += error
+
+            # plotSeries(real_vals, predicted_vals)
+            #     log_loss = calculateLogLoss(c_te_start, c_te_end, data, predicted_vals)
+            #     log_loss = numpy.sum(numpy.sum(log_loss))
+            #     total_log_loss += log_loss
+                start = c_te_end
+            # print lag, lambda_param, total_log_loss
+            if total_log_loss < min_log_loss:
+                min_log_loss = total_log_loss
+                optim_lag, optim_lambda = lag, lambda_param
+
+    return optim_lag, optim_lambda
 
 
-# def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, lag=2, lambda_param=10):
-#     octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/')
-#     octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/lasso/')
-#     octave.addpath(os.getcwd())
-#     # oc = Oct2Py()
-#     no_of_series, series_length = data.shape
-#     octave.eval('pkg load communications')
-#     coeffsMatrix = octave.ts_ls_gran(data, tr_id_start, tr_id_end, lag, lambda_param)
-#     coeffPyMatrix = numpy.zeros(shape=(no_of_series, no_of_series, lag))
-#
-#     for idx in range(no_of_series):
-#         coeffPyMatrix[idx] = numpy.reshape(coeffsMatrix[idx], newshape=(no_of_series, lag))
-#
-#     return coeffPyMatrix
-#
-# def runLocalGranger(statistics_for_bnss, GRANGER_MEASURES, avg_idxs, find_outlier_idxs=True):
-#     GRANGER_MEASURES = [measure_key for measure_key in GRANGER_MEASURES if measure_key in statistics_for_bnss]
-#     no_of_series = len(GRANGER_MEASURES)
-#     series_length = len(statistics_for_bnss[GRANGER_MEASURES[0]])
-#
-#     data = numpy.zeros(shape=(no_of_series, series_length), dtype=numpy.float)
-#     for s in range(no_of_series):
-#         measure_key = GRANGER_MEASURES[s]
-#         data[s] = statistics_for_bnss[measure_key]
-#
-#     diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, series_length)
-#     no_of_windows = len(diff_test_windows)
-#     test_error_scores, test_outlier_idxs = {key:[] for key in GRANGER_MEASURES}, {key:[] for key in GRANGER_MEASURES}
-#     for wid in range(no_of_windows):
-#         tr_id_start, tr_id_end = diff_train_windows[wid]
-#         te_id_start, te_id_end = diff_test_windows[wid]
-#
-#         optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 4, 5, 10)
-#
-#         # optim_lag, optim_lambda = 1, 3
-#         coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, optim_lag, optim_lambda)
-#
-#         for idx in range(te_id_start, te_id_end+1):
-#             predicted_val = makePredictionsUsingGranger(coeffMatrix, data, optim_lag, idx)
-#             for s in range(no_of_series):
-#                 error = squaredResidualError(data[s][idx], predicted_val[s])
-#                 test_error_scores[GRANGER_MEASURES[s]].append(error)
-#                 if find_outlier_idxs and error > StatConstants.MEASURE_CHANGE_LOCAL_GRANGER_THRES[GRANGER_MEASURES[s]]:
-#                     test_outlier_idxs[GRANGER_MEASURES[s]].append(idx)
-#     return test_error_scores, test_outlier_idxs
+def makePredictionsUsingGranger(coeffPyMatrix, data, lag, idx):
+    no_of_series, series_length = data.shape
+    predicted_vals = numpy.zeros(no_of_series)
+    for s in range(no_of_series):
+        curr_matrix = coeffPyMatrix[s]
+        lagged_vals = numpy.array(
+            [[data[j][idx - i - 1] * curr_matrix[j][lag - i - 1] for i in range(lag - 1, -1, -1)] for j in
+             range(no_of_series)])
+        predicted_vals[s] = numpy.sum(numpy.sum(lagged_vals))
+    return predicted_vals
+
+
+def callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, lag=2, lambda_param=10):
+    octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/')
+    octave.addpath('/media/santhosh/Data/ubuntu/workspaces/datalab/Data-Mining/Granger_source/GrangerAD/lasso/')
+    octave.addpath(os.getcwd())
+    # oc = Oct2Py()
+    no_of_series, series_length = data.shape
+    octave.eval('pkg load communications')
+    coeffsMatrix = octave.ts_ls_gran(data, tr_id_start, tr_id_end, lag, lambda_param)
+    coeffPyMatrix = numpy.zeros(shape=(no_of_series, no_of_series, lag))
+
+    for idx in range(no_of_series):
+        coeffPyMatrix[idx] = numpy.reshape(coeffsMatrix[idx], newshape=(no_of_series, lag))
+
+    return coeffPyMatrix
+
+def runLocalGranger(statistics_for_bnss, GRANGER_MEASURES, avg_idxs, find_outlier_idxs=True):
+    GRANGER_MEASURES = [measure_key for measure_key in GRANGER_MEASURES if measure_key in statistics_for_bnss]
+    no_of_series = len(GRANGER_MEASURES)
+    series_length = len(statistics_for_bnss[GRANGER_MEASURES[0]])
+
+    data = numpy.zeros(shape=(no_of_series, series_length), dtype=numpy.float)
+    for s in range(no_of_series):
+        measure_key = GRANGER_MEASURES[s]
+        data[s] = statistics_for_bnss[measure_key]
+
+    diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, series_length)
+    no_of_windows = len(diff_test_windows)
+    test_error_scores, test_outlier_idxs = {key:[] for key in GRANGER_MEASURES}, {key:[] for key in GRANGER_MEASURES}
+    for wid in range(no_of_windows):
+        tr_id_start, tr_id_end = diff_train_windows[wid]
+        te_id_start, te_id_end = diff_test_windows[wid]
+
+        optim_lag, optim_lambda = doCrossValidationAndGetLagLambda(data, tr_id_start, tr_id_end, 2, 4, 5, 10)
+
+        # optim_lag, optim_lambda = 1, 3
+        coeffMatrix = callOctaveAndFindGrangerCasuality(data, tr_id_start, tr_id_end, optim_lag, optim_lambda)
+
+        for idx in range(te_id_start, te_id_end+1):
+            predicted_val = makePredictionsUsingGranger(coeffMatrix, data, optim_lag, idx)
+            for s in range(no_of_series):
+                error = squaredResidualError(data[s][idx], predicted_val[s])
+                test_error_scores[GRANGER_MEASURES[s]].append(error)
+                if find_outlier_idxs and error > StatConstants.MEASURE_CHANGE_LOCAL_GRANGER_THRES[GRANGER_MEASURES[s]]:
+                    test_outlier_idxs[GRANGER_MEASURES[s]].append(idx)
+    return test_error_scores, test_outlier_idxs
 
 
 
@@ -501,11 +507,11 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                     chPtsOutliers[measure_key] = dict()
                 chPtsOutliers[measure_key][algo]= (chOutlierIdxs, chOutlierScores)
 
-    # if isGrangerNeeded:
-    #     test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,
-    #                                                              avg_idxs, find_outlier_idxs)
-    #     for measure_key in test_outlier_scores.keys():
-    #         chPtsOutliers[measure_key] = (test_outlier_idxs[measure_key], test_outlier_scores[measure_key])
+    if isGrangerNeeded:
+        test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,
+                                                                 avg_idxs, find_outlier_idxs)
+        for measure_key in test_outlier_scores.keys():
+            chPtsOutliers[measure_key] = (test_outlier_idxs[measure_key], test_outlier_scores[measure_key])
 
     afterDetection = datetime.now()
     print 'Time Taken For Anamoly Detection for Bnss Key', statistics_for_bnss[StatConstants.BNSS_ID],\
