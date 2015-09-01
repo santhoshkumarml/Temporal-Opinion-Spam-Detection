@@ -130,24 +130,10 @@ def plotAny(a):
 
 
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, timeLength = '1-M'):
-
     plot = 1
-
     fig = plt.figure(figsize=(20,20))
 
-    avg_idxs = None
-
     step = 10
-
-        # if total_time_slots > 50:
-        #     step = total_time_slots/50
-        #
-        # step = 3
-
-    years   = mdates.YearLocator()   # every year
-    months  = mdates.MonthLocator()  # every month
-    days = mdates.DayLocator()
-    daysFmt = mdates.DateFormatter('%b-%Y')
 
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
@@ -159,45 +145,64 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
             continue
-        # firstDimensionValues = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots), timeLength)
-        # xticks = GraphUtil.getDates(firstDateTime, range(firstTimeKey, total_time_slots, step), timeLength)
-
-        ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
-
-        plt.title('Business statistics')
-        plt.xlabel('Date')
-
-        plt.xlim(firstTimeKey, lastTimeKey)
-        plt.xticks(xticks)
-
-        plt.ylabel(measure_key)
-
-        #ax1.xaxis.set_major_formatter(daysFmt)
-
-        if measure_key == StatConstants.AVERAGE_RATING:
-            plt.ylim((1,5))
-            plt.yticks(range(1,6))
-
         data = statistics_for_bnss[measure_key][firstTimeKey:lastTimeKey+1]
-        # if measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
-        #     import math
-        #     data = numpy.array([math.log(d) for d in data])
-
-        ax1.plot(firstDimensionValues,\
-                data, 'g', label=measure_key)
 
         if chPtsOutliersForBnss:
+            algo_idx = 1
             for algo in chPtsOutliersForBnss[measure_key]:
+                ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
+                plt.title('Business statistics')
+                plt.xlabel('Date')
+
+                plt.xlim(firstTimeKey, lastTimeKey)
+                plt.xticks(xticks)
+
+                plt.ylabel(algo + " - " + measure_key)
+
+                if measure_key == StatConstants.AVERAGE_RATING:
+                    plt.ylim((1,5))
+                    plt.yticks(range(1,6))
+
+
+                ax1.plot(firstDimensionValues,\
+                    data, 'g', label=measure_key)
+
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
+
+                if len(chPtsOutlierScores) > 0:
+                    ax2 = ax1.twinx()
+                    ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
+                         'r', label='Outlier Scores')
+
+                for idx in chOutlierIdxs:
+                    ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
         else:
+            ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
+            plt.title('Business statistics')
+            plt.xlabel('Date')
+
+            plt.xlim(firstTimeKey, lastTimeKey)
+            plt.xticks(xticks)
+
+            plt.ylabel(algo + " - " + measure_key)
+
+            if measure_key == StatConstants.AVERAGE_RATING:
+                plt.ylim((1,5))
+                plt.yticks(range(1,6))
+
+
+            ax1.plot(firstDimensionValues,\
+                data, 'g', label=measure_key)
+
             chOutlierIdxs, chPtsOutlierScores = [], []
+            if len(chPtsOutlierScores) > 0:
+                ax2 = ax1.twinx()
+                ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
+                     'r', label='Outlier Scores')
 
-        if len(chPtsOutlierScores) > 0:
-            ax2 = ax1.twinx()
-            ax2.plot(range(firstTimeKey,firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores, 'r', label='Outlier Scores')
+            for idx in chOutlierIdxs:
+                ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
-        for idx in chOutlierIdxs:
-            ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
         plot += 1
 
