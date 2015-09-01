@@ -187,28 +187,29 @@ def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
         if measure_key not in statistics_for_bnss or measure_key not in chPtsOutliers:
             continue
         statistics = statistics_for_bnss[measure_key][firstTimeKey:]
-        chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key]
-        if measure_key == StatConstants.AVERAGE_RATING:
-                windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
-                scores = {key:0.0 for key in windows}
-                changed_dimensions = {key: set() for key in windows}
-        elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
-                numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
-                                                    for idx1, idx2 in windows}
-        else:
-            if measure_key != StatConstants.NO_OF_REVIEWS:
-                dimensions += 1
-                if len(chOutlierIdxs) > 0:
-                    globalMaxima = numpy.amax(statistics)
-                    globalMinima = numpy.amin(statistics)
-                    for window in windows:
-                        idx1, idx2 = window
-                        if numpy.any(numpy.array([True for idx in chOutlierIdxs if idx in range(idx1,idx2)])):
-                            localMaxima = numpy.amax(statistics[idx1:idx2])
-                            localMinima = numpy.amin(statistics[idx1:idx2])
-                            score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
-                            scores[window] += score_for_window
-                            changed_dimensions[window].add(measure_key)
+        for algo in chPtsOutliers[measure_key]:
+            chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key][algo]
+            if measure_key == StatConstants.AVERAGE_RATING:
+                    windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
+                    scores = {key:0.0 for key in windows}
+                    changed_dimensions = {key: set() for key in windows}
+            elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+                    numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
+                                                        for idx1, idx2 in windows}
+            else:
+                if measure_key != StatConstants.NO_OF_REVIEWS:
+                    dimensions += 1
+                    if len(chOutlierIdxs) > 0:
+                        globalMaxima = numpy.amax(statistics)
+                        globalMinima = numpy.amin(statistics)
+                        for window in windows:
+                            idx1, idx2 = window
+                            if numpy.any(numpy.array([True for idx in chOutlierIdxs if idx in range(idx1,idx2)])):
+                                localMaxima = numpy.amax(statistics[idx1:idx2])
+                                localMinima = numpy.amin(statistics[idx1:idx2])
+                                score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
+                                scores[window] += score_for_window
+                                changed_dimensions[window].add(measure_key)
     for window in windows:
         scores[window] /= dimensions
         if numberOfReviewsInEachTimeStamp[window] == 0:
