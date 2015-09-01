@@ -1,9 +1,6 @@
 __author__ = 'santhosh'
 
 import numpy
-import matplotlib
-matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 from anomaly_detection import AnomalyDetector
 from util import StatConstants

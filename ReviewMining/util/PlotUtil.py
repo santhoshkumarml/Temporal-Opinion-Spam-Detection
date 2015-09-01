@@ -4,9 +4,6 @@ Created on Jan 10, 2015
 @author: Santhosh
 '''
 
-import matplotlib
-matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 from os.path import join
 from util import StatConstants
