@@ -4,6 +4,7 @@ Created on Jan 10, 2015
 @author: Santhosh
 '''
 
+import matplotlib
 import matplotlib.pyplot as plt
 from os.path import join
 from util import StatConstants
@@ -37,6 +38,8 @@ import matplotlib.dates as mdates
 #                  additional_artists=art,\
 #                  bbox_inches="tight")
 #     plt.close()
+
+matplotlib.use('Agg')
 
 def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
