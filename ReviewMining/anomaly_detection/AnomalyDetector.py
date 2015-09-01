@@ -498,8 +498,10 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                 elif algo == StatConstants.LOCAL_GRANGER:
                     isGrangerNeeded = True
                     continue
-                if algo not in chPtsOutliers:
+
+                if measure_key not in chPtsOutliers:
                     chPtsOutliers[measure_key] = dict()
+
                 chPtsOutliers[measure_key][algo]= (chOutlierIdxs, chOutlierScores)
 
     # if isGrangerNeeded:
