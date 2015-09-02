@@ -131,8 +131,8 @@ def plotAny(a):
 
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, timeLength = '1-M'):
     plot = 1
-    fig = plt.figure(figsize=(20,20))
-
+    fig = plt.figure(figsize=(60, 60))
+    # fig = plt.figure()
     step = 10
 
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
@@ -148,9 +148,13 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         data = statistics_for_bnss[measure_key][firstTimeKey:lastTimeKey+1]
 
         if chPtsOutliersForBnss:
-            algo_idx = 1
-            for algo in chPtsOutliersForBnss[measure_key]:
-                ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
+            algoList = chPtsOutliersForBnss[measure_key].keys()
+
+            if len(algoList) == 1:
+                algoList = [algo for algo in algoList] + [algo for algo in algoList]
+
+            for algo in algoList:
+                ax1 = fig.add_subplot(len(toBeUsedMeasures), 2, plot)
                 plt.title('Business statistics')
                 plt.xlabel('Date')
 
@@ -176,7 +180,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                 for idx in chOutlierIdxs:
                     ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
-                algo_idx += 1
+
+                plot += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
             plt.title('Business statistics')
@@ -205,11 +210,11 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
 
-        plot += 1
+        # plot += 1
 
     art = []
-    lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
-    art.append(lgd)
+    # lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
+    # art.append(lgd)
     #fig.autofmt_xdate()
     plt.tight_layout()
 

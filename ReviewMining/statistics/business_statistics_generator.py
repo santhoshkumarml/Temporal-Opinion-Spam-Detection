@@ -154,7 +154,7 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
     beforeAnomalyDetection = datetime.now()
 
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
-                                                           find_outlier_idxs=False)
+                                                           find_outlier_idxs=True)
 
     measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
