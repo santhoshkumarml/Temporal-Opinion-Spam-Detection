@@ -243,7 +243,6 @@ def doLocalARCrossValidation(data, tr_idx_start, tr_idx_end):
     ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
     error_dict = dict()
     for order in range(1, min([5, length_of_training_data])):
-        print data[tr_idx_start:tr_idx_end+1]
         ar_res = ar_mod.fit(maxlag=order)
         params = ar_res.params
         error = 0
