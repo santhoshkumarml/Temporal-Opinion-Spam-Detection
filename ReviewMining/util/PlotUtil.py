@@ -176,6 +176,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                 for idx in chOutlierIdxs:
                     ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
+                algo_idx += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
             plt.title('Business statistics')
