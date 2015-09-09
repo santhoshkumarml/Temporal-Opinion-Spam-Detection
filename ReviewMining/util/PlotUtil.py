@@ -131,7 +131,7 @@ def plotAny(a):
 
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, timeLength = '1-M'):
     plot = 1
-    fig = plt.figure(figsize=(60, 60))
+    fig = plt.figure(figsize=(20, 20))
     # fig = plt.figure()
     step = 10
 
@@ -141,6 +141,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
     total_time_slots = lastTimeKey-firstTimeKey+1
     xticks = range(firstTimeKey, lastTimeKey+1, step)
+
+    toBeUsedMeasures = [measure for measure in toBeUsedMeasures if measure != StatConstants.NON_CUM_NO_OF_REVIEWS]
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -155,13 +157,13 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
             for algo in algoList:
                 ax1 = fig.add_subplot(len(toBeUsedMeasures), 2, plot)
-                plt.title('Business statistics')
+                plt.title(algo)
                 plt.xlabel('Date')
 
                 plt.xlim(firstTimeKey, lastTimeKey)
                 plt.xticks(xticks)
 
-                plt.ylabel(algo + " - " + measure_key)
+                plt.ylabel(measure_key)
 
                 if measure_key == StatConstants.AVERAGE_RATING:
                     plt.ylim((1,5))
@@ -183,14 +185,14 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                 plot += 1
         else:
-            ax1 = fig.add_subplot(len(toBeUsedMeasures), algo_idx, plot)
-            plt.title('Business statistics')
+            ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
+            plt.title(algo)
             plt.xlabel('Date')
 
             plt.xlim(firstTimeKey, lastTimeKey)
             plt.xticks(xticks)
 
-            plt.ylabel(algo + " - " + measure_key)
+            plt.ylabel(measure_key)
 
             if measure_key == StatConstants.AVERAGE_RATING:
                 plt.ylim((1,5))

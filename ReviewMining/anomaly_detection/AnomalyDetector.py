@@ -372,10 +372,8 @@ def twitterAnomalyDetection(dates, values):
     return idxs
 
 
-
-
 def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
-                                 statistics_for_measure, avg_idxs, algo):
+                                 statistics_for_measure, lead_signal_idxs, algo):
     if algo == StatConstants.AR_UNIFYING:
         result = scipy.signal.argrelextrema(numpy.array(choutlierScores), numpy.greater)
         idxs = result[0]
@@ -390,10 +388,13 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
     if StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.INCREASE:
         for idx in idxs:
             idxRangePresent = False
-            for range_idx in range(idx-2, idx+3):
-                if range_idx in avg_idxs:
-                    idxRangePresent = True
-                    break
+            if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+                idxRangePresent = True
+            else:
+                for range_idx in range(idx-2, idx+3):
+                    if range_idx in lead_signal_idxs:
+                        idxRangePresent = True
+                        break
             if idxRangePresent:
                 idx1,idx2 = getRangeIdxs(idx)
                 new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx1:idx2]), numpy.greater)
@@ -408,10 +409,13 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
     elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
         for idx in idxs:
             idxRangePresent = False
-            for range_idx in range(idx-2,idx+3):
-                if range_idx in avg_idxs:
-                    idxRangePresent = True
-                    break
+            if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+                idxRangePresent = True
+            else:
+                for range_idx in range(idx-2,idx+3):
+                    if range_idx in lead_signal_idxs:
+                        idxRangePresent = True
+                        break
             if idxRangePresent:
                 idx1,idx2 = getRangeIdxs(idx)
                 new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx1:idx2]), numpy.less)
@@ -427,10 +431,13 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
     else:
         for idx in idxs:
             idxRangePresent = False
-            for range_idx in range(idx-2, idx+3):
-                if range_idx in avg_idxs:
-                    idxRangePresent = True
-                    break
+            if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+                idxRangePresent = True
+            else:
+                for range_idx in range(idx-2, idx+3):
+                    if range_idx in lead_signal_idxs:
+                        idxRangePresent = True
+                        break
             if idxRangePresent:
                 new_idxs.add(idx)
 
@@ -449,7 +456,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
     firstDateTime = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
     chPtsOutliers= dict()
-    avg_idxs = None
+    lead_signal_idxs = set()
     GRANGER_MEASURES = [measure_key for measure_key in StatConstants.MEASURES_CHANGE_FINDERS
                         if StatConstants.LOCAL_GRANGER in StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key]
                         ]
@@ -470,30 +477,40 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                     import ChangeFinderSinglePass as ch
                     cf = ch.ChangeFinderSinglepass(r, order, smooth)
                     change_scores = []
-                    for d in data:
+                    for didx in range(len(data)):
+                        d = data[didx]
                         score = cf.update(d)
+                        if find_outlier_idxs and didx > 0:
+                            direction = d - data[didx-1]
+                            needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
+                            thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
+                            if measure_key == StatConstants.NO_OF_POSITIVE_REVIEWS:
+                                print score, didx, thres, direction
+                            if thres and score >= thres:
+                                if needed_direction == StatConstants.BOTH or direction == needed_direction:
+                                    chOutlierIdxs.append(didx)
                         change_scores.append(score)
                     chOutlierScores = change_scores
 
-                    if find_outlier_idxs:
-                        chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(chOutlierIdxs,
-                                                                                      chOutlierScores, measure_key,
-                                                                                      statistics_for_bnss[measure_key][firstKey:],
-                                                                                      avg_idxs, algo)
+                    # if find_outlier_idxs:
+                    #     chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(chOutlierIdxs,
+                    #                                                                   chOutlierScores, measure_key,
+                    #                                                                   statistics_for_bnss[measure_key][firstKey:],
+                    #                                                                   lead_signal_idxs, algo)
                 elif algo == StatConstants.CUSUM:
                     chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
                     if measure_key == StatConstants.AVERAGE_RATING:
                         ta, tai, taf, amp = chOutlierIdxs
                         chOutlierIdxs = [idx for idx in ta]
                         chOutlierScores = []
-                        avg_idxs = set(ta)
+                        # lead_signal_idxs = set(ta)
 
                 elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
                     chOutlierIdxs = twitterAnomalyDetection(\
                         GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
                         ,data)
                 elif algo == StatConstants.LOCAL_AR:
-                    chOutlierIdxs, chOutlierScores = localAR(data, avg_idxs, measure_key, find_outlier_idxs)
+                    chOutlierIdxs, chOutlierScores = localAR(data, lead_signal_idxs, measure_key, find_outlier_idxs)
 
                 elif algo == StatConstants.LOCAL_GRANGER:
                     isGrangerNeeded = True
@@ -501,6 +518,9 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
 
                 if measure_key not in chPtsOutliers:
                     chPtsOutliers[measure_key] = dict()
+
+                if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+                    lead_signal_idxs = lead_signal_idxs.union(set(chOutlierIdxs))
 
                 chPtsOutliers[measure_key][algo]= (chOutlierIdxs, chOutlierScores)
 

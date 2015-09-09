@@ -167,7 +167,7 @@ class ChangeFinderSinglepass(object):
         score = 0
         if len(self._ts) == self._order:
             score = self._sdar_first.update(x,self._ts)
-            self._add_one(score,self._first_scores, self._smooth)
+            self._add_one(score, self._first_scores, self._smooth)
         self._add_one(x,self._ts, self._order)
         second_target = None
         if len(self._first_scores) == self._smooth:#平滑化

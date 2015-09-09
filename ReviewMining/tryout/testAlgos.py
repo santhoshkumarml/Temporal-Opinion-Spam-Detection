@@ -265,15 +265,18 @@ def tryBusinessMeasureExtractor(csvFolder):
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:20]
-    # bnssKeys = ['476534368']
+    bnssKeys = bnssKeys[3:35]
+    bnssKeys = ['371405542']
     #0.75,0.6,0.4
 
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
-                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF\
-                             and measure != StatConstants.NO_OF_POSITIVE_REVIEWS and measure != StatConstants.NO_OF_NEGATIVE_REVIEWS]
+                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     # measuresToBeExtracted = [StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS, StatConstants.TF_IDF]
+    lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
+
+    measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
+
 
     business_ranking_and_changed_dims = dict()
 
