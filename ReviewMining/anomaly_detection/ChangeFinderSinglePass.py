@@ -133,8 +133,8 @@ class _SDAR_1Dim(object):
         what,e = LevinsonDurbin(self._c,self._order)
         xhat = np.dot(-what[1:],(term[::-1]  - self._mu))+self._mu
         self._sigma = (1-self._r)*self._sigma + self._r * (x-xhat) * (x-xhat)
-        return -math.log(math.exp(-0.5 *(x-xhat)**2/self._sigma)/((2 * math.pi)**0.5 * self._sigma**0.5))
-        # return (x-xhat)**2t
+        # return -math.log(math.exp(-0.5 *(x-xhat)**2/self._sigma)/((2 * math.pi)**0.5 * self._sigma**0.5))
+        return (x-xhat)**2
 
 class ChangeFinderSinglepass(object):
     def __init__(self, r = 0.5, order = 1, smooth=7):

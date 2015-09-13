@@ -744,11 +744,12 @@ def testCusum():
 
     x = numpy.atleast_1d(data).astype('float64')
     changes = cusum_using_call_to_r_py(x)
-    plotCusumChanges(changes, x)
+    print changes
+    # plotCusumChanges(changes, x)
 
     #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
     #print ta
-    plotCusumChanges(ta, x)
+    # plotCusumChanges(ta, x)
 
 def tryAr():
     fig = plt.figure()
@@ -976,9 +977,18 @@ def checkCusum2():
     print detection_times
     plotCusumChanges(x, changes, detection_times)
 
+def testSpc():
+     import spc
+     s = spc.Spc([1, 2, 3, 3, 2, 1, 3, 8], spc.CHART_X_MR_MR)
+     s.get_stats()
+     print s.get_violating_points()
 
-
-#testCusum()
+def testCusum1():
+    data = []
+    x = numpy.atleast_1d(data).astype('float64')
+    changes = cusum_using_call_to_r_py(x)
+    print changes
+# testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()

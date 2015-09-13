@@ -10,7 +10,7 @@ from anomaly_detection import AnomalyDetector
 from util import PlotUtil
 
 def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
-                     measuresToBeExtracted = StatConstants.MEASURES, logStats = False, doPlot=True):
+                     measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
 
     print '--------------------------------------------------------------------------------------------------------------------'
     print 'Stats Generation for bnss:', bnssKey
@@ -155,26 +155,13 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
 
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
                                                            find_outlier_idxs=True)
-
-    measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
-    chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
-    measure_log_file.write(str(chPtsOutliers)+" ")
-    measure_log_file.close()
-    del chPtsOutliers[StatConstants.BNSS_ID]
-
     afterAnomalyDetection = datetime.now()
 
     if logStats:
         bnssStatFile.close()
     print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
 
-    if doPlot:
-        beforePlotTime = datetime.now()
-        PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
-        afterPlotTime = datetime.now()
-        print 'Plot Generation Time for bnss:', bnssKey, 'in', afterPlotTime-beforePlotTime
-
-    ranking_score, changed_dims = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
+    # ranking_score, changed_dims = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
     print '------------------------------------------------------------------------------------------------------------------------------'
 
-    return statistics_for_current_bnss, ranking_score, changed_dims
+    return statistics_for_current_bnss, chPtsOutliers

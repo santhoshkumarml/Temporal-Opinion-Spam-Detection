@@ -15,6 +15,7 @@ from itunes_utils.ItunesDataReader import ItunesDataReader
 import os
 from os.path import join
 from util import SIAUtil
+from util import PlotUtil
 from datetime import datetime, timedelta
 import sys
 
@@ -242,8 +243,21 @@ def runChangeFinder(data, algo):
 #
 # plotDataAndChanges(data, scores=scores)
 
+def logStats(bnssKey, plotDir, chPtsOutliers):
+    measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
+    chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
+    measure_log_file.write(str(chPtsOutliers)+" ")
+    measure_log_file.close()
+    del chPtsOutliers[StatConstants.BNSS_ID]
 
-def tryBusinessMeasureExtractor(csvFolder):
+
+def plotBnss(bnssKey, statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
+    beforePlotTime = datetime.now()
+    PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
+    afterPlotTime = datetime.now()
+    print 'Plot Generation Time for bnss:', bnssKey, 'in', afterPlotTime-beforePlotTime
+
+def tryBusinessMeasureExtractor(csvFolder, doPlot):
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
 
@@ -265,8 +279,8 @@ def tryBusinessMeasureExtractor(csvFolder):
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[3:35]
-    bnssKeys = ['371405542']
+    # bnssKeys = bnssKeys[3:35]
+    bnssKeys = ['363590051']
     #0.75,0.6,0.4
 
     # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
@@ -281,18 +295,21 @@ def tryBusinessMeasureExtractor(csvFolder):
     business_ranking_and_changed_dims = dict()
 
     for bnss_key in bnssKeys:
-        statistics_for_bnss, ranking_scores, changed_dims = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(superGraph,\
-                                                                                      cross_time_graphs,\
-                                                                                       plotDir, bnss_key,\
-                                                                                       timeLength,\
-                                                                                       measuresToBeExtracted,\
-                                                                                        logStats=False, doPlot=True)
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        statistics_for_bnss, chPtsOutliers = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(
+            superGraph,\
+            cross_time_graphs,\
+            plotDir, bnss_key,\
+            timeLength,\
+            measuresToBeExtracted)
 
-        for time_window in ranking_scores:
-            time1, time2 = time_window
-            time1, time2 = time1+firstTimeKey, time2+firstTimeKey
-            business_ranking_and_changed_dims[(bnss_key, (time1, time2))] = (ranking_scores[time_window], changed_dims[time_window])
+        logStats(bnss_key, plotDir. chPtsOutliers)
+
+        if doPlot:
+            beforePlotTime = datetime.now()
+            PlotUtil.plotMeasuresForBnss(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,\
+                                         measuresToBeExtracted, timeLength)
+            afterPlotTime = datetime.now()
+            print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
     print '---------------------------------------------------------------------------------------------------------------'
 
