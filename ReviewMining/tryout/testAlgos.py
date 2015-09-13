@@ -313,21 +313,21 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot):
 
     print '---------------------------------------------------------------------------------------------------------------'
 
-    sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
-                                       key=lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
-
-    res = open(os.path.join(plotDir, 'result.txt'),'w')
-    changed_dims_cnt = dict()
-    for bnss_key, time_window in sorted_suspicious_ranking:
-        business_ranking, changed_dims = business_ranking_and_changed_dims[(bnss_key, time_window)]
-        tup = (bnss_key,time_window, changed_dims)
-        res.write('result='+str(tup)+'\n')
-        key = tuple(sorted(changed_dims))
-        if key not in changed_dims_cnt:
-            changed_dims_cnt[key] = 0
-        changed_dims_cnt[key] += 1
-    print changed_dims_cnt
-    res.close()
+    # sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
+    #                                    key=lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
+    #
+    # res = open(os.path.join(plotDir, 'result.txt'),'w')
+    # changed_dims_cnt = dict()
+    # for bnss_key, time_window in sorted_suspicious_ranking:
+    #     business_ranking, changed_dims = business_ranking_and_changed_dims[(bnss_key, time_window)]
+    #     tup = (bnss_key,time_window, changed_dims)
+    #     res.write('result='+str(tup)+'\n')
+    #     key = tuple(sorted(changed_dims))
+    #     if key not in changed_dims_cnt:
+    #         changed_dims_cnt[key] = 0
+    #     changed_dims_cnt[key] += 1
+    # print changed_dims_cnt
+    # res.close()
 
 if __name__ == "__main__":
     if(len(sys.argv)!=2):
