@@ -299,8 +299,7 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot):
             plotDir, bnss_key,\
             timeLength,\
             measuresToBeExtracted)
-
-        logStats(bnss_key, plotDir. chPtsOutliers)
+        logStats(bnss_key, plotDir, chPtsOutliers)
 
         if doPlot:
             beforePlotTime = datetime.now()
