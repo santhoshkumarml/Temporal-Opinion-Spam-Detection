@@ -484,8 +484,6 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                             direction = d - data[didx-1]
                             needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
                             thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
-                            if measure_key == StatConstants.NO_OF_POSITIVE_REVIEWS:
-                                print score, didx, thres, direction
                             if thres and score >= thres:
                                 if needed_direction == StatConstants.BOTH or direction == needed_direction:
                                     chOutlierIdxs.append(didx)

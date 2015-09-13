@@ -292,8 +292,6 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot):
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
 
-    business_ranking_and_changed_dims = dict()
-
     for bnss_key in bnssKeys:
         statistics_for_bnss, chPtsOutliers = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(
             superGraph,\
@@ -313,6 +311,7 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot):
 
     print '---------------------------------------------------------------------------------------------------------------'
 
+    business_ranking_and_changed_dims = dict()
     # sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
     #                                    key=lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
     #
@@ -335,4 +334,4 @@ if __name__ == "__main__":
         sys.exit()
     csvFolder = sys.argv[1]
     #'/media/santhosh/Data/workspace/datalab/data/Itunes'
-    tryBusinessMeasureExtractor(csvFolder)
+    tryBusinessMeasureExtractor(csvFolder, doPlot=False)
