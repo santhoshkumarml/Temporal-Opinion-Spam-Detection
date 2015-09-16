@@ -1,18 +1,16 @@
 __author__ = 'santhosh'
 
-from util import StatConstants
 from datetime import datetime
-import numpy
 import os
+
+from util import StatConstants
 from util import StatUtil
 from util import SIAUtil
-from anomaly_detection import AnomalyDetector
-from util import PlotUtil
 
-def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
+
+def extractBnssStatistics(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
                      measuresToBeExtracted = StatConstants.MEASURES, logStats = False):
 
-    print '--------------------------------------------------------------------------------------------------------------------'
     print 'Stats Generation for bnss:', bnssKey
     beforeStat = datetime.now()
     statistics_for_current_bnss = dict()
@@ -146,22 +144,10 @@ def extractMeasuresAndDetectAnomaliesForBnss(superGraph, cross_time_graphs, plot
                                         str(statistics_for_current_bnss[measure_key]))
             bnssStatFile.write('\n')
         bnssStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
+        bnssStatFile.close()
 
     afterStat = datetime.now()
 
     print 'Stats Generation Time for bnss:', bnssKey, 'in', afterStat-beforeStat
 
-    beforeAnomalyDetection = datetime.now()
-
-    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
-                                                           find_outlier_idxs=True)
-    afterAnomalyDetection = datetime.now()
-
-    if logStats:
-        bnssStatFile.close()
-    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
-
-    # ranking_score, changed_dims = AnomalyDetector.calculateRankingUsingAnomalies(statistics_for_current_bnss, chPtsOutliers)
-    print '------------------------------------------------------------------------------------------------------------------------------'
-
-    return statistics_for_current_bnss, chPtsOutliers
+    return statistics_for_current_bnss

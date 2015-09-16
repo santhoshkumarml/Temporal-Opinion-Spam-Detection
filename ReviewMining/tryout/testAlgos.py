@@ -243,6 +243,12 @@ def runChangeFinder(data, algo):
 #
 # plotDataAndChanges(data, scores=scores)
 
+def readData(csvFolder):
+    rdr = ItunesDataReader()
+    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
+    return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
+
+
 def logStats(bnssKey, plotDir, chPtsOutliers):
     measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
@@ -250,21 +256,31 @@ def logStats(bnssKey, plotDir, chPtsOutliers):
     measure_log_file.close()
     del chPtsOutliers[StatConstants.BNSS_ID]
 
+def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, find_outlier_idxs=True):
+    beforeAnomalyDetection = datetime.now()
 
-def plotBnss(bnssKey, statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
+    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
+                                                           find_outlier_idxs)
+    afterAnomalyDetection = datetime.now()
+
+    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
+
+    return chPtsOutliers
+
+
+def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
     beforePlotTime = datetime.now()
-    PlotUtil.plotMeasuresForBnss(statistics_for_current_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
+    PlotUtil.plotMeasuresForBnss(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,\
+                                         measuresToBeExtracted, timeLength)
     afterPlotTime = datetime.now()
-    print 'Plot Generation Time for bnss:', bnssKey, 'in', afterPlotTime-beforePlotTime
+    print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
-def tryBusinessMeasureExtractor(csvFolder, doPlot):
-    rdr = ItunesDataReader()
-    (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
+def tryBusinessMeasureExtractor(csvFolder, doPlot, timeLength = '1-W'):
+    #Read data
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
 
-    print 'data_read'
-    timeLength = '1-W'
-
-    superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
+    #Construct Graphs
+    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
@@ -279,53 +295,31 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot):
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
 
-    # bnssKeys = bnssKeys[3:35]
-    bnssKeys = ['363590051']
-    #0.75,0.6,0.4
+    bnssKeys = bnssKeys[:1]
 
-    # measuresToBeExtracted = [measure for measure in StatConstants.MEASURES if measure != StatConstants.MAX_TEXT_SIMILARITY ]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
-    # measuresToBeExtracted = [StatConstants.AVERAGE_RATING, StatConstants.NO_OF_REVIEWS, StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
 
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
 
     for bnss_key in bnssKeys:
-        statistics_for_bnss, chPtsOutliers = business_statistics_generator.extractMeasuresAndDetectAnomaliesForBnss(
+        statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
             superGraph,\
             cross_time_graphs,\
             plotDir, bnss_key,\
             timeLength,\
             measuresToBeExtracted)
+        chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
+
         logStats(bnss_key, plotDir, chPtsOutliers)
 
         if doPlot:
-            beforePlotTime = datetime.now()
-            PlotUtil.plotMeasuresForBnss(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,\
-                                         measuresToBeExtracted, timeLength)
-            afterPlotTime = datetime.now()
-            print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
+            plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
 
     print '---------------------------------------------------------------------------------------------------------------'
 
-    business_ranking_and_changed_dims = dict()
-    # sorted_suspicious_ranking = sorted(business_ranking_and_changed_dims.keys(),\
-    #                                    key=lambda key : business_ranking_and_changed_dims[key][0], reverse=True)
-    #
-    # res = open(os.path.join(plotDir, 'result.txt'),'w')
-    # changed_dims_cnt = dict()
-    # for bnss_key, time_window in sorted_suspicious_ranking:
-    #     business_ranking, changed_dims = business_ranking_and_changed_dims[(bnss_key, time_window)]
-    #     tup = (bnss_key,time_window, changed_dims)
-    #     res.write('result='+str(tup)+'\n')
-    #     key = tuple(sorted(changed_dims))
-    #     if key not in changed_dims_cnt:
-    #         changed_dims_cnt[key] = 0
-    #     changed_dims_cnt[key] += 1
-    # print changed_dims_cnt
-    # res.close()
 
 if __name__ == "__main__":
     if(len(sys.argv)!=2):
