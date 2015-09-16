@@ -251,16 +251,16 @@ def readScoresFromMeasureLog(plotDir):
     import re
     chPtsOutliers = dict()
     measure_scores = dict()
-    measure_log = open(os.path.join(plotDir, "measure_scores.log"), 'r')
+    measure_log = os.path.join(plotDir, "measure_scores.log")
     with open(measure_log) as f:
-        string = f.read()
-        p = re.compile('[{][^{]+[}]')
-        strings = p.findall(string)
+        strings = f.readlines()
+        # p = re.compile('[{][^{]+([{][^{]+[}])+[^}]+BNSS_ID[^}]+[}]')
+        # p = re.compile('[{].*BNSS_ID[^}]+[}]')
+        # strings = p.findall(a)
         for string in strings:
             string = "chPtsOutliers="+string
             exec(string)
-
-            avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING]
+            avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
             diff_test_idxs = set()
             for idx in sorted(avg_idxs):
                 idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
@@ -278,7 +278,10 @@ def readScoresFromMeasureLog(plotDir):
                     chOutlierIdxs, chOutlierScores = chPtsOutliersEntry[algo]
 
                     if measure_key not in measure_scores:
-                        measure_scores[measure_key] = []
+                        measure_scores[measure_key] = dict()
+
+                    if algo not in measure_scores[measure_key]:
+                        measure_scores[measure_key][algo] = []
 
                     test_measure_scores = []
 
@@ -288,10 +291,10 @@ def readScoresFromMeasureLog(plotDir):
                     else:
                         test_measure_scores = chOutlierScores
 
-                    measure_scores[measure_key].extend(test_measure_scores)
+                    measure_scores[measure_key][algo].extend(test_measure_scores)
 
-    for measure_key in measure_scores.keys():
-        print measure_key, max(measure_scores[measure_key]), min(measure_scores[measure_key])
+    # for measure_key in measure_scores.keys():
+    #     print measure_key, max(measure_scores[measure_key]), min(measure_scores[measure_key])
 
     return measure_scores
 
@@ -304,7 +307,7 @@ def readData(csvFolder):
 def logStats(bnssKey, plotDir, chPtsOutliers):
     measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
-    measure_log_file.write(str(chPtsOutliers)+" ")
+    measure_log_file.write(str(chPtsOutliers)+"\n")
     measure_log_file.close()
     del chPtsOutliers[StatConstants.BNSS_ID]
 
@@ -327,7 +330,7 @@ def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measure
     afterPlotTime = datetime.now()
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
-def tryBusinessMeasureExtractor(csvFolder, doPlot, timeLength = '1-W'):
+def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
 
@@ -335,10 +338,6 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot, timeLength = '1-W'):
     superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
-    currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-
-    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), currentDateTime)
-
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
 
@@ -347,7 +346,7 @@ def tryBusinessMeasureExtractor(csvFolder, doPlot, timeLength = '1-W'):
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
 
-    bnssKeys = bnssKeys[:1]
+    bnssKeys = bnssKeys[:2]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -378,5 +377,14 @@ if __name__ == "__main__":
         print 'Usage: python -m \"tryout.testAlgos\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
+
+    currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
+    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), 'main')
+
     #'/media/santhosh/Data/workspace/datalab/data/Itunes'
-    tryBusinessMeasureExtractor(csvFolder, doPlot=False)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False)
+    measure_scores = readScoresFromMeasureLog(plotDir)
+    for measure_key in measure_scores.keys():
+        for algo in measure_scores[measure_key].keys():
+            scores = measure_scores[measure_key][algo]
+            print measure_key, algo, getThreshold(scores, 0.10)
