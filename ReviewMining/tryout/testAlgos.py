@@ -242,6 +242,58 @@ def runChangeFinder(data, algo):
 # # scores = out
 #
 # plotDataAndChanges(data, scores=scores)
+def getThreshold(stats_for_dimension, k):
+    mean = numpy.mean(stats_for_dimension)
+    std = numpy.std(stats_for_dimension)
+    return mean+(k*std)
+
+def readScoresFromMeasureLog(plotDir):
+    import re
+    chPtsOutliers = dict()
+    measure_scores = dict()
+    measure_log = open(os.path.join(plotDir, "measure_scores.log"), 'r')
+    with open(measure_log) as f:
+        string = f.read()
+        p = re.compile('[{][^{]+[}]')
+        strings = p.findall(string)
+        for string in strings:
+            string = "chPtsOutliers="+string
+            exec(string)
+
+            avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING]
+            diff_test_idxs = set()
+            for idx in sorted(avg_idxs):
+                idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
+                for indx in range(idx1, idx2+1):
+                    diff_test_idxs.add(indx)
+
+            for measure_key in chPtsOutliers.keys():
+                if measure_key == StatConstants.AVERAGE_RATING\
+                        or measure_key == StatConstants.NO_OF_REVIEWS or\
+                                measure_key == 'BNSS_ID':
+                    continue
+
+                chPtsOutliersEntry = chPtsOutliers[measure_key]
+                for algo in chPtsOutliersEntry.keys():
+                    chOutlierIdxs, chOutlierScores = chPtsOutliersEntry[algo]
+
+                    if measure_key not in measure_scores:
+                        measure_scores[measure_key] = []
+
+                    test_measure_scores = []
+
+                    if algo == StatConstants.LOCAL_AR:
+                        test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores))\
+                                                                if idx in diff_test_idxs]
+                    else:
+                        test_measure_scores = chOutlierScores
+
+                    measure_scores[measure_key].extend(test_measure_scores)
+
+    for measure_key in measure_scores.keys():
+        print measure_key, max(measure_scores[measure_key]), min(measure_scores[measure_key])
+
+    return measure_scores
 
 def readData(csvFolder):
     rdr = ItunesDataReader()
