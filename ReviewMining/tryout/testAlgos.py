@@ -242,10 +242,35 @@ def runChangeFinder(data, algo):
 # # scores = out
 #
 # plotDataAndChanges(data, scores=scores)
+def doHistogramForMeasure(bins, algo, measure_key, scores):
+    fig = plt.figure()
+    plt.title('Score histogram')
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_xlabel(measure_key)
+    # ax.set_xticks(bins)
+    # if key == StatConstants.NO_OF_NEGATIVE_REVIEWS or key == StatConstants.NO_OF_POSITIVE_REVIEWS\
+    #     or key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+    #     ax.hist(scores, bins, alpha=1.00, label=key, log=True)
+    # else:
+    print algo, measure_key
+    ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
+    thr1 = getThreshold(scores, 0.10)
+    thr2 = getThreshold(scores, 0.05)
+    thr3 = getThreshold(scores, 0.01)
+    ax.axvline(x=thr1, linewidth=2, color='r')
+    ax.axvline(x=thr2, linewidth=2, color='g')
+    ax.axvline(x=thr3, linewidth=2, color='c')
+    plt.show()
+
 def getThreshold(stats_for_dimension, k):
-    mean = numpy.mean(stats_for_dimension)
-    std = numpy.std(stats_for_dimension)
-    return mean+(k*std)
+    hist, bin_edges = numpy.histogram(stats_for_dimension, bins= 20, density=True)
+    out = hist*numpy.diff(bin_edges)
+    for i in range(1, len(out)):
+        # print numpy.sum(out[:i]), (1.0/(1+(k**2)))
+        if numpy.sum(out[:i]) > (1.0/(1+(k**2))):
+            return bin_edges[i]
+    return bin_edges[i]
+
 
 def readScoresFromMeasureLog(plotDir):
     import re
@@ -254,12 +279,18 @@ def readScoresFromMeasureLog(plotDir):
     measure_log = os.path.join(plotDir, "measure_scores.log")
     with open(measure_log) as f:
         strings = f.readlines()
+        # strings = f.read()
         # p = re.compile('[{][^{]+([{][^{]+[}])+[^}]+BNSS_ID[^}]+[}]')
         # p = re.compile('[{].*BNSS_ID[^}]+[}]')
         # strings = p.findall(a)
         for string in strings:
+            string.strip('\r')
+            string.strip('\n')
             string = "chPtsOutliers="+string
-            exec(string)
+            try:
+                exec(string)
+            except:
+                continue
             avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
             diff_test_idxs = set()
             for idx in sorted(avg_idxs):
@@ -285,11 +316,15 @@ def readScoresFromMeasureLog(plotDir):
 
                     test_measure_scores = []
 
+
                     if algo == StatConstants.LOCAL_AR:
                         test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores))\
                                                                 if idx in diff_test_idxs]
                     else:
                         test_measure_scores = chOutlierScores
+
+                    test_measure_scores = [score for score in test_measure_scores if score < 10000
+                                           or measure_key in StatConstants.MEASURE_LEAD_SIGNALS]
 
                     measure_scores[measure_key][algo].extend(test_measure_scores)
 
@@ -325,8 +360,10 @@ def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, fin
 
 def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
     beforePlotTime = datetime.now()
-    PlotUtil.plotMeasuresForBnss(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,\
-                                         measuresToBeExtracted, timeLength)
+    avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
+
+    PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir,\
+                                         measuresToBeExtracted, avg_idxs, timeLength)
     afterPlotTime = datetime.now()
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
@@ -345,8 +382,9 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
                  if bnss_type == SIAUtil.PRODUCT]
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
+    bnssKeys = ['363590051', '386244833', '371405542']
 
-    bnssKeys = bnssKeys[:2]
+    # bnssKeys = bnssKeys[:2]
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -379,12 +417,12 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
 
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), 'main')
+    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), '1')
 
     #'/media/santhosh/Data/workspace/datalab/data/Itunes'
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
     measure_scores = readScoresFromMeasureLog(plotDir)
     for measure_key in measure_scores.keys():
         for algo in measure_scores[measure_key].keys():
             scores = measure_scores[measure_key][algo]
-            print measure_key, algo, getThreshold(scores, 0.10)
+            doHistogramForMeasure(20, algo, measure_key, scores)

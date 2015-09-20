@@ -666,26 +666,11 @@ def cusum_using_call_to_r_py(x):
     idx = 0
     std_dev = None
     for i in range(1, x.size):
-        # print '-------------------------------'
-        # print i
-        #print x[idx:i], x[i]
         if std_dev == None:
             upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=0.5, new_data=x[i])
-        # else:
-        #     upper_l, lower_l = checkCusumCallRFromPy(x[idx:i], shift=0.5, stdev=std_dev, new_data=x[i])
         std_dev = None
-        # print 'sample<-c(',
-        # for j in range(idx,i):
-        # print x[j],
-        #     if j != i:
-        #         print ',',
-        # print ')'
-        # print 'new_d<-c(',x[i],')'
-        #print [idx + val for val in upper_l], [idx + val for val in lower_l]
-        # print '-------------------------------'
+
         if i - idx in upper_l or i - idx in lower_l:
-            # if std_dev == None:
-            #     std_dev = numpy.std(x[idx:i])
             idx = i
             changes.append(idx)
     return changes
@@ -984,11 +969,19 @@ def testSpc():
      print s.get_violating_points()
 
 def testCusum1():
-    data = []
+    data = [ 1.91079812,2.19664269,2.27588424,2.2967706, 2.3353566, 2.38813638
+    ,2.38973707,2.39438291,2.39977435,2.42619392,2.43355657,2.45093379
+    ,2.47486563,2.49725426,2.52620654,2.53696789,2.54032453,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632
+    ,2.54582632,2.54582632,2.54582632,2.54582632,2.54582632,2.54545455]
     x = numpy.atleast_1d(data).astype('float64')
     changes = cusum_using_call_to_r_py(x)
     print changes
-# testCusum()
+testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
