@@ -169,9 +169,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     plt.ylim((1,5))
                     plt.yticks(range(1,6))
 
-                if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_POSITIVE_REVIEWS]:
-                    import math
-                    data = [d for d in data]
+                if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS,\
+                                   StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NON_CUM_NO_OF_REVIEWS]:
+                    ax1.set_yscale('log')
 
                 ax1.plot(firstDimensionValues,\
                     data, 'g', label=measure_key)
