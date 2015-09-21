@@ -169,9 +169,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     plt.ylim((1,5))
                     plt.yticks(range(1,6))
 
-                if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS,\
-                                   StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NON_CUM_NO_OF_REVIEWS]:
-                    ax1.set_yscale('log')
 
                 ax1.plot(firstDimensionValues,\
                     data, 'g', label=measure_key)
@@ -188,16 +185,16 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                             idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
                             for indx in range(idx1, idx2+1):
                                 diff_test_idxs.add(indx)
-                        print diff_test_idxs
-                        for idx in diff_test_idxs:
-                            print idx, scores[idx]
-                            ax2.plot(firstTimeKey+idx, scores[idx], 'r')
+                        x = [firstTimeKey+indx for indx in diff_test_idxs]
+                        scores = [scores[indx] for indx in diff_test_idxs]
+                        ax2.plot(x, scores, 'r')
                     else:
                         ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
                              'r', label='Outlier Scores')
 
-                # for idx in chOutlierIdxs:
-                #     ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
+                if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+                    for idx in chOutlierIdxs:
+                        ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
                 plot += 1
         else:

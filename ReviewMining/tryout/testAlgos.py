@@ -382,7 +382,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
                  if bnss_type == SIAUtil.PRODUCT]
 
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
-    bnssKeys = ['363590051', '386244833', '371405542']
+    bnssKeys = ['386244833']
 
     # bnssKeys = bnssKeys[:2]
 
@@ -399,7 +399,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
             cross_time_graphs,\
             plotDir, bnss_key,\
             timeLength,\
-            measuresToBeExtracted)
+            measuresToBeExtracted, logStats=True)
         chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
 
         logStats(bnss_key, plotDir, chPtsOutliers)
@@ -420,9 +420,9 @@ if __name__ == "__main__":
     plotDir = join(join(join(csvFolder, os.pardir), 'stats'), '1')
 
     #'/media/santhosh/Data/workspace/datalab/data/Itunes'
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    measure_scores = readScoresFromMeasureLog(plotDir)
-    for measure_key in measure_scores.keys():
-        for algo in measure_scores[measure_key].keys():
-            scores = measure_scores[measure_key][algo]
-            doHistogramForMeasure(20, algo, measure_key, scores)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    # measure_scores = readScoresFromMeasureLog(plotDir)
+    # for measure_key in measure_scores.keys():
+    #     for algo in measure_scores[measure_key].keys():
+    #         scores = measure_scores[measure_key][algo]
+    #         doHistogramForMeasure(20, algo, measure_key, scores)

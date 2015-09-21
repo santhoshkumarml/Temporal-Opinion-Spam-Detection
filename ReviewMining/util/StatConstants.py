@@ -12,10 +12,10 @@ BNSS_ID = 'BNSS_ID'
 
 AVERAGE_RATING = 'Average Rating'
 RATING_ENTROPY = 'Rating entropy'
-NO_OF_REVIEWS = 'Number of Reviews'
-NON_CUM_NO_OF_REVIEWS = 'Non Cumulative Number of Reviews'
-NO_OF_POSITIVE_REVIEWS = 'Number of Positive Reviews'
-NO_OF_NEGATIVE_REVIEWS = 'Number of Negative Reviews'
+NO_OF_REVIEWS = 'No of Reviews'
+NON_CUM_NO_OF_REVIEWS = 'Non Cum No. of Reviews'
+NO_OF_POSITIVE_REVIEWS = 'No of +ve Reviews'
+NO_OF_NEGATIVE_REVIEWS = 'No of -ve Reviews'
 RATIO_OF_SINGLETONS = 'Ratio of Singletons'
 RATIO_OF_FIRST_TIMERS = 'Ratio of First-timers'
 YOUTH_SCORE = 'Youth Score'
@@ -60,8 +60,8 @@ TWITTER_SEASONAL_ANOM_DETECTION = 'Twitter Anomaly Detection in Time Series'
 #                            ENTROPY_SCORE:LOCAL_AR, MAX_TEXT_SIMILARITY:LOCAL_AR,\
 #                                   TF_IDF:LOCAL_AR, NO_OF_REVIEWS: LOCAL_AR}
 
-MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM], NO_OF_POSITIVE_REVIEWS: [AR_UNIFYING],\
-                                  NO_OF_NEGATIVE_REVIEWS:[AR_UNIFYING], RATING_ENTROPY: [LOCAL_AR, AR_UNIFYING],\
+MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM], NO_OF_POSITIVE_REVIEWS: [LOCAL_AR, AR_UNIFYING],\
+                                  NO_OF_NEGATIVE_REVIEWS:[LOCAL_AR, AR_UNIFYING], RATING_ENTROPY: [LOCAL_AR, AR_UNIFYING],\
                            NON_CUM_NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING], RATIO_OF_SINGLETONS:[LOCAL_AR, AR_UNIFYING],\
                            RATIO_OF_FIRST_TIMERS:[LOCAL_AR, AR_UNIFYING], YOUTH_SCORE:[LOCAL_AR, AR_UNIFYING],\
                            ENTROPY_SCORE:[LOCAL_AR, AR_UNIFYING], MAX_TEXT_SIMILARITY:[LOCAL_AR, AR_UNIFYING],\
