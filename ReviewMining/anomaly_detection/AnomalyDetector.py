@@ -463,7 +463,6 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
     isGrangerNeeded = False
 
     for measure_key in StatConstants.MEASURES:
-        chOutlierIdxs, chOutlierScores = [], []
         if measure_key in statistics_for_bnss:
             if measure_key == StatConstants.NO_OF_REVIEWS:
                 continue
@@ -472,6 +471,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
             algoList, params = StatConstants.MEASURES_CHANGE_FINDERS[measure_key]
 
             for algo in algoList:
+                chOutlierIdxs, chOutlierScores = [], []
+
                 if algo == StatConstants.AR_UNIFYING:
                     r, order, smooth = params
                     import ChangeFinderSinglePass as ch
@@ -481,7 +482,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                         d = data[didx]
                         score = cf.update(d)
                         if find_outlier_idxs and didx > 0:
-                            direction = d - data[didx-1]
+                            direction = StatConstants.DECREASE if d - data[didx-1] < 0 else StatConstants.INCREASE
                             needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
                             thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
                             if thres and score >= thres:
@@ -520,7 +521,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                 if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
                     lead_signal_idxs = lead_signal_idxs.union(set(chOutlierIdxs))
 
-                chPtsOutliers[measure_key][algo]= (chOutlierIdxs, chOutlierScores)
+                chPtsOutliers[measure_key][algo] = (chOutlierIdxs, chOutlierScores)
 
     # if isGrangerNeeded:
     #     test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,

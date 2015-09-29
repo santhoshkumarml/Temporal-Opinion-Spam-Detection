@@ -13,7 +13,6 @@ from statistics import business_statistics_generator
 from util import GraphUtil
 from itunes_utils.ItunesDataReader import ItunesDataReader
 import os
-from os.path import join
 from util import SIAUtil
 from util import PlotUtil
 from datetime import datetime, timedelta
@@ -423,7 +422,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
             file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
         file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
 
-    bnssKeys = [ file_name for file_name, size in file_list_size]
+    bnssKeys = [file_name for file_name, size in file_list_size]
 
     bnssKeys = ['307906541']
     for bnss_key in bnssKeys:
@@ -464,8 +463,6 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
                 # print '   IN    ', max(scores), measure_noise[measure_key],
                 scores = [sc for sc in scores if sc < measure_noise[measure_key]]
             thr = getThreshold(scores, 0.10)
-            print measure_key, thr
-            print numpy.histogram(scores, 20)
             if doHist:
                 doHistogramForMeasure(20, algo, measure_key, scores)
             result[measure_key] = thr
@@ -476,12 +473,8 @@ if __name__ == "__main__":
         print 'Usage: python -m \"tryout.testAlgos\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
-
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = join(join(join(csvFolder, os.pardir), 'stats'), '1')
-    # plotDir = join(join(csvFolder, os.pardir), 'stats')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
 
-    #'/media/santhosh/Data/workspace/datalab/data/Itunes'
     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # print pickle.load(open(join(plotDir, '386244833')))
     # print getThresholdForDifferentMeasures(plotDir, doHist=False)

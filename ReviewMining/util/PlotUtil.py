@@ -186,6 +186,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                     max_score = -float('inf')
                     min_score = float('inf')
+                    diff_test_idxs = set()
 
                     for a in algoList:
                         idxs, scs = chPtsOutliersForBnss[measure_key][a]
@@ -204,12 +205,12 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                         if algo == StatConstants.LOCAL_AR:
                             for idx in sorted(avg_idxs):
                                 idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
-                                print idx1, idx2, firstTimeKey
                                 x = []
                                 plot_scores = []
                                 for indx in range(idx1, idx2+1):
                                     if indx >= len(scores):
                                         continue
+                                    diff_test_idxs.add(indx)
                                     x.append(firstTimeKey+indx)
                                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
@@ -229,7 +230,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                  'r', label='Outlier Scores')
 
                 for idx in chOutlierIdxs:
-                    ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
+                    if idx in diff_test_idxs:
+                        ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
                 plot += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
