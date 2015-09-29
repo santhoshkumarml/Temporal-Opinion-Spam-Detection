@@ -87,12 +87,16 @@ MEASURE_DIRECTION = {AVERAGE_RATING : BOTH, RATING_ENTROPY:DECREASE,\
                            ENTROPY_SCORE:DECREASE, MAX_TEXT_SIMILARITY:INCREASE, TF_IDF:BOTH,\
                      NO_OF_REVIEWS: INCREASE, NO_OF_POSITIVE_REVIEWS:BOTH, NO_OF_NEGATIVE_REVIEWS:BOTH}
 
-MEASURE_CHANGE_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY:0.5,\
-                           NON_CUM_NO_OF_REVIEWS:250, RATIO_OF_SINGLETONS:0.4,\
-                           RATIO_OF_FIRST_TIMERS:0.4, YOUTH_SCORE:0.5,\
-                           ENTROPY_SCORE:0.6, MAX_TEXT_SIMILARITY:None, TF_IDF:None,\
-                        NO_OF_REVIEWS:None, NO_OF_POSITIVE_REVIEWS:20,
-                        NO_OF_NEGATIVE_REVIEWS:20}
+MEASURE_CHANGE_THRES = {'Youth Score': 0.24807599485757884, 'Ratio of Singletons': 0.29342091179200519,
+                                 'No of +ve Reviews': 173073.6792415776, 'Entropy Gap Score': 0.33269945143185731,
+                                 'Rating entropy': 1.1475137218593321, 'Non Cum No. of Reviews': 203497.47969341138,
+                                 'Ratio of First-timers': 0.25817557347083786, 'No of -ve Reviews': 5823.5356454838775}
+    # {AVERAGE_RATING : 0.5, RATING_ENTROPY:0.5,\
+    #                        NON_CUM_NO_OF_REVIEWS:250, RATIO_OF_SINGLETONS:0.4,\
+    #                        RATIO_OF_FIRST_TIMERS:0.4, YOUTH_SCORE:0.5,\
+    #                        ENTROPY_SCORE:0.6, MAX_TEXT_SIMILARITY:None, TF_IDF:None,\
+    #                     NO_OF_REVIEWS:None, NO_OF_POSITIVE_REVIEWS:20,
+    #                     NO_OF_NEGATIVE_REVIEWS:20}
 
 MEASURE_CHANGE_LOCAL_GRANGER_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.25,\
                            NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.16,\
@@ -101,9 +105,14 @@ MEASURE_CHANGE_LOCAL_GRANGER_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.25
                                  TF_IDF: None, NO_OF_REVIEWS: None, NO_OF_POSITIVE_REVIEWS:None,
                                  NO_OF_NEGATIVE_REVIEWS:None}
 
-MEASURE_CHANGE_LOCAL_AR_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.75,\
-                           NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.10,\
-                           RATIO_OF_FIRST_TIMERS: 0.08, YOUTH_SCORE: 0.08,\
-                           ENTROPY_SCORE: 0.75, MAX_TEXT_SIMILARITY: None,\
-                                 TF_IDF: None, NO_OF_REVIEWS: 200, NO_OF_POSITIVE_REVIEWS:200,
-                                 NO_OF_NEGATIVE_REVIEWS:200}
+MEASURE_CHANGE_LOCAL_AR_THRES = {'Youth Score': 0.24807599485757884, 'Ratio of Singletons': 0.29342091179200519,
+                                 'No of +ve Reviews': 173073.6792415776, 'Entropy Gap Score': 0.33269945143185731,
+                                 'Rating entropy': 1.1475137218593321, 'Non Cum No. of Reviews': 203497.47969341138,
+                                 'Ratio of First-timers': 0.25817557347083786, 'No of -ve Reviews': 5823.5356454838775}
+
+    # {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.75,\
+    #                        NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.10,\
+    #                        RATIO_OF_FIRST_TIMERS: 0.08, YOUTH_SCORE: 0.08,\
+    #                        ENTROPY_SCORE: 0.75, MAX_TEXT_SIMILARITY: None,\
+    #                              TF_IDF: None, NO_OF_REVIEWS: 200, NO_OF_POSITIVE_REVIEWS:200,
+    #                              NO_OF_NEGATIVE_REVIEWS:200}

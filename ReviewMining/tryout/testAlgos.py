@@ -18,6 +18,7 @@ from util import SIAUtil
 from util import PlotUtil
 from datetime import datetime, timedelta
 import sys
+import pickle
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
@@ -254,22 +255,19 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     # else:
     print algo, measure_key
     ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
-    thr1 = getThreshold(scores, 0.10)
-    thr2 = getThreshold(scores, 0.05)
-    thr3 = getThreshold(scores, 0.01)
+    thr1 = getThreshold(scores, 0.20)
+    thr2 = getThreshold(scores, 0.10)
+    thr3 = getThreshold(scores, 0.05)
     ax.axvline(x=thr1, linewidth=2, color='r')
     ax.axvline(x=thr2, linewidth=2, color='g')
     ax.axvline(x=thr3, linewidth=2, color='c')
     plt.show()
 
 def getThreshold(stats_for_dimension, k):
-    hist, bin_edges = numpy.histogram(stats_for_dimension, bins= 20, density=True)
-    out = hist*numpy.diff(bin_edges)
-    for i in range(1, len(out)):
-        # print numpy.sum(out[:i]), (1.0/(1+(k**2)))
-        if numpy.sum(out[:i]) > (1.0/(1+(k**2))):
-            return bin_edges[i]
-    return bin_edges[i]
+    m = numpy.mean(stats_for_dimension)
+    std = numpy.std(stats_for_dimension)
+    vals = {0.05:math.sqrt(19),0.10:3,0.20:2}
+    return (m + (vals[k]*std))
 
 
 def readScoresFromMeasureLog(plotDir):
@@ -299,8 +297,8 @@ def readScoresFromMeasureLog(plotDir):
                     diff_test_idxs.add(indx)
 
             for measure_key in chPtsOutliers.keys():
-                if measure_key == StatConstants.AVERAGE_RATING\
-                        or measure_key == StatConstants.NO_OF_REVIEWS or\
+                if measure_key == StatConstants.AVERAGE_RATING \
+                        or measure_key == StatConstants.NO_OF_REVIEWS or \
                                 measure_key == 'BNSS_ID':
                     continue
 
@@ -318,13 +316,12 @@ def readScoresFromMeasureLog(plotDir):
 
 
                     if algo == StatConstants.LOCAL_AR:
-                        test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores))\
-                                                                if idx in diff_test_idxs]
+                        test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores)) \
+                                               if idx in diff_test_idxs]
                     else:
                         test_measure_scores = chOutlierScores
 
-                    test_measure_scores = [score for score in test_measure_scores if score < 10000
-                                           or measure_key in StatConstants.MEASURE_LEAD_SIGNALS]
+                    test_measure_scores = [score for score in test_measure_scores]
 
                     measure_scores[measure_key][algo].extend(test_measure_scores)
 
@@ -337,6 +334,20 @@ def readData(csvFolder):
     rdr = ItunesDataReader()
     (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
+
+def rankAnomalies(bnss_key, chPtsOutliers, test_windows, measures):
+    measures_changed = 0
+    weighted_anomalies = dict()
+    for window in test_windows:
+        for measure_key in chPtsOutliers.keys():
+            chPtsOutlierScores, chPtsOutliersIdxs = chPtsOutliers[measure_key]
+            if window in chPtsOutliersIdxs:
+                measures_changed += 1
+                no_of_changes_before = chPtsOutliersIdxs.index(window)
+                weighted_anomalies[measure_key] = (1.0 / no_of_changes_before)
+        ratio_of_anomalies_measure = float(measures_changed)/measures
+
+
 
 
 def logStats(bnssKey, plotDir, chPtsOutliers):
@@ -362,53 +373,103 @@ def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measure
     beforePlotTime = datetime.now()
     avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
 
-    PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir,\
-                                         measuresToBeExtracted, avg_idxs, timeLength)
+    PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir, \
+                                 measuresToBeExtracted, avg_idxs, timeLength)
     afterPlotTime = datetime.now()
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
-def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
-    #Read data
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
 
-    #Construct Graphs
-    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
-                                                           bnssIdToBusinessDict,\
-                                                            reviewIdToReviewsDict, timeLength)
+def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
+    bnss_file_name = os.path.join(plotDir, bnss_key)
+    print 'Serializing to file', bnss_file_name
+    if not os.path.exists(bnss_file_name):
+        with open(bnss_file_name, 'w') as f:
+            pickle.dump(statistics_for_bnss, f)
+
+def deserializeBnssStats(bnss_key, statsDir):
+    return pickle.load(open(os.path.join(statsDir, bnss_key)))
+
+def readAndGenerateStatistics(csvFolder, plotDir, timeLength):
+    # Read data
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
+    # Construct Graphs
+    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, \
+                                                           bnssIdToBusinessDict, \
+                                                           reviewIdToReviewsDict, timeLength)
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
-
-    bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-                 if bnss_type == SIAUtil.PRODUCT]
-
+    bnssKeys = [bnss_key for bnss_key, bnss_type in superGraph.nodes() \
+                if bnss_type == SIAUtil.PRODUCT]
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
-    bnssKeys = ['386244833']
-
+    # bnssKeys = ['386244833']
     # bnssKeys = bnssKeys[:2]
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
+                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
+    lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
+    measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
+    return bnssKeys, cross_time_graphs, measuresToBeExtracted, superGraph
+
+def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
-
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
+    bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    file_list_size = []
+    for root, dirs, files in os.walk(bnss_stats_dir):
+        for name in files:
+            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+        file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
 
+    bnssKeys = [ file_name for file_name, size in file_list_size]
+
+    bnssKeys = ['307906541']
     for bnss_key in bnssKeys:
-        statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
-            superGraph,\
-            cross_time_graphs,\
-            plotDir, bnss_key,\
-            timeLength,\
-            measuresToBeExtracted, logStats=True)
+        # statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
+        #     superGraph, \
+        #     cross_time_graphs, \
+        #     plotDir, bnss_key, \
+        #     timeLength, \
+        #     measuresToBeExtracted, logStats=False)
+
+        statistics_for_bnss = deserializeBnssStats(bnss_key, bnss_stats_dir)
+
         chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
 
-        logStats(bnss_key, plotDir, chPtsOutliers)
+        # logStats(bnss_key, plotDir, chPtsOutliers)
 
         if doPlot:
             plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
 
     print '---------------------------------------------------------------------------------------------------------------'
 
+
+def getThresholdForDifferentMeasures(plotDir, doHist=False):
+    measure_scores = readScoresFromMeasureLog(plotDir)
+    # 12444474, 13693304, 266284
+    measure_noise = {StatConstants.NON_CUM_NO_OF_REVIEWS: 266284,
+                     StatConstants.NO_OF_POSITIVE_REVIEWS: 13693304,
+                     StatConstants.NO_OF_NEGATIVE_REVIEWS: 266284}
+    result = dict()
+    for measure_key in measure_scores.keys():
+        for algo in measure_scores[measure_key].keys():
+            if(algo  == StatConstants.LOCAL_AR):
+                continue
+            scores = measure_scores[measure_key][algo]
+            if not measure_key == StatConstants.NO_OF_NEGATIVE_REVIEWS:
+                continue
+            if measure_key in measure_noise:
+                # print '   IN    ', max(scores), measure_noise[measure_key],
+                scores = [sc for sc in scores if sc < measure_noise[measure_key]]
+            thr = getThreshold(scores, 0.10)
+            print measure_key, thr
+            print numpy.histogram(scores, 20)
+            if doHist:
+                doHistogramForMeasure(20, algo, measure_key, scores)
+            result[measure_key] = thr
+    return result
 
 if __name__ == "__main__":
     if(len(sys.argv)!=2):
@@ -418,11 +479,9 @@ if __name__ == "__main__":
 
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = join(join(join(csvFolder, os.pardir), 'stats'), '1')
+    # plotDir = join(join(csvFolder, os.pardir), 'stats')
 
     #'/media/santhosh/Data/workspace/datalab/data/Itunes'
     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # measure_scores = readScoresFromMeasureLog(plotDir)
-    # for measure_key in measure_scores.keys():
-    #     for algo in measure_scores[measure_key].keys():
-    #         scores = measure_scores[measure_key][algo]
-    #         doHistogramForMeasure(20, algo, measure_key, scores)
+    # print pickle.load(open(join(plotDir, '386244833')))
+    # print getThresholdForDifferentMeasures(plotDir, doHist=False)
