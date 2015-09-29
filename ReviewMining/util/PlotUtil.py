@@ -134,15 +134,14 @@ def plotAny(a):
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, avg_idxs, timeLength = '1-M'):
     plot = 1
     fig = plt.figure(figsize=(20, 20))
-    # fig = plt.figure()
     step = 10
 
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
-    firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
-    total_time_slots = lastTimeKey-firstTimeKey+1
     xticks = range(firstTimeKey, lastTimeKey+1, step)
+    # firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
+    # total_time_slots = lastTimeKey-firstTimeKey+1
 
     toBeUsedMeasures = [measure for measure in toBeUsedMeasures]
 
@@ -181,8 +180,10 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     modified_data, 'g', label=measure_key)
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
+                print algo, chOutlierIdxs, measure_key,
 
                 if len(chPtsOutlierScores) > 0:
+
                     max_score = -float('inf')
                     min_score = float('inf')
 
@@ -190,6 +191,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                         idxs, scs = chPtsOutliersForBnss[measure_key][a]
                         max_score = max((max_score, max(scs)))
                         min_score = min((min_score, min(scs)))
+
                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                         max_score = math.log(max_score+1)
@@ -200,24 +202,21 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     scores = chPtsOutlierScores
                     if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
                         if algo == StatConstants.LOCAL_AR:
-                            diff_test_idxs = set()
                             for idx in sorted(avg_idxs):
                                 idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
+                                print idx1, idx2, firstTimeKey
+                                x = []
+                                plot_scores = []
                                 for indx in range(idx1, idx2+1):
-                                    diff_test_idxs.add(indx)
-                            # x = [firstTimeKey+indx for indx in diff_test_idxs]
-                            # scores = [scores[indx] for indx in diff_test_idxs]
-                            if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
+                                    if indx >= len(scores):
+                                        continue
+                                    x.append(firstTimeKey+indx)
+                                    if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
-                                scores = [math.log(scores[indx]+1) for indx in range(len(scores))
-                                          if indx in diff_test_idxs]
-                            else:
-                                scores = [scores[indx] for indx in range(len(scores))
-                                          if indx in diff_test_idxs]
-
-                            x = [firstTimeKey+indx for indx in range(len(chPtsOutlierScores)) if indx in diff_test_idxs]
-
-                            ax2.plot(x, scores, 'r')
+                                        plot_scores.append(math.log(scores[indx]+1))
+                                    else:
+                                        plot_scores.append(scores[indx])
+                                ax2.plot(x, plot_scores, 'r')
                         else:
                             if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
@@ -229,10 +228,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
                                  'r', label='Outlier Scores')
 
-                # if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
                 for idx in chOutlierIdxs:
                     ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
-
                 plot += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
@@ -261,13 +258,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
             for idx in chOutlierIdxs:
                 ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
 
-
-        # plot += 1
-
     art = []
-    # lgd = plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
-    # art.append(lgd)
-    #fig.autofmt_xdate()
     plt.tight_layout()
 
     imgFile = join(inputDir, statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")+'.png'
