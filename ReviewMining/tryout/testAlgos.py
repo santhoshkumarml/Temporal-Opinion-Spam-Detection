@@ -457,12 +457,12 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
             if(algo  == StatConstants.LOCAL_AR):
                 continue
             scores = measure_scores[measure_key][algo]
-            if not measure_key == StatConstants.NO_OF_NEGATIVE_REVIEWS:
-                continue
+            # if not measure_key == StatConstants.NO_OF_NEGATIVE_REVIEWS:
+            #     continue
             if measure_key in measure_noise:
                 # print '   IN    ', max(scores), measure_noise[measure_key],
                 scores = [sc for sc in scores if sc < measure_noise[measure_key]]
-            thr = getThreshold(scores, 0.10)
+            thr = getThreshold(scores, 0.20)
             if doHist:
                 doHistogramForMeasure(20, algo, measure_key, scores)
             result[measure_key] = thr

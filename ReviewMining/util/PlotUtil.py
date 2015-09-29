@@ -210,7 +210,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 for indx in range(idx1, idx2+1):
                                     if indx >= len(scores):
                                         continue
-                                    diff_test_idxs.add(indx)
                                     x.append(firstTimeKey+indx)
                                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
@@ -228,6 +227,11 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                             else:
                                 ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
                                  'r', label='Outlier Scores')
+
+                for idx in sorted(avg_idxs):
+                    idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
+                    for indx in range(idx1, idx2+1):
+                        diff_test_idxs.add(indx)
 
                 for idx in chOutlierIdxs:
                     if idx in diff_test_idxs:

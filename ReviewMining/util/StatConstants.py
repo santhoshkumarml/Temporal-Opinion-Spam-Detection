@@ -87,10 +87,10 @@ MEASURE_DIRECTION = {AVERAGE_RATING : BOTH, RATING_ENTROPY:DECREASE,\
                            ENTROPY_SCORE:DECREASE, MAX_TEXT_SIMILARITY:INCREASE, TF_IDF:BOTH,\
                      NO_OF_REVIEWS: INCREASE, NO_OF_POSITIVE_REVIEWS:BOTH, NO_OF_NEGATIVE_REVIEWS:BOTH}
 
-MEASURE_CHANGE_THRES = {'Youth Score': 0.24807599485757884, 'Ratio of Singletons': 0.29342091179200519,
-                                 'No of +ve Reviews': 173073.6792415776, 'Entropy Gap Score': 0.33269945143185731,
-                                 'Rating entropy': 1.1475137218593321, 'Non Cum No. of Reviews': 203497.47969341138,
-                                 'Ratio of First-timers': 0.25817557347083786, 'No of -ve Reviews': 5823.5356454838775}
+MEASURE_CHANGE_THRES = {'Youth Score': 0.17426854768711522, 'Ratio of Singletons': 0.20796975455475908,
+                                 'No of +ve Reviews': 101771.01715466162, 'Entropy Gap Score': 0.23116616686865055,
+                                 'Rating entropy': 0.80826377581423614, 'Non Cum No. of Reviews': 8607.5606033538934,
+                                 'Ratio of First-timers': 0.18162624326062649, 'No of -ve Reviews': 2831.779432290914}
     # {AVERAGE_RATING : 0.5, RATING_ENTROPY:0.5,\
     #                        NON_CUM_NO_OF_REVIEWS:250, RATIO_OF_SINGLETONS:0.4,\
     #                        RATIO_OF_FIRST_TIMERS:0.4, YOUTH_SCORE:0.5,\
@@ -105,10 +105,11 @@ MEASURE_CHANGE_LOCAL_GRANGER_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.25
                                  TF_IDF: None, NO_OF_REVIEWS: None, NO_OF_POSITIVE_REVIEWS:None,
                                  NO_OF_NEGATIVE_REVIEWS:None}
 
-MEASURE_CHANGE_LOCAL_AR_THRES = {'Youth Score': 0.24807599485757884, 'Ratio of Singletons': 0.29342091179200519,
-                                 'No of +ve Reviews': 173073.6792415776, 'Entropy Gap Score': 0.33269945143185731,
-                                 'Rating entropy': 1.1475137218593321, 'Non Cum No. of Reviews': 203497.47969341138,
-                                 'Ratio of First-timers': 0.25817557347083786, 'No of -ve Reviews': 5823.5356454838775}
+MEASURE_CHANGE_LOCAL_AR_THRES = {'Youth Score': 0.17426854768711522, 'Ratio of Singletons': 0.20796975455475908,
+                                 'No of +ve Reviews': 101771.01715466162, 'Entropy Gap Score': 0.23116616686865055,
+                                 'Rating entropy': 0.80826377581423614, 'Non Cum No. of Reviews': 8607.5606033538934,
+                                 'Ratio of First-timers': 0.18162624326062649, 'No of -ve Reviews': 2831.779432290914}
+
 
     # {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.75,\
     #                        NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.10,\
