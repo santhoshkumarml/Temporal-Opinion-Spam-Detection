@@ -253,10 +253,23 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     #     ax.hist(scores, bins, alpha=1.00, label=key, log=True)
     # else:
     print algo, measure_key
-    ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
     thr1 = getThreshold(scores, 0.20)
     thr2 = getThreshold(scores, 0.10)
     thr3 = getThreshold(scores, 0.05)
+    if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS,
+                       StatConstants.NON_CUM_NO_OF_REVIEWS]:
+        # scores = [math.log(sc+1) for sc in scores]
+        # min_score = min(scores)
+        # max_score = max(scores)
+        # thr1 = math.log(thr1+1)
+        # thr2 = math.log(thr2+1)
+        # thr3 = math.log(thr3+1)
+        # bins = numpy.arange(min_score, max_score, bins)
+        # bins = bins[:20]
+        ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
+    else:
+        ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
+
     ax.axvline(x=thr1, linewidth=2, color='r')
     ax.axvline(x=thr2, linewidth=2, color='g')
     ax.axvline(x=thr3, linewidth=2, color='c')
@@ -265,7 +278,7 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
 def getThreshold(stats_for_dimension, k):
     m = numpy.mean(stats_for_dimension)
     std = numpy.std(stats_for_dimension)
-    vals = {0.05:math.sqrt(19),0.10:3,0.20:2}
+    vals = {0.05:math.sqrt(19),0.10:3, 0.20:2, 0.15:2.38}
     return (m + (vals[k]*std))
 
 
@@ -335,18 +348,39 @@ def readData(csvFolder):
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 
 def rankAnomalies(bnss_key, chPtsOutliers, test_windows, measures):
-    measures_changed = 0
-    weighted_anomalies = dict()
+    weighted_anomalies_for_window = dict()
+    avg_max_anomaly_for_time_window = dict()
+    ratio_of_anomalies_measure = dict()
+    MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18, StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
+                         StatConstants.NO_OF_POSITIVE_REVIEWS:100000, StatConstants.NON_CUM_NO_OF_REVIEWS:100000}
     for window in test_windows:
+        measures_changed = 0
         for measure_key in chPtsOutliers.keys():
             chPtsOutlierScores, chPtsOutliersIdxs = chPtsOutliers[measure_key]
-            if window in chPtsOutliersIdxs:
+            idx1, idx2 = window
+            idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2]
+            if len(idxs) > 0:
+                idx = max(idxs, key= lambda x: chPtsOutlierScores[x])
                 measures_changed += 1
-                no_of_changes_before = chPtsOutliersIdxs.index(window)
-                weighted_anomalies[measure_key] = (1.0 / no_of_changes_before)
-        ratio_of_anomalies_measure = float(measures_changed)/measures
+                no_of_changes_before = chPtsOutliersIdxs.index(idx)
+                div = MAGNITURE_DIVIDER[measure_key] if measure_key in MAGNITURE_DIVIDER else 1.0
 
+                if window not in weighted_anomalies_for_window:
+                    weighted_anomalies_for_window[window] = 0.0
+                weighted_anomalies_for_window[window] += ((1.0 / (1 + no_of_changes_before)) * (chPtsOutlierScores[idx]/div))
 
+                if window not in avg_max_anomaly_for_time_window:
+                    avg_max_anomaly_for_time_window[window] = (0.0, 0.0)
+
+                avg_anomaly, max_anomaly = avg_max_anomaly_for_time_window[window]
+                avg_anomaly += (chPtsOutlierScores[idx]/div)
+                max_anomaly = max(max_anomaly, (chPtsOutlierScores[idx]/div))
+                avg_max_anomaly_for_time_window[window] = avg_anomaly, max_anomaly
+
+        avg_anomaly, max_anomaly = avg_max_anomaly_for_time_window[window]
+        avg_max_anomaly_for_time_window[window] = (avg_anomaly/measures_changed), max_anomaly
+        weighted_anomalies_for_window[window] /= measures_changed
+        ratio_of_anomalies_measure[window] = float(measures_changed)/measures
 
 
 def logStats(bnssKey, plotDir, chPtsOutliers):
@@ -447,22 +481,16 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
 
 def getThresholdForDifferentMeasures(plotDir, doHist=False):
     measure_scores = readScoresFromMeasureLog(plotDir)
-    # 12444474, 13693304, 266284
-    measure_noise = {StatConstants.NON_CUM_NO_OF_REVIEWS: 266284,
-                     StatConstants.NO_OF_POSITIVE_REVIEWS: 13693304,
-                     StatConstants.NO_OF_NEGATIVE_REVIEWS: 266284}
     result = dict()
     for measure_key in measure_scores.keys():
         for algo in measure_scores[measure_key].keys():
             if(algo  == StatConstants.LOCAL_AR):
                 continue
             scores = measure_scores[measure_key][algo]
-            # if not measure_key == StatConstants.NO_OF_NEGATIVE_REVIEWS:
-            #     continue
-            if measure_key in measure_noise:
-                # print '   IN    ', max(scores), measure_noise[measure_key],
-                scores = [sc for sc in scores if sc < measure_noise[measure_key]]
-            thr = getThreshold(scores, 0.20)
+            if not measure_key in [StatConstants.NO_OF_NEGATIVE_REVIEWS,
+                                   StatConstants.NON_CUM_NO_OF_REVIEWS, StatConstants.NO_OF_POSITIVE_REVIEWS]:
+                continue
+            thr = getThreshold(scores, 0.15)
             if doHist:
                 doHistogramForMeasure(20, algo, measure_key, scores)
             result[measure_key] = thr
@@ -476,5 +504,5 @@ if __name__ == "__main__":
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
 
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # print getThresholdForDifferentMeasures(plotDir, doHist=False)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    print getThresholdForDifferentMeasures(plotDir, doHist=True)
