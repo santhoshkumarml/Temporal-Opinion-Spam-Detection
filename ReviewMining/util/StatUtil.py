@@ -110,8 +110,10 @@ def calculateNoOfPositiveAndNegativeReviews(G, statistics_for_bnss, neighboring_
 
         if reviewSentiment == SIAUtil.REVIEW_TYPE_POSITIVE:
             noOfPReviews += 1
-        else:
+        elif reviewSentiment == SIAUtil.REVIEW_TYPE_NEGATIVE:
             noOfNReviews += 1
+        else:
+            pass
     statistics_for_bnss[StatConstants.NO_OF_POSITIVE_REVIEWS][timeKey] = noOfPReviews
     statistics_for_bnss[StatConstants.NO_OF_NEGATIVE_REVIEWS][timeKey] = noOfNReviews
 

@@ -38,6 +38,7 @@ REVIEW_TYPES = {REVIEW_TYPE_FAKE, REVIEW_TYPE_REAL}
 
 REVIEW_TYPE_NEGATIVE = 0
 REVIEW_TYPE_POSITIVE = 1
+REVIEW_TYPE_NEUTRAL = 2
 
 REVIEW_EDGE_DICT_CONST = 'review'
 '''
@@ -258,10 +259,12 @@ class review(SIALink):
         return self.id
     
     def getReviewSentiment(self):
-        if self.getRating()>=3.0:
+        if self.getRating()>3.0:
             return REVIEW_TYPE_POSITIVE
-        else:
+        elif self.getRating()<3.0:
             return REVIEW_TYPE_NEGATIVE
+        else:
+            return REVIEW_TYPE_NEUTRAL
     
     def getUserId(self):
         return self.usrId

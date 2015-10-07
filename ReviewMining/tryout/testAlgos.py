@@ -254,18 +254,19 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     # else:
     print algo, measure_key
     thr1 = getThreshold(scores, 0.20)
-    thr2 = getThreshold(scores, 0.10)
-    thr3 = getThreshold(scores, 0.05)
+    thr2 = getThreshold(scores, 0.15)
+    thr3 = getThreshold(scores, 0.10)
+    thr4 = getThreshold(scores, 0.05)
     if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS,
                        StatConstants.NON_CUM_NO_OF_REVIEWS]:
         # scores = [math.log(sc+1) for sc in scores]
-        # min_score = min(scores)
-        # max_score = max(scores)
+        min_score = min(scores)
+        max_score = max(scores)
         # thr1 = math.log(thr1+1)
         # thr2 = math.log(thr2+1)
         # thr3 = math.log(thr3+1)
         # bins = numpy.arange(min_score, max_score, bins)
-        # bins = bins[:20]
+        # bins = bins[:11]
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
     else:
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
@@ -422,7 +423,7 @@ def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
 def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
 
-def readAndGenerateStatistics(csvFolder, plotDir, timeLength):
+def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W'):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
     # Construct Graphs
@@ -442,8 +443,46 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength):
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
     return bnssKeys, cross_time_graphs, measuresToBeExtracted, superGraph
 
-def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
+def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W'):
+    bnssKeys, cross_time_graphs, measuresToBeExtracted, superGraph = readAndGenerateStatistics(csvFolder, plotDir)
+    for bnssKey in bnssKeys:
+        statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
+            superGraph, \
+            cross_time_graphs, \
+            plotDir, bnssKey, \
+            timeLength, \
+            measuresToBeExtracted, logStats=False)
+        serializeBnssStats(bnssKey, plotDir, statistics_for_bnss)
 
+
+def getThresholdForDifferentMeasures(plotDir, doHist=False):
+    measure_scores = readScoresFromMeasureLog(plotDir)
+    result = dict()
+    measure_noise_threshold = {StatConstants.NO_OF_NEGATIVE_REVIEWS:10000 ,
+                               StatConstants.NON_CUM_NO_OF_REVIEWS:2652956,
+                               StatConstants.NO_OF_POSITIVE_REVIEWS:2652956}
+    for measure_key in measure_scores.keys():
+        for algo in measure_scores[measure_key].keys():
+            if(algo  == StatConstants.LOCAL_AR):
+                continue
+            scores = measure_scores[measure_key][algo]
+            #StatConstants.NO_OF_NEGATIVE_REVIEWS ,StatConstants.NON_CUM_NO_OF_REVIEWS, StatConstants.NO_OF_POSITIVE_REVIEWS
+            #[-ve -> 10000, +ve-> 2652956,,all->265296]
+            #
+            # if not measure_key in [StatConstants.NO_OF_NEGATIVE_REVIEWS ,StatConstants.NON_CUM_NO_OF_REVIEWS, StatConstants.NO_OF_POSITIVE_REVIEWS]:
+            #     continue
+            # else:
+                # print numpy.histogram(scores, 500)
+                # sys.exit()
+            if measure_key in measure_noise_threshold:
+                scores = [sc for sc in scores if sc < measure_noise_threshold[measure_key]]
+            thr = getThreshold(scores, 0.15)
+            if doHist:
+                doHistogramForMeasure(20, algo, measure_key, scores)
+            result[measure_key] = thr
+    return result
+
+def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
@@ -458,15 +497,9 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
 
     bnssKeys = [file_name for file_name, size in file_list_size]
 
-    bnssKeys = ['307906541']
+    # bnssKeys = ['307906541']
+    bnssKeys = bnssKeys[:10]
     for bnss_key in bnssKeys:
-        # statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
-        #     superGraph, \
-        #     cross_time_graphs, \
-        #     plotDir, bnss_key, \
-        #     timeLength, \
-        #     measuresToBeExtracted, logStats=False)
-
         statistics_for_bnss = deserializeBnssStats(bnss_key, bnss_stats_dir)
 
         chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
@@ -479,23 +512,6 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     print '---------------------------------------------------------------------------------------------------------------'
 
 
-def getThresholdForDifferentMeasures(plotDir, doHist=False):
-    measure_scores = readScoresFromMeasureLog(plotDir)
-    result = dict()
-    for measure_key in measure_scores.keys():
-        for algo in measure_scores[measure_key].keys():
-            if(algo  == StatConstants.LOCAL_AR):
-                continue
-            scores = measure_scores[measure_key][algo]
-            if not measure_key in [StatConstants.NO_OF_NEGATIVE_REVIEWS,
-                                   StatConstants.NON_CUM_NO_OF_REVIEWS, StatConstants.NO_OF_POSITIVE_REVIEWS]:
-                continue
-            thr = getThreshold(scores, 0.15)
-            if doHist:
-                doHistogramForMeasure(20, algo, measure_key, scores)
-            result[measure_key] = thr
-    return result
-
 if __name__ == "__main__":
     if(len(sys.argv)!=2):
         print 'Usage: python -m \"tryout.testAlgos\" csvFolder'
@@ -503,6 +519,6 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    print getThresholdForDifferentMeasures(plotDir, doHist=True)
+    # doSerializeAllBnss(csvFolder, plotDir)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    # print getThresholdForDifferentMeasures(plotDir, doHist=True)

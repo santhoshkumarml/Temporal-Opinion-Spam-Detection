@@ -180,7 +180,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     modified_data, 'g', label=measure_key)
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
-                print algo, chOutlierIdxs, measure_key,
+                print measure_key, algo, chOutlierIdxs
 
                 if len(chPtsOutlierScores) > 0:
 
@@ -190,8 +190,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                     for a in algoList:
                         idxs, scs = chPtsOutliersForBnss[measure_key][a]
-                        max_score = max((max_score, max(scs)))
-                        min_score = min((min_score, min(scs)))
+                        if len(scs) > 0:
+                            max_score = max((max_score, max(scs)))
+                            min_score = min((min_score, min(scs)))
 
                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
