@@ -143,7 +143,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     # firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
     # total_time_slots = lastTimeKey-firstTimeKey+1
 
-    toBeUsedMeasures = [measure for measure in toBeUsedMeasures]
+    toBeUsedMeasures = [measure for measure in StatConstants.MEASURE_PRIORITY if measure in toBeUsedMeasures]
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -180,7 +180,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     modified_data, 'g', label=measure_key)
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
-                print measure_key, algo, chOutlierIdxs
+                # print measure_key, algo, chOutlierIdxs
 
                 if len(chPtsOutlierScores) > 0:
 

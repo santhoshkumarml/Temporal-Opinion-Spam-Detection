@@ -2,12 +2,14 @@ __author__ = 'santhosh'
 
 import numpy
 import matplotlib.pyplot as plt
+
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
-from anomaly_detection import cusum
 from anomaly_detection import ChangeFinder as cfr
+
+
 # import changefinder
-import copy
+import RankHelper
 import math
 from statistics import business_statistics_generator
 from util import GraphUtil
@@ -15,7 +17,7 @@ from itunes_utils.ItunesDataReader import ItunesDataReader
 import os
 from util import SIAUtil
 from util import PlotUtil
-from datetime import datetime, timedelta
+from datetime import datetime
 import sys
 import pickle
 
@@ -283,11 +285,10 @@ def getThreshold(stats_for_dimension, k):
     return (m + (vals[k]*std))
 
 
-def readScoresFromMeasureLog(plotDir):
-    import re
+def readScoresFromMeasureLog(plotDir, file_name):
     chPtsOutliers = dict()
     measure_scores = dict()
-    measure_log = os.path.join(plotDir, "measure_scores.log")
+    measure_log = os.path.join(plotDir, file_name)
     with open(measure_log) as f:
         strings = f.readlines()
         # strings = f.read()
@@ -347,42 +348,6 @@ def readData(csvFolder):
     rdr = ItunesDataReader()
     (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
-
-def rankAnomalies(bnss_key, chPtsOutliers, test_windows, measures):
-    weighted_anomalies_for_window = dict()
-    avg_max_anomaly_for_time_window = dict()
-    ratio_of_anomalies_measure = dict()
-    MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18, StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
-                         StatConstants.NO_OF_POSITIVE_REVIEWS:100000, StatConstants.NON_CUM_NO_OF_REVIEWS:100000}
-    for window in test_windows:
-        measures_changed = 0
-        for measure_key in chPtsOutliers.keys():
-            chPtsOutlierScores, chPtsOutliersIdxs = chPtsOutliers[measure_key]
-            idx1, idx2 = window
-            idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2]
-            if len(idxs) > 0:
-                idx = max(idxs, key= lambda x: chPtsOutlierScores[x])
-                measures_changed += 1
-                no_of_changes_before = chPtsOutliersIdxs.index(idx)
-                div = MAGNITURE_DIVIDER[measure_key] if measure_key in MAGNITURE_DIVIDER else 1.0
-
-                if window not in weighted_anomalies_for_window:
-                    weighted_anomalies_for_window[window] = 0.0
-                weighted_anomalies_for_window[window] += ((1.0 / (1 + no_of_changes_before)) * (chPtsOutlierScores[idx]/div))
-
-                if window not in avg_max_anomaly_for_time_window:
-                    avg_max_anomaly_for_time_window[window] = (0.0, 0.0)
-
-                avg_anomaly, max_anomaly = avg_max_anomaly_for_time_window[window]
-                avg_anomaly += (chPtsOutlierScores[idx]/div)
-                max_anomaly = max(max_anomaly, (chPtsOutlierScores[idx]/div))
-                avg_max_anomaly_for_time_window[window] = avg_anomaly, max_anomaly
-
-        avg_anomaly, max_anomaly = avg_max_anomaly_for_time_window[window]
-        avg_max_anomaly_for_time_window[window] = (avg_anomaly/measures_changed), max_anomaly
-        weighted_anomalies_for_window[window] /= measures_changed
-        ratio_of_anomalies_measure[window] = float(measures_changed)/measures
-
 
 def logStats(bnssKey, plotDir, chPtsOutliers):
     measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
@@ -456,7 +421,7 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W'):
 
 
 def getThresholdForDifferentMeasures(plotDir, doHist=False):
-    measure_scores = readScoresFromMeasureLog(plotDir)
+    measure_scores = readScoresFromMeasureLog(plotDir, "measure_scores.log")
     result = dict()
     measure_noise_threshold = {StatConstants.NO_OF_NEGATIVE_REVIEWS:10000 ,
                                StatConstants.NON_CUM_NO_OF_REVIEWS:2652956,
@@ -497,8 +462,8 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
 
     bnssKeys = [file_name for file_name, size in file_list_size]
 
-    # bnssKeys = ['307906541']
-    bnssKeys = bnssKeys[:10]
+    bnssKeys = ['307906541']
+
     for bnss_key in bnssKeys:
         statistics_for_bnss = deserializeBnssStats(bnss_key, bnss_stats_dir)
 
@@ -522,3 +487,15 @@ if __name__ == "__main__":
     # doSerializeAllBnss(csvFolder, plotDir)
     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)
+    # RankHelper.rankAllAnomalies(plotDir)
+    bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    file_list_size = []
+    for root, dirs, files in os.walk(bnss_stats_dir):
+        for name in files:
+            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+        file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+
+    bnssKeys = [file_name for file_name, size in file_list_size]
+    print bnssKeys[30:60]
+
+    # bnssKeys = ['307906541']

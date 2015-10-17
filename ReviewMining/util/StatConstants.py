@@ -45,20 +45,6 @@ LOCAL_GRANGER = 'LOCAL_GRANGER'
 AR_UNIFYING = 'SDAR'
 TWITTER_SEASONAL_ANOM_DETECTION = 'Twitter Anomaly Detection in Time Series'
 
-# MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : CUSUM, RATING_ENTROPY:AR_UNIFYING,\
-#                            NON_CUM_NO_OF_REVIEWS: AR_UNIFYING, RATIO_OF_SINGLETONS:AR_UNIFYING,\
-#                            NO_OF_POSITIVE_REVIEWS: AR_UNIFYING, NO_OF_NEGATIVE_REVIEWS:AR_UNIFYING,\
-#                            RATIO_OF_FIRST_TIMERS:AR_UNIFYING, YOUTH_SCORE:AR_UNIFYING,\
-#                            ENTROPY_SCORE:AR_UNIFYING, MAX_TEXT_SIMILARITY:AR_UNIFYING,\
-#                                   TF_IDF:AR_UNIFYING, NO_OF_REVIEWS: AR_UNIFYING}
-
-
-# MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : CUSUM, RATING_ENTROPY:LOCAL_AR,\
-#                            NON_CUM_NO_OF_REVIEWS: LOCAL_AR, RATIO_OF_SINGLETONS:LOCAL_AR,\
-#                            NO_OF_POSITIVE_REVIEWS: LOCAL_AR, NO_OF_NEGATIVE_REVIEWS:LOCAL_AR,\
-#                            RATIO_OF_FIRST_TIMERS:LOCAL_AR, YOUTH_SCORE:LOCAL_AR,\
-#                            ENTROPY_SCORE:LOCAL_AR, MAX_TEXT_SIMILARITY:LOCAL_AR,\
-#                                   TF_IDF:LOCAL_AR, NO_OF_REVIEWS: LOCAL_AR}
 
 MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM], NO_OF_POSITIVE_REVIEWS: [LOCAL_AR, AR_UNIFYING],\
                                   NO_OF_NEGATIVE_REVIEWS:[LOCAL_AR, AR_UNIFYING], RATING_ENTROPY: [LOCAL_AR, AR_UNIFYING],\
@@ -69,11 +55,6 @@ MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM], NO_OF_POSITIVE_REVIE
 
 MEASURE_LEAD_SIGNALS = {AVERAGE_RATING}
 
-# MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : CUSUM, RATING_ENTROPY:LOCAL_GRANGER,\
-#                            NON_CUM_NO_OF_REVIEWS: LOCAL_AR, RATIO_OF_SINGLETONS:LOCAL_GRANGER,\
-#                            RATIO_OF_FIRST_TIMERS:LOCAL_GRANGER, YOUTH_SCORE:LOCAL_GRANGER,\
-#                            ENTROPY_SCORE:LOCAL_GRANGER, MAX_TEXT_SIMILARITY:LOCAL_GRANGER,\
-#                                   TF_IDF:LOCAL_GRANGER, NO_OF_REVIEWS: LOCAL_AR}
 
 MEASURES_CHANGE_FINDERS = {key:(MEASURES_CHANGE_DETECTION_ALGO[key],MEASURES_CHANGE_FINDER_PARAMS[key]) for key in MEASURES}
 
@@ -81,6 +62,10 @@ MEASURES_CHANGE_FINDERS = {key:(MEASURES_CHANGE_DETECTION_ALGO[key],MEASURES_CHA
 BOTH = 'both'
 INCREASE = 'Increase'
 DECREASE = 'Decrease'
+
+MEASURE_PRIORITY = [AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS, NON_CUM_NO_OF_REVIEWS,
+                    ENTROPY_SCORE, RATING_ENTROPY, YOUTH_SCORE, RATIO_OF_FIRST_TIMERS, RATIO_OF_SINGLETONS]
+
 MEASURE_DIRECTION = {AVERAGE_RATING : BOTH, RATING_ENTROPY:DECREASE,\
                            NON_CUM_NO_OF_REVIEWS:INCREASE, RATIO_OF_SINGLETONS:INCREASE,\
                            RATIO_OF_FIRST_TIMERS:INCREASE, YOUTH_SCORE:INCREASE,\
@@ -98,33 +83,9 @@ MEASURE_CHANGE_THRES = {'Youth Score': 0.20255295206730223, 'Ratio of Singletons
                                  'No of +ve Reviews': 39432.770726578514, 'Entropy Gap Score': 0.26981230346376256,
                                  'Rating entropy': 0.93762424754829699, 'Non Cum No. of Reviews': 43423.188618988795,
                                  'Ratio of First-timers': 0.21045479159684069, 'No of -ve Reviews': 372.90525000682993}
-    # {AVERAGE_RATING : 0.5, RATING_ENTROPY:0.5,\
-    #                        NON_CUM_NO_OF_REVIEWS:250, RATIO_OF_SINGLETONS:0.4,\
-    #                        RATIO_OF_FIRST_TIMERS:0.4, YOUTH_SCORE:0.5,\
-    #                        ENTROPY_SCORE:0.6, MAX_TEXT_SIMILARITY:None, TF_IDF:None,\
-    #                     NO_OF_REVIEWS:None, NO_OF_POSITIVE_REVIEWS:20,
-    #                     NO_OF_NEGATIVE_REVIEWS:20}
 
 
 MEASURE_CHANGE_LOCAL_AR_THRES = {'Youth Score': 0.20255295206730223, 'Ratio of Singletons': 0.24039496091794749,
                                  'No of +ve Reviews': 39432.770726578514, 'Entropy Gap Score': 0.26981230346376256,
                                  'Rating entropy': 0.93762424754829699, 'Non Cum No. of Reviews': 43423.188618988795,
                                  'Ratio of First-timers': 0.21045479159684069, 'No of -ve Reviews': 372.90525000682993}
-    # {'Youth Score': 0.20231548209321173, 'Ratio of Singletons': 0.24044131425397922,
-    #                              'No of +ve Reviews': 120982.03773216135, 'Entropy Gap Score': 0.26974895841786667,
-    #                              'Rating entropy': 0.93717923483986132, 'Non Cum No. of Reviews': 10210.16079911323,
-    #                              'Ratio of First-timers': 0.21071509702760502, 'No of -ve Reviews': 3364.7388373516019}
-
-
-    # {'Youth Score': 0.17426854768711522, 'Ratio of Singletons': 0.20796975455475908,
-    #                              'No of +ve Reviews': 101771.01715466162, 'Entropy Gap Score': 0.23116616686865055,
-    #                              'Rating entropy': 0.80826377581423614, 'Non Cum No. of Reviews': 8607.5606033538934,
-    #                              'Ratio of First-timers': 0.18162624326062649, 'No of -ve Reviews': 2831.779432290914}
-
-
-    # {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.75,\
-    #                        NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.10,\
-    #                        RATIO_OF_FIRST_TIMERS: 0.08, YOUTH_SCORE: 0.08,\
-    #                        ENTROPY_SCORE: 0.75, MAX_TEXT_SIMILARITY: None,\
-    #                              TF_IDF: None, NO_OF_REVIEWS: 200, NO_OF_POSITIVE_REVIEWS:200,
-    #                              NO_OF_NEGATIVE_REVIEWS:200}
