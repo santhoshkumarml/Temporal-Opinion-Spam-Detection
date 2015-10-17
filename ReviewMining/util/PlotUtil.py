@@ -181,12 +181,11 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
                 # print measure_key, algo, chOutlierIdxs
-
+                diff_test_idxs = set()
                 if len(chPtsOutlierScores) > 0:
 
                     max_score = -float('inf')
                     min_score = float('inf')
-                    diff_test_idxs = set()
 
                     for a in algoList:
                         idxs, scs = chPtsOutliersForBnss[measure_key][a]

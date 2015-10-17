@@ -488,14 +488,14 @@ if __name__ == "__main__":
     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)
     # RankHelper.rankAllAnomalies(plotDir)
-    bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
-    file_list_size = []
-    for root, dirs, files in os.walk(bnss_stats_dir):
-        for name in files:
-            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-        file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
-
-    bnssKeys = [file_name for file_name, size in file_list_size]
-    print bnssKeys[30:60]
+    # bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    # file_list_size = []
+    # for root, dirs, files in os.walk(bnss_stats_dir):
+    #     for name in files:
+    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+    #
+    # bnssKeys = [file_name for file_name, size in file_list_size]
+    # print bnssKeys[30:60]
 
     # bnssKeys = ['307906541']
