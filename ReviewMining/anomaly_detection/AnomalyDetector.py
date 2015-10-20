@@ -334,8 +334,6 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
                     # copied_data[i] = pred
 
         outies_scores.extend(test_error_scores)
-
-    print '-----------------------------------------------------'
     return outierIds, outies_scores
 
 

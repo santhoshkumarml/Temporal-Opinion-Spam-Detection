@@ -244,6 +244,21 @@ def runChangeFinder(data, algo):
 # # scores = out
 #
 # plotDataAndChanges(data, scores=scores)
+
+def printBnss():
+    # bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    # file_list_size = []
+    # for root, dirs, files in os.walk(bnss_stats_dir):
+    #     for name in files:
+    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+    #
+    # bnssKeys = [file_name for file_name, size in file_list_size]
+    # print bnssKeys[30:60]
+
+    # bnssKeys = ['307906541']
+    pass
+
 def doHistogramForMeasure(bins, algo, measure_key, scores):
     fig = plt.figure()
     plt.title('Score histogram')
@@ -349,12 +364,14 @@ def readData(csvFolder):
     (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=False)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 
-def logStats(bnssKey, plotDir, chPtsOutliers):
-    measure_log_file = open(os.path.join(plotDir, "measure_scores.log"), 'a')
+def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
+    measure_log_file = open(os.path.join(plotDir, "scores_with_outliers.log"), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
+    chPtsOutliers[StatConstants.FIRST_TIME_KEY] = firstTimeKey
     measure_log_file.write(str(chPtsOutliers)+"\n")
     measure_log_file.close()
     del chPtsOutliers[StatConstants.BNSS_ID]
+    del chPtsOutliers[StatConstants.FIRST_TIME_KEY]
 
 def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, find_outlier_idxs=True):
     beforeAnomalyDetection = datetime.now()
@@ -460,16 +477,21 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
             file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
         file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
 
-    bnssKeys = [file_name for file_name, size in file_list_size]
+    bnssKeys = [file_name for file_name,
+                              size in file_list_size]
 
-    bnssKeys = ['307906541']
+    bnssKeys = ['363590051', '307906541']
+    bnssKeys = ['363590051']
 
+    print '---------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
         statistics_for_bnss = deserializeBnssStats(bnss_key, bnss_stats_dir)
 
         chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
 
-        # logStats(bnss_key, plotDir, chPtsOutliers)
+        print chPtsOutliers
+
+        # logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
 
         if doPlot:
             plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
@@ -484,18 +506,7 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    # doSerializeAllBnss(csvFolder, plotDir)
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # print getThresholdForDifferentMeasures(plotDir, doHist=True)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False)
     # RankHelper.rankAllAnomalies(plotDir)
-    # bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
-    # file_list_size = []
-    # for root, dirs, files in os.walk(bnss_stats_dir):
-    #     for name in files:
-    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
-    #
-    # bnssKeys = [file_name for file_name, size in file_list_size]
-    # print bnssKeys[30:60]
-
-    # bnssKeys = ['307906541']
+    # doSerializeAllBnss(csvFolder, plotDir)
+    # print getThresholdForDifferentMeasures(plotDir, doHist=True)
