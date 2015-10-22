@@ -239,10 +239,10 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                         outlier_idx < idx2 and idx1 <= outlier_idx < len(chPtsOutlierScores)]
                         if len(outlier_idxs) > 0:
                             outlier_idx = max(outlier_idxs, key = lambda outlier_idx : chPtsOutlierScores[outlier_idx])
-                            ax1.axvline(x=firstDimensionValues[outlier_idx], linewidth=1, color='b')
+                            ax1.axvline(x=firstDimensionValues[outlier_idx], linewidth=1.5, color='b')
                 else:
                     for idx in chOutlierIdxs:
-                        ax1.axvline(x=firstDimensionValues[idx], linewidth=1, color='b')
+                        ax1.axvline(x=firstDimensionValues[idx], linewidth=1.5, color='b')
                 plot += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)

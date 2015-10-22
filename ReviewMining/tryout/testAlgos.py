@@ -437,6 +437,40 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W'):
         serializeBnssStats(bnssKey, plotDir, statistics_for_bnss)
 
 
+def intersection_between_users(usr_ids_for_bnss_in_time_window, bnssKey, superGraph):
+    usrs_for_this_bnss = set([usrId for usrId, usr_type in superGraph.neighbors((bnssKey, SIAUtil.PRODUCT))])
+    ins = usr_ids_for_bnss_in_time_window.intersection(usrs_for_this_bnss)
+    if len(ins) > 10:
+        print bnssKey, ins
+    return len(ins)
+
+def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLength = '1-W'):
+     # Read data
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
+
+    # Construct Graphs
+    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, \
+                                                           bnssIdToBusinessDict, \
+                                                           reviewIdToReviewsDict, timeLength)
+
+    usr_ids_for_bnss_in_time_window = []
+
+    lb, ub = time_window
+    time_window = [idx for idx in range(lb, ub+1)]
+    for time_key in time_window:
+         time_g = cross_time_graphs[time_key]
+         usr_ids_for_bnss_in_time_window = usr_ids_for_bnss_in_time_window \
+                                           + [usrId for (usrId, usr_type)
+                                              in time_g.neighbors((bnssKey, SIAUtil.PRODUCT))]
+    usr_ids_for_bnss_in_time_window = set(usr_ids_for_bnss_in_time_window)
+    bnssKeys = set([bnssId for usrId in usr_ids_for_bnss_in_time_window for bnssId, bnssType in superGraph.neighbors((usrId, SIAUtil.USER))])
+    bnssKeys = [(bnssId, intersection_between_users(usr_ids_for_bnss_in_time_window, bnssId, superGraph)) for bnssId in bnssKeys]
+    bnssKeys = sorted(bnssKeys, reverse=True,
+                      key= lambda x: x[1])
+    print bnssKeys
+
+
+
 def getThresholdForDifferentMeasures(plotDir, doHist=False):
     measure_scores = readScoresFromMeasureLog(plotDir, "measure_scores.log")
     result = dict()
@@ -480,16 +514,14 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
 
-    bnssKeys = ['363590051', '307906541']
-    bnssKeys = ['363590051']
+    # bnssKeys = ['363590051', '307906541']
+    bnssKeys = ['391704995']
 
     print '---------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
         statistics_for_bnss = deserializeBnssStats(bnss_key, bnss_stats_dir)
 
         chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
-
-        print chPtsOutliers
 
         # logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
 
@@ -506,7 +538,8 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    findUsersInThisTimeWindow('363590051',(107, 112),csvFolder, plotDir)
     # RankHelper.rankAllAnomalies(plotDir)
     # doSerializeAllBnss(csvFolder, plotDir)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)

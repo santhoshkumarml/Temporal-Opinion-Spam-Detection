@@ -692,50 +692,6 @@ def plotCusumChanges(x, changes, detection_times=[]):
                  label='Detection')
     plt.show()
 
-
-def testCusum():
-    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(1.5, 0.05, 200),\
-                              numpy.random.normal(2.3, 0.05, 200)])
-    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(0.7, 0.4, 200)])
-    data = numpy.concatenate([numpy.random.normal(0.7, 0.05, 200), numpy.random.normal(0.7, 0.2, 200)])
-    data = [0.71912204,0.87731491,1.04376258,1.40563906,0.88967452,0.54856211
-            ,0.53175152,0.55124426,0.55343821,0.62240886,0.74833934,0.85191151
-            ,0.7632238,0.79266917,0.94361834,1.04220472,1.02522303,0.52746524
-            ,0.19799156,0.6144071,0.58449179,0.63295556,0.93026894,0.7709049
-            ,0.53611494,0.74182611,0.96449673,0.8470438,0.98779719,0.81249067
-            ,0.84709773,0.87185117,0.82816918,0.27686884,0.04748681,0.12145272
-            ,0.1041873,0.31396252,0.07103816,0.15854998,0.10125327,0.09326488
-            ,0.07942194,0.03908175,0.11218925,0.10670825,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722,0.2035722
-            ,0.2035722,0.2035722,0.2035722,0.0,0.0]
-    data = [3.32919255,3.64074074,3.84269663,3.90813648,4.00207039,4.12747875
-,4.17529039,4.2212766,4.24964639,4.22222222,4.22419725,4.2175552
-,4.23211606,4.24624765,4.25167936,4.25248166,4.2575,4.25680787
-,4.29813318,4.30547474,4.29731762,4.29461078,4.28444652,4.26276548
-,4.24914237,4.23062539,4.20832483,4.15762171,4.13535749,4.0970021
-,4.06199813,4.03958944,4.0111131,4.07295029,4.46319569,4.50791645
-,4.5365574,4.53393311,4.58877685,4.59767227,4.57510136,4.58629547
-,4.59982221,4.60221015,4.61307239,4.62219092,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638,4.62106638
-,4.62106638,4.62106638,4.62106638,4.62105966,4.62105966]
-
-    x = numpy.atleast_1d(data).astype('float64')
-    changes = cusum_using_call_to_r_py(x)
-    print changes
-    # plotCusumChanges(changes, x)
-
-    #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
-    #print ta
-    # plotCusumChanges(ta, x)
-
 def tryAr():
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
@@ -981,6 +937,38 @@ def testCusum1():
     x = numpy.atleast_1d(data).astype('float64')
     changes = cusum_using_call_to_r_py(x)
     print changes
+
+
+def testCusum():
+    import os, testAlgos
+    csvFolder = sys.argv[1]
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
+    bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    # file_list_size = []
+    # for root, dirs, files in os.walk(bnss_stats_dir):
+    #     for name in files:
+    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+    #
+    # bnssKeys = [file_name for file_name,
+    #                           size in file_list_size]
+    bnssKeys = ['363590051']
+
+    for bnss_key in bnssKeys:
+        statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
+        firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:]
+        x = numpy.atleast_1d(data).astype('float64')
+        print x
+        changes = cusum_using_call_to_r_py(x)
+        plotCusumChanges(x, changes)
+        # print [firstKey + change for change in changes]
+    # plotCusumChanges(changes, x)
+
+    #ta, tai, tapi, tani = AnomalyDetector.detect_outliers_using_cusum(data, 0.5)
+    #print ta
+    # plotCusumChanges(ta, x)
+
 testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
