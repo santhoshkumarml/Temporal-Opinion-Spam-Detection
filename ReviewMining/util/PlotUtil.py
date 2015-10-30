@@ -174,7 +174,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                    StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                     import math
-                    modified_data = [math.log(d+1) for d in data]
+                    modified_data = [d+1 for d in data]
+                    ax1.set_yscale('log')
 
                 ax1.plot(firstDimensionValues,\
                     modified_data, 'g', label=measure_key)
@@ -195,8 +196,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
-                        max_score = math.log(max_score+1)
-                        min_score = math.log(min_score+1)
+                        max_score = max_score+1
+                        min_score = min_score+1
 
                     ax2 = ax1.twinx()
                     ax2.set_ylim((min_score, max_score+0.01))
@@ -213,7 +214,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                     x.append(firstTimeKey+indx)
                                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
-                                        plot_scores.append(math.log(scores[indx]+1))
+                                        plot_scores.append(scores[indx]+1)
+                                        ax2.set_yscale('log')
                                     else:
                                         plot_scores.append(scores[indx])
                                 ax2.plot(x, plot_scores, 'r')
@@ -221,7 +223,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                             if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                                 scores = chPtsOutlierScores
-                                scores = [math.log(scores[indx]+1) for indx in range(len(scores))]
+                                scores = [scores[indx]+1 for indx in range(len(scores))]
+                                ax2.set_yscale('log')
                                 ax2.plot(range(firstTimeKey, firstTimeKey+len(scores)), scores,
                                  'r', label='Outlier Scores')
                             else:

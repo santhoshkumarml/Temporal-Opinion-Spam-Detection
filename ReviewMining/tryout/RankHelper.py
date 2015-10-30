@@ -97,8 +97,6 @@ def rankAllAnomalies(plotDir):
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
-    final_scores_dict = dict()
-    bnss_first_time_dict = dict()
     with open(measure_log) as f:
         aF1, aF2, aF3, aF4 = dict(), dict(), dict(), dict()
         strings = f.readlines()
@@ -120,7 +118,6 @@ def rankAllAnomalies(plotDir):
                         magnitude_divider[measure_key] = max_outlier_score
                     if max_outlier_score > magnitude_divider[measure_key]:
                         magnitude_divider[measure_key] = max_outlier_score
-        print magnitude_divider
 
         for string in strings:
             chPtsOutliers = readChPtsOutliers(string)
@@ -143,43 +140,86 @@ def rankAllAnomalies(plotDir):
                 aF4[(bnss_key, window)] = f4[window]
 
 
-        scores1 = sorted(aF1.values())
-        scores2 = sorted(aF2.values())
-        scores3 = sorted(aF3.values())
-        scores4 = sorted(aF4.values())
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        for string in strings:
-            chPtsOutliers = readChPtsOutliers(string)
-            if StatConstants.BNSS_ID not in chPtsOutliers:
-                continue
-            bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
-            bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
-            avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
-            diff_test_windows = [AnomalyDetector.getRangeIdxs(idx) for idx in sorted(avg_idxs)]
+        rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
 
-            for window in diff_test_windows:
-                score1 = aF1[(bnss_key, window)]
-                score2 = aF2[(bnss_key, window)]
-                score3 = aF3[(bnss_key, window)]
-                score4 = aF4[(bnss_key, window)]
 
-                nscore1 = float(scores1.index(score1))/float(len(scores1))
-                nscore2 = float(scores2.index(score2))/float(len(scores2))
-                nscore3 = float(scores3.index(score3))/float(len(scores3))
-                nscore4 = float(scores4.index(score4))/float(len(scores4))
+def rankAnomaliesPartially(aF1, aF2, aF3, aF4, topK=50):
+    Keys1D = sorted(aF1.keys(), lambda  key: aF1[key], reverse=True)
+    Keys2D = sorted(aF2.keys(), lambda  key: aF2[key], reverse=True)
+    Keys3D = sorted(aF3.keys(), lambda  key: aF3[key], reverse=True)
+    Keys4D = sorted(aF4.keys(), lambda  key: aF4[key], reverse=True)
 
-                nscore1 = (nscore1**2)*0.4
-                nscore2 = (nscore2**2)*0.2
-                nscore3 = (nscore3**2)*0.2
-                nscore4 = (nscore4**2)*0.2
+    ranked_bnss = []
+    visited_bnss = set()
 
-                final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4])/4)
-                final_scores_dict[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)
+    idx = 0
+    while len(visited_bnss) < topK:
+        key1 = Keys1D[idx]
+        key2 = Keys2D[idx]
+        key3 = Keys3D[idx]
+        key4 = Keys4D[idx]
+
+        if key1 not in visited_bnss:
+            ranked_bnss.append(key1)
+            visited_bnss.add(key1)
+
+        if key2 not in visited_bnss:
+            ranked_bnss.append(key2)
+            visited_bnss.add(key2)
+
+        if key3 not in visited_bnss:
+            ranked_bnss.append(key3)
+            visited_bnss.add(key3)
+
+        if key4 not in visited_bnss:
+            ranked_bnss.append(key4)
+            visited_bnss.add(key4)
+
+        idx += 1
+
+def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
+    bnss_first_time_dict = dict()
+    final_scores_dict = dict()
+
+    scores1 = sorted(aF1.values())
+    scores2 = sorted(aF2.values())
+    scores3 = sorted(aF3.values())
+    scores4 = sorted(aF4.values())
+
+    for string in strings:
+        chPtsOutliers = readChPtsOutliers(string)
+        if StatConstants.BNSS_ID not in chPtsOutliers:
+            continue
+        bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+        bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
+        avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
+        diff_test_windows = [AnomalyDetector.getRangeIdxs(idx) for idx in sorted(avg_idxs)]
+
+        for window in diff_test_windows:
+            score1 = aF1[(bnss_key, window)]
+            score2 = aF2[(bnss_key, window)]
+            score3 = aF3[(bnss_key, window)]
+            score4 = aF4[(bnss_key, window)]
+
+            nscore1 = float(scores1.index(score1)) / float(len(scores1))
+            nscore2 = float(scores2.index(score2)) / float(len(scores2))
+            nscore3 = float(scores3.index(score3)) / float(len(scores3))
+            nscore4 = float(scores4.index(score4)) / float(len(scores4))
+
+            nscore1 = (nscore1 ** 2) * 0.4
+            nscore2 = (nscore2 ** 2) * 0.2
+            nscore3 = (nscore3 ** 2) * 0.2
+            nscore4 = (nscore4 ** 2) * 0.2
+
+            final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4]) / 4)
+            final_scores_dict[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)
 
     sorted_keys = sorted(final_scores_dict.keys(), key= lambda  v : final_scores_dict[v][0], reverse=True)
     print '-------------------------------------------------------------------------------------------------'
-    for key in sorted_keys:
+    for key_idx in range(0, topK):
+        key = sorted_keys[key_idx]
         bnss_key, (idx1, idx2) = key
         idx1 += bnss_first_time_dict[bnss_key]
         idx2 += bnss_first_time_dict[bnss_key]

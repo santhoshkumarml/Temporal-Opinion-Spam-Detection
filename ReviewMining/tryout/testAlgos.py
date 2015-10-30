@@ -417,7 +417,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W'):
     bnssKeys = [bnss_key for bnss_key, bnss_type in superGraph.nodes() \
                 if bnss_type == SIAUtil.PRODUCT]
     bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
-    # bnssKeys = ['386244833']
+    # bnssKeys = ['363590051']
     # bnssKeys = bnssKeys[:2]
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -515,7 +515,9 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
                               size in file_list_size]
 
     # bnssKeys = ['363590051', '307906541']
-    bnssKeys = ['391704995']
+    # bnssKeys = ['316239742', '351598228', '391704995', '399734002', '481096722',
+    #             '326477287', '385786751', '477148788', '481589275', '448679509']
+    bnssKeys = ['316239742']
 
     print '---------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
@@ -538,8 +540,8 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    findUsersInThisTimeWindow('363590051',(107, 112),csvFolder, plotDir)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    # findUsersInThisTimeWindow('363590051',(107, 112),csvFolder, plotDir)
     # RankHelper.rankAllAnomalies(plotDir)
     # doSerializeAllBnss(csvFolder, plotDir)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)
