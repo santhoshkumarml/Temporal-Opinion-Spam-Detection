@@ -145,7 +145,7 @@ def rankAllAnomalies(plotDir):
         rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
 
 
-def rankAnomaliesPartially(aF1, aF2, aF3, aF4, topK=50):
+def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
     Keys1D = sorted(aF1.keys(), lambda  key: aF1[key], reverse=True)
     Keys2D = sorted(aF2.keys(), lambda  key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), lambda  key: aF3[key], reverse=True)
@@ -153,6 +153,14 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, topK=50):
 
     ranked_bnss = []
     visited_bnss = set()
+    bnss_first_time_dict = dict()
+
+    for string in strings:
+        chPtsOutliers = readChPtsOutliers(string)
+        if StatConstants.BNSS_ID not in chPtsOutliers:
+            continue
+        bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+        bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
 
     idx = 0
     while len(visited_bnss) < topK:
@@ -178,6 +186,15 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, topK=50):
             visited_bnss.add(key4)
 
         idx += 1
+
+    print '-------------------------------------------------------------------------------------------------'
+    for key_idx in range(0, topK):
+        key = ranked_bnss[key_idx]
+        bnss_key, (idx1, idx2) = key
+        idx1 += bnss_first_time_dict[bnss_key]
+        idx2 += bnss_first_time_dict[bnss_key]
+        print bnss_key, (idx1, idx2)
+    print '-------------------------------------------------------------------------------------------------'
 
 def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
     bnss_first_time_dict = dict()
