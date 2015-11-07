@@ -1,4 +1,3 @@
-__author__ = 'santhosh'
 # -*- coding: utf-8 -*-
 from __future__ import division
 
@@ -17,6 +16,7 @@ from lshash import LSHash
 
 import anomaly_detection.MITCusum as cm
 from anomaly_detection import AnomalyDetector
+from anomaly_detection import MyCusum
 from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
 from temporal_statistics import measure_extractor
@@ -24,6 +24,8 @@ from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
+
+__author__ = 'santhosh'
 
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -934,24 +936,24 @@ def testCusum():
     csvFolder = sys.argv[1]
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
     bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
-    # file_list_size = []
-    # for root, dirs, files in os.walk(bnss_stats_dir):
-    #     for name in files:
-    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
-    #
-    # bnssKeys = [file_name for file_name,
-    #                           size in file_list_size]
-    bnssKeys = ['363590051']
+    file_list_size = []
+    for root, dirs, files in os.walk(bnss_stats_dir):
+        for name in files:
+            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+        file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
 
+    bnssKeys = [file_name for file_name,
+                              size in file_list_size]
+    bnssKeys = bnssKeys[120:140]
+    #'371405542', '363590051', '327586041', '412629178'
+    # bnssKeys = ['385786751']
     for bnss_key in bnssKeys:
         statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:firstKey+40]
         data = numpy.atleast_1d(data).astype('float64')
-        from anomaly_detection import MyCusum as cusum
-        changes = cusum.run_cusum(data, threshold=12, magnitude=0.5)
-        print changes
+        changes = MyCusum.run_cusum(data, threshold=8, magnitude=0.5)
+        print bnss_key, changes
         # changes = cusum_using_call_to_r_py(x)
         plotCusumChanges(data, changes)
         # print [firstKey + change for change in changes]
@@ -977,12 +979,11 @@ def mockTestCusum():
                 numpy.random.normal(1.0, 0.1, 100)]
     data = numpy.concatenate(dis_data)
     data = numpy.atleast_1d(data).astype('float64')
-    from anomaly_detection import MyCusum as cusum
-    changes = cusum.run_cusum(data, threshold=100, magnitude=0.5)
+    changes = MyCusum.run_cusum(data, threshold=100, magnitude=0.5)
     plotCusumChanges(data, changes)
 
-# testCusum()
-mockTestCusum()
+testCusum()
+# mockTestCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()

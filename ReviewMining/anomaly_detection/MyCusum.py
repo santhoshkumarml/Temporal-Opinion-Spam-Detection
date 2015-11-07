@@ -15,22 +15,26 @@ def run_cusum(data, threshold,magnitude=0.5):
         current_sample = data[k]
         mean = numpy.mean(data[start:k])
         std = numpy.std(data[start:k+1])
-        if std > 0:
-            sp = (magnitude/(std**2))*(current_sample - mean - (magnitude/2))
-            sn = -((magnitude/(std**2))*(current_sample - mean + (magnitude/2)))
-            pS[k] = pS[k-1] + sp
-            nS[k] = nS[k-1] + sn
-            pG[k] = max(pG[k-1] + sp, 0)
-            nG[k] = max(nG[k-1] + sn, 0)
-            if pG[k] > threshold > 0 or nG[k] > threshold > 0:
-                nd = k
-                if pG[k] > threshold > 0:
-                    nc = min(range(start + 1, k + 1), key=lambda key: pS[key - 1])
-                else:
-                    nc = min(range(start + 1, k + 1), key=lambda key: nS[key - 1])
-                nS[nc] = pS[nc] = nG[nc] = pG[nc] = 0
-                k = start = nc + 1
-                changes.append(nc)
-                # print nd, nc
+        std = (10**-2) if std == 0 else std
+        sp = (magnitude/(std**2))*(current_sample - mean - (magnitude/2))
+        sn = -((magnitude/(std**2))*(current_sample - mean + (magnitude/2)))
+        pS[k] = pS[k-1] + sp
+        nS[k] = nS[k-1] + sn
+        pG[k] = max(pG[k-1] + sp, 0)
+        nG[k] = max(nG[k-1] + sn, 0)
+        # print current_sample, pG[k], pS[k], sp
+        if pG[k] > threshold > 0 or nG[k] > threshold > 0:
+            nd = k
+            # while pG[start] == 0 and nG[start] == 0 and start < len(data) - 1:
+            #     start += 1
+
+            if pG[k] > threshold > 0:
+                nc = min(range(start + 1, k + 1), key=lambda key: pS[key - 1])
+            else:
+                nc = min(range(start + 1, k + 1), key=lambda key: nS[key - 1])
+            nS[nc] = pS[nc] = nG[nc] = pG[nc] = 0
+            k = start = nc + 1
+            changes.append(nc)
+            # print nd, nc
         k += 1
     return changes
