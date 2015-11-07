@@ -48,7 +48,7 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             if measure_key in StatConstants.MEASURE_LEAD_SIGNALS or measure_key == StatConstants.BNSS_ID\
                     or measure_key == StatConstants.FIRST_TIME_KEY:
                 continue
-            chPtsOutliersIdxs, chPtsOutlierScores = chPtsOutliers[measure_key][StatConstants.AR_UNIFYING]
+            chPtsOutliersIdxs, chPtsOutlierScores = chPtsOutliers[measure_key][StatConstants.LOCAL_AR]
             idx1, idx2 = window
             idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2]
             if len(idxs) > 0:
@@ -142,14 +142,15 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
+        # rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
         rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
 
 
 def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
-    Keys1D = sorted(aF1.keys(), lambda  key: aF1[key], reverse=True)
-    Keys2D = sorted(aF2.keys(), lambda  key: aF2[key], reverse=True)
-    Keys3D = sorted(aF3.keys(), lambda  key: aF3[key], reverse=True)
-    Keys4D = sorted(aF4.keys(), lambda  key: aF4[key], reverse=True)
+    Keys1D = sorted(aF1.keys(), key=lambda key: aF1[key], reverse=True)
+    Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
+    Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
+    Keys4D = sorted(aF4.keys(), key=lambda key: aF4[key], reverse=True)
 
     ranked_bnss = []
     visited_bnss = set()
@@ -225,10 +226,16 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
             nscore3 = float(scores3.index(score3)) / float(len(scores3))
             nscore4 = float(scores4.index(score4)) / float(len(scores4))
 
-            nscore1 = (nscore1 ** 2) * 0.4
-            nscore2 = (nscore2 ** 2) * 0.2
-            nscore3 = (nscore3 ** 2) * 0.2
-            nscore4 = (nscore4 ** 2) * 0.2
+            # nscore1 = (nscore1 ** 2) * 0.4
+            # nscore2 = (nscore2 ** 2) * 0.2
+            # nscore3 = (nscore3 ** 2) * 0.2
+            # nscore4 = (nscore4 ** 2) * 0.2
+
+            nscore1 = (nscore1 ** 2)
+            nscore2 = (nscore2 ** 2)
+            nscore3 = (nscore3 ** 2)
+            nscore4 = (nscore4 ** 2)
+
 
             final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4]) / 4)
             final_scores_dict[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)

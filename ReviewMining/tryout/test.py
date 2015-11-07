@@ -676,13 +676,14 @@ def cusum_using_call_to_r_py(x):
     return changes
 
 
-def plotCusumChanges(x, changes, detection_times=[]):
+def plotCusumChanges(x, changes=[], detection_times=[]):
 
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
     ax1.plot(x)
     plt.ylim((1,5))
     plt.yticks(numpy.arange(1,5.5,0.5))
+    ax1.plot(x)
     ax1.plot(changes, x[changes], 'o', mfc='r', mec='r', mew=1, ms=5,
              label='Alarm')
     for idx in changes:
@@ -958,10 +959,12 @@ def testCusum():
         statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:]
-        x = numpy.atleast_1d(data).astype('float64')
-        print x
-        changes = cusum_using_call_to_r_py(x)
-        plotCusumChanges(x, changes)
+        data = numpy.atleast_1d(data).astype('float64')
+        from anomaly_detection import MyCusum as cusum
+        changes = cusum.run_cusum(data, 200)
+        print changes
+        # changes = cusum_using_call_to_r_py(x)
+        plotCusumChanges(data, changes)
         # print [firstKey + change for change in changes]
     # plotCusumChanges(changes, x)
 
@@ -969,6 +972,20 @@ def testCusum():
     #print ta
     # plotCusumChanges(ta, x)
 
+def mockTestCusum():
+    dis_data = [numpy.random.normal(1.5, 0.1, 100),
+                numpy.random.normal(2.0, 0.1, 100),
+                numpy.random.normal(2.5, 0.1, 100),
+                numpy.random.normal(3.0, 0.1, 100),
+                numpy.random.normal(3.5, 0.1, 100)]
+    data = numpy.concatenate(dis_data)
+    data = numpy.atleast_1d(data).astype('float64')
+    from anomaly_detection import MyCusum as cusum
+    changes = cusum.run_cusum(data, 400)
+    print changes
+    plotCusumChanges(data, changes)
+
+# testCusum()
 testCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()

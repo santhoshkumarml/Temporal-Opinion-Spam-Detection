@@ -514,10 +514,15 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
 
-    # bnssKeys = ['363590051', '307906541']
+    # bnssKeys = ['481012158']
     # bnssKeys = ['316239742', '351598228', '391704995', '399734002', '481096722',
     #             '326477287', '385786751', '477148788', '481589275', '448679509']
-    bnssKeys = ['316239742']
+    bnssKeys = ['363590051', '351598228', '337950299', '374091507',
+                '481012158', '320578069', '449453028', '316937016',
+                '481012158', '433701402', '334982585', '494481220',
+                '394900607', '403654673', '481012158', '481185291',
+                '329643619', '494481220', '481185291']
+    bnssKeys = ['481012158']
 
     print '---------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
@@ -540,7 +545,7 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False)
     # findUsersInThisTimeWindow('363590051',(107, 112),csvFolder, plotDir)
     # RankHelper.rankAllAnomalies(plotDir)
     # doSerializeAllBnss(csvFolder, plotDir)
