@@ -20,8 +20,8 @@ def run_cusum(data, threshold,magnitude=0.5):
             sn = -((magnitude/(std**2))*(current_sample - mean + (magnitude/2)))
             pS[k] = pS[k-1] + sp
             nS[k] = nS[k-1] + sn
-            pG[k] = max(pG[k-1] + current_sample, 0)
-            nG[k] = max(nG[k-1] + current_sample, 0)
+            pG[k] = max(pG[k-1] + sp, 0)
+            nG[k] = max(nG[k-1] + sn, 0)
             if pG[k] > threshold > 0 or nG[k] > threshold > 0:
                 nd = k
                 if pG[k] > threshold > 0:

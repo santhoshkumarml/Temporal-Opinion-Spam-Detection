@@ -985,7 +985,7 @@ def mockTestCusum():
     data = numpy.concatenate(dis_data)
     data = numpy.atleast_1d(data).astype('float64')
     from anomaly_detection import MyCusum as cusum
-    changes = cusum.run_cusum(data, 400)
+    changes = cusum.run_cusum(data, 100)
     plotCusumChanges(data, changes)
 
 # testCusum()
