@@ -973,20 +973,23 @@ def testCusum():
     # plotCusumChanges(ta, x)
 
 def mockTestCusum():
-    dis_data = [numpy.random.normal(1.5, 0.1, 100),
-                numpy.random.normal(2.0, 0.1, 100),
-                numpy.random.normal(2.5, 0.1, 100),
-                numpy.random.normal(3.0, 0.1, 100),
-                numpy.random.normal(3.5, 0.1, 100)]
+    dis_data = [numpy.random.normal(1.5, 0.05, 100),
+                numpy.random.normal(2.0, 0.05, 100),
+                numpy.random.normal(2.5, 0.05, 100),
+                numpy.random.normal(3.0, 0.05, 100),
+                numpy.random.normal(3.5, 0.05, 100),
+                numpy.random.normal(3.0, 0.05, 100),
+                numpy.random.normal(2.5, 0.05, 100),
+                numpy.random.normal(2.0, 0.05, 100),
+                numpy.random.normal(1.5, 0.05, 100)]
     data = numpy.concatenate(dis_data)
     data = numpy.atleast_1d(data).astype('float64')
     from anomaly_detection import MyCusum as cusum
     changes = cusum.run_cusum(data, 400)
-    print changes
     plotCusumChanges(data, changes)
 
 # testCusum()
-testCusum()
+mockTestCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()

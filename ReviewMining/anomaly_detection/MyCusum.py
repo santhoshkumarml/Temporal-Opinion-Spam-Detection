@@ -25,13 +25,12 @@ def run_cusum(data, threshold,magnitude=0.5):
             if pG[k] > threshold > 0 or nG[k] > threshold > 0:
                 nd = k
                 if pG[k] > threshold > 0:
-                    nc = min(range(start + 1, k + 1), key=lambda key: pS[key])
+                    nc = min(range(start + 1, k + 1), key=lambda key: pS[key - 1])
                 else:
-                    nc = min(range(start + 1, k + 1), key=lambda key: nS[key])
-
+                    nc = min(range(start + 1, k + 1), key=lambda key: nS[key - 1])
                 nS[nc] = pS[nc] = nG[nc] = pG[nc] = 0
-                k = start = nc + 2
-                changes.append(nc + 1)
+                k = start = nc + 1
+                changes.append(nc)
                 # print nd, nc
         k += 1
     return changes
