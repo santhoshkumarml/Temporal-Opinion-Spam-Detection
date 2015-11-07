@@ -1,7 +1,0 @@
-*.DS_Store
-*.exe
-*.mdb
-*.txt
-*.userprefs
-YelpAPI/obj/*
-YelpAPI/bin/*
