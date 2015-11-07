@@ -2,3 +2,4 @@
 error.txt
 .project
 .pydev*
+.idea/
