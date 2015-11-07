@@ -13,8 +13,6 @@ import math
 from statsmodels.tsa.ar_model import AR
 import copy
 import numpy
-import os
-
 
 
 LIMITS = { StatConstants.RATING_ENTROPY: (0.0, None),\
