@@ -9,7 +9,7 @@ from datetime import datetime
 from util import StatConstants
 import anomaly_detection
 import changefinder
-import cusum
+import MITCusum
 import numpy
 from util import GraphUtil
 import scipy
@@ -486,7 +486,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                                                                                       statistics_for_bnss[measure_key][firstKey:],
                                                                                       avg_idxs, algo)
                 elif algo == StatConstants.CUSUM:
-                    chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
+                    chOutlierIdxs = MITCusum.detect_cusum(data, threshold=params, show=False)
                     if measure_key == StatConstants.AVERAGE_RATING:
                         ta, tai, taf, amp = chOutlierIdxs
                         chOutlierIdxs = [idx for idx in ta]

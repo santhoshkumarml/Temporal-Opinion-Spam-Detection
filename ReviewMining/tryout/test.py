@@ -1,38 +1,29 @@
-'''
-Created on Feb 9, 2015
-
-@author: santhosh
-'''
+__author__ = 'santhosh'
 # -*- coding: utf-8 -*-
 from __future__ import division
 
-import csv
-from datetime import datetime, timedelta
-from statistics import business_statistics_generator
 import json
-from lshash import LSHash
+import os
+import sys
+from datetime import date
+from datetime import datetime, timedelta
+from os.path import join
+
+import changefinder
+import matplotlib.pyplot as plt
 import networkx
 import numpy
-import os
-from os.path import join
-import rpy2
-import random
-import sys
+from lshash import LSHash
 
-import anomaly_detection.cusum as cm
+import anomaly_detection.MITCusum as cm
+from anomaly_detection import AnomalyDetector
 from itunes_utils.ItunesDataReader import ItunesDataReader
 from lsh import ShingleUtil
-import matplotlib.pyplot as plt
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
 from yelp_utils import dataReader as dr
 from yelp_utils.YelpDataReader import YelpDataReader
-from anomaly_detection import AnomalyDetector
-import changefinder
-from scipy.signal import argrelextrema
-import  math
-from datetime import date
 
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -63,7 +54,6 @@ def testPlot():
 
 def datesFormatinPlots():
 
-    import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
 
@@ -360,7 +350,6 @@ inputDirName = 'D:\\workspace\\datalab\\data\\from ubuntu\\zips'
 # print ShingleUtil.jac_doc_hash(data, 30, 5)
 #ShingleUtil.s_curve()
 def checkNonAscii():
-    import codecs
     content = 'data='
     with open('/home/santhosh/out1.log',"r") as f:
         data = dict()

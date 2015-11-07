@@ -6,7 +6,7 @@ Created on Feb 19, 2015
 
 from datetime import datetime
 from util import StatConstants
-import cusum
+import MITCusum
 from util import GraphUtil
 import scipy
 import math
@@ -493,7 +493,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                     #                                                                   statistics_for_bnss[measure_key][firstKey:],
                     #                                                                   lead_signal_idxs, algo)
                 elif algo == StatConstants.CUSUM:
-                    chOutlierIdxs = cusum.detect_cusum(data, threshold=params, show=False)
+                    chOutlierIdxs = MITCusum.detect_cusum(data, threshold=params, show=False)
                     if measure_key == StatConstants.AVERAGE_RATING:
                         ta, tai, taf, amp = chOutlierIdxs
                         chOutlierIdxs = [idx for idx in ta]
