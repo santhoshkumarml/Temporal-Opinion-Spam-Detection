@@ -958,10 +958,10 @@ def testCusum():
     for bnss_key in bnssKeys:
         statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:]
+        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:firstKey+40]
         data = numpy.atleast_1d(data).astype('float64')
         from anomaly_detection import MyCusum as cusum
-        changes = cusum.run_cusum(data, 200)
+        changes = cusum.run_cusum(data, threshold=12, magnitude=0.5)
         print changes
         # changes = cusum_using_call_to_r_py(x)
         plotCusumChanges(data, changes)
@@ -973,19 +973,23 @@ def testCusum():
     # plotCusumChanges(ta, x)
 
 def mockTestCusum():
-    dis_data = [numpy.random.normal(1.5, 0.05, 100),
-                numpy.random.normal(2.0, 0.05, 100),
-                numpy.random.normal(2.5, 0.05, 100),
-                numpy.random.normal(3.0, 0.05, 100),
-                numpy.random.normal(3.5, 0.05, 100),
-                numpy.random.normal(3.0, 0.05, 100),
-                numpy.random.normal(2.5, 0.05, 100),
-                numpy.random.normal(2.0, 0.05, 100),
-                numpy.random.normal(1.5, 0.05, 100)]
+    dis_data = [numpy.random.normal(1.0, 0.1, 100),
+                numpy.random.normal(1.5, 0.1, 100),
+                numpy.random.normal(2.0, 0.1, 100),
+                numpy.random.normal(2.5, 0.1, 100),
+                numpy.random.normal(3.0, 0.1, 100),
+                numpy.random.normal(3.5, 0.1, 100),
+                numpy.random.normal(4.0, 0.1, 100),
+                numpy.random.normal(3.5, 0.1, 100),
+                numpy.random.normal(3.0, 0.1, 100),
+                numpy.random.normal(2.5, 0.1, 100),
+                numpy.random.normal(2.0, 0.1, 100),
+                numpy.random.normal(1.5, 0.1, 100),
+                numpy.random.normal(1.0, 0.1, 100)]
     data = numpy.concatenate(dis_data)
     data = numpy.atleast_1d(data).astype('float64')
     from anomaly_detection import MyCusum as cusum
-    changes = cusum.run_cusum(data, 100)
+    changes = cusum.run_cusum(data, threshold=100, magnitude=0.5)
     plotCusumChanges(data, changes)
 
 # testCusum()
