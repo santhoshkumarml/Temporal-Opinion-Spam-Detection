@@ -32,7 +32,7 @@ MEASURES = [AVERAGE_RATING, RATING_ENTROPY, NON_CUM_NO_OF_REVIEWS, NO_OF_POSITIV
 # order Degree of forgetting type AR model  -> Ar model Degree
 # smooth  section length of time to be moving average smoothing the calculated outliers score  - T for moving average
 
-MEASURES_CHANGE_FINDER_PARAMS = {AVERAGE_RATING : 0.5, RATING_ENTROPY:(0.2, 1, 3),\
+MEASURES_CHANGE_FINDER_PARAMS = {AVERAGE_RATING : (8, 0.5), RATING_ENTROPY:(0.2, 1, 3),\
                            NON_CUM_NO_OF_REVIEWS:(0.2, 1, 3), NO_OF_POSITIVE_REVIEWS:(0.2, 1, 3),\
                                  NO_OF_NEGATIVE_REVIEWS:(0.2, 1, 3), RATIO_OF_SINGLETONS:(0.5,1,3),\
                            RATIO_OF_FIRST_TIMERS:(0.5,1,3), YOUTH_SCORE:(0.5,1,3),\

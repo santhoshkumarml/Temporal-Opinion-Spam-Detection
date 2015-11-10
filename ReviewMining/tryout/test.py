@@ -6,7 +6,6 @@ import os
 import sys
 from datetime import date
 from datetime import datetime, timedelta
-from os.path import join
 
 import changefinder
 import matplotlib.pyplot as plt
@@ -508,7 +507,7 @@ def doIndexForRestaurants():
         outDict['bnssName'] = bnss.getName()
         restaurants.append(outDict)
     result['bnss'] = restaurants
-    with open(join(inputDirName, 'index.json'),'w') as f:
+    with open(os.path.join(inputDirName, 'index.json'),'w') as f:
         json.dump(result, f)
          
         
@@ -535,7 +534,7 @@ def checkYelpAPI():
     revws1 = rdr.getReviewIdToReviewDict().values()
     content = 'data='
     revws2 = []
-    with open(join(inputDirName, 'bnss'), mode='r') as f:
+    with open(os.path.join(inputDirName, 'bnss'), mode='r') as f:
         data = dict()
         content = content+f.readline()
         exec(content)
@@ -591,7 +590,7 @@ def checkBnss():
 
 def plotDirCreation(inputFileName):
     import os
-    inputDir =  join(join(join(inputFileName, os.pardir),os.pardir), 'latest')
+    inputDir = os.path.join(os.path.join(os.path.join(inputFileName, os.pardir),os.pardir), 'latest')
     
     
 def tryTemporalStatisticsForYelp():
@@ -632,7 +631,7 @@ def tryTemporalStatisticsForItunes():
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
 
-    plotDir =  join(join(csvFolder, os.pardir), 'latest')  
+    plotDir = os.path.join(os.path.join(csvFolder, os.pardir), 'latest')
       
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
                  if bnss_type == SIAUtil.PRODUCT] 
@@ -667,8 +666,7 @@ def cusum_using_call_to_r_py(x):
     return changes
 
 
-def plotCusumChanges(x, changes=[], detection_times=[]):
-
+def plotCusumChanges(x, changes=[], bnss_name=''):
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
     ax1.plot(x)
@@ -679,10 +677,15 @@ def plotCusumChanges(x, changes=[], detection_times=[]):
              label='Alarm')
     for idx in changes:
             ax1.axvline(x=idx, linewidth=2, color='r')
-    if len(detection_times) > 0:
-        ax1.plot(detection_times, x[detection_times], 'o', mfc='g', mec='g', mew=1, ms=5,
-                 label='Detection')
-    plt.show()
+    # if len(detection_times) > 0:
+    #     ax1.plot(detection_times, x[detection_times], 'o', mfc='g', mec='g', mew=1, ms=5,
+    #              label='Detection')
+    plt.tight_layout()
+    imgFile = os.path.join('/home/santhosh/logs/avg', bnss_name+"_stat")+'.png'
+    print bnss_name+" stats are logged to "+imgFile
+    plt.savefig(imgFile, \
+                bbox_inches="tight")
+    plt.close()
 
 def tryAr():
     fig = plt.figure()
@@ -944,18 +947,18 @@ def testCusum():
 
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
-    bnssKeys = bnssKeys[120:140]
+    bnssKeys = bnssKeys[:2078]
     #'371405542', '363590051', '327586041', '412629178'
     # bnssKeys = ['385786751']
     for bnss_key in bnssKeys:
         statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:firstKey+40]
+        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:]
         data = numpy.atleast_1d(data).astype('float64')
         changes = MyCusum.run_cusum(data, threshold=8, magnitude=0.5)
-        print bnss_key, changes
+        # print bnss_key, changes
         # changes = cusum_using_call_to_r_py(x)
-        plotCusumChanges(data, changes)
+        plotCusumChanges(data, changes, bnss_key)
         # print [firstKey + change for change in changes]
     # plotCusumChanges(changes, x)
 
@@ -964,22 +967,23 @@ def testCusum():
     # plotCusumChanges(ta, x)
 
 def mockTestCusum():
-    dis_data = [numpy.random.normal(1.0, 0.1, 100),
-                numpy.random.normal(1.5, 0.1, 100),
-                numpy.random.normal(2.0, 0.1, 100),
-                numpy.random.normal(2.5, 0.1, 100),
-                numpy.random.normal(3.0, 0.1, 100),
-                numpy.random.normal(3.5, 0.1, 100),
-                numpy.random.normal(4.0, 0.1, 100),
-                numpy.random.normal(3.5, 0.1, 100),
-                numpy.random.normal(3.0, 0.1, 100),
-                numpy.random.normal(2.5, 0.1, 100),
-                numpy.random.normal(2.0, 0.1, 100),
-                numpy.random.normal(1.5, 0.1, 100),
-                numpy.random.normal(1.0, 0.1, 100)]
-    data = numpy.concatenate(dis_data)
+    # dis_data = [numpy.random.normal(1.0, 0.1, 100),
+    #             numpy.random.normal(1.5, 0.1, 100),
+    #             numpy.random.normal(2.0, 0.1, 100),
+    #             numpy.random.normal(2.5, 0.1, 100),
+    #             numpy.random.normal(3.0, 0.1, 100),
+    #             numpy.random.normal(3.5, 0.1, 100),
+    #             numpy.random.normal(4.0, 0.1, 100),
+    #             numpy.random.normal(3.5, 0.1, 100),
+    #             numpy.random.normal(3.0, 0.1, 100),
+    #             numpy.random.normal(2.5, 0.1, 100),
+    #             numpy.random.normal(2.0, 0.1, 100),
+    #             numpy.random.normal(1.5, 0.1, 100),
+    #             numpy.random.normal(1.0, 0.1, 100)]
+    # data = numpy.concatenate(dis_data)
+    data = [ 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.57142857, 4.25, 4.25, 4.25, 4.25, 4.6]
     data = numpy.atleast_1d(data).astype('float64')
-    changes = MyCusum.run_cusum(data, threshold=100, magnitude=0.5)
+    changes = MyCusum.run_cusum(data, threshold=8, magnitude=0.5)
     plotCusumChanges(data, changes)
 
 testCusum()
