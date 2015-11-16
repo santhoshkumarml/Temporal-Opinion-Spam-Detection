@@ -16,11 +16,6 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     plt.title('Score histogram')
     ax = fig.add_subplot(1, 1, 1)
     ax.set_xlabel(measure_key)
-    # ax.set_xticks(bins)
-    # if key == StatConstants.NO_OF_NEGATIVE_REVIEWS or key == StatConstants.NO_OF_POSITIVE_REVIEWS\
-    #     or key == StatConstants.NON_CUM_NO_OF_REVIEWS:
-    #     ax.hist(scores, bins, alpha=1.00, label=key, log=True)
-    # else:
     print algo, measure_key
     thr1 = AppUtil.getThreshold(scores, 0.20)
     thr2 = AppUtil.getThreshold(scores, 0.15)
@@ -77,12 +72,9 @@ def readScoresFromMeasureLog(plotDir, file_name):
 
                     if algo not in measure_scores[measure_key]:
                         measure_scores[measure_key][algo] = []
-
                     test_measure_scores = []
-
-
                     if algo == StatConstants.LOCAL_AR:
-                        test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores)) \
+                        test_measure_scores = [chOutlierScores[idx] for idx in range(len(chOutlierScores))
                                                if idx in diff_test_idxs]
                     else:
                         test_measure_scores = chOutlierScores
@@ -143,19 +135,17 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #             '329643619', '494481220', '481185291']
     # bnssKeys = ['481012158']
 
-    print '---------------------------------------------------------------------------------------------------------------'
+    print '------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
 
-        chPtsOutliers = AppUtil.detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
-
-        # logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
-
+        chPtsOutliers = AppUtil.detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength,
+                                                       find_outlier_idxs=True)
+        # Apputil.logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
         if doPlot:
-            AppUtil.plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
-
-    print '---------------------------------------------------------------------------------------------------------------'
-
+            AppUtil.plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
+                                  measuresToBeExtracted, timeLength)
+    print '------------------------------------------------------------------------------------------------------------'
 
 if __name__ == "__main__":
     if(len(sys.argv)!=2):

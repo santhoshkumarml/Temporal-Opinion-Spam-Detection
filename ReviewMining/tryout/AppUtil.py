@@ -86,8 +86,8 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
 
     # Construct Graphs
-    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, \
-                                                           bnssIdToBusinessDict, \
+    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
+                                                           bnssIdToBusinessDict,
                                                            reviewIdToReviewsDict, timeLength)
 
     usr_ids_for_bnss_in_time_window = []
