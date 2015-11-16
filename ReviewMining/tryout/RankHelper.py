@@ -1,14 +1,13 @@
 __author__ = 'santhosh'
 
-import os
 import math
+import os
 
-from util import StatConstants
-from anomaly_detection import AnomalyDetector
 import matplotlib.pyplot as plt
+
 import AppUtil
-
-
+from anomaly_detection import AnomalyDetector
+from util import StatConstants
 
 def doHistogramForFeature(bins, scores):
     for score in scores:
@@ -19,17 +18,6 @@ def doHistogramForFeature(bins, scores):
 
         ax.hist(score, bins, alpha=1.00)
         plt.show()
-
-def readChPtsOutliers(string):
-    chPtsOutliers = dict()
-    string.strip('\r')
-    string.strip('\n')
-    string = "chPtsOutliers=" + string
-    try:
-        exec (string)
-    except:
-        pass
-    return chPtsOutliers
 
 
 def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, measures, magnitude_divider):
@@ -108,7 +96,7 @@ def rankAllAnomalies(plotDir):
         strings = f.readlines()
         magnitude_divider = dict()
         for string in strings:
-            chPtsOutliers = readChPtsOutliers(string)
+            chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
             if StatConstants.BNSS_ID not in chPtsOutliers:
                 continue
             for measure_key in chPtsOutliers.keys():
@@ -126,7 +114,7 @@ def rankAllAnomalies(plotDir):
                         magnitude_divider[measure_key] = max_outlier_score
 
         for string in strings:
-            chPtsOutliers = readChPtsOutliers(string)
+            chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
             if StatConstants.BNSS_ID not in chPtsOutliers:
                 continue
             bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
@@ -152,7 +140,7 @@ def rankAllAnomalies(plotDir):
         # rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
 
 
-def printRankedBnss(bnss_first_time_dict, sorted_keys, topK, bnss_review_threshold=0, bnss_to_reviews_dict = dict()):
+def printRankedBnss(bnss_first_time_dict, sorted_keys, aux_info, topK, bnss_review_threshold=0, bnss_to_reviews_dict = dict()):
     print '-------------------------------------------------------------------------------------------------'
     for key_idx in range(0, topK):
         key = sorted_keys[key_idx]
@@ -160,7 +148,7 @@ def printRankedBnss(bnss_first_time_dict, sorted_keys, topK, bnss_review_thresho
         if bnss_key in bnss_to_reviews_dict and bnss_first_time_dict[bnss_key] > bnss_review_threshold:
             idx1 += bnss_first_time_dict[bnss_key]
             idx2 += bnss_first_time_dict[bnss_key]
-            print bnss_key, (idx1, idx2)
+            print bnss_key, (idx1, idx2), aux_info[key]
     print '-------------------------------------------------------------------------------------------------'
 
 
@@ -169,13 +157,14 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
     Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
     Keys4D = sorted(aF4.keys(), key=lambda key: aF4[key], reverse=True)
+    aux_info = dict()
 
     ranked_bnss = []
     visited_bnss = set()
     bnss_first_time_dict = dict()
 
     for string in strings:
-        chPtsOutliers = readChPtsOutliers(string)
+        chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
         if StatConstants.BNSS_ID not in chPtsOutliers:
             continue
         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
@@ -191,26 +180,31 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
         if key1 not in visited_bnss:
             ranked_bnss.append(key1)
             visited_bnss.add(key1)
+            aux_info[key1] = (1, aF1[key1])
 
         if key2 not in visited_bnss:
             ranked_bnss.append(key2)
             visited_bnss.add(key2)
+            aux_info[key2] = (2, aF1[key2])
 
         if key3 not in visited_bnss:
             ranked_bnss.append(key3)
             visited_bnss.add(key3)
+            aux_info[key3] = (3, aF1[key3])
 
         if key4 not in visited_bnss:
             ranked_bnss.append(key4)
             visited_bnss.add(key4)
+            aux_info[key4] = (4, aF1[key4])
 
         idx += 1
 
-    return ranked_bnss, bnss_first_time_dict
+    return ranked_bnss, bnss_first_time_dict, aux_info
 
 def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
     bnss_first_time_dict = dict()
     final_scores_dict = dict()
+    aux_info = dict()
 
     scores1 = sorted(aF1.values())
     scores2 = sorted(aF2.values())
@@ -218,7 +212,7 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
     scores4 = sorted(aF4.values())
 
     for string in strings:
-        chPtsOutliers = readChPtsOutliers(string)
+        chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
         if StatConstants.BNSS_ID not in chPtsOutliers:
             continue
         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
@@ -242,9 +236,9 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
             nscore3 = (nscore3 ** 2)
             nscore4 = (nscore4 ** 2)
 
-
             final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4]) / 4)
-            final_scores_dict[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)
+            final_scores_dict[(bnss_key, window)] = final_score
+            aux_info[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)
 
-    sorted_keys = sorted(final_scores_dict.keys(), key=lambda v: final_scores_dict[v][0], reverse=True)
-    return sorted_keys, bnss_first_time_dict
+    sorted_keys = sorted(final_scores_dict.keys(), key=lambda v: final_scores_dict[v], reverse=True)
+    return sorted_keys, bnss_first_time_dict, aux_info

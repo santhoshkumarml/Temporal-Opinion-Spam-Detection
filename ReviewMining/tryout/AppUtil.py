@@ -217,3 +217,40 @@ def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measure
                                  measuresToBeExtracted, avg_idxs, timeLength)
     afterPlotTime = datetime.now()
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
+
+
+def detectOutliersUsingAlreadyGeneratedScores(all_scores, statistics_for_bnss, chPtsOutliers, bnssKey):
+    avg_idxs, avg_scores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
+    for measure_key in chPtsOutliers.keys():
+        all_algo_scores = chPtsOutliers[measure_key]
+        if measure_key in StatConstants.MEASURE_LEAD_SIGNALS or measure_key == StatConstants.BNSS_ID \
+                or measure_key == StatConstants.FIRST_TIME_KEY:
+            continue
+        for algo in all_algo_scores.keys():
+            chPtsOutlierIdxs, chPtsOutlierScores = all_algo_scores[algo]
+            permitted_idxs = set()
+            chPtsOutlierIdxs = []
+            if algo == StatConstants.LOCAL_AR:
+                windows = AnomalyDetector.getRangeIdxs(avg_idxs)
+                permitted_idxs = set([idx for idx in range(idx1, idx2+1) for idx1, idx2 in windows])
+            else:
+                permitted_idxs = set([idx for idx in range(0, len(chPtsOutlierScores))])
+            for idx in range(0, len(chPtsOutlierScores)):
+                if idx in permitted_idxs:
+                    if chPtsOutlierScores[idx] > StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]:
+                        chPtsOutlierIdxs.append(idx)
+            all_algo_scores[algo] = (chPtsOutlierIdxs, chPtsOutlierScores)
+        chPtsOutliers[measure_key] = all_algo_scores
+    return chPtsOutliers
+
+
+def readScoreFromScoreLogForBnss(string):
+    chPtsOutliers = dict()
+    string.strip('\r')
+    string.strip('\n')
+    string = "chPtsOutliers=" + string
+    try:
+        exec (string)
+    except:
+        pass
+    return chPtsOutliers

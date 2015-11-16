@@ -147,10 +147,18 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #             '329643619', '494481220', '481185291']
     # bnsskeys = ['481012158']
 
+    # score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
+    # with open(score_log_file) as f:
+    #     strings = f.readlines()
+    #     for string in strings:
+    #         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+    #         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
+
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, AppUtil.BNSS_STATS_FOLDER)
-        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength,find_outlier_idxs=true)
+        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength, find_outlier_idxs=True)
+
         # apputil.logstats(bnss_key, plotdir, chptsoutliers, statistics_for_bnss[statconstants.first_time_key])
         if doPlot:
             AppUtil.plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
@@ -165,8 +173,8 @@ if __name__ == "__main__":
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # ranked_bnss, bnss_first_time_dict = RankHelper.rankAllAnomalies(plotDir)
-    # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, 50,
-    #                            bnss_review_threshold=20, bnss_to_reviews_dict= bnss_to_reviews_dict)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
+    RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, 50,
+                                bnss_review_threshold=20, bnss_to_reviews_dict= bnss_to_reviews_dict)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)

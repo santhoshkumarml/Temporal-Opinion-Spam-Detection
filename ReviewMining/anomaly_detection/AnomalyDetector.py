@@ -255,22 +255,17 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
     thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
     val_change_thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
+
     diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, len(data))
-
     total_length = len(data)
-
     no_of_windows = len(diff_train_windows)
     outierIds = []
     outies_scores = []
     for wid in range(no_of_windows):
         tr_idx_start, tr_idx_end = diff_train_windows[wid]
         te_idx_start, te_idx_end = diff_test_windows[wid]
-
         last_filled_idx = len(outies_scores)-1
-
         order = doLocalARCrossValidation(data, tr_idx_start, tr_idx_end)
-
-        # print 'Low Error Order', order
 
         ar_mod = AR(data[tr_idx_start:tr_idx_end+1])
         ar_res = ar_mod.fit(maxlag=order)
