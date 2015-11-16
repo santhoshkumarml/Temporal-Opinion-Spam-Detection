@@ -50,9 +50,14 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
                 continue
             chPtsOutliersIdxs, chPtsOutlierScores = chPtsOutliers[measure_key][StatConstants.LOCAL_AR]
             idx1, idx2 = window
-            idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2]
+            idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2 and idx < len(chPtsOutlierScores)]
             if len(idxs) > 0:
-                idx = max(idxs, key= lambda x: chPtsOutlierScores[x])
+                try:
+                    idx = max(idxs, key= lambda x: chPtsOutlierScores[x])
+                except:
+                    print bnss_key, measure_key, idxs, len(chPtsOutlierScores)
+                    print chPtsOutlierScores
+                    raise
                 measures_changed += 1
                 no_of_changes_before = chPtsOutliersIdxs.index(idx)
                 div = MAGNITURE_DIVIDER[measure_key] if measure_key in MAGNITURE_DIVIDER else 1.0
@@ -110,7 +115,7 @@ def rankAllAnomalies(plotDir):
                         or measure_key == StatConstants.FIRST_TIME_KEY:
                     continue
 
-                chPtsOutliersIdxs, chPtsOutlierScores = chPtsOutliers[measure_key][StatConstants.AR_UNIFYING]
+                chPtsOutliersIdxs, chPtsOutlierScores = chPtsOutliers[measure_key][StatConstants.LOCAL_AR]
 
                 if len(chPtsOutlierScores) > 0:
                     max_outlier_score = max(chPtsOutlierScores)
@@ -142,8 +147,8 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        # rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
-        rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
+        # rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
 
 
 def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):

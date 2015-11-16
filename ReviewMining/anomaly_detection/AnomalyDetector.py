@@ -496,10 +496,10 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                 elif algo == StatConstants.CUSUM:
                     # chOutlierIdxs = MyCusum.detect_cusum(data, threshold=params, show=False)
                     chOutlierIdxs = MyCusum.run_cusum(data, threshold=params[0], magnitude=params[1])
-                    if measure_key == StatConstants.AVERAGE_RATING:
-                        ta, tai, taf, amp = chOutlierIdxs
-                        chOutlierIdxs = [idx for idx in ta]
-                        chOutlierScores = []
+                    # if measure_key == StatConstants.AVERAGE_RATING:
+                    #     ta, tai, taf, amp = chOutlierIdxs
+                    #     chOutlierIdxs = [idx for idx in ta]
+                    #     chOutlierScores = []
                         # lead_signal_idxs = set(ta)
 
                 elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:

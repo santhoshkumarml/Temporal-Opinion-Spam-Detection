@@ -14,6 +14,7 @@ import numpy
 from lshash import LSHash
 
 import anomaly_detection.MITCusum as cm
+import tryout.AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
 from itunes_utils.ItunesDataReader import ItunesDataReader
@@ -666,7 +667,7 @@ def cusum_using_call_to_r_py(x):
     return changes
 
 
-def plotCusumChanges(x, changes=[], bnss_name=''):
+def plotCusumChanges(x, changes=[], bnss_name='', doSave=True):
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
     ax1.plot(x)
@@ -680,12 +681,15 @@ def plotCusumChanges(x, changes=[], bnss_name=''):
     # if len(detection_times) > 0:
     #     ax1.plot(detection_times, x[detection_times], 'o', mfc='g', mec='g', mew=1, ms=5,
     #              label='Detection')
-    plt.tight_layout()
-    imgFile = os.path.join('/home/santhosh/logs/avg', bnss_name+"_stat")+'.png'
-    print bnss_name+" stats are logged to "+imgFile
-    plt.savefig(imgFile, \
-                bbox_inches="tight")
-    plt.close()
+    if doSave:
+        plt.tight_layout()
+        imgFile = os.path.join('/home/santhosh/logs/avg', bnss_name+"_stat")+'.png'
+        print bnss_name+" stats are logged to "+imgFile
+        plt.savefig(imgFile, \
+                    bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
 
 def tryAr():
     fig = plt.figure()
@@ -947,13 +951,17 @@ def testCusum():
 
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
-    bnssKeys = bnssKeys[:2078]
+    bnssKeys = ['284819997', '412362331', '425165540', '412629178', '380467238',
+                '314050952', '319927587', '396833011', '448999087', '307386350',
+                '318594291', '329158810', '489302558', '447556667', '438931724',
+                '360819574', '289738462', '399975973', '294328109']
     #'371405542', '363590051', '327586041', '412629178'
     # bnssKeys = ['385786751']
     for bnss_key in bnssKeys:
-        statistics_for_bnss = testAlgos.deserializeBnssStats(bnss_key, bnss_stats_dir)
+        statistics_for_bnss = tryout.AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:]
+        lastKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
+        data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:lastKey+1]
         data = numpy.atleast_1d(data).astype('float64')
         changes = MyCusum.run_cusum(data, threshold=8, magnitude=0.5)
         # print bnss_key, changes
@@ -984,10 +992,10 @@ def mockTestCusum():
     data = [ 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.2, 3.57142857, 4.25, 4.25, 4.25, 4.25, 4.6]
     data = numpy.atleast_1d(data).astype('float64')
     changes = MyCusum.run_cusum(data, threshold=8, magnitude=0.5)
-    plotCusumChanges(data, changes)
+    plotCusumChanges(data, changes, 'mock', doSave=False)
 
-testCusum()
-# mockTestCusum()
+# testCusum()
+mockTestCusum()
 #testCFForSomeMeasures()
 #tryTemporalStatisticsForItunes()
 #checkPlot2()
