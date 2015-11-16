@@ -109,6 +109,14 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
 
 
 
+
+# score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
+# with open(score_log_file) as f:
+#     strings = f.readlines()
+#     for string in strings:
+#         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+#         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
+
 def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in StatConstants.measures \
                              if measure != StatConstants.max_text_similarity and measure != StatConstants.tf_idf]
@@ -146,13 +154,6 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #             '394900607', '403654673', '481012158', '481185291',
     #             '329643619', '494481220', '481185291']
     # bnsskeys = ['481012158']
-
-    # score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
-    # with open(score_log_file) as f:
-    #     strings = f.readlines()
-    #     for string in strings:
-    #         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
-    #         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
 
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
