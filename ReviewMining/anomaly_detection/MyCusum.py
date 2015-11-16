@@ -34,9 +34,9 @@ def run_cusum(data, threshold,magnitude=0.5):
             else:
                 nc = min(range(start + 1, k + 1), key=lambda key: nS[key - 1])
             nS[nc] = pS[nc] = nG[nc] = pG[nc] = 0
-            print nd, nc
-            print nS
-            print pS
+            # print nd, nc
+            # print nS
+            # print pS
             k = start = nc + 1
             changes.append(nc)
         k += 1

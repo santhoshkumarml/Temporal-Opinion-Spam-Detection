@@ -7,6 +7,8 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 import AppUtil
+import RankHelper
+from util import SIAUtil
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
 
@@ -106,6 +108,7 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
     return result
 
 
+
 def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -113,19 +116,27 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
     bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
-    file_list_size = []
-    for root, dirs, files in os.walk(bnss_stats_dir):
-        for name in files:
-            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-        file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
-
-    bnssKeys = [file_name for file_name,
-                              size in file_list_size]
-
-    bnssKeys = ['284819997', '412362331', '425165540', '412629178', '380467238',
-                '314050952', '319927587', '396833011', '448999087', '307386350',
-                '318594291', '329158810', '489302558', '447556667', '438931724',
-                '360819574', '289738462', '399975973', '294328109']
+    # file_list_size = []
+    # for root, dirs, files in os.walk(bnss_stats_dir):
+    #     for name in files:
+    #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+    #
+    # bnssKeys = [file_name for file_name,
+    #                           size in file_list_size]
+    bnssKeys = ['412362331', '425165540', '412629178', '380467238', '314050952', '319927587',
+                '396833011', '448999087', '307386350', '318594291', '329158810',
+                '489302558', '447556667', '438931724', '360819574', '289738462',
+                '399975973', '395697081', '364982249', '303032761', '408858076',
+                '340175157', '371119201', '320641659', '334236299', '304932383',
+                '379459295', '380507093', '415894489', '363494433', '406134561',
+                '299948601', '446708554', '368052618', '423192164', '399334913',
+                '330560517', '363955204', '407181075', '376344614', '469329213',
+                '327769277', '348824026', '363667391', '481012158', '386392481', '332452121']
+    # bnssKeys = ['284819997', '412362331', '425165540', '412629178', '380467238',
+    #             '314050952', '319927587', '396833011', '448999087', '307386350',
+    #             '318594291', '329158810', '489302558', '447556667', '438931724',
+    #             '360819574', '289738462', '399975973', '294328109']
     # bnssKeys = ['316239742', '351598228', '391704995', '399734002', '481096722',
     #             '326477287', '385786751', '477148788', '481589275', '448679509']
     # bnssKeys = ['363590051', '351598228', '337950299', '374091507',
@@ -148,12 +159,15 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     print '------------------------------------------------------------------------------------------------------------'
 
 if __name__ == "__main__":
-    if(len(sys.argv)!=2):
+    if len(sys.argv) != 2:
         print 'Usage: python -m \"tryout.testAlgos\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # RankHelper.rankAllAnomalies(plotDir)
+    # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
+    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    # ranked_bnss, bnss_first_time_dict = RankHelper.rankAllAnomalies(plotDir)
+    # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, 50,
+    #                            bnss_review_threshold=20, bnss_to_reviews_dict= bnss_to_reviews_dict)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)

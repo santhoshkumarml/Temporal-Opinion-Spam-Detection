@@ -147,8 +147,20 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
         # rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+
+
+def printRankedBnss(bnss_first_time_dict, sorted_keys, topK, bnss_review_threshold=0, bnss_to_reviews_dict = dict()):
+    print '-------------------------------------------------------------------------------------------------'
+    for key_idx in range(0, topK):
+        key = sorted_keys[key_idx]
+        bnss_key, (idx1, idx2) = key
+        if bnss_key in bnss_to_reviews_dict and bnss_first_time_dict[bnss_key] > bnss_review_threshold:
+            idx1 += bnss_first_time_dict[bnss_key]
+            idx2 += bnss_first_time_dict[bnss_key]
+            print bnss_key, (idx1, idx2)
+    print '-------------------------------------------------------------------------------------------------'
 
 
 def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
@@ -193,14 +205,7 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
 
         idx += 1
 
-    print '-------------------------------------------------------------------------------------------------'
-    for key_idx in range(0, topK):
-        key = ranked_bnss[key_idx]
-        bnss_key, (idx1, idx2) = key
-        idx1 += bnss_first_time_dict[bnss_key]
-        idx2 += bnss_first_time_dict[bnss_key]
-        print bnss_key, (idx1, idx2)
-    print '-------------------------------------------------------------------------------------------------'
+    return ranked_bnss, bnss_first_time_dict
 
 def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
     bnss_first_time_dict = dict()
@@ -231,11 +236,6 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
             nscore3 = float(scores3.index(score3)) / float(len(scores3))
             nscore4 = float(scores4.index(score4)) / float(len(scores4))
 
-            # nscore1 = (nscore1 ** 2) * 0.4
-            # nscore2 = (nscore2 ** 2) * 0.2
-            # nscore3 = (nscore3 ** 2) * 0.2
-            # nscore4 = (nscore4 ** 2) * 0.2
-
             nscore1 = (nscore1 ** 2)
             nscore2 = (nscore2 ** 2)
             nscore3 = (nscore3 ** 2)
@@ -245,13 +245,5 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
             final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4]) / 4)
             final_scores_dict[(bnss_key, window)] = (final_score, nscore1, nscore2, nscore3, nscore4)
 
-    sorted_keys = sorted(final_scores_dict.keys(), key= lambda  v : final_scores_dict[v][0], reverse=True)
-    print '-------------------------------------------------------------------------------------------------'
-    for key_idx in range(0, topK):
-        key = sorted_keys[key_idx]
-        bnss_key, (idx1, idx2) = key
-        idx1 += bnss_first_time_dict[bnss_key]
-        idx2 += bnss_first_time_dict[bnss_key]
-        print bnss_key, (idx1, idx2) , final_scores_dict[key]
-    print '-------------------------------------------------------------------------------------------------'
-
+    sorted_keys = sorted(final_scores_dict.keys(), key=lambda v: final_scores_dict[v][0], reverse=True)
+    return sorted_keys, bnss_first_time_dict

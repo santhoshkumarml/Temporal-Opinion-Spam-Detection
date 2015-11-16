@@ -11,12 +11,16 @@ from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
 
+USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
+BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
+
+
 #1/(1+ (k**2)) = percent
 #k = math.sqrt( (1-percent)/ percent)
 #k = math.sqrt(19) for 5% (i.e. 0.05)
+
 def determinKForPercent(percent):
     return math.sqrt((1-percent)/percent)
-
 
 def getThreshold(data, percent):
     m = numpy.mean(data)
@@ -107,7 +111,7 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
     print bnssKeys
 
 
-def logAllUsrStats(inputDir, timeLength = '1-W'):
+def logAllUsrStats(csvFolder, plotDir, timeLength = '1-W'):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
     # Construct Graphs
@@ -134,6 +138,17 @@ def logAllUsrStats(inputDir, timeLength = '1-W'):
                 usrStatFile.write('\n')
 
 
+def readReviewsForBnssOrUser(plotDir, node_type = SIAUtil.PRODUCT):
+    file_name = BNSS_REVIEW_CNT_FILE
+    node_type_to_reviews_dict = dict()
+    prefix = 'node_type_to_reviews_dict'
+    if node_type == SIAUtil.USER:
+        file_name = USR_REVIEW_CNT_FILE
+    with open(os.path.join(plotDir, file_name)) as f:
+        string = prefix + '=' + f.read()
+        exec(string)
+    return node_type_to_reviews_dict
+
 def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
@@ -156,7 +171,7 @@ def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
         no_of_reviews_for_usr = len(superGraph.neighbors((usrKey, SIAUtil.USER)))
         usr_to_no_of_reviews_dict[usrKey] = no_of_reviews_for_usr
 
-    with open(os.path.join(plotDir, 'usr_review_cnt.txt'), 'w') as f:
+    with open(os.path.join(plotDir, USR_REVIEW_CNT_FILE), 'w') as f:
         f.write(str(usr_to_no_of_reviews_dict))
 
     bnssKeys = [bnss_key for bnss_key, bnss_type in superGraph.nodes() \
@@ -167,7 +182,7 @@ def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
         no_of_reviews_for_bnss = len(superGraph.neighbors((bnssKey, SIAUtil.PRODUCT)))
         bnss_to_no_of_reviews_dict[bnssKey] = no_of_reviews_for_bnss
 
-    with open(os.path.join(plotDir, 'bnss_review_cnt.txt'), 'w') as f:
+    with open(os.path.join(plotDir, BNSS_REVIEW_CNT_FILE), 'w') as f:
         f.write(str(bnss_to_no_of_reviews_dict))
 
 
