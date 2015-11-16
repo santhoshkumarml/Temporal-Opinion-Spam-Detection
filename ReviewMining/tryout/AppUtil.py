@@ -10,7 +10,8 @@ from itunes_utils.ItunesDataReader import ItunesDataReader
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
-
+SCORES_LOG_FILE = 'scores_with_outliers.log'
+BNSS_STATS_FOLDER = 'bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
 
@@ -187,7 +188,7 @@ def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
 
 
 def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
-    measure_log_file = open(os.path.join(plotDir, "scores_with_outliers.log"), 'a')
+    measure_log_file = open(os.path.join(plotDir, SCORES_LOG_FILE), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
     chPtsOutliers[StatConstants.FIRST_TIME_KEY] = firstTimeKey
     measure_log_file.write(str(chPtsOutliers)+"\n")

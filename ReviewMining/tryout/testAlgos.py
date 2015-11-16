@@ -110,53 +110,52 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
 
 
 def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
-    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
-                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
-    lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
+    measuresToBeExtracted = [measure for measure in StatConstants.measures \
+                             if measure != StatConstants.max_text_similarity and measure != StatConstants.tf_idf]
+    lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.measure_lead_signals]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
-    bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
+    bnss_stats_dir = os.path.join(plotDir, AppUtil.BNSS_STATS_FOLDER)
     # file_list_size = []
     # for root, dirs, files in os.walk(bnss_stats_dir):
     #     for name in files:
     #         file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=True)
+    #     file_list_size = sorted(file_list_size, key= lambda x:x[1], reverse=true)
     #
-    # bnssKeys = [file_name for file_name,
+    # bnsskeys = [file_name for file_name,
     #                           size in file_list_size]
-    bnssKeys = ['412362331', '425165540', '412629178', '380467238', '314050952', '319927587',
-                '396833011', '448999087', '307386350', '318594291', '329158810',
-                '489302558', '447556667', '438931724', '360819574', '289738462',
-                '399975973', '395697081', '364982249', '303032761', '408858076',
-                '340175157', '371119201', '320641659', '334236299', '304932383',
-                '379459295', '380507093', '415894489', '363494433', '406134561',
-                '299948601', '446708554', '368052618', '423192164', '399334913',
-                '330560517', '363955204', '407181075', '376344614', '469329213',
-                '327769277', '348824026', '363667391', '481012158', '386392481', '332452121']
-    # bnssKeys = ['284819997', '412362331', '425165540', '412629178', '380467238',
+    bnssKeys = ['412362331', '425165540', '412629178', '380467238', '314050952',
+                '319927587', '396833011', '448999087', '307386350', '318594291',
+                '329158810', '489302558', '447556667', '438931724', '360819574',
+                '289738462', '399975973', '395697081', '364982249', '303032761',
+                '408858076', '340175157', '371119201', '320641659', '334236299',
+                '304932383', '379459295', '380507093', '415894489', '363494433',
+                '406134561', '299948601', '446708554', '368052618', '423192164',
+                '399334913', '330560517', '363955204', '407181075', '376344614',
+                '469329213', '327769277', '348824026', '363667391', '481012158',
+                '386392481', '332452121']
+    # bnsskeys = ['284819997', '412362331', '425165540', '412629178', '380467238',
     #             '314050952', '319927587', '396833011', '448999087', '307386350',
     #             '318594291', '329158810', '489302558', '447556667', '438931724',
     #             '360819574', '289738462', '399975973', '294328109']
-    # bnssKeys = ['316239742', '351598228', '391704995', '399734002', '481096722',
+    # bnsskeys = ['316239742', '351598228', '391704995', '399734002', '481096722',
     #             '326477287', '385786751', '477148788', '481589275', '448679509']
-    # bnssKeys = ['363590051', '351598228', '337950299', '374091507',
+    # bnsskeys = ['363590051', '351598228', '337950299', '374091507',
     #             '481012158', '320578069', '449453028', '316937016',
     #             '481012158', '433701402', '334982585', '494481220',
     #             '394900607', '403654673', '481012158', '481185291',
     #             '329643619', '494481220', '481185291']
-    # bnssKeys = ['481012158']
+    # bnsskeys = ['481012158']
 
-    print '------------------------------------------------------------------------------------------------------------'
     for bnss_key in bnssKeys:
-        statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
-
-        chPtsOutliers = AppUtil.detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength,
-                                                       find_outlier_idxs=True)
-        # Apputil.logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
+        print '------------------------------------------------------------------------------------------------------------'
+        statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, AppUtil.BNSS_STATS_FOLDER)
+        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength,find_outlier_idxs=true)
+        # apputil.logstats(bnss_key, plotdir, chptsoutliers, statistics_for_bnss[statconstants.first_time_key])
         if doPlot:
             AppUtil.plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
                                   measuresToBeExtracted, timeLength)
-    print '------------------------------------------------------------------------------------------------------------'
+        print '------------------------------------------------------------------------------------------------------------'
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

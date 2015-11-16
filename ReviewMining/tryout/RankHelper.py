@@ -6,6 +6,7 @@ import math
 from util import StatConstants
 from anomaly_detection import AnomalyDetector
 import matplotlib.pyplot as plt
+import AppUtil
 
 
 
@@ -97,12 +98,12 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
-    measure_log = os.path.join(plotDir, "scores_with_outliers.log")
+    score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
-    with open(measure_log) as f:
+    with open(score_log_file) as f:
         aF1, aF2, aF3, aF4 = dict(), dict(), dict(), dict()
         strings = f.readlines()
         magnitude_divider = dict()
