@@ -1,17 +1,13 @@
 __author__ = 'santhosh'
 
-import math
 import os
 import sys
 from datetime import datetime
-import AppUtil
 
 import matplotlib.pyplot as plt
-import numpy
 
+import AppUtil
 from anomaly_detection import AnomalyDetector
-from itunes_utils.ItunesDataReader import ItunesDataReader
-from util import PlotUtil
 from util import StatConstants
 
 
@@ -26,20 +22,12 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     #     ax.hist(scores, bins, alpha=1.00, label=key, log=True)
     # else:
     print algo, measure_key
-    thr1 = getThreshold(scores, 0.20)
-    thr2 = getThreshold(scores, 0.15)
-    thr3 = getThreshold(scores, 0.10)
-    thr4 = getThreshold(scores, 0.05)
+    thr1 = AppUtil.getThreshold(scores, 0.20)
+    thr2 = AppUtil.getThreshold(scores, 0.15)
+    thr3 = AppUtil.getThreshold(scores, 0.10)
+    thr4 = AppUtil.getThreshold(scores, 0.05)
     if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS,
                        StatConstants.NON_CUM_NO_OF_REVIEWS]:
-        # scores = [math.log(sc+1) for sc in scores]
-        min_score = min(scores)
-        max_score = max(scores)
-        # thr1 = math.log(thr1+1)
-        # thr2 = math.log(thr2+1)
-        # thr3 = math.log(thr3+1)
-        # bins = numpy.arange(min_score, max_score, bins)
-        # bins = bins[:11]
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
     else:
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
@@ -49,29 +37,16 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     ax.axvline(x=thr3, linewidth=2, color='c')
     plt.show()
 
-
-#1/(1+ (k**2)) = percent
-#k = math.sqrt( (1-percent)/ percent)
-#k = math.sqrt(19) for 5% (i.e. 0.05)
-def determinKForPercent(percent):
-    return math.sqrt((1-percent)/percent)
-
-def getThreshold(data, percent):
-    m = numpy.mean(data)
-    std = numpy.std(data)
-    return (m + (determinKForPercent(percent)*std))
-
-
+# strings = f.read()
+# p = re.compile('[{][^{]+([{][^{]+[}])+[^}]+BNSS_ID[^}]+[}]')
+# p = re.compile('[{].*BNSS_ID[^}]+[}]')
+# strings = p.findall(a)
 def readScoresFromMeasureLog(plotDir, file_name):
     chPtsOutliers = dict()
     measure_scores = dict()
     measure_log = os.path.join(plotDir, file_name)
     with open(measure_log) as f:
         strings = f.readlines()
-        # strings = f.read()
-        # p = re.compile('[{][^{]+([{][^{]+[}])+[^}]+BNSS_ID[^}]+[}]')
-        # p = re.compile('[{].*BNSS_ID[^}]+[}]')
-        # strings = p.findall(a)
         for string in strings:
             string.strip('\r')
             string.strip('\n')
@@ -116,45 +91,7 @@ def readScoresFromMeasureLog(plotDir, file_name):
 
                     measure_scores[measure_key][algo].extend(test_measure_scores)
 
-    # for measure_key in measure_scores.keys():
-    #     print measure_key, max(measure_scores[measure_key]), min(measure_scores[measure_key])
-
     return measure_scores
-
-def readData(csvFolder):
-    rdr = ItunesDataReader()
-    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
-    return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
-
-def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
-    measure_log_file = open(os.path.join(plotDir, "scores_with_outliers.log"), 'a')
-    chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
-    chPtsOutliers[StatConstants.FIRST_TIME_KEY] = firstTimeKey
-    measure_log_file.write(str(chPtsOutliers)+"\n")
-    measure_log_file.close()
-    del chPtsOutliers[StatConstants.BNSS_ID]
-    del chPtsOutliers[StatConstants.FIRST_TIME_KEY]
-
-def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, find_outlier_idxs=True):
-    beforeAnomalyDetection = datetime.now()
-
-    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
-                                                           find_outlier_idxs)
-    afterAnomalyDetection = datetime.now()
-
-    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
-
-    return chPtsOutliers
-
-
-def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
-    beforePlotTime = datetime.now()
-    avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
-
-    PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir, \
-                                 measuresToBeExtracted, avg_idxs, timeLength)
-    afterPlotTime = datetime.now()
-    print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
 
 def getThresholdForDifferentMeasures(plotDir, doHist=False):
@@ -170,11 +107,12 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
             scores = measure_scores[measure_key][algo]
             if measure_key in measure_noise_threshold:
                 scores = [sc for sc in scores if sc < measure_noise_threshold[measure_key]]
-            thr = getThreshold(scores, 0.15)
+            thr = AppUtil.getThreshold(scores, 0.15)
             if doHist:
                 doHistogramForMeasure(20, algo, measure_key, scores)
             result[measure_key] = thr
     return result
+
 
 def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
@@ -209,12 +147,12 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     for bnss_key in bnssKeys:
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
 
-        chPtsOutliers = detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
+        chPtsOutliers = AppUtil.detectAnomaliesForBnss(bnss_key, statistics_for_bnss, timeLength, find_outlier_idxs=True)
 
         # logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
 
         if doPlot:
-            plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
+            AppUtil.plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength)
 
     print '---------------------------------------------------------------------------------------------------------------'
 

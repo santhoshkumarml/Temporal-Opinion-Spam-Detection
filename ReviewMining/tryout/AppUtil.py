@@ -1,10 +1,32 @@
+import math
 import os
 import pickle
+from datetime import datetime
 
+import numpy
+
+from anomaly_detection import AnomalyDetector
+from itunes_utils.ItunesDataReader import ItunesDataReader
 from statistics import business_statistics_generator
-from tryout.testAlgos import readData, csvFolder, plotDir
-from util import GraphUtil, SIAUtil, StatConstants
+from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
+
+#1/(1+ (k**2)) = percent
+#k = math.sqrt( (1-percent)/ percent)
+#k = math.sqrt(19) for 5% (i.e. 0.05)
+def determinKForPercent(percent):
+    return math.sqrt((1-percent)/percent)
+
+
+def getThreshold(data, percent):
+    m = numpy.mean(data)
+    std = numpy.std(data)
+    return (m + (determinKForPercent(percent)*std))
+
+def readData(csvFolder):
+    rdr = ItunesDataReader()
+    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
+    return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 
 def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
     bnss_file_name = os.path.join(plotDir, bnss_key)
@@ -147,3 +169,35 @@ def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
 
     with open(os.path.join(plotDir, 'bnss_review_cnt.txt'), 'w') as f:
         f.write(str(bnss_to_no_of_reviews_dict))
+
+
+def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
+    measure_log_file = open(os.path.join(plotDir, "scores_with_outliers.log"), 'a')
+    chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
+    chPtsOutliers[StatConstants.FIRST_TIME_KEY] = firstTimeKey
+    measure_log_file.write(str(chPtsOutliers)+"\n")
+    measure_log_file.close()
+    del chPtsOutliers[StatConstants.BNSS_ID]
+    del chPtsOutliers[StatConstants.FIRST_TIME_KEY]
+
+
+def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, find_outlier_idxs=True):
+    beforeAnomalyDetection = datetime.now()
+
+    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
+                                                           find_outlier_idxs)
+    afterAnomalyDetection = datetime.now()
+
+    print 'Anomaly Detection Time for bnss:', bnssKey, 'in', afterAnomalyDetection-beforeAnomalyDetection
+
+    return chPtsOutliers
+
+
+def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
+    beforePlotTime = datetime.now()
+    avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
+
+    PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir, \
+                                 measuresToBeExtracted, avg_idxs, timeLength)
+    afterPlotTime = datetime.now()
+    print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
