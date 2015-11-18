@@ -288,7 +288,7 @@ class review(SIALink):
         self.score = user.getMessageFromNeighbor(business)
 
     def toString(self):
-        return 'Review by Usr:'+self.usrId+' Rating:'+str(self.rating)+' Review Time:'+\
+        return 'Review by Usr:'+self.usrId+ ' on Bnss:'+ self.bnId+' Rating:'+str(self.rating)+' Review Time:'+\
                str(getDateForReview(self))+' Review Comment:'+ str(self.getReviewText())
 
 

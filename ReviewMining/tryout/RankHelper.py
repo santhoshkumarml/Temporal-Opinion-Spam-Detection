@@ -42,7 +42,7 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             idxs = [idx for idx in chPtsOutliersIdxs if idx>=idx1 and idx<=idx2 and idx < len(chPtsOutlierScores)]
             if len(idxs) > 0:
                 try:
-                    idx = max(idxs, key= lambda x: chPtsOutlierScores[x])
+                    idx = max(idxs, key=lambda x: chPtsOutlierScores[x])
                 except:
                     print bnss_key, measure_key, idxs, len(chPtsOutlierScores)
                     print chPtsOutlierScores
@@ -67,10 +67,10 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
                 avg_anomaly += (chPtsOutlierScores[idx]/div)
                 max_anomaly = max(max_anomaly, (chPtsOutlierScores[idx]/div))
 
-        if measures_changed > 0:
-            avg_anomaly_for_time_window[window] = avg_anomaly
-            max_anomaly_for_time_window[window] = max_anomaly
+                avg_anomaly_for_time_window[window] = avg_anomaly
+                max_anomaly_for_time_window[window] = max_anomaly
 
+        if measures_changed > 0:
             avg_anomaly = avg_anomaly_for_time_window[window]
             avg_anomaly_for_time_window[window] = (avg_anomaly/measures_changed)
 
@@ -82,7 +82,8 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             max_anomaly_for_time_window[window] = 0.0
             weighted_anomalies_for_window[window] = 0.0
             ratio_of_anomalies_measure[window] = 0.0
-
+        if measures_changed > 5:
+            print bnss_key, window
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
@@ -136,11 +137,13 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
-        # rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
 
 
-def printRankedBnss(bnss_first_time_dict, sorted_keys, aux_info, topK, bnss_review_threshold=0, bnss_to_reviews_dict = dict()):
+
+def printRankedBnss(bnss_first_time_dict, sorted_keys, aux_info,
+                    topK, bnss_review_threshold=0, bnss_to_reviews_dict=dict()):
     print '-------------------------------------------------------------------------------------------------'
     for key_idx in range(0, topK):
         key = sorted_keys[key_idx]
@@ -231,10 +234,10 @@ def rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings, topK=50):
             nscore3 = float(scores3.index(score3)) / float(len(scores3))
             nscore4 = float(scores4.index(score4)) / float(len(scores4))
 
-            nscore1 = (nscore1 ** 2)
-            nscore2 = (nscore2 ** 2)
-            nscore3 = (nscore3 ** 2)
-            nscore4 = (nscore4 ** 2)
+            nscore1 = (nscore1 ** 2)*0.4
+            nscore2 = (nscore2 ** 2)*0.2
+            nscore3 = (nscore3 ** 2)*0.2
+            nscore4 = (nscore4 ** 2)*0.2
 
             final_score = math.sqrt(sum([nscore1, nscore2, nscore3, nscore4]) / 4)
             final_scores_dict[(bnss_key, window)] = final_score

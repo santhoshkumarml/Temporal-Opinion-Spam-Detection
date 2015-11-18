@@ -28,9 +28,9 @@ def getThreshold(data, percent):
     std = numpy.std(data)
     return (m + (determinKForPercent(percent)*std))
 
-def readData(csvFolder):
+def readData(csvFolder,readReviewsText=False):
     rdr = ItunesDataReader()
-    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText=True)
+    (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 
 def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
@@ -101,14 +101,16 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
     time_window = [idx for idx in range(lb, ub+1)]
     for time_key in time_window:
          time_g = cross_time_graphs[time_key]
+         if (bnssKey, SIAUtil.PRODUCT) not in time_g:
+             continue
          usr_ids_for_bnss_in_time_window = usr_ids_for_bnss_in_time_window \
                                            + [usrId for (usrId, usr_type)
                                               in time_g.neighbors((bnssKey, SIAUtil.PRODUCT))]
     usr_ids_for_bnss_in_time_window = set(usr_ids_for_bnss_in_time_window)
+
     bnssKeys = set([bnssId for usrId in usr_ids_for_bnss_in_time_window for bnssId, bnssType in superGraph.neighbors((usrId, SIAUtil.USER))])
     bnssKeys = [(bnssId, intersection_between_users(usr_ids_for_bnss_in_time_window, bnssId, superGraph)) for bnssId in bnssKeys]
-    bnssKeys = sorted(bnssKeys, reverse=True,
-                      key= lambda x: x[1])
+    bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: x[1])
     print bnssKeys
 
 

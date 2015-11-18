@@ -10,13 +10,13 @@ def run_cusum(data, threshold,magnitude=0.5):
     magnitude = float(magnitude)
     threshold = float(threshold)
     k = 1
-    std = 0.2
+    # std = 0.2
     while k < len(data):
         nS[start] = pS[start] = nG[start] = pG[start] = 0
         current_sample = data[k]
         mean = numpy.mean(data[start:k])
-        # std = numpy.std(data[start:k+1])
-        # std = (10**-2) if std == 0 else std
+        std = numpy.std(data[start:k+1])
+        std = (10**-2) if std == 0 else std
         sp = (magnitude/(std**2))*(current_sample - mean - (magnitude/2))
         sn = -((magnitude/(std**2))*(current_sample - mean + (magnitude/2)))
         pS[k] = pS[k-1] + sp

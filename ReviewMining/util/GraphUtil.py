@@ -129,8 +129,8 @@ class TemporalGraph(networkx.Graph):
         
         all_review_dates = [SIAUtil.getDateForReview(r)\
                  for r in parent_reviews.values() ]
-        minDate =  min(all_review_dates)
-        maxDate =  max(all_review_dates)
+        minDate = min(all_review_dates)
+        maxDate = max(all_review_dates)
 
         cross_time_graphs = dict()
         time_key = 0
