@@ -47,7 +47,7 @@ class ItunesDataReader:
         self.bnssIdToBnssDict = {}
         self.reviewIdToReviewDict = {}
 
-    def readData(self, reviewFolder, readReviewsText=True):
+    def readData(self, reviewFolder, readReviewsText=False):
         beforeDataReadTime = datetime.now()
         reviewMetaFile = join(reviewFolder, META_FILE)
         reviewFile = join(reviewFolder, REVIEW_FILE)

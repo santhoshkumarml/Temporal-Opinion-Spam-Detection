@@ -82,7 +82,7 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             max_anomaly_for_time_window[window] = 0.0
             weighted_anomalies_for_window[window] = 0.0
             ratio_of_anomalies_measure[window] = 0.0
-        if measures_changed > 5:
+        if measures_changed > 4:
             print bnss_key, window
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
@@ -155,7 +155,49 @@ def printRankedBnss(bnss_first_time_dict, sorted_keys, aux_info,
     print '-------------------------------------------------------------------------------------------------'
 
 
-def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
+def getVal(key, Keys1D, Keys2D, Keys3D, Keys4D):
+    val = 0
+    if key in Keys1D:
+        val += 1
+    if key in Keys2D:
+        val += 1
+    if key in Keys3D:
+        val += 1
+    if key in Keys4D:
+        val += 1
+    return val
+
+def rankAnomaliesPartially1(aF1, aF2, aF3, aF4, strings, topK=50):
+    Keys1D = sorted(aF1.keys(), key=lambda key: aF1[key], reverse=True)
+    Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
+    Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
+    Keys4D = sorted(aF4.keys(), key=lambda key: aF4[key], reverse=True)
+    aux_info = dict()
+    ranked_bnss = []
+    visited_bnss = set()
+    bnss_first_time_dict = dict()
+    for string in strings:
+        chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
+        if StatConstants.BNSS_ID not in chPtsOutliers:
+            continue
+        bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+        bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
+    all_keys = set(list(Keys1D) + list(Keys2D) + list(Keys3D)+ list(Keys4D))
+
+    #closure function
+    def func_sort(key1, key2):
+        val1 = getVal(key1, Keys1D, Keys2D, Keys3D, Keys4D)
+        val2 = getVal(key2, Keys1D, Keys2D, Keys3D, Keys4D)
+        if val1 > val2:
+            return True
+        else:
+            return False
+
+    ranked_keys = sorted([key for key in all_keys], key=func_sort)
+    return ranked_keys
+
+
+def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=50):
     Keys1D = sorted(aF1.keys(), key=lambda key: aF1[key], reverse=True)
     Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)

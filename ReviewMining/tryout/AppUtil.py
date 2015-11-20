@@ -88,12 +88,15 @@ def intersection_between_users(usr_ids_for_bnss_in_time_window, bnssKey, superGr
 
 def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLength = '1-W'):
      # Read data
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=False)
 
     # Construct Graphs
     superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
                                                            bnssIdToBusinessDict,
                                                            reviewIdToReviewsDict, timeLength)
+    del superGraph
+
+    usr_to_reviews_dict = readReviewsForBnssOrUser(plotDir, node_type=SIAUtil.USER)
 
     usr_ids_for_bnss_in_time_window = []
 
@@ -103,15 +106,20 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
          time_g = cross_time_graphs[time_key]
          if (bnssKey, SIAUtil.PRODUCT) not in time_g:
              continue
-         usr_ids_for_bnss_in_time_window = usr_ids_for_bnss_in_time_window \
-                                           + [usrId for (usrId, usr_type)
-                                              in time_g.neighbors((bnssKey, SIAUtil.PRODUCT))]
-    usr_ids_for_bnss_in_time_window = set(usr_ids_for_bnss_in_time_window)
+         usr_ids_for_bnss_in_time_window = usr_ids_for_bnss_in_time_window + \
+                                           [usrId for (usrId, usr_type) in time_g.neighbors((bnssKey, SIAUtil.PRODUCT))]
+    # usr_ids_for_bnss_in_time_window = set(usr_ids_for_bnss_in_time_window)
 
-    bnssKeys = set([bnssId for usrId in usr_ids_for_bnss_in_time_window for bnssId, bnssType in superGraph.neighbors((usrId, SIAUtil.USER))])
-    bnssKeys = [(bnssId, intersection_between_users(usr_ids_for_bnss_in_time_window, bnssId, superGraph)) for bnssId in bnssKeys]
-    bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: x[1])
-    print bnssKeys
+    usr_ids_for_bnss_in_time_window = sorted([(usr, usr_to_reviews_dict[usr])
+                                              for usr in usr_ids_for_bnss_in_time_window], key=lambda x: x[1])
+    for usr in usr_ids_for_bnss_in_time_window:
+        print usr
+
+
+    # bnssKeys = set([bnssId for usrId in usr_ids_for_bnss_in_time_window for bnssId, bnssType in superGraph.neighbors((usrId, SIAUtil.USER))])
+    # bnssKeys = [(bnssId, intersection_between_users(usr_ids_for_bnss_in_time_window, bnssId, superGraph)) for bnssId in bnssKeys]
+    # bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: x[1])
+    # print bnssKeys
 
 
 def logAllUsrStats(csvFolder, plotDir, timeLength = '1-W'):
