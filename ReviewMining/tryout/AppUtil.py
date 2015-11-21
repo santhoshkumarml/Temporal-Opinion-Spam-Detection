@@ -221,10 +221,14 @@ def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, fin
 
 def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measuresToBeExtracted, timeLength):
     beforePlotTime = datetime.now()
-    avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
-
+    lead_idxs = set()
+    for measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
+        algo = chPtsOutliers[measure_key].keys()[0]
+        avg_idxs, chOutlierScores = chPtsOutliers[measure_key][algo]
+        lead_idxs |= set(avg_idxs)
+    lead_idxs = sorted(lead_idxs)
     PlotUtil.plotMeasuresForBnss(statistics_for_bnss, chPtsOutliers, plotDir, \
-                                 measuresToBeExtracted, avg_idxs, timeLength)
+                                 measuresToBeExtracted, lead_idxs, timeLength)
     afterPlotTime = datetime.now()
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 

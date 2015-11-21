@@ -196,13 +196,13 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
-                        max_score = max_score+1
-                        min_score = min_score+1
+                        max_score += 1
+                        min_score += 1
 
                     ax2 = ax1.twinx()
                     ax2.set_ylim((min_score, max_score+0.01))
                     scores = chPtsOutlierScores
-                    if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
+                    if len(scores) > 0:
                         if algo == StatConstants.LOCAL_AR:
                             for idx in sorted(avg_idxs):
                                 idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
@@ -231,6 +231,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
                                  'r', label='Outlier Scores')
 
+
                 # if measure_key == StatConstants.YOUTH_SCORE:
                 #     print firstTimeKey, algo, chPtsOutlierScores[105-firstTimeKey:116 -firstTimeKey]
                 #     print data[105-firstTimeKey:116 -firstTimeKey], len(data), len(chPtsOutlierScores)
@@ -241,7 +242,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                         outlier_idxs = [outlier_idx for outlier_idx in chOutlierIdxs if
                                         outlier_idx < idx2 and idx1 <= outlier_idx < len(chPtsOutlierScores)]
                         if len(outlier_idxs) > 0:
-                            outlier_idx = max(outlier_idxs, key = lambda outlier_idx : chPtsOutlierScores[outlier_idx])
+                            outlier_idx = min(outlier_idxs, key= lambda outlier_idx : math.fabs(idx-outlier_idx))
                             ax1.axvline(x=firstDimensionValues[outlier_idx], linewidth=1.5, color='b')
                 else:
                     for idx in chOutlierIdxs:

@@ -312,8 +312,11 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
                 diff = math.fabs(direction)
                 if direction < 0:
                     direction = StatConstants.DECREASE
-                else:
+                elif direction > 0:
                     direction = StatConstants.INCREASE
+                else:
+                    direction = StatConstants.NEUTRAL
+
                 # and diff>=val_change_thres
 
                 # import tryout.ScoreHistogram as sc
@@ -474,7 +477,8 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                         d = data[didx]
                         score = cf.update(d)
                         if find_outlier_idxs and didx > 0:
-                            direction = StatConstants.DECREASE if d - data[didx-1] < 0 else StatConstants.INCREASE
+                            direction = StatConstants.DECREASE if d-data[didx-1] < 0 \
+                                else StatConstants.INCREASE if d-data[didx-1] >0 else StatConstants.NEUTRAL
                             needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
                             thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
                             if thres and score >= thres:
@@ -513,6 +517,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
 
                 if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
                     lead_signal_idxs = lead_signal_idxs.union(set(chOutlierIdxs))
+                    print lead_signal_idxs
 
                 chPtsOutliers[measure_key][algo] = (chOutlierIdxs, chOutlierScores)
 
