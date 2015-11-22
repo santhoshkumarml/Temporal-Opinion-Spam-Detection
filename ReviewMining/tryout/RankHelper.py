@@ -167,14 +167,12 @@ def getVal(key, Keys1D, Keys2D, Keys3D, Keys4D):
         val += 1
     return val
 
-def rankAnomaliesPartially1(aF1, aF2, aF3, aF4, strings, topK=50):
+def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
     Keys1D = sorted(aF1.keys(), key=lambda key: aF1[key], reverse=True)
     Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
     Keys4D = sorted(aF4.keys(), key=lambda key: aF4[key], reverse=True)
     aux_info = dict()
-    ranked_bnss = []
-    visited_bnss = set()
     bnss_first_time_dict = dict()
     for string in strings:
         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
@@ -182,19 +180,20 @@ def rankAnomaliesPartially1(aF1, aF2, aF3, aF4, strings, topK=50):
             continue
         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
         bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
-    all_keys = set(list(Keys1D) + list(Keys2D) + list(Keys3D)+ list(Keys4D))
+    all_keys = set(list(Keys1D) + list(Keys2D) + list(Keys3D) + list(Keys4D))
 
     #closure function
     def func_sort(key1, key2):
         val1 = getVal(key1, Keys1D, Keys2D, Keys3D, Keys4D)
         val2 = getVal(key2, Keys1D, Keys2D, Keys3D, Keys4D)
-        if val1 > val2:
-            return True
-        else:
-            return False
+        if val1 == val2:
+            val1 = aF1[key1]+aF2[key1]+aF3[key1]+aF4[key1]
+            val2 = aF1[key2]+aF2[key2]+aF3[key2]+aF4[key2]
+        return True if val1 > val2 else False
+
 
     ranked_keys = sorted([key for key in all_keys], key=func_sort)
-    return ranked_keys
+    return ranked_keys, bnss_first_time_dict, aux_info
 
 
 def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=50):
