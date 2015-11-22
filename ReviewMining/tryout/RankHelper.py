@@ -9,6 +9,7 @@ import AppUtil
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
 
+
 def doHistogramForFeature(bins, scores):
     for score in scores:
         fig = plt.figure()
@@ -137,8 +138,8 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
-        # return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
 
 
 
@@ -151,7 +152,8 @@ def printRankedBnss(bnss_first_time_dict, sorted_keys, aux_info,
         if bnss_key in bnss_to_reviews_dict and bnss_first_time_dict[bnss_key] > bnss_review_threshold:
             idx1 += bnss_first_time_dict[bnss_key]
             idx2 += bnss_first_time_dict[bnss_key]
-            print bnss_key, (idx1, idx2), aux_info[key]
+            aux = aux_info[key] if key in aux_info else ''
+            print bnss_key, (idx1, idx2), aux
     print '-------------------------------------------------------------------------------------------------'
 
 
@@ -192,7 +194,7 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
         return True if val1 > val2 else False
 
 
-    ranked_keys = sorted([key for key in all_keys], key=func_sort)
+    ranked_keys = sorted([key for key in all_keys], cmp=func_sort)
     return ranked_keys, bnss_first_time_dict, aux_info
 
 
