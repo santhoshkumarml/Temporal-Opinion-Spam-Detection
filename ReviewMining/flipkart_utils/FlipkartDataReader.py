@@ -1,5 +1,5 @@
 __author__ = 'santhosh'
-import datetime
+import datetime.datetime
 import os
 
 import pandas
@@ -33,7 +33,7 @@ class FlipkartDataReader(object):
         for tup in df1.itertuples():
             review_id, bnss_id, user_id, rating, creation_time_stamp, last_modified_time = tup
             review_id, bnss_id, user_id, rating, creation_time_stamp = \
-                review_id, bnss_id, user_id, float(rating), datetime.datetime.strptime(creation_time_stamp, '%Y-%m-%d %H:%M:%S')
+                review_id, bnss_id, user_id, float(rating), datetime.strptime(creation_time_stamp, '%Y-%m-%d %H:%M:%S')
 
             if bnss_id not in self.bnssIdToBnssDict:
                 self.bnssIdToBnssDict[bnss_id] = SIAUtil.business(bnss_id, bnss_id)
