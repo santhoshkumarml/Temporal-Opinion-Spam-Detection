@@ -176,7 +176,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #             '482030564', '330560517', '416611649', '395697081', '438931724',
     #             '332121452', '335158923', '329158810', '411388627', '371119201',
     #             '382274493', '481012158', '289738462']
-    bnssKeys = ['333647776']
+    bnssKeys = ['319927587']
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, os.path.join(plotDir, AppUtil.BNSS_STATS_FOLDER))
@@ -194,11 +194,13 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    # bnssKey = '412629178'
-    # AppUtil.findUsersInThisTimeWindow(bnssKey, (148, 151), csvFolder, plotDir)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    bnssKey = '379459295'
+    AppUtil.findUsersInThisTimeWindow(bnssKey, (110, 113), csvFolder, plotDir)
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
     # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-    # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, 50,
-    #                             bnss_review_threshold=20, bnss_to_reviews_dict=bnss_to_reviews_dict)
+    # for key in ranked_bnss:
+    #     print key
+    # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
+    #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
     # print getThresholdForDifferentMeasures(plotDir, doHist=True)

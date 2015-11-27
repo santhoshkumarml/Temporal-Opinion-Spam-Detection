@@ -26,6 +26,7 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
     avg_anomaly_for_time_window = dict()
     max_anomaly_for_time_window = dict()
     ratio_of_anomalies_measure = dict()
+    firstTimeKey = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
     if not magnitude_divider:
         MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18, StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
                              StatConstants.NO_OF_POSITIVE_REVIEWS:100000, StatConstants.NON_CUM_NO_OF_REVIEWS:100000}
@@ -83,8 +84,9 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             max_anomaly_for_time_window[window] = 0.0
             weighted_anomalies_for_window[window] = 0.0
             ratio_of_anomalies_measure[window] = 0.0
-        if measures_changed > 4:
-            print bnss_key, window
+        if measures_changed > 4 and bnss_key=='319927587':
+            idx1, idx2 = window
+            print bnss_key, (idx1 + firstTimeKey, idx2 + firstTimeKey)
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
@@ -138,8 +140,9 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        # return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
-        return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
 
 
 
@@ -182,7 +185,7 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
             continue
         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
         bnss_first_time_dict[bnss_key] = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
-    all_keys = set(list(Keys1D) + list(Keys2D) + list(Keys3D) + list(Keys4D))
+    all_keys = set(Keys1D[:topK] + Keys2D[:topK] + Keys3D[:topK] + Keys4D[:topK])
 
     #closure function
     def func_sort(key1, key2):
@@ -203,6 +206,7 @@ def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=50):
     Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
     Keys4D = sorted(aF4.keys(), key=lambda key: aF4[key], reverse=True)
+
     aux_info = dict()
 
     ranked_bnss = []
@@ -231,17 +235,17 @@ def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=50):
         if key2 not in visited_bnss:
             ranked_bnss.append(key2)
             visited_bnss.add(key2)
-            aux_info[key2] = (2, aF1[key2])
+            aux_info[key2] = (2, aF2[key2])
 
         if key3 not in visited_bnss:
             ranked_bnss.append(key3)
             visited_bnss.add(key3)
-            aux_info[key3] = (3, aF1[key3])
+            aux_info[key3] = (3, aF3[key3])
 
         if key4 not in visited_bnss:
             ranked_bnss.append(key4)
             visited_bnss.add(key4)
-            aux_info[key4] = (4, aF1[key4])
+            aux_info[key4] = (4, aF4[key4])
 
         idx += 1
 
