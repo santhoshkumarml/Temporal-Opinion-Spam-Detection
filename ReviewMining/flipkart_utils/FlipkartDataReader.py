@@ -1,6 +1,6 @@
 __author__ = 'santhosh'
-import datetime.datetime
 import os
+from datetime import datetime
 
 import pandas
 
