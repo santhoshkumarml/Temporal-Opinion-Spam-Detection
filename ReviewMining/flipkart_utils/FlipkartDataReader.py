@@ -1,10 +1,10 @@
 __author__ = 'santhosh'
 import datetime
 import os
-import sys
-from util import SIAUtil
 
 import pandas
+
+from util import SIAUtil
 
 REVIEW_ID = 'Id'
 BNSS_ID = 'property_id'
@@ -55,12 +55,15 @@ class FlipkartDataReader(object):
             'Reviews:', len(self.reviewIdToReviewDict.keys())
 
         if not readReviewsText:
+            afterDataReadTime = datetime.now()
+            print 'Data Read Time:',(afterDataReadTime - beforeDataReadTime)
+
             return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
 
         skippedData = 0
         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object, names=REVIEW_CSV_COLS)
-        for tup in df1.itertuples():
+        for tup in df2.itertuples():
             review_id, bnss_id, user_id, generic_rating,\
             review_text, vertical, last_modified_time,\
             creation_time_stamp, first_to_review, certififed_buyer = tup
@@ -73,12 +76,12 @@ class FlipkartDataReader(object):
 
         afterDataReadTime = datetime.now()
 
-        print 'Data Read Time:',(afterDataReadTime - beforeDataReadTime)
+        print 'Data Read Time:', (afterDataReadTime - beforeDataReadTime)
         print 'Skipped Count:', skippedData
 
-        print 'Users:',len(self.usrIdToUsrDict.keys()), \
-            'Products:',len(self.bnssIdToBnssDict.keys()), \
-            'Reviews:',len(self.reviewIdToReviewDict.keys())
+        print 'Users:', len(self.usrIdToUsrDict.keys()), \
+            'Products:', len(self.bnssIdToBnssDict.keys()), \
+            'Reviews:', len(self.reviewIdToReviewDict.keys())
 
         textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
