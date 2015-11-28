@@ -66,7 +66,7 @@ class FlipkartDataReader(object):
             if len(list(tup)) != 12:
                 skippedData += 1
                 continue
-            index, review_id, bnss_id, user_id, generic_rating,\
+            index, primary_idx, bnss_id, user_id, review_id,\
             review_text, title, vertical, last_modified_time,\
             creation_time_stamp, first_to_review, certififed_buyer = tup
 
