@@ -62,10 +62,10 @@ class FlipkartDataReader(object):
         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object)
         for tup in df2.itertuples():
-            if len(list(tup)) != 11:
+            if len(list(tup)) != 12:
                 skippedData += 1
                 continue
-            review_id, bnss_id, user_id, generic_rating,\
+            index, review_id, bnss_id, user_id, generic_rating,\
             review_text, title, vertical, last_modified_time,\
             creation_time_stamp, first_to_review, certififed_buyer = tup
 
