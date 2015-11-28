@@ -30,11 +30,11 @@ def constructIntervalTree(days):
     t[0:1] = 0
     iter_start = 1
     step_index = 0
-    while(iter_start<end):
-        iterend = iter_start+(2**step_index)
+    while iter_start < end:
+        iterend = iter_start + (2**step_index)
         t[iter_start:iterend] = 0
-        iter_start =  iterend
-        step_index+=1
+        iter_start = iterend
+        step_index += 1
     return t
 
 
@@ -45,7 +45,7 @@ def getBucketIntervalForBucketTree(bucketTree, point):
 
 def updateBucketTree(bucketTree, point):
     interval = getBucketIntervalForBucketTree(bucketTree, point)
-    begin,end,data = interval
+    begin, end, data = interval
     bucketTree.remove(interval)
     bucketTree[begin:end] = data + 1.0
 
@@ -164,17 +164,37 @@ def calculateYouthScore(G, statistics_for_bnss, neighboring_usr_nodes, superGrap
     statistics_for_bnss[StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
 
 
-def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes, noOfReviews, timeKey, timeLength,
+
+def getGranularityInc(day_granularity_inc):
+    granularity_inc = day_granularity_inc
+    if StatConstants.MINIMUM_GRANULARITY == StatConstants.HOUR_GRANULARITY:
+        granularity_inc *= 24
+    elif StatConstants.MINIMUM_GRANULARITY == StatConstants.MINUTE_GRANULARITY:
+        granularity_inc *=  (24 * 60)
+    return granularity_inc
+
+def getDateDiff(diff):
+    if StatConstants.MINIMUM_GRANULARITY == StatConstants.DAY_GRANULARITY:
+        return diff.days
+    elif StatConstants.MINIMUM_GRANULARITY == StatConstants.HOUR_GRANULARITY:
+        return diff.hour
+    elif StatConstants.MINIMUM_GRANULARITY == StatConstants.MINUTE_GRANULARITY:
+        return diff.minute
+
+def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes, noOfReviews,
+                                  timeKey, timeLength,
                                   total_time_slots):
     entropyScore = 0
     if StatConstants.ENTROPY_SCORE not in statistics_for_bnss:
         statistics_for_bnss[StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
     if noOfReviews >= 2:
-        bucketTree = constructIntervalTree(GraphUtil.getDayIncrements(timeLength))
-        allReviewsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID]) for (usrId, usr_type) in neighboring_usr_nodes]
+        granularity_inc = getGranularityInc(GraphUtil.getDayIncrements(timeLength))
+        bucketTree = constructIntervalTree(granularity_inc)
+        allReviewsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
+                                     for (usrId, usr_type) in neighboring_usr_nodes]
         allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key=lambda x: SIAUtil.getDateForReview(x))
-        allReviewVelocity = [(SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x + 1]) - \
-                              SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days \
+        allReviewVelocity = [getDateDiff(SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x + 1]) -
+                              SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days
                              for x in range(len(allReviewsInThisTimeBlock) - 1)]
         for reviewTimeDiff in allReviewVelocity:
             updateBucketTree(bucketTree, reviewTimeDiff)

@@ -28,8 +28,7 @@ def getThreshold(data, percent):
     std = numpy.std(data)
     return (m + (determinKForPercent(percent)*std))
 
-def readData(csvFolder,readReviewsText=False):
-    rdr = ItunesDataReader()
+def readData(csvFolder,readReviewsText=False, rdr = ItunesDataReader()):
     (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 

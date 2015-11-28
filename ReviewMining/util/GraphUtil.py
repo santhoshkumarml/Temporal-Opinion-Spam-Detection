@@ -3,11 +3,12 @@ Created on Jan 12, 2015
 
 @author: santhosh
 '''
-import networkx
-from datetime import datetime,timedelta
 import re
-import SIAUtil
+from datetime import datetime, timedelta
 
+import networkx
+
+import SIAUtil
 
 
 def getDayIncrements(timeSplit):
