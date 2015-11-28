@@ -16,8 +16,6 @@ REVIEW_TEXT = 'text'
 
 RATING_CSV = 'ProductRatings_processed.csv'
 REVIEW_CSV = 'ProductReviews_processed.csv'
-RATING_CSV_COLS = [REVIEW_ID, BNSS_ID, USER_ID, RATING, CREATE_TIMESTAMP]
-REVIEW_CSV_COLS = [REVIEW_ID, BNSS_ID, USER_ID, REVIEW_TEXT]
 
 class FlipkartDataReader(object):
     def __init__(self):
@@ -29,7 +27,7 @@ class FlipkartDataReader(object):
         beforeDataReadTime = datetime.now()
         RATING_CSV_COLS = [REVIEW_ID, BNSS_ID, USER_ID, RATING, CREATE_TIMESTAMP]
         df1 = pandas.read_csv(os.path.join(reviewFolder, RATING_CSV),
-                              escapechar='\\', skiprows=1, header=None, dtype=object, names=RATING_CSV_COLS)
+                              escapechar='\\', skiprows=1, header=None, dtype=object)
         for tup in df1.itertuples():
             review_id, bnss_id, user_id, rating, creation_time_stamp, last_modified_time = tup
             review_id, bnss_id, user_id, rating, creation_time_stamp = \
@@ -62,10 +60,13 @@ class FlipkartDataReader(object):
 
         skippedData = 0
         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
-                              escapechar='\\', skiprows=1, header=None, dtype=object, names=REVIEW_CSV_COLS)
+                              escapechar='\\', skiprows=1, header=None, dtype=object)
         for tup in df2.itertuples():
+            if len(list(tup)) != 11:
+                skippedData += 1
+                continue
             review_id, bnss_id, user_id, generic_rating,\
-            review_text, vertical, last_modified_time,\
+            review_text, title, vertical, last_modified_time,\
             creation_time_stamp, first_to_review, certififed_buyer = tup
 
             if review_id in self.reviewIdToReviewDict:
