@@ -16,7 +16,7 @@ def entropyFn(probability_dict):
     for key in probability_dict:
         probability = probability_dict[key]
         if probability > 0:
-            entropy += -(probability*math.log(probability,2))
+            entropy += -(probability * math.log(probability, 2))
     return entropy
 
 
