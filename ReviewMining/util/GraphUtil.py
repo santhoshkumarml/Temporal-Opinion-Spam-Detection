@@ -7,6 +7,7 @@ import re
 from datetime import datetime, timedelta
 
 import networkx
+import StatConstants
 
 import SIAUtil
 
@@ -27,6 +28,14 @@ def getDayIncrements(timeSplit):
     else:
         dayIncrement = numeric * 365
     return dayIncrement
+
+def getGranularityInc(day_granularity_inc):
+    granularity_inc = day_granularity_inc
+    if StatConstants.MINIMUM_GRANULARITY == StatConstants.HOUR_GRANULARITY:
+        granularity_inc *= 24
+    elif StatConstants.MINIMUM_GRANULARITY == StatConstants.MINUTE_GRANULARITY:
+        granularity_inc *= (24 * 60)
+    return granularity_inc
 
 def getDates(firstDatetime, timeKeys, timeLength ='1-M'):
     dayIncrement = getDayIncrements(timeLength)
@@ -152,6 +161,22 @@ class TemporalGraph(networkx.Graph):
         return cross_time_graphs
 
 #---------------------------------------------------------------------------------------------------------
+def createSuperGraph(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, timeLength):
+    superGraph = SuperGraph.createGraph(usrIdToUserDict, \
+                                        bnssIdToBusinessDict, \
+                                        reviewIdToReviewsDict)
+
+    print "Super Graph Created"
+    return superGraph
+
+def createTemporalGraph(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, timeLength):
+    cross_time_graphs = TemporalGraph.createTemporalGraph(usrIdToUserDict, \
+                                                          bnssIdToBusinessDict, \
+                                                          reviewIdToReviewsDict, \
+                                                          timeLength, False)
+    print "Temporal Graph Created"
+    return cross_time_graphs
+
 def createGraphs(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict, timeLength):
     beforeGraphConstructionTime = datetime.now()
     superGraph = SuperGraph.createGraph(usrIdToUserDict,\

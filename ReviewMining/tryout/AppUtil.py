@@ -48,25 +48,24 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W'):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
     # Construct Graphs
-    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, \
-                                                           bnssIdToBusinessDict, \
-                                                           reviewIdToReviewsDict, timeLength)
+    cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
+                                               bnssIdToBusinessDict,
+                                               reviewIdToReviewsDict, timeLength)
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
-    bnssKeys = [bnss_key for bnss_key, bnss_type in superGraph.nodes() \
-                if bnss_type == SIAUtil.PRODUCT]
-    bnssKeys = sorted(bnssKeys, reverse=True, key=lambda x: len(superGraph.neighbors((x, SIAUtil.PRODUCT))))
-    # bnssKeys = ['363590051']
-    # bnssKeys = bnssKeys[:2]
+
+    bnssKeys = list(bnssIdToBusinessDict.keys())
+
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
-    return bnssKeys, cross_time_graphs, measuresToBeExtracted, superGraph
+    return bnssKeys, cross_time_graphs, measuresToBeExtracted
 
 
 def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W'):
-    bnssKeys, cross_time_graphs, measuresToBeExtracted, superGraph = readAndGenerateStatistics(csvFolder, plotDir)
+    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir)
+    superGraph = GraphUtil.SuperGraph()
     for bnssKey in bnssKeys:
         statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
             superGraph, \

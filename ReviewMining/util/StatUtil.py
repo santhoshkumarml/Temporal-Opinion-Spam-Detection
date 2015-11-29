@@ -163,16 +163,6 @@ def calculateYouthScore(G, statistics_for_bnss, neighboring_usr_nodes, superGrap
         youth_scores.append(youth_score)
     statistics_for_bnss[StatConstants.YOUTH_SCORE][timeKey] = numpy.mean(numpy.array(youth_scores))
 
-
-
-def getGranularityInc(day_granularity_inc):
-    granularity_inc = day_granularity_inc
-    if StatConstants.MINIMUM_GRANULARITY == StatConstants.HOUR_GRANULARITY:
-        granularity_inc *= 24
-    elif StatConstants.MINIMUM_GRANULARITY == StatConstants.MINUTE_GRANULARITY:
-        granularity_inc *=  (24 * 60)
-    return granularity_inc
-
 def getDateDiff(diff):
     if StatConstants.MINIMUM_GRANULARITY == StatConstants.DAY_GRANULARITY:
         return diff.days
@@ -188,7 +178,7 @@ def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes,
     if StatConstants.ENTROPY_SCORE not in statistics_for_bnss:
         statistics_for_bnss[StatConstants.ENTROPY_SCORE] = numpy.zeros(total_time_slots)
     if noOfReviews >= 2:
-        granularity_inc = getGranularityInc(GraphUtil.getDayIncrements(timeLength))
+        granularity_inc = GraphUtil.getGranularityInc(GraphUtil.getDayIncrements(timeLength))
         bucketTree = constructIntervalTree(granularity_inc)
         allReviewsInThisTimeBlock = [G.getReview(usrId, statistics_for_bnss[StatConstants.BNSS_ID])
                                      for (usrId, usr_type) in neighboring_usr_nodes]

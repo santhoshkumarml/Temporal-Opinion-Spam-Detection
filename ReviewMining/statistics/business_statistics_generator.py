@@ -25,6 +25,13 @@ def extractBnssStatistics(superGraph, cross_time_graphs, plotDir, bnssKey, timeL
     isInitialized = False
     for timeKey in cross_time_graphs:
         G = cross_time_graphs[timeKey]
+
+        for reviewId in G.getReviewIds():
+            revw = G.getReviewFromReviewId(reviewId)
+            usr = G.getUser(revw.getUserId())
+            bnss = G.getBusiness(revw.getBusinessID())
+            superGraph.addNodesAndEdge(usr, bnss, revw)
+
         if bnssKey in G.getBusinessIds():
             if not isInitialized:
                 statistics_for_current_bnss[StatConstants.BNSS_ID] = bnssKey
