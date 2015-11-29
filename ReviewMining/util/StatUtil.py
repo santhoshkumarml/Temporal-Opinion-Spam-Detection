@@ -52,7 +52,9 @@ def updateBucketTree(bucketTree, point):
 def fixZeroReviewTimeStamps(timeKey, statistics_for_bnss):
     noOfReviewsInTime = statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
     for measure_key in StatConstants.MEASURES:
-        if measure_key not in statistics_for_bnss or measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+        if measure_key not in statistics_for_bnss or measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
+                                                                     StatConstants.NO_OF_POSITIVE_REVIEWS,
+                                                                     StatConstants.NO_OF_NEGATIVE_REVIEWS]:
             continue
         if measure_key != StatConstants.NO_OF_REVIEWS and measure_key != StatConstants.AVERAGE_RATING and\
                         measure_key != StatConstants.MAX_TEXT_SIMILARITY:
