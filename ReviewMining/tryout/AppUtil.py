@@ -7,6 +7,7 @@ import numpy
 
 from anomaly_detection import AnomalyDetector
 from itunes_utils.ItunesDataReader import ItunesDataReader
+from flipkart_utils.FlipkartDataReader import FlipkartDataReader
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
@@ -63,7 +64,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr = Itun
     return bnssKeys, cross_time_graphs, measuresToBeExtracted
 
 
-def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
+def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=FlipkartDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr)
     superGraph = GraphUtil.SuperGraph()
     for bnssKey in bnssKeys:
