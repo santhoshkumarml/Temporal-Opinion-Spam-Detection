@@ -8,7 +8,6 @@ if __name__ == "__main__":
         sys.exit()
     csvFolder = sys.argv[1]
     reader = FlipkartDataReader.FlipkartDataReader()
-    reader.readData(csvFolder)
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk_bnss_stats')
-    AppUtil.doSerializeAllBnss(csvFolder, plotDir, timeLength='1-W')
+    AppUtil.doSerializeAllBnss(csvFolder, plotDir, timeLength='1-W', rdr=reader)

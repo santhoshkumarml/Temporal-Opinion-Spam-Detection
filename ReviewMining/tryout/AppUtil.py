@@ -44,9 +44,9 @@ def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
 
 
-def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W'):
+def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr = ItunesDataReader()):
     # Read data
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr)
     # Construct Graphs
     cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
                                                bnssIdToBusinessDict,
@@ -63,8 +63,8 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W'):
     return bnssKeys, cross_time_graphs, measuresToBeExtracted
 
 
-def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W'):
-    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir)
+def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
+    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr)
     superGraph = GraphUtil.SuperGraph()
     for bnssKey in bnssKeys:
         statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
