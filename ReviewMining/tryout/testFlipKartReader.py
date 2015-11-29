@@ -1,5 +1,7 @@
-import sys
+import sys, os
 from flipkart_utils import FlipkartDataReader
+from datetime import datetime
+import AppUtil
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print 'Usage: python -m \"tryout.testFlipkKartReader\" csvFolder'
@@ -8,4 +10,5 @@ if __name__ == "__main__":
     reader = FlipkartDataReader.FlipkartDataReader()
     reader.readData(csvFolder)
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk_bnss_stats')
+    AppUtil.doSerializeAllBnss(csvFolder, plotDir, timeLength='1-W')
