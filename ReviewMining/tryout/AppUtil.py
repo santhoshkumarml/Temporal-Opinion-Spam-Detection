@@ -49,7 +49,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr=rdr)
     # Construct Graphs
-    cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
+    cross_time_graphs = GraphUtil.createTemporalGraph(usrIdToUserDict,
                                                bnssIdToBusinessDict,
                                                reviewIdToReviewsDict, timeLength)
     if not os.path.exists(plotDir):
