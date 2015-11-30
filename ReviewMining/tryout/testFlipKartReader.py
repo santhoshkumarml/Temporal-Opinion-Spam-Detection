@@ -2,6 +2,8 @@ import sys, os
 from flipkart_utils import FlipkartDataReader
 from datetime import datetime
 import AppUtil
+from util import GraphUtil
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print 'Usage: python -m \"tryout.testFlipkKartReader\" csvFolder'

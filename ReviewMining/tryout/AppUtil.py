@@ -66,8 +66,8 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
 
 def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=FlipkartDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
-    superGraph = GraphUtil.SuperGraph()
     for bnssKey in bnssKeys:
+        superGraph = GraphUtil.SuperGraph()
         statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
             superGraph, \
             cross_time_graphs, \
@@ -75,6 +75,7 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=FlipkartDataR
             timeLength, \
             measuresToBeExtracted, logStats=False)
         serializeBnssStats(bnssKey, plotDir, statistics_for_bnss)
+        del superGraph
 
 
 def intersection_between_users(usr_ids_for_bnss_in_time_window, bnssKey, superGraph):
