@@ -65,7 +65,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr = Itun
 
 
 def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=FlipkartDataReader()):
-    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr)
+    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
     superGraph = GraphUtil.SuperGraph()
     for bnssKey in bnssKeys:
         statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
