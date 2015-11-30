@@ -45,9 +45,9 @@ def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
 
 
-def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr = ItunesDataReader()):
+def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     # Read data
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr=rdr)
     # Construct Graphs
     cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,
                                                bnssIdToBusinessDict,
