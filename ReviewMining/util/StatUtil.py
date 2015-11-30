@@ -186,7 +186,7 @@ def calculateTemporalEntropyScore(G, statistics_for_bnss, neighboring_usr_nodes,
                                      for (usrId, usr_type) in neighboring_usr_nodes]
         allReviewsInThisTimeBlock = sorted(allReviewsInThisTimeBlock, key=lambda x: SIAUtil.getDateForReview(x))
         allReviewVelocity = [getDateDiff(SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x + 1]) -
-                              SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x])).days
+                              SIAUtil.getDateForReview(allReviewsInThisTimeBlock[x]))
                              for x in range(len(allReviewsInThisTimeBlock) - 1)]
         for reviewTimeDiff in allReviewVelocity:
             updateBucketTree(bucketTree, reviewTimeDiff)
