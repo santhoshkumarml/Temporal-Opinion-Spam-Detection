@@ -65,7 +65,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
     return bnssKeys, cross_time_graphs, measuresToBeExtracted
 
 
-def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=FlipkartDataReader()):
+def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
     for bnssKey in bnssKeys:
         superGraph = GraphUtil.SuperGraph()
