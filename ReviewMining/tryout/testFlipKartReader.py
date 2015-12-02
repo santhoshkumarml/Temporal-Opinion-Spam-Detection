@@ -1,9 +1,10 @@
-import sys, os
-from flipkart_utils import FlipkartDataReader
+import os
+import sys
 from datetime import datetime
+
 import AppUtil
-from util import GraphUtil
 from anomaly_detection import AnomalyDetector
+from flipkart_utils import FlipkartDataReader
 from util import StatConstants
 
 
@@ -22,7 +23,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
 
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
-    bnssKeys = bnssKeys[:10]
+    bnssKeys = bnssKeys
 
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
@@ -42,5 +43,4 @@ if __name__ == "__main__":
     reader = FlipkartDataReader.FlipkartDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
-    # AppUtil.doSerializeAllBnss(csvFolder, plotDir, timeLength='1-W', rdr=reader)
     tryBusinessMeasureExtractor(csvFolder, plotDir, True)
