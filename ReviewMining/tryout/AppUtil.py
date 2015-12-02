@@ -12,7 +12,8 @@ from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
 SCORES_LOG_FILE = 'scores_with_outliers.log'
-BNSS_STATS_FOLDER = 'bnss_stats'
+ITUNES_BNSS_STATS_FOLDER = 'bnss_stats'
+FLIPKART_BNSS_STATS_FOLDER = 'fk_bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
 

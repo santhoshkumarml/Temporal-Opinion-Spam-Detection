@@ -123,7 +123,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
-    bnss_stats_dir = os.path.join(plotDir, AppUtil.BNSS_STATS_FOLDER)
+    bnss_stats_dir = os.path.join(plotDir, AppUtil.ITUNES_BNSS_STATS_FOLDER)
     file_list_size = []
     for root, dirs, files in os.walk(bnss_stats_dir):
         for name in files:
@@ -179,7 +179,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     bnssKeys = ['319927587']
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
-        statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, os.path.join(plotDir, AppUtil.BNSS_STATS_FOLDER))
+        statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, os.path.join(plotDir, AppUtil.ITUNES_BNSS_STATS_FOLDER))
         chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength, find_outlier_idxs=True)
         # AppUtil.logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
         if doPlot:
