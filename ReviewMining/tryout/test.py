@@ -939,7 +939,7 @@ def testCusum1():
 
 
 def testCusum():
-    import os, testAlgos
+    import os, testItunes
     csvFolder = sys.argv[1]
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
     bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
