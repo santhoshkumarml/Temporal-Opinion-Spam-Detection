@@ -56,7 +56,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
 
-    bnssKeys = list(bnssIdToBusinessDict.keys())
+    bnssKeys = sorted(list(bnssIdToBusinessDict.keys()))
 
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -67,7 +67,13 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
 
 def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
+    print 'Data Read'
     for bnssKey in bnssKeys:
+        print 'Processing', bnssKey
+        bnss_file_name = os.path.join(plotDir, bnssKey)
+        if os.path.exists(bnss_file_name):
+            print 'Statistics Already Generated', bnssKey
+            continue
         superGraph = GraphUtil.SuperGraph()
         statistics_for_bnss = business_statistics_generator.extractBnssStatistics(
             superGraph, \
