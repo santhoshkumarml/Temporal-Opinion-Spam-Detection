@@ -42,5 +42,5 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     reader = FlipkartDataReader.FlipkartDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk_bnss_stats')
     AppUtil.doSerializeAllBnss(csvFolder, plotDir,rdr=reader)
