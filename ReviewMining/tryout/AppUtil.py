@@ -68,6 +68,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
 def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
     print 'Data Read'
+    bnssKeys = bnssKeys[:6000]
     for bnssKey in bnssKeys:
         print 'Processing', bnssKey
         bnss_file_name = os.path.join(plotDir, bnssKey)
