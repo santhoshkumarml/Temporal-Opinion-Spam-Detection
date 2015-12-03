@@ -43,4 +43,4 @@ if __name__ == "__main__":
     reader = FlipkartDataReader.FlipkartDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
-    tryBusinessMeasureExtractor(csvFolder, plotDir, True)
+    AppUtil.doSerializeAllBnss(csvFolder, plotDir,rdr=reader)
