@@ -52,71 +52,52 @@ class ItunesDataReader:
         reviewMetaFile = join(reviewFolder, META_FILE)
         reviewFile = join(reviewFolder, REVIEW_FILE)
         skippedMeta,skippedData = 0,0
-        with open(reviewMetaFile, 'r') as f:
-            lines = f.read().splitlines()
-            print 'Meta lines', len(lines)
-            for line in lines:
-                line = line.replace('\,','')
-                row = line.split(',')
-                if len(row) < len(META_COLS):
-                    #print 'skipping Meta:', line, row
-                    skippedMeta+=1
-                    continue
-                bnss_id = row[META_IDX_DICT[META_BNSS_ID]]
-                user_id = row[META_IDX_DICT[META_USER_ID]]
-                user_name = row[META_IDX_DICT[META_USER_NAME]]
-                review_id = row[META_IDX_DICT[META_REVIEW_ID]]
-                stars = row[META_IDX_DICT[META_STARS]]
-                review_date = row[META_IDX_DICT[META_DATE]]
-                
-                length = len(review_date)
-                review_date = review_date[0:length-4]+','+review_date[length-4:]
-                #print bnss_id, review_id, user_id, user_name, stars, review_date
-                #review_id = (bnss_id, review_id)
-                try :
-                    date_object = dateutil.parser.parse(review_date)
-                    date_object = date_object.date()
-#                     t = ''
-#                     for i in range(13,8,-1):
-#                         if row[i]:
-#                             t = row[i]
-#                             break
-#                         
-#                     if not t:
-#                         print 'No date'
-#                     else:
-#                         print t
-#                     sys.exit()
-                    float_bnss_id = float(bnss_id)
-                    float_user_id = float(user_id)
-                    float_review_id = float(review_id)
-                    stars = float(stars)
-                    if stars < 0 or stars > 5:
-                        #print 'Invalid Rating', stars
-                        raise Exception('Invalid Rating')
-                except:
-                    #print 'skipping Meta:', line, row
-                    skippedMeta+=1
-                    continue
-            
-                if bnss_id not in self.bnssIdToBnssDict:
-                    self.bnssIdToBnssDict[bnss_id] = business(bnss_id, bnss_id)
-                bnss = self.bnssIdToBnssDict[bnss_id]
-            
-                if user_id not in self.usrIdToUsrDict:
-                    self.usrIdToUsrDict[user_id] = user(user_id, user_name)    
-                usr = self.usrIdToUsrDict[user_id]
+        df1 = pd.read_csv(reviewMetaFile, escapechar='\\', header=None, dtype=object, error_bad_lines=False)
+        for tup in df1.itertuples():
+            ls = list(tup)
+            if len(ls) < 11:
+                skippedMeta += 1
+            bnss_id, review_id, user_id, user_name, stars, version, review_date, hv, tv, ts = ls[1:11]
+            # length = len(review_date)
+            # review_date = review_date[0:length-4]+','+review_date[length-4:]
+            #print bnss_id, review_id, user_id, user_name, stars, review_date
+            #review_id = (bnss_id, review_id)
+            try:
+                date_object = dateutil.parser.parse(review_date)
+                date_object = date_object.date()
+                if date_object.year > 2012 or date_object.year < 2008:
+                    raise Exception('Invalid Date')
+                float_bnss_id = float(bnss_id)
+                float_user_id = float(user_id)
+                float_review_id = float(review_id)
+                stars = float(stars)
+                if stars < 0 or stars > 5:
+                    #print 'Invalid Rating', stars
+                    raise Exception('Invalid Rating')
+            except:
+                # print 'skipping Meta:', ls
+                skippedMeta += 1
+                continue
 
-                revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
-            
-                if review_id in self.reviewIdToReviewDict:
-                    print 'Already Read Meta - ReviewId:',review_id
-                
-                self.reviewIdToReviewDict[review_id] = revw
+            if bnss_id not in self.bnssIdToBnssDict:
+                self.bnssIdToBnssDict[bnss_id] = business(bnss_id, bnss_id)
+            bnss = self.bnssIdToBnssDict[bnss_id]
+
+            if user_id not in self.usrIdToUsrDict:
+                self.usrIdToUsrDict[user_id] = user(user_id, user_name)
+            usr = self.usrIdToUsrDict[user_id]
+
+            revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
+
+            if review_id in self.reviewIdToReviewDict:
+                print 'Already Read Meta - ReviewId:',review_id
+
+            self.reviewIdToReviewDict[review_id] = revw
         
         print 'Users:',len(self.usrIdToUsrDict.keys()),\
          'Products:',len(self.bnssIdToBnssDict.keys()),\
          'Reviews:',len(self.reviewIdToReviewDict.keys())
+        print 'Skipped Lines:', skippedMeta
         # return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
     
         if not readReviewsText:

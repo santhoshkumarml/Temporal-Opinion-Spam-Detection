@@ -102,8 +102,11 @@ def extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs, plotDir, time
 
     for bnssKey in bnss_set:
         bnss_file_name = os.path.join(os.path.join(plotDir, 'stats'), bnssKey)
-        statistics_for_current_bnss = pickle.load(bnss_file_name)
+        statistics_for_current_bnss = pickle.load(open(bnss_file_name))
         StatUtil.doPostProcessingForStatistics(statistics_for_current_bnss, total_time_slots, measuresToBeExtracted)
+        # Serialize the the current business
+        with open(bnss_file_name, 'w') as f:
+            pickle.dump(statistics_for_current_bnss, f)
 
     afterStat = datetime.now()
     print 'Stats Generation Time for bnsses:', bnss_set, 'in', afterStat-beforeStat
