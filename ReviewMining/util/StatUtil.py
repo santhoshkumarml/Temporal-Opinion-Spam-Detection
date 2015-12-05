@@ -73,7 +73,7 @@ def calculateRatingEntropy(statistics_for_bnss, ratings, reviews_for_bnss, timeK
     if StatConstants.RATING_ENTROPY not in statistics_for_bnss:
         statistics_for_bnss[StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
 
-    ratingDistribution = {key:0.0 for key in sorted_rating_list}
+    ratingDistribution = {key: 0.0 for key in sorted_rating_list}
 
     for rating in ratings:
         ratingDistribution[rating] += 1.0

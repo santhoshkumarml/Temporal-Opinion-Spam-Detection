@@ -87,7 +87,7 @@ if __name__ == "__main__":
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
     bnss_list = AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,
-                                                                 bnss_list_start=0, bnss_list_end=5000)
+                                                                 bnss_list_start=0, bnss_list_end=13000)
     print 'Finished Generating Statistics for Bnsses:'
     print bnss_list
 
