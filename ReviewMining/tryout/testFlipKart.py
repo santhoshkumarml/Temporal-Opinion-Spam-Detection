@@ -43,5 +43,12 @@ if __name__ == "__main__":
     reader = FlipkartDataReader.FlipkartDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
+    bnss_list = AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,
+                                                                 bnss_list_start=0,
+                                                                 bnss_list_end=500000,
+                                                                 rdr=reader)
+    print 'Finished Generating Statistics for Bnsses:'
+    print bnss_list
+    # AppUtil.readData(csvFolder, rdr=reader)
     # AppUtil.doSerializeAllBnss(csvFolder, plotDir, rdr=reader)
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
