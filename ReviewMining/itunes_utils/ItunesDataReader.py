@@ -3,14 +3,14 @@ Created on Feb 6, 2015
 
 @author: santhosh
 '''
-import pandas as pd
-import sys
-from os.path import join
-from util.SIAUtil import user, business, review
+import math
 from datetime import datetime
+from os.path import join
+
 import dateutil
-import re
-import csv
+import pandas as pd
+
+from util.SIAUtil import user, business, review
 
 #appid,review id,userid,username,stars,version,date,number of helpful votes,total votes,unix timestamp
 META_BNSS_ID = 'bnss_id'
@@ -71,7 +71,7 @@ class ItunesDataReader:
                 float_user_id = float(user_id)
                 float_review_id = float(review_id)
                 stars = float(stars)
-                if stars < 0 or stars > 5:
+                if math.isnan(stars) or stars < 0 or stars > 5:
                     #print 'Invalid Rating', stars
                     raise Exception('Invalid Rating')
             except:
@@ -90,7 +90,7 @@ class ItunesDataReader:
             revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
 
             if review_id in self.reviewIdToReviewDict:
-                print 'Already Read Meta - ReviewId:',review_id
+                print 'Already Read Meta - ReviewId:', review_id
 
             self.reviewIdToReviewDict[review_id] = revw
         

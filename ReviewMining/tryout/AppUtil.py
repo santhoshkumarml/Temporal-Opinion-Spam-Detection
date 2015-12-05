@@ -100,6 +100,16 @@ def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start
     else:
         bnss_list = bnsses_list
 
+    for bnssKey in bnss_list:
+        bnss_file_name = os.path.join(os.path.join(plotDir, 'stats'), bnssKey)
+        if os.path.exists(bnss_file_name):
+            try:
+                os.unlink(bnss_file_name)
+                print 'Unlinked', bnss_file_name
+            except:
+                print 'Unable to unlink', bnss_file_name
+                raise
+
     business_statistics_generator.extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs,
                                                                    plotDir, timeLength, measuresToBeExtracted)
     return bnss_list
