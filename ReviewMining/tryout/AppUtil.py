@@ -89,10 +89,17 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataRea
 
 
 
-def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start,
-                                             bnss_list_end, timeLength = '1-W', rdr=ItunesDataReader()):
+def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start=-1,
+                                             bnss_list_end=-1, bnsses_list=list(),
+                                             timeLength = '1-W', rdr=ItunesDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
-    bnss_list = bnssKeys[bnss_list_start:bnss_list_end]
+    bnss_list = list()
+
+    if bnss_list_end > bnss_list_start > -1:
+        bnss_list = bnssKeys[bnss_list_start:bnss_list_end]
+    else:
+        bnss_list = bnsses_list
+
     business_statistics_generator.extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs,
                                                                    plotDir, timeLength, measuresToBeExtracted)
     return bnss_list

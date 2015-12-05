@@ -109,9 +109,7 @@ def extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs, plotDir, time
             pickle.dump(statistics_for_current_bnss, f)
 
     afterStat = datetime.now()
-    print 'Stats Generation Time for bnsses:', bnss_set, 'in', afterStat-beforeStat
-
-
+    print 'Stats Generation Time for bnsses:', len(bnss_set), 'in', (afterStat - beforeStat)
 
 
 def extractBnssStatistics(superGraph, cross_time_graphs, plotDir, bnssKey, timeLength,\
