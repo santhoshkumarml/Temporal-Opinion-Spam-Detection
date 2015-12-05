@@ -46,6 +46,8 @@ def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
 
 
+
+
 def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr=rdr)
@@ -84,6 +86,15 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataRea
             measuresToBeExtracted, logStats=False)
         serializeBnssStats(bnssKey, plotDir, statistics_for_bnss)
         del superGraph
+
+
+
+def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start,
+                                             bnss_list_end, timeLength = '1-W', rdr=ItunesDataReader()):
+    bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
+    bnss_list = bnssKeys[bnss_list_start:bnss_list_end]
+    business_statistics_generator.extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs,
+                                                                   plotDir, timeLength, measuresToBeExtracted)
 
 
 def intersection_between_users(usr_ids_for_bnss_in_time_window, bnssKey, superGraph):

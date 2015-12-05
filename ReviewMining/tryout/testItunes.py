@@ -8,12 +8,6 @@ import AppUtil
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
 
-# score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
-# with open(score_log_file) as f:
-#     strings = f.readlines()
-#     for string in strings:
-#         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
-#         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)
 
 def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
@@ -74,7 +68,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot, timeLength = '1-W'):
     #             '482030564', '330560517', '416611649', '395697081', '438931724',
     #             '332121452', '335158923', '329158810', '411388627', '371119201',
     #             '382274493', '481012158', '289738462']
-    bnssKeys = ['319927587']
+    bnssKeys = ['432306789']
     for bnss_key in bnssKeys:
         print '------------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, os.path.join(plotDir, AppUtil.ITUNES_BNSS_STATS_FOLDER))
@@ -91,14 +85,27 @@ if __name__ == "__main__":
         sys.exit()
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
+    AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, 0, 1000)
+
+
     # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
-    bnssKey = '379459295'
-    AppUtil.findUsersInThisTimeWindow(bnssKey, (110, 113), csvFolder, plotDir)
+    # bnssKey = '319927587'
+    # AppUtil.findUsersInThisTimeWindow(bnssKey, (191, 191), csvFolder, plotDir)
+
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
     # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-    # for key in ranked_bnss:
-    #     print key
+    # print len(ranked_bnss)
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
-    # print getThresholdForDifferentMeasures(plotDir, doHist=True)
+
+    # print ThresholdHelper.getThresholdForDifferentMeasures(plotDir, doHist=True)
+
+
+
+# score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
+# with open(score_log_file) as f:
+#     strings = f.readlines()
+#     for string in strings:
+#         bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
+#         chPtsOutliers = AppUtil.readScoreFromScoreLogForBnss(string)

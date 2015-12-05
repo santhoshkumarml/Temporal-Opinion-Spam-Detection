@@ -140,8 +140,8 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
-        # return rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings)
         # return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
 
 
@@ -201,7 +201,7 @@ def rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings, topK=50):
     return ranked_keys, bnss_first_time_dict, aux_info
 
 
-def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=50):
+def rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings, topK=200):
     Keys1D = sorted(aF1.keys(), key=lambda key: aF1[key], reverse=True)
     Keys2D = sorted(aF2.keys(), key=lambda key: aF2[key], reverse=True)
     Keys3D = sorted(aF3.keys(), key=lambda key: aF3[key], reverse=True)
