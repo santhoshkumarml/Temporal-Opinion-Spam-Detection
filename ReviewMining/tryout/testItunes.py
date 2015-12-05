@@ -86,7 +86,7 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
-    AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, 0, 1000)
+    AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, 0, 1)
 
 
     # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)

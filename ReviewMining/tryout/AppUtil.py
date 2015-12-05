@@ -95,6 +95,7 @@ def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start
     bnss_list = bnssKeys[bnss_list_start:bnss_list_end]
     business_statistics_generator.extractStatisticsForMultipleBnss(bnss_list, cross_time_graphs,
                                                                    plotDir, timeLength, measuresToBeExtracted)
+    return bnss_list
 
 
 def intersection_between_users(usr_ids_for_bnss_in_time_window, bnssKey, superGraph):
