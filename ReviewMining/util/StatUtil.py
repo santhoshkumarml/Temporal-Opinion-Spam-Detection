@@ -70,24 +70,19 @@ def calculateAvgRating(statistics_for_bnss, ratings, timeKey, total_time_slots):
 def calculateRatingEntropy(statistics_for_bnss, ratings, reviews_for_bnss, timeKey, total_time_slots):
     sorted_rating_list = set(sorted(ratings))
 
-    if StatConstants.RATING_DISTRIBUTION not in statistics_for_bnss:
-        statistics_for_bnss[StatConstants.RATING_DISTRIBUTION] = dict()
-
     if StatConstants.RATING_ENTROPY not in statistics_for_bnss:
         statistics_for_bnss[StatConstants.RATING_ENTROPY] = numpy.zeros(total_time_slots)
 
-    if timeKey not in statistics_for_bnss[StatConstants.RATING_DISTRIBUTION]:
-        statistics_for_bnss[StatConstants.RATING_DISTRIBUTION][timeKey] = {key: 0.0 for key in sorted_rating_list}
+    ratingDistribution = {key:0.0 for key in sorted_rating_list}
 
     for rating in ratings:
-        statistics_for_bnss[StatConstants.RATING_DISTRIBUTION][timeKey][rating] += 1.0
+        ratingDistribution[rating] += 1.0
 
     for rating in sorted_rating_list:
-        statistics_for_bnss[StatConstants.RATING_DISTRIBUTION][timeKey][rating] /= float(len(reviews_for_bnss))
+        ratingDistribution[rating] /= float(len(reviews_for_bnss))
 
-    if timeKey in statistics_for_bnss[StatConstants.RATING_DISTRIBUTION]:
-            entropy = entropyFn(statistics_for_bnss[StatConstants.RATING_DISTRIBUTION][timeKey])
-            statistics_for_bnss[StatConstants.RATING_ENTROPY][timeKey] = entropy
+    entropy = entropyFn(ratingDistribution)
+    statistics_for_bnss[StatConstants.RATING_ENTROPY][timeKey] = entropy
 
 def calculateNoOfReviews(statistics_for_bnss, neighboring_usr_nodes, timeKey, total_time_slots):
     if StatConstants.NO_OF_REVIEWS not in statistics_for_bnss:
