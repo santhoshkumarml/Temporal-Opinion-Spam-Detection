@@ -517,7 +517,7 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
 
                 if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
                     lead_signal_idxs = lead_signal_idxs.union(set(chOutlierIdxs))
-                    print lead_signal_idxs
+                    # print lead_signal_idxs
 
                 chPtsOutliers[measure_key][algo] = (chOutlierIdxs, chOutlierScores)
 

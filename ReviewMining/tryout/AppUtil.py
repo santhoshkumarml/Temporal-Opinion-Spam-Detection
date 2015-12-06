@@ -159,31 +159,39 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
     # print bnssKeys
 
 
-def logAllUsrStats(csvFolder, plotDir, timeLength = '1-W'):
+def logAllUsrOrBnssStats(csvFolder, plotDir, timeLength ='1-W', node_type=SIAUtil.PRODUCT):
     # Read data
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=True)
     # Construct Graphs
-    superGraph, cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict, \
-                                                           bnssIdToBusinessDict, \
-                                                           reviewIdToReviewsDict, timeLength)
+    cross_time_graphs = GraphUtil.createTemporalGraph(usrIdToUserDict,
+                                                      bnssIdToBusinessDict,
+                                                      reviewIdToReviewsDict, timeLength)
     if not os.path.exists(plotDir):
         os.makedirs(plotDir)
-    usrKeys = [usr_key for usr_key, usr_type in superGraph.nodes() \
-                if usr_type == SIAUtil.USER]
-    for usr_key in usrKeys:
-        usrStatFilePath = os.path.join(plotDir, usr_key+'.stats')
-        with open(usrStatFilePath, 'w') as usrStatFile:
-            usrStatFile.write('--------------------------------------------------------------------------------------------------------------------\n')
-            usrStatFile.write('Statistics for User:'+usr_key+'\n')
-            neighboring_bnss_nodes = superGraph.neighbors((usr_key, SIAUtil.USER))
-            reviews_for_usr = [superGraph.getReview(usr_key, bnssId) for (bnssId, bnss_type) in neighboring_bnss_nodes]
-            usrStatFile.write('Reviews for this usr:')
-            usrStatFile.write('Number of reviews:'+str(len(neighboring_bnss_nodes)))
-            usrStatFile.write('\n')
-            reviews_sorted = sorted(reviews_for_usr, key=lambda key: SIAUtil.getDateForReview(key))
-            for review in reviews_sorted:
-                usrStatFile.write(review.toString())
-                usrStatFile.write('\n')
+
+    for timeKey in cross_time_graphs.keys():
+        G = cross_time_graphs[timeKey]
+        nodeKeys = [key for key, node_t in G.nodes() if node_t == node_type]
+        for key in nodeKeys:
+            nodeStatFilePath = os.path.join(plotDir, key+'.stats')
+
+            if not os.path.exists(nodeStatFile):
+                with open(nodeStatFilePath, 'a') as nodeStatFile:
+                    nodeStatFile.write('Statistics for '+node_type+':'+key+'\n')
+
+            with open(nodeStatFilePath, 'a') as nodeStatFile:
+                nodeStatFile.write('------------------------------------------------------------------------------\n')
+                neighboring_bnss_nodes = G.neighbors((key, SIAUtil.USER))
+                reviews_for_node = [G.getReview(key, neighId)
+                                           for (neighId, neighbor_type) in neighboring_bnss_nodes]
+                nodeStatFile.write('Reviews for this '+node_type + 'in' +
+                                   'TimeStamp:' + G.getDateTime() + '-' + timeKey + '\n')
+                nodeStatFile.write('Number of reviews: '+str(len(neighboring_bnss_nodes)) + '\n')
+                reviews_sorted = sorted(reviews_for_node, key=lambda revw: SIAUtil.getDateForReview(revw))
+                for review in reviews_sorted:
+                    nodeStatFile.write(review.toString())
+                    nodeStatFile.write('\n')
+                nodeStatFile.write('------------------------------------------------------------------------------\n')
 
 
 def readReviewsForBnssOrUser(plotDir, node_type = SIAUtil.PRODUCT):

@@ -84,9 +84,9 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
             max_anomaly_for_time_window[window] = 0.0
             weighted_anomalies_for_window[window] = 0.0
             ratio_of_anomalies_measure[window] = 0.0
-        if measures_changed > 4 and bnss_key=='319927587':
-            idx1, idx2 = window
-            print bnss_key, (idx1 + firstTimeKey, idx2 + firstTimeKey)
+        # if measures_changed > 4 and bnss_key=='319927587':
+        #     idx1, idx2 = window
+        #     print bnss_key, (idx1 + firstTimeKey, idx2 + firstTimeKey)
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
@@ -140,8 +140,8 @@ def rankAllAnomalies(plotDir):
 
         # doHistogramForFeature(bins=10,scores=[scores1, scores2, scores3, scores4])
 
-        # return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
-        return rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings)
+        return rankAnomaliesByAllFeatures(aF1, aF2, aF3, aF4, strings)
+        # return rankAnomaliesPartiallyBFS(aF1, aF2, aF3, aF4, strings)
         # return rankAnomaliesPartially(aF1, aF2, aF3, aF4, strings)
 
 
