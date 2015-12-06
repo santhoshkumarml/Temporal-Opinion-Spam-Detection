@@ -192,7 +192,7 @@ def logAllUsrOrBnssStats(csvFolder, logReviewsDir, timeLength ='1-W', node_type=
                                         for (neighId, neighbor_type) in neighboring_bnss_nodes]
 
                 nodeStatFile.write('Reviews for this '+node_type + 'in' +
-                                   'TimeStamp:' + G.getDateTime().strftime('%m/%d/%Y') + '-' + timeKey + '\n')
+                                   'TimeStamp:' + G.getDateTime().strftime('%m/%d/%Y') + '-' + str(timeKey) + '\n')
                 nodeStatFile.write('Number of reviews: '+str(len(neighboring_bnss_nodes)) + '\n')
                 reviews_sorted = sorted(reviews_for_node, key=lambda revw: SIAUtil.getDateForReview(revw))
                 for review in reviews_sorted:
