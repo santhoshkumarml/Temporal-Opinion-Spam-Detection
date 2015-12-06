@@ -292,7 +292,7 @@ def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measure
 
     if no_of_reviews_for_bnss[0] > 0:
         statistics_for_bnss[StatConstants.AVERAGE_RATING][0] = \
-            statistics_for_bnss[StatConstants.AVERAGE_RATING] / no_of_reviews_for_bnss[0]
+            statistics_for_bnss[StatConstants.AVERAGE_RATING][0] / no_of_reviews_for_bnss[0]
 
     for timeKey in range(1, total_time_slots):
         if timeKey >= firstTimeKey and timeKey <=lastTimeKey:
