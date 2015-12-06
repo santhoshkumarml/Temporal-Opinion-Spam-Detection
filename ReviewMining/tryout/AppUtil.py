@@ -159,21 +159,21 @@ def findUsersInThisTimeWindow(bnssKey, time_window, csvFolder, plotDir, timeLeng
     # print bnssKeys
 
 
-def logAllUsrOrBnssStats(csvFolder, plotDir, timeLength ='1-W', node_type=SIAUtil.PRODUCT):
+def logAllUsrOrBnssStats(csvFolder, logReviewsDir, timeLength ='1-W', node_type=SIAUtil.PRODUCT):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=True)
     # Construct Graphs
     cross_time_graphs = GraphUtil.createTemporalGraph(usrIdToUserDict,
                                                       bnssIdToBusinessDict,
                                                       reviewIdToReviewsDict, timeLength)
-    if not os.path.exists(plotDir):
-        os.makedirs(plotDir)
+    if not os.path.exists(logReviewsDir):
+        os.makedirs(logReviewsDir)
 
     for timeKey in cross_time_graphs.keys():
         G = cross_time_graphs[timeKey]
         nodeKeys = [key for key, node_t in G.nodes() if node_t == node_type]
         for key in nodeKeys:
-            nodeStatFilePath = os.path.join(plotDir, key+'.stats')
+            nodeStatFilePath = os.path.join(logReviewsDir, key + '.stats')
 
             if not os.path.exists(nodeStatFile):
                 with open(nodeStatFilePath, 'a') as nodeStatFile:
