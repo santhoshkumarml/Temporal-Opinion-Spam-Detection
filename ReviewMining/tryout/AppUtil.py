@@ -175,7 +175,7 @@ def logAllUsrOrBnssStats(csvFolder, logReviewsDir, timeLength ='1-W', node_type=
         for key in nodeKeys:
             nodeStatFilePath = os.path.join(logReviewsDir, key + '.stats')
 
-            if not os.path.exists(nodeStatFile):
+            if not os.path.exists(nodeStatFilePath):
                 with open(nodeStatFilePath, 'a') as nodeStatFile:
                     nodeStatFile.write('Statistics for '+node_type+':'+key+'\n')
 
