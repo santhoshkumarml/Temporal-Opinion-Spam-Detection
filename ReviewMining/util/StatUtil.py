@@ -313,8 +313,8 @@ def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measure
                 statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = 0
 
         else:
-            print 'Not in Range', timeKey, firstTimeKey, lastTimeKey,\
-                no_of_reviews_for_bnss[timeKey], statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
+            # print 'Not in Range', timeKey, firstTimeKey, lastTimeKey,\
+            #     no_of_reviews_for_bnss[timeKey], statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
 
             if no_of_reviews_for_bnss[timeKey] > 0:
                 statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /= \
