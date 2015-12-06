@@ -85,7 +85,8 @@ if __name__ == "__main__":
 
     # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True)
 
-    doLogUsrAndBnssReview(csvFolder, plotDir)
+    # doLogUsrAndBnssReview(csvFolder, plotDir)
+    AppUtil.readData(csvFolder, readReviewsText=True)
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
     # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
     # tryNewRanking(ranked_bnss, aux_info)

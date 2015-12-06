@@ -94,60 +94,67 @@ class ItunesDataReader:
 
             self.reviewIdToReviewDict[review_id] = revw
         
-        print 'Users:',len(self.usrIdToUsrDict.keys()),\
-         'Products:',len(self.bnssIdToBnssDict.keys()),\
-         'Reviews:',len(self.reviewIdToReviewDict.keys())
+        print 'Users:', len(self.usrIdToUsrDict.keys()),\
+            'Products:', len(self.bnssIdToBnssDict.keys()),\
+            'Reviews:', len(self.reviewIdToReviewDict.keys())
+
         print 'Skipped Lines:', skippedMeta
+
         # return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
     
         if not readReviewsText:
             return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
         
-        df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
-                              dtype=object, names = COLS)
+        df2 = pd.read_csv(reviewFile,escapechar='\\', header=None,
+                          dtype=object, error_bad_lines=False)
         review_ids = []
-        for index, bnss_id, review_id, title, content in df2.itertuples():
+        for tup in df2.itertuples():
+            try:
+                index, bnss_id, review_id, title, content = tup
+            except:
+                skippedData += 1
+                continue
+
             try:
                 float_bnss_id = float(bnss_id)
                 float_review_id = float(review_id)
             except:
-                #print 'Wrong', index,  bnss_id, review_id, title, content
-                review_id = review_ids[-1]
+                review_id = review_id [-1]
                 if review_id in self.reviewIdToReviewDict:
                     review_text = self.reviewIdToReviewDict[review_id].getReviewText()
-                    review_text = review_text+bnss_id
+                    review_text = review_text + bnss_id
                     self.reviewIdToReviewDict[review_id].setReviewText(review_text)
                 continue
-            
-            #review_id = (bnss_id, review_id)
+
             review_ids.append(review_id)
-            
+
             if review_id in self.reviewIdToReviewDict:
                 review_text = str(content)
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
-                skippedData+=1
+                skippedData += 1
         
         print 'Data lines', df2.shape[0], len(review_ids)
             
         afterDataReadTime = datetime.now()
         
-        print 'Data Read Time:',(afterDataReadTime - beforeDataReadTime)
+        print 'Data Read Time:', (afterDataReadTime - beforeDataReadTime)
         print 'Skipped Count:', skippedMeta, skippedData
         
-        print 'Users:',len(self.usrIdToUsrDict.keys()),\
-         'Products:',len(self.bnssIdToBnssDict.keys()),\
-         'Reviews:',len(self.reviewIdToReviewDict.keys())
+        print 'Users:', len(self.usrIdToUsrDict.keys()),\
+            'Products:', len(self.bnssIdToBnssDict.keys()),\
+            'Reviews:', len(self.reviewIdToReviewDict.keys())
         
-        textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict\
-                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
-        for review_id in textLessReviewId:
+        textLessReviewIds = set([review_id for review_id in self.reviewIdToReviewDict
+                                if not self.reviewIdToReviewDict[review_id].getReviewText()])
+        for review_id in textLessReviewIds:
             del self.reviewIdToReviewDict[review_id]
+
         print 'Removing text less reviews'
         
-        print 'Users:',len(self.usrIdToUsrDict.keys()),\
-         'Products:',len(self.bnssIdToBnssDict.keys()),\
-         'Reviews:',len(self.reviewIdToReviewDict.keys())
+        print 'Users:', len(self.usrIdToUsrDict.keys()),\
+            'Products:', len(self.bnssIdToBnssDict.keys()),\
+            'Reviews:', len(self.reviewIdToReviewDict.keys())
          
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
 
