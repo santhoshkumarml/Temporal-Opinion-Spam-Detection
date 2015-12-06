@@ -320,3 +320,15 @@ def readScoreFromScoreLogForBnss(string):
     except:
         pass
     return chPtsOutliers
+
+
+def doLogUsrAndBnssReview(csvFolder, plotDir):
+    from util import SIAUtil
+    bnssReviewLogDir = os.path.join(plotDir, 'bnss_review_logs')
+    usrReviewLogDir = os.path.join(plotDir, 'usr_review_logs')
+    if not os.path.exists(bnssReviewLogDir):
+        os.mkdir(bnssReviewLogDir)
+    logAllUsrOrBnssStats(csvFolder, bnssReviewLogDir, node_type=SIAUtil.PRODUCT)
+    if not os.path.exists(usrReviewLogDir):
+        os.mkdir(usrReviewLogDir)
+    logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
