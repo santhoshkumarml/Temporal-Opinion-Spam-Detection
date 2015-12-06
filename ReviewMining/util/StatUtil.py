@@ -285,27 +285,37 @@ def doPostProcessingForStatistics(statistics_for_bnss, total_time_slots, measure
     no_of_reviews_for_bnss = statistics_for_bnss[StatConstants.NO_OF_REVIEWS]
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
-    if StatConstants.NON_CUM_NO_OF_REVIEWS in measuresToBeExtracted:
-        statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS] = numpy.copy(statistics_for_bnss[StatConstants.NO_OF_REVIEWS])
 
-    for timeKey in range(total_time_slots):
+    if StatConstants.NON_CUM_NO_OF_REVIEWS in measuresToBeExtracted:
+        statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS] = \
+            numpy.copy(statistics_for_bnss[StatConstants.NO_OF_REVIEWS])
+
+    if no_of_reviews_for_bnss[0] > 0:
+        statistics_for_bnss[StatConstants.AVERAGE_RATING][0] = \
+            statistics_for_bnss[StatConstants.AVERAGE_RATING] / no_of_reviews_for_bnss[0]
+
+    for timeKey in range(1, total_time_slots):
         if timeKey >= firstTimeKey and timeKey <=lastTimeKey:
             fixZeroReviewTimeStamps(timeKey, statistics_for_bnss)
+
             #POST PROCESSING FOR NUMBER_OF_REVIEWS
             statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey] = \
                 no_of_reviews_for_bnss[timeKey - 1] + no_of_reviews_for_bnss[timeKey]
+
             #POST PROCESSING FOR AVERAGE RATING
             if no_of_reviews_for_bnss[timeKey] > 0:
-                sum_of_ratings = (
-                statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey - 1] * no_of_reviews_for_bnss[
-                    timeKey - 1])
+                sum_of_ratings = (statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey - 1] *
+                                  no_of_reviews_for_bnss[timeKey - 1])
                 sum_of_ratings += statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
-                statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = sum_of_ratings / \
-                                                                                no_of_reviews_for_bnss[timeKey]
+                statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = \
+                    sum_of_ratings / no_of_reviews_for_bnss[timeKey]
             else:
                 statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] = 0
 
         else:
+            print 'Not in Range', timeKey, firstTimeKey, lastTimeKey,\
+                no_of_reviews_for_bnss[timeKey], statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey]
+
             if no_of_reviews_for_bnss[timeKey] > 0:
                 statistics_for_bnss[StatConstants.AVERAGE_RATING][timeKey] /= \
                 statistics_for_bnss[StatConstants.NO_OF_REVIEWS][timeKey]
