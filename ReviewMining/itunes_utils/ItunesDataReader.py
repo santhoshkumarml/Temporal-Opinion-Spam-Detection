@@ -119,7 +119,7 @@ class ItunesDataReader:
                 float_bnss_id = float(bnss_id)
                 float_review_id = float(review_id)
             except:
-                review_id = review_id [-1]
+                review_id = review_ids[-1]
                 if review_id in self.reviewIdToReviewDict:
                     review_text = self.reviewIdToReviewDict[review_id].getReviewText()
                     review_text = review_text + bnss_id
