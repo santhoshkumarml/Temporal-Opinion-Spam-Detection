@@ -171,18 +171,18 @@ def logAllUsrOrBnssStats(csvFolder, logReviewsDir, timeLength ='1-W', node_type=
 
     for timeKey in cross_time_graphs.keys():
         G = cross_time_graphs[timeKey]
-        nodeKeys = [key for key, node_t in G.nodes() if node_t == node_type]
-        for key in nodeKeys:
-            nodeStatFilePath = os.path.join(logReviewsDir, key + '.stats')
+        nodeKeys = [nodeId for nodeId, node_t in G.nodes() if node_t == node_type]
+        for nodeId in nodeKeys:
+            nodeStatFilePath = os.path.join(logReviewsDir, nodeId + '.stats')
 
             if not os.path.exists(nodeStatFilePath):
                 with open(nodeStatFilePath, 'a') as nodeStatFile:
-                    nodeStatFile.write('Statistics for '+node_type+':'+key+'\n')
+                    nodeStatFile.write('Statistics for '+node_type+':'+nodeId+'\n')
 
             with open(nodeStatFilePath, 'a') as nodeStatFile:
                 nodeStatFile.write('------------------------------------------------------------------------------\n')
-                neighboring_bnss_nodes = G.neighbors((key, SIAUtil.USER))
-                reviews_for_node = [G.getReview(key, neighId)
+                neighboring_bnss_nodes = G.neighbors((nodeId, node_type))
+                reviews_for_node = [G.getReview(nodeId, neighId)
                                            for (neighId, neighbor_type) in neighboring_bnss_nodes]
                 nodeStatFile.write('Reviews for this '+node_type + 'in' +
                                    'TimeStamp:' + G.getDateTime() + '-' + timeKey + '\n')
