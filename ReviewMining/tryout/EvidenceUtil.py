@@ -10,30 +10,18 @@ def plotRatingDistribution(review_rating_distribution):
     import matplotlib.pyplot as plt
     fig = plt.figure(1, figsize=(6,6))
     ax = plt.axes([0.1, 0.1, 0.8, 0.8])
-
-    # The slices will be ordered and plotted counter-clockwise.
     labels = review_rating_distribution.keys()
     fracs = review_rating_distribution.values()
 
     plt.pie(fracs, labels=labels,
-        autopct='%1.1f%%', shadow=True, startangle=90)
-    # The default startangle is 0, which would start
-    # the Frogs slice on the x-axis.  With startangle=90,
-    # everything is rotated counter-clockwise by 90 degrees,
-    # so the plotting starts on the positive y-axis.
-
+        autopct='%1.0f%%', shadow=True, startangle=90)
     plt.title('Review Rating Count', bbox={'facecolor':'0.8', 'pad':5})
-
+    plt.legend()
     plt.show()
 
 
 def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W',
                            rdr=ItunesDataReader(), readReviewsText=False):
-    r_D = {1.0: 6.0, 2.0: 4.0, 3.0: 16.0, 4.0: 79.0, 5.0: 344.0}
-    plotRatingDistribution(r_D)
-    import sys
-    sys.exit()
-
     suspicious_timestamps = dict()
     with open('/home/santhosh/out_all_features_mul_reviews') as f:
         lines = f.readlines()
@@ -150,11 +138,11 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     print sorted(review_distribution_for_non_singleton_usr.iteritems(),
                  key=lambda (usrId, distribution): total_reviews_for_non_singleton_usr[usrId], reverse=True)
     print 'Total Reviews for Non Singleton User Suspiciousness:'
-    print sorted(total_reviews_for_non_singleton_usr.iteritems(), key=lambda (usrId, count) : count, reverse=True)
+    print sorted(total_reviews_for_non_singleton_usr.iteritems(), key=lambda (usrId, count): count, reverse=True)
     if readReviewsText:
         print 'Two Grams'
-        print sorted(two_grams_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print sorted(two_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
         print 'Three Grams'
-        print sorted(three_grams_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print sorted(three_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
         print 'Four Grams'
-        print sorted(four_games_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print sorted(four_games_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
