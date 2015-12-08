@@ -75,9 +75,6 @@ def plotReviewTimeRating(review_time_rating,  imgFolder, title = 'Time Wise Rati
 
 def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W',
                            rdr=ItunesDataReader(), readReviewsText=False, doPlot=False):
-    plotExtremityForNonSingletonUsr(10, 5, '')
-    import sys
-    sys.exit()
     suspicious_timestamps = dict()
     with open('/home/santhosh/out_all_features_mul_reviews') as f:
         lines = f.readlines()
