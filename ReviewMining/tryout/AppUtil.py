@@ -421,7 +421,7 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
 
     review_time_rating = {float(key): dict() for key in range(1, 6)}
     review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
-    ratio_of_single_tons = {float(key): 0.0 for key in range(1, 6)}
+    singleton_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
 
     for r in reviews_for_bnss_in_time_key:
         if readReviewsText:
@@ -436,16 +436,19 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
 
         review_rating_distribution[r.getRating()] += 1.0
         if r.getUserId() in singleton_usrs:
-            ratio_of_single_tons[r.getRating()] += 1.0
+            singleton_review_rating_distribution[r.getRating()] += 1.0
         date_of_review = SIAUtil.getDateForReview(r)
         if date_of_review not in review_time_rating[r.getRating()]:
             review_time_rating[r.getRating()][date_of_review] = 0.0
         review_time_rating[r.getRating()][date_of_review] += 1.0
 
-    print 'Review Rating', review_rating_distribution
-    print 'Review Time Rating', review_time_rating
-    print 'Singleton Distribution', ratio_of_single_tons
-    print 'Non Singleton User Suspiciousness', non_singleton_usr_suspicousness
+    print 'Review Rating Distribution:'
+    print review_rating_distribution
+    print 'Review Time Rating:'
+    print review_time_rating
+    print 'Singleton Distribution:'
+    print singleton_review_rating_distribution
+    print 'Non Singleton User Suspiciousness:'
     print sorted(non_singleton_usr_suspicousness.iteritems(),
                  key=lambda (usrId, count): count, reverse=True)
     print 'Review Distribution for Non Singleton User:'
