@@ -336,7 +336,8 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
 
 
 
-def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W', rdr=ItunesDataReader()):
+def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W',
+                           rdr=ItunesDataReader(), readReviewsText=False):
 
     suspicious_timestamps = dict()
     with open('/home/santhosh/out_all_features_mul_reviews') as f:
@@ -350,7 +351,8 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
             for idx in range(int(idx1), int(idx2)):
                 suspicious_timestamps[bnss_key].add(idx)
 
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=True, rdr=rdr)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder,
+                                                                            readReviewsText=readReviewsText, rdr=rdr)
     ctg = GraphUtil.createTemporalGraph(usrIdToUserDict,
                                                       bnssIdToBusinessDict,
                                                       reviewIdToReviewsDict,
@@ -422,13 +424,15 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     ratio_of_single_tons = {float(key): 0.0 for key in range(1, 6)}
 
     for r in reviews_for_bnss_in_time_key:
-        two_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 2)
-        three_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 3)
-        four_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 4)
+        if readReviewsText:
+            decoded_text = r.getReviewText().decode('UTF-8')
+            two_grams = ngrams(nltk.word_tokenize(decoded_text), 2)
+            three_grams = ngrams(nltk.word_tokenize(decoded_text), 3)
+            four_grams = ngrams(nltk.word_tokenize(decoded_text), 4)
 
-        put_grams(two_grams, two_grams_dict)
-        put_grams(three_grams, three_grams_dict)
-        put_grams(four_grams, four_games_dict)
+            put_grams(two_grams, two_grams_dict)
+            put_grams(three_grams, three_grams_dict)
+            put_grams(four_grams, four_games_dict)
 
         review_rating_distribution[r.getRating()] += 1.0
         if r.getUserId() in singleton_usrs:
@@ -442,8 +446,17 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     print 'Review Time Rating', review_time_rating
     print 'Singleton Distribution', ratio_of_single_tons
     print 'Non Singleton User Suspiciousness', non_singleton_usr_suspicousness
-    print 'Review Distribution for Non Singleton User', review_distribution_for_non_singleton_usr
-    print 'Total Reviews for Non Singleton User Suspiciousness', total_reviews_for_non_singleton_usr
-    print 'Two Grams', two_grams_dict
-    print 'Three Grams', three_grams_dict
-    print 'Four Grams', four_games_dict
+    print sorted(non_singleton_usr_suspicousness.iteritems(),
+                 key=lambda (usrId, count): count, reverse=True)
+    print 'Review Distribution for Non Singleton User:'
+    print sorted(review_distribution_for_non_singleton_usr.iteritems(),
+                 key=lambda (usrId, distribution): total_reviews_for_non_singleton_usr[usrId], reverse=True)
+    print 'Total Reviews for Non Singleton User Suspiciousness:'
+    print sorted(total_reviews_for_non_singleton_usr.iteritems(), key=lambda (usrId, count) : count, reverse=True)
+    if readReviewsText:
+        print 'Two Grams'
+        print sorted(two_grams_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print 'Three Grams'
+        print sorted(three_grams.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print 'Four Grams'
+        print sorted(four_games_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
