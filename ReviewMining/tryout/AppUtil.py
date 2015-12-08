@@ -366,6 +366,7 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
 
     non_singleton_usr_suspicousness = dict()
     total_reviews_for_non_singleton_usr = dict()
+    review_distribution_for_non_singleton_usr = dict()
     time_key_to_date_time = dict()
 
     for time_key in ctg.keys():
@@ -377,14 +378,17 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
         reviews_for_this_usr = sorted([superGraph.getReview(non_singleton_usr, bnssId) for (bnssId, bnss_type)
                                        in superGraph.neighbors((non_singleton_usr, SIAUtil.USER))])
         total_reviews_for_non_singleton_usr[non_singleton_usr] = len(reviews_for_this_usr)
+        review_distribution_for_non_singleton_usr[non_singleton_usr] = {float(key): 0.0 for key in range(1, 6)}
+
         if non_singleton_usr not in non_singleton_usr_suspicousness:
             non_singleton_usr_suspicousness[non_singleton_usr] = 0.0
 
-        for reviews_for_this_usr in reviews_for_this_usr:
-            bnssId_for_this_review = reviews_for_this_usr.getBusinessID()
+        for revw_for_usr in reviews_for_this_usr:
+            bnssId_for_this_review = revw_for_usr.getBusinessID()
+            review_distribution_for_non_singleton_usr[non_singleton_usr][revw_for_usr.getRating()] += 1.0
             if bnssId_for_this_review not in suspicious_timestamps:
                 continue
-            date_time_for_this_usr = SIAUtil.getDateForReview(reviews_for_this_usr)
+            date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
             time_id_for_date_time = -1
             for time_key in time_key_to_date_time.keys():
                 if date_time_for_this_usr < time_key_to_date_time[time_key].date():
@@ -419,4 +423,5 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     print 'Review Time Rating', review_time_rating
     print 'Singleton Distribution', ratio_of_single_tons
     print 'Non Singleton User Suspiciousness', non_singleton_usr_suspicousness
+    print 'Review Distribution for Non Singleton User', review_distribution_for_non_singleton_usr
     print 'Total Reviews for Non Singleton User Suspiciousness', total_reviews_for_non_singleton_usr
