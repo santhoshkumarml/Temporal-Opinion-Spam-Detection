@@ -58,7 +58,7 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False
 
     bnssKeys = [file_name for file_name,
                               size in file_list_size]
-    # bnssKeys = ['284235722']
+    bnssKeys = ['284235722']
     for bnss_key in bnssKeys:
         print '--------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key,
@@ -82,15 +82,14 @@ if __name__ == "__main__":
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 
-    tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=False, logStats=False)
+    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
 
     # AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnsses_list=['284235722'])
 
-    # AppUtil.doLogUsrAndBnssReview(csvFolder, plotDir)
-    # AppUtil.readData(csvFolder, readReviewsText=True)
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
     # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
     # tryNewRanking(ranked_bnss, aux_info)
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
+    AppUtil.findStatsForEverything(csvFolder, plotDir, '284819997', 168)
