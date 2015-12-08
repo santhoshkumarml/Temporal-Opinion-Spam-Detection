@@ -94,4 +94,4 @@ if __name__ == "__main__":
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
-    EvidenceUtil.findStatsForEverything(csvFolder, plotDir, '284819997', 168)
+    EvidenceUtil.findStatsForEverything(csvFolder, plotDir, '284819997', 168, readReviewsText=True, doPlot=True)

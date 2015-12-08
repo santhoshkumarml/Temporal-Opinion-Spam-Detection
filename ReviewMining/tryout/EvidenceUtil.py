@@ -1,4 +1,10 @@
+import collections
+import datetime
+
+import matplotlib.pyplot as plt
 import nltk
+import numpy
+import os
 from nltk import ngrams
 
 from itunes_utils.ItunesDataReader import ItunesDataReader
@@ -6,22 +12,72 @@ from tryout.AppUtil import readData
 from util import GraphUtil, SIAUtil
 
 
-def plotRatingDistribution(review_rating_distribution):
-    import matplotlib.pyplot as plt
-    fig = plt.figure(1, figsize=(6,6))
+def plotRatingDistribution(review_rating_distribution, imgFolder,
+                           title='Rating Distribution'):
+    fig = plt.figure()
     ax = plt.axes([0.1, 0.1, 0.8, 0.8])
+    imgFile = os.path.join(imgFolder, title + '.png')
     labels = review_rating_distribution.keys()
     fracs = review_rating_distribution.values()
 
     plt.pie(fracs, labels=labels,
         autopct='%1.0f%%', shadow=True, startangle=90)
-    plt.title('Review Rating Count', bbox={'facecolor':'0.8', 'pad':5})
+    plt.title(title, bbox={'facecolor': '0.8', 'pad': 5})
     plt.legend()
-    plt.show()
+    plt.savefig(imgFile, bbox_inches='tight')
+
+
+def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
+                                    title='Extremity of Non SingletonUsr'):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    width = 0.30
+    imgFile = os.path.join(imgFolder, title + '.png')
+    x_labels = ['Extreme Users', 'Non Extreme Users']
+    p_extreme = ax.bar(0, extreme_usrs, width, color='r')
+    p_non_extreme = ax.bar(1, non_extreme_usrs, width, color='b')
+
+    plt.ylabel('Count')
+    plt.xticks([0.15, 1.15], x_labels)
+    plt.legend()
+    plt.savefig(imgFile, bbox_inches='tight')
+
+
+def plotReviewTimeRating(review_time_rating,  imgFolder, title = 'Time Wise Rating Count'):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    imgFile = os.path.join(imgFolder, title + '.png')
+    colors = ['y', 'c', 'm', 'b', 'r']
+    ind = numpy.arange(0, 7)
+    width = 0.35
+    x_labels = [d.strftime('%m/%d/%Y') for d in sorted(review_time_rating[1.0].keys())]
+    pS = []
+    btm = None
+    colr = 0
+    for rating_key in review_time_rating.keys():
+        val = review_time_rating[rating_key]
+        od = collections.OrderedDict(sorted(val.items()))
+        val = od.values()
+        if not btm:
+            p = ax.bar(ind, review_time_rating[rating_key].values(), width, color=colors[colr])
+        else:
+            p = ax.bar(ind, review_time_rating[rating_key].values(), width, color=colors[colr], bottom=btm)
+        btm = val
+        colr += 1
+        pS.append(p)
+
+    plt.ylabel(title)
+    plt.title(title)
+    plt.xticks(ind + width/2., x_labels)
+    plt.legend([p[0] for p in pS], range(1, 6))
+    plt.savefig(imgFile, bbox_inches='tight')
 
 
 def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W',
-                           rdr=ItunesDataReader(), readReviewsText=False):
+                           rdr=ItunesDataReader(), readReviewsText=False, doPlot=False):
+    plotExtremityForNonSingletonUsr(10, 5, '')
+    import sys
+    sys.exit()
     suspicious_timestamps = dict()
     with open('/home/santhosh/out_all_features_mul_reviews') as f:
         lines = f.readlines()
@@ -56,10 +112,11 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     review_distribution_for_non_singleton_usr = dict()
     time_key_to_date_time = dict()
 
-    for time_key in ctg.keys():
-        d = ctg[time_key].getDateTime()
-        time_key_to_date_time[time_key] = d
+    for t_k in ctg.keys():
+        d = ctg[t_k].getDateTime()
+        time_key_to_date_time[t_k] = d
 
+    d_start = time_key_to_date_time[time_key]
 
     for non_singleton_usr in non_singleton_usrs:
         reviews_for_this_usr = sorted([superGraph.getReview(non_singleton_usr, bnssId) for (bnssId, bnss_type)
@@ -102,7 +159,10 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
                 grams_dict[gram] = 0.0
             grams_dict[gram] += 1.0
 
-    review_time_rating = dict()
+
+    review_time_rating = {float(key):
+                              {(d_start+datetime.timedelta(days=i)).date(): 0.0 for i in range(0, 7)}
+                          for key in range(1, 6)}
     review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
     singleton_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
 
@@ -121,24 +181,28 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
         if r.getUserId() in singleton_usrs:
             singleton_review_rating_distribution[r.getRating()] += 1.0
         date_of_review = SIAUtil.getDateForReview(r)
-        if date_of_review not in review_time_rating:
-            review_time_rating[date_of_review][r.getRating()] = {float(key): dict() for key in range(1, 6)}
-        review_time_rating[date_of_review][r.getRating()] += 1.0
+        review_time_rating[r.getRating()][date_of_review] += 1.0
 
-    print 'Review Rating Distribution:'
-    print review_rating_distribution
-    print 'Review Time Rating:'
-    print review_time_rating
-    print 'Singleton Distribution:'
-    print singleton_review_rating_distribution
     print 'Non Singleton User Suspiciousness:'
     print sorted(non_singleton_usr_suspicousness.iteritems(),
                  key=lambda (usrId, count): count, reverse=True)
     print 'Review Distribution for Non Singleton User:'
     print sorted(review_distribution_for_non_singleton_usr.iteritems(),
                  key=lambda (usrId, distribution): total_reviews_for_non_singleton_usr[usrId], reverse=True)
+
+    total_non_singleton_usrs = len(review_distribution_for_non_singleton_usr.keys())
+    extreme_non_singleton_usrs = 0
+    non_extreme_non_singleton_usrs = 0
+
+    for usrId in review_distribution_for_non_singleton_usr.keys():
+        rating_dist = review_distribution_for_non_singleton_usr[usrId]
+        if rating_dist[2.0] == 0 and rating_dist[3.0] == 0 and rating_dist[4.0] == 0:
+            extreme_non_singleton_usrs += 1
+    non_extreme_non_singleton_usrs = total_non_singleton_usrs - extreme_non_singleton_usrs
+
     print 'Total Reviews for Non Singleton User Suspiciousness:'
     print sorted(total_reviews_for_non_singleton_usr.iteritems(), key=lambda (usrId, count): count, reverse=True)
+
     if readReviewsText:
         print 'Two Grams'
         print sorted(two_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
@@ -146,3 +210,12 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
         print sorted(three_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
         print 'Four Grams'
         print sorted(four_games_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
+
+    if doPlot:
+        imgFolder = os.path.join(plotDir, bnss_key + '_' + str(time_key))
+        if not os.path.exists(imgFolder):
+            os.mkdir(imgFolder)
+        plotRatingDistribution(review_rating_distribution, imgFolder, title='All Review Rating Count')
+        plotReviewTimeRating(review_time_rating, imgFolder)
+        plotRatingDistribution(singleton_review_rating_distribution, imgFolder, title='Singleton Review Rating Count')
+        plotExtremityForNonSingletonUsr(non_extreme_non_singleton_usrs, extreme_non_singleton_usrs, imgFolder)
