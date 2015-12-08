@@ -457,6 +457,6 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
         print 'Two Grams'
         print sorted(two_grams_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
         print 'Three Grams'
-        print sorted(three_grams.iteritems(), key=lambda (gram, count) : count, reverse=True)
+        print sorted(three_grams_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
         print 'Four Grams'
         print sorted(four_games_dict.iteritems(), key=lambda (gram, count) : count, reverse=True)
