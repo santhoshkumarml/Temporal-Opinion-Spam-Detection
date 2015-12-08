@@ -419,7 +419,7 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
                 grams_dict[gram] = 0.0
             grams_dict[gram] += 1.0
 
-    review_time_rating = {float(key): dict() for key in range(1, 6)}
+    review_time_rating = dict()
     review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
     singleton_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
 
@@ -438,9 +438,9 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
         if r.getUserId() in singleton_usrs:
             singleton_review_rating_distribution[r.getRating()] += 1.0
         date_of_review = SIAUtil.getDateForReview(r)
-        if date_of_review not in review_time_rating[r.getRating()]:
-            review_time_rating[r.getRating()][date_of_review] = 0.0
-        review_time_rating[r.getRating()][date_of_review] += 1.0
+        if date_of_review not in review_time_rating:
+            review_time_rating[date_of_review][r.getRating()] = {float(key): dict() for key in range(1, 6)}
+        review_time_rating[date_of_review][r.getRating()] += 1.0
 
     print 'Review Rating Distribution:'
     print review_rating_distribution
