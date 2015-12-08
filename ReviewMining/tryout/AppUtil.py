@@ -3,20 +3,21 @@ import os
 import pickle
 from datetime import datetime
 
+import nltk
 import numpy
 
 from anomaly_detection import AnomalyDetector
 from itunes_utils.ItunesDataReader import ItunesDataReader
-from flipkart_utils.FlipkartDataReader import FlipkartDataReader
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
+from nltk.util import ngrams
 
 SCORES_LOG_FILE = 'scores_with_outliers.log'
 ITUNES_BNSS_STATS_FOLDER = 'bnss_stats'
 FLIPKART_BNSS_STATS_FOLDER = 'fk_bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
-
+nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
 
 #1/(1+ (k**2)) = percent
 #k = math.sqrt( (1-percent)/ percent)
@@ -336,6 +337,7 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
 
 
 def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = '1-W', rdr=ItunesDataReader()):
+
     suspicious_timestamps = dict()
     with open('/home/santhosh/out_all_features_mul_reviews') as f:
         lines = f.readlines()
@@ -348,7 +350,7 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
             for idx in range(int(idx1), int(idx2)):
                 suspicious_timestamps[bnss_key].add(idx)
 
-    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=False, rdr=rdr)
+    bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, readReviewsText=True, rdr=rdr)
     ctg = GraphUtil.createTemporalGraph(usrIdToUserDict,
                                                       bnssIdToBusinessDict,
                                                       reviewIdToReviewsDict,
@@ -405,12 +407,29 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     del neighboring_usr_nodes, all_usrs, non_singleton_usrs,\
         time_key_to_date_time, suspicious_timestamps, superGraph, ctg
 
+    four_games_dict = dict()
+    three_grams_dict = dict()
+    two_grams_dict = dict()
+
+    def put_grams(grams, grams_dict):
+        for gram in grams:
+            if gram not in grams_dict:
+                grams_dict[gram] = 0.0
+            grams_dict[gram] += 1.0
 
     review_time_rating = {float(key): dict() for key in range(1, 6)}
     review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
     ratio_of_single_tons = {float(key): 0.0 for key in range(1, 6)}
 
     for r in reviews_for_bnss_in_time_key:
+        two_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 2)
+        three_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 3)
+        four_grams = ngrams(nltk.word_tokenize(r.getReviewText()), 4)
+
+        put_grams(two_grams, two_grams_dict)
+        put_grams(three_grams, three_grams_dict)
+        put_grams(four_grams, four_games_dict)
+
         review_rating_distribution[r.getRating()] += 1.0
         if r.getUserId() in singleton_usrs:
             ratio_of_single_tons[r.getRating()] += 1.0
@@ -425,3 +444,6 @@ def findStatsForEverything(csvFolder, plotDir,  bnssKey, time_key, timeLength = 
     print 'Non Singleton User Suspiciousness', non_singleton_usr_suspicousness
     print 'Review Distribution for Non Singleton User', review_distribution_for_non_singleton_usr
     print 'Total Reviews for Non Singleton User Suspiciousness', total_reviews_for_non_singleton_usr
+    print 'Two Grams', two_grams_dict
+    print 'Three Grams', three_grams_dict
+    print 'Four Grams', four_games_dict
