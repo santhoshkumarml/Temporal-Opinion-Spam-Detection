@@ -33,6 +33,7 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness, imgFolder,
     plt.savefig(imgFile)
     plt.close()
 
+
 def plotRatingDistribution(review_rating_distribution, imgFolder,
                            title='Rating Distribution'):
     fig = plt.figure(figsize=(10, 6))
@@ -98,7 +99,6 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     plt.close()
 
 
-
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
     suspicious_timestamps = dict()
     suspicious_timestamp_ordered = list()
@@ -130,6 +130,7 @@ def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, tim
 
     return ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered
 
+
 def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviewsText=False, doPlot=False):
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
 
@@ -144,7 +145,6 @@ def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviews
     non_singleton_usr_suspicousness = dict()
     total_reviews_for_non_singleton_usr = dict()
     review_distribution_for_non_singleton_usr = dict()
-
 
     d_start = time_key_to_date_time[time_key]
 
@@ -170,7 +170,6 @@ def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviews
                     break
             if time_id_for_date_time in suspicious_timestamps[bnssId_for_this_review]:
                 non_singleton_usr_suspicousness[non_singleton_usr] += 1.0
-
 
     reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
                                            in neighboring_usr_nodes],
