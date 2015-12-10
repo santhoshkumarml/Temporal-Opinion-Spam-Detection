@@ -82,7 +82,7 @@ if __name__ == "__main__":
         sys.exit()
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
+    plotDir = os.path.join(os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it'), 'Experiments')
 
     # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
 
@@ -94,13 +94,14 @@ if __name__ == "__main__":
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
-    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True)
+    readReviewsText= False
+    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
-    suspicious_timestamp_ordered = suspicious_timestamp_ordered[30:40]
+    suspicious_timestamp_ordered = suspicious_timestamp_ordered[:1]
 
     for suspicious_timestamp in suspicious_timestamp_ordered:
         bnss_key, wdw = suspicious_timestamp
         idx1, idx2 = wdw
         time_key = (idx1 + (idx2-1))/2
-        EvidenceUtil.findStatsForEverything(plotDir, bnss_key, time_key, necessary_ds, readReviewsText=True,
+        EvidenceUtil.findStatsForEverything(plotDir, bnss_key, time_key, necessary_ds, readReviewsText=readReviewsText,
                                             doPlot=True)

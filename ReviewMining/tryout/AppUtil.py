@@ -16,7 +16,7 @@ ITUNES_BNSS_STATS_FOLDER = 'bnss_stats'
 FLIPKART_BNSS_STATS_FOLDER = 'fk_bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
-nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
+
 
 #1/(1+ (k**2)) = percent
 #k = math.sqrt( (1-percent)/ percent)
