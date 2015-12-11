@@ -19,32 +19,6 @@ def checkAvgRatingValid(statistics_for_bnss):
         # print avg_rating
         # sys.exit()
 
-def tryNewRanking(ranked_bnss, aux_info):
-    scores = dict()
-    import pickle
-    for bnss_key, timeWindow in ranked_bnss:
-        f = open(os.path.join( os.path.join(plotDir, 'bnss_stats'),
-                               bnss_key))
-        statistics_for_bnss = pickle.load(f)
-        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-        score = aux_info[(bnss_key, timeWindow)]
-
-        idx1, idx2 = timeWindow
-        idx1 = idx1 + firstTimeKey
-        idx2 = idx2 + firstTimeKey
-        timeWindow = (idx1, idx2)
-        top_number_of_reviews = max([statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS][idx]
-                                     for idx in range(idx1, idx2)
-                                     if idx < len(statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS])])
-        score = score[0] * top_number_of_reviews
-
-        scores[(bnss_key, timeWindow)] = score
-        f.close()
-
-    sorted_scores = sorted(scores.keys(), key=lambda key:scores[key], reverse=True)
-    for bnss_key, timeWindow in sorted_scores:
-        print bnss_key, timeWindow, scores[(bnss_key, timeWindow)]
-
 def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False, timeLength = '1-W', bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -94,7 +68,7 @@ if __name__ == "__main__":
 
     # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
     # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-    # tryNewRanking(ranked_bnss, aux_info)
+    # RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)

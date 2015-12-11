@@ -20,6 +20,31 @@ def doHistogramForFeature(bins, scores):
         ax.hist(score, bins, alpha=1.00)
         plt.show()
 
+def tryNewRanking(plotDir, ranked_bnss, aux_info):
+    scores = dict()
+    import pickle
+    for bnss_key, timeWindow in ranked_bnss:
+        f = open(os.path.join( os.path.join(plotDir, 'bnss_stats'),
+                               bnss_key))
+        statistics_for_bnss = pickle.load(f)
+        firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+        score = aux_info[(bnss_key, timeWindow)]
+
+        idx1, idx2 = timeWindow
+        idx1 = idx1 + firstTimeKey
+        idx2 = idx2 + firstTimeKey
+        timeWindow = (idx1, idx2)
+        top_number_of_reviews = max([statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS][idx]
+                                     for idx in range(idx1, idx2)
+                                     if idx < len(statistics_for_bnss[StatConstants.NON_CUM_NO_OF_REVIEWS])])
+        score = score[0] * top_number_of_reviews
+
+        scores[(bnss_key, timeWindow)] = score
+        f.close()
+
+    sorted_scores = sorted(scores.keys(), key=lambda key:scores[key], reverse=True)
+    for bnss_key, timeWindow in sorted_scores:
+        print bnss_key, timeWindow, scores[(bnss_key, timeWindow)]
 
 def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, measures, magnitude_divider):
     weighted_anomalies_for_window = dict()
