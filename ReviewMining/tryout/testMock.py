@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import numpy
+import changefinder as cfr
 
 CHPT_CONST_INCREASE = 'INCREASE_CONSTANT'
 CHPT_CONST_DECREASE = 'DECREASE_CONSTANT'
