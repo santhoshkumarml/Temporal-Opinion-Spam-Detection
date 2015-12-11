@@ -18,7 +18,7 @@ def make_autopct(values):
     def my_autopct(pct):
         total = sum(values)
         val = int(round(pct*total/100.0))
-        return '{p:.2f}%  ({v:d})'.format(p=pct, v=val)
+        return '{v:d}'.format(p=pct, v=val)
     return my_autopct
 
 def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
@@ -57,8 +57,8 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
     X, Y = nx.bipartite.sets(g)
     pos = dict()
-    pos.update( (n, (1, i)) for i, n in enumerate(X) ) # put nodes from X at x=1
-    pos.update( (n, (2, i)) for i, n in enumerate(Y) ) # put nodes from Y at x=2
+    pos.update((n, (1, i)) for i, n in enumerate(X)) # put nodes from X at x=1
+    pos.update((n, (2, i)) for i, n in enumerate(Y)) # put nodes from Y at x=2
 
 
     # edge_labels = {(u, v): r.toString() for u, v, r in g.edges(data=True)}
@@ -91,7 +91,6 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                                          for usrId in non_singleton_usr_non_suspicousness.keys()
                                          for bnss_node in non_singleton_usr_non_suspicousness[usrId]],
                                alpha=0.5, edge_color='g')
-
 
     nx.draw_networkx_labels(g, pos, labels=node_labels)
     # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
@@ -239,10 +238,10 @@ def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviews
             date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
 
             time_id_for_date_time = -1
-            for time_key in time_key_to_date_time.keys():
-                if date_time_for_this_usr < time_key_to_date_time[time_key].date():
+            for time_id in time_key_to_date_time.keys():
+                if date_time_for_this_usr < time_key_to_date_time[time_id].date():
                     break
-                time_id_for_date_time = time_key
+                time_id_for_date_time = time_id
 
             if bnssId_for_this_review in suspicious_timestamps and \
                             time_id_for_date_time in suspicious_timestamps[bnssId_for_this_review]:
@@ -304,17 +303,17 @@ def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviews
             extreme_non_singleton_usrs += 1
     non_extreme_non_singleton_usrs = total_non_singleton_usrs - extreme_non_singleton_usrs
 
-    print 'Review Distribution for Non Singleton User:'
-    print sorted(non_singleton_usr_all_review_distribution.iteritems(),
-                 key=lambda (usrId, distribution): non_singleton_usr_non_suspicousness[usrId], reverse=True)
-
-    print 'Non Singleton User Suspiciousness:'
-    print sorted(non_singleton_usr_suspicousness.iteritems(),
-                 key=lambda (usrId, internal_items): len(internal_items), reverse=True)
-
-    print 'Non Singleton User Non Suspiciousness:'
-    print sorted(non_singleton_usr_non_suspicousness.iteritems(),
-                 key=lambda (usrId, internal_items): len(internal_items), reverse=True)
+    # print 'Review Distribution for Non Singleton User:'
+    # print sorted(non_singleton_usr_all_review_distribution.iteritems(),
+    #              key=lambda (usrId, distribution): non_singleton_usr_non_suspicousness[usrId], reverse=True)
+    #
+    # print 'Non Singleton User Suspiciousness:'
+    # print sorted(non_singleton_usr_suspicousness.iteritems(),
+    #              key=lambda (usrId, internal_items): len(internal_items), reverse=True)
+    #
+    # print 'Non Singleton User Non Suspiciousness:'
+    # print sorted(non_singleton_usr_non_suspicousness.iteritems(),
+    #              key=lambda (usrId, internal_items): len(internal_items), reverse=True)
 
     if readReviewsText:
         print 'Two Grams'

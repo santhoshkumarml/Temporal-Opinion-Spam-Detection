@@ -45,22 +45,26 @@ def tryNewRanking(ranked_bnss, aux_info):
     for bnss_key, timeWindow in sorted_scores:
         print bnss_key, timeWindow, scores[(bnss_key, timeWindow)]
 
-def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False, timeLength = '1-W'):
+def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False, timeLength = '1-W', bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
     measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
 
     bnss_stats_dir = os.path.join(plotDir, AppUtil.ITUNES_BNSS_STATS_FOLDER)
-    file_list_size = []
-    for root, dirs, files in os.walk(bnss_stats_dir):
-        for name in files:
-            file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
-        file_list_size = sorted(file_list_size, key=lambda x: x[1], reverse=True)
+    if len(bnss_list) == 0:
+        file_list_size = []
+        for root, dirs, files in os.walk(bnss_stats_dir):
+            for name in files:
+                file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+            file_list_size = sorted(file_list_size, key=lambda x: x[1], reverse=True)
 
-    bnssKeys = [file_name for file_name,
-                              size in file_list_size]
-    bnssKeys = ['284235722']
+        bnssKeys = [file_name for file_name,
+                                  size in file_list_size]
+        bnssKeys = ['284235722']
+    else:
+        bnssKeys = bnss_list
+
     for bnss_key in bnssKeys:
         print '--------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key,
@@ -94,14 +98,20 @@ if __name__ == "__main__":
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
-    readReviewsText= False
+    readReviewsText = False
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
-    suspicious_timestamp_ordered = suspicious_timestamp_ordered[:1]
+    suspicious_timestamp_ordered = suspicious_timestamp_ordered[70:80]
 
     for suspicious_timestamp in suspicious_timestamp_ordered:
+        print '----------------------------------------------------------------------------------------'
         bnss_key, wdw = suspicious_timestamp
         idx1, idx2 = wdw
         time_key = (idx1 + (idx2-1))/2
+        print 'Bnss', bnss_key, time_key
         EvidenceUtil.findStatsForEverything(plotDir, bnss_key, time_key, necessary_ds, readReviewsText=readReviewsText,
                                             doPlot=True)
+        tryBusinessMeasureExtractor(csvFolder,
+                                    os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it'),
+                                    doPlot=True, bnss_list=[bnss_key])
+        print '----------------------------------------------------------------------------------------'
