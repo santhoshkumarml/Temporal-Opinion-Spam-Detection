@@ -23,45 +23,60 @@ def make_autopct(values):
 
 def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                             non_singleton_usr_non_suspicousness,
-                            imgFolder,
+                            imgFolder, time_key_to_date_time,
                             title='Suspicious Non Singleton User',
                             plot_non_suspicious=False):
     fig = plt.figure(figsize=(10, 10))
     imgFile = os.path.join(imgFolder, title + '.png')
 
     g = nx.Graph()
-    suspicious_bnss_nodes = set()
-    non_suspicious_bnss_nodes = set()
+    bnss_nodes = set()
     usr_nodes = set()
 
     node_labels = dict()
 
     for usrId in non_singleton_usr_suspicousness.keys():
-        for bnss_node in non_singleton_usr_suspicousness[usrId]:
-            suspicious_bnss_nodes.add(bnss_node)
-            g.add_edge(usrId, bnss_node)
-            node_labels[bnss_node] = bnss_node
+        for revw_for_usr in non_singleton_usr_suspicousness[usrId]:
+            bnss_id_for_revw = revw_for_usr.getBusinessID()
+            date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+
+            time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                          date_time_for_this_usr)
+            bnss_nodes.add(bnss_id_for_revw)
+            g.add_edge(usrId, bnss_id_for_revw, {'edge': (revw_for_usr.getRating(), time_id_for_date_time)})
+
+            node_labels[bnss_id_for_revw] = bnss_id_for_revw
             usr_nodes.add(usrId)
             node_labels[usrId] = usrId
 
     if plot_non_suspicious:
         for usrId in non_singleton_usr_non_suspicousness.keys():
-            for bnss_node in non_singleton_usr_non_suspicousness[usrId]:
-                non_suspicious_bnss_nodes.add(bnss_node)
-                g.add_edge(usrId, bnss_node)
-                node_labels[bnss_node] = bnss_node
+            for revw_for_usr in non_singleton_usr_non_suspicousness[usrId]:
+                bnss_id_for_revw = revw_for_usr.getBusinessID()
+                date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+
+                time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                              date_time_for_this_usr)
+                bnss_nodes.add(bnss_id_for_revw)
+                g.add_edge(usrId, bnss_id_for_revw, {'edge': (revw_for_usr.getRating(),
+                                                               time_id_for_date_time)})
+                node_labels[bnss_id_for_revw] = bnss_id_for_revw
                 usr_nodes.add(usrId)
                 node_labels[usrId] = usrId
 
+    edge_labels=dict([((u,v,),d['edge'])
+             for u,v,d in g.edges(data=True)])
+
     pos = dict()
+    i = 1
+    for node in usr_nodes:
+        pos[node] = (1, i)
+        i += 1
 
-    X, Y = nx.bipartite.sets(g)
-    pos = dict()
-    pos.update((n, (1, i)) for i, n in enumerate(X)) # put nodes from X at x=1
-    pos.update((n, (2, i)) for i, n in enumerate(Y)) # put nodes from Y at x=2
-
-
-    # edge_labels = {(u, v): r.toString() for u, v, r in g.edges(data=True)}
+    i = 1
+    for node in bnss_nodes:
+        pos[node] = (2, i)
+        i += 1
 
     nx.draw_networkx_nodes(g, pos,
                            nodelist=list(usr_nodes),
@@ -69,32 +84,27 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                            node_size=500,
                            alpha=0.8)
     nx.draw_networkx_nodes(g, pos,
-                           nodelist=list(suspicious_bnss_nodes),
-                           node_color='r',
+                           nodelist=list(bnss_nodes),
+                           node_color='m',
                            node_size=500,
                            alpha=0.8)
 
     nx.draw_networkx_edges(g, pos,
-                           edgelist=[(usrId, bnss_node)
-                                     for usrId in non_singleton_usr_suspicousness.keys()
-                                     for bnss_node in non_singleton_usr_suspicousness[usrId]],
-                           alpha=0.5, edge_color='r')
+                       edgelist=[(usrId, revw_for_usr.getBusinessID())
+                                 for usrId in non_singleton_usr_suspicousness.keys()
+                                 for revw_for_usr in non_singleton_usr_suspicousness[usrId]],
+                       alpha=0.5, edge_color='r')
 
     if plot_non_suspicious:
-        nx.draw_networkx_nodes(g, pos,
-                               nodelist=list(non_suspicious_bnss_nodes),
-                               node_color='g',
-                               node_size=400,
-                               alpha=0.8)
         nx.draw_networkx_edges(g, pos,
-                               edgelist=[(usrId, bnss_node)
+                               edgelist=[(usrId, revw_for_usr.getBusinessID())
                                          for usrId in non_singleton_usr_non_suspicousness.keys()
-                                         for bnss_node in non_singleton_usr_non_suspicousness[usrId]],
+                                         for revw_for_usr in non_singleton_usr_non_suspicousness[usrId]],
                                alpha=0.5, edge_color='g')
 
     nx.draw_networkx_labels(g, pos, labels=node_labels)
     # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
-    # nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, label_pos=0.3)
 
     plt.title(title)
     plt.axis('off')
@@ -138,11 +148,12 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
 
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(20, 12))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = ['y', 'c', 'm', 'b', 'r']
-    ind = numpy.arange(0, 7)
+    total_days = len(review_time_rating[1.0].keys())
+    ind = numpy.arange(0, total_days)
     width = 0.35
     x_labels = [d.strftime('%m/%d/%Y') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
@@ -157,7 +168,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
             btm = val
         else:
             p = ax.bar(ind, val, width, color=colors[colr], bottom=btm)
-            btm = numpy.array([btm[i] + val[i] for i in range(0, 7)])
+            btm = numpy.array([btm[i] + val[i] for i in range(0, total_days)])
 
         colr += 1
         pS.append(p)
@@ -173,7 +184,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
     suspicious_timestamps = dict()
     suspicious_timestamp_ordered = list()
-    with open('/home/santhosh/out_all_features_mul_reviews') as f:
+    with open('/home/santhosh/logs/out_all_features_mul_reviews.log') as f:
         lines = f.readlines()
         for line in lines:
             bnss_key, idx1, idx2, score = line.strip().split()
@@ -202,62 +213,79 @@ def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, tim
     return ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered
 
 
-def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviewsText=False, doPlot=False):
-    ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
+def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
+                  time_wise_non_singleton_usr_non_suspicousness,\
+                  time_wise_four_grams_dict,\
+                  time_wise_three_grams_dict, time_wise_two_grams_dict,\
+                  time_wise_all_user_review_rating_distribution,\
+                  time_wise_singleton_review_rating_distribution,\
+                  time_wise_non_singleton_review_rating_distribution,\
+                  time_wise_extreme_non_singleton_usrs,\
+                  time_wise_non_extreme_non_singleton_usrs,\
+                  time_wise_review_time_rating,\
+                  time_key_start, time_key_end, time_key_to_date_time,\
+                  bnssImgFolder):
+    for time_key in range(time_key_start, time_key_end):
+        imgFolder = os.path.join(bnssImgFolder, str(time_key))
+        if not os.path.exists(imgFolder):
+                os.makedirs(imgFolder)
+        all_user_review_rating_distribution = time_wise_all_user_review_rating_distribution[time_key]
+        singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
+        non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
+        extreme_non_singleton_usrs, non_extreme_non_singleton_usrs = time_wise_extreme_non_singleton_usrs[time_key], time_wise_non_extreme_non_singleton_usrs[time_key]
+        non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness = time_wise_non_singleton_usr_suspicousness[time_key], time_wise_non_singleton_usr_non_suspicousness[time_key]
+        plotRatingDistribution(all_user_review_rating_distribution, imgFolder, title='All Review Rating Count')
+        plotRatingDistribution(singleton_review_rating_distribution, imgFolder, title='Singleton Review Rating Count')
+        plotRatingDistribution(non_singleton_review_rating_distribution, imgFolder,
+                               title='Non Singleton Review Rating Count')
+        plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs, non_extreme_non_singleton_usrs, imgFolder)
+        plotSuspiciousNessGraph(non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness,
+                                imgFolder, time_key_to_date_time, plot_non_suspicious=False)
+    plotReviewTimeRating(time_wise_review_time_rating, bnssImgFolder)
 
-    G = ctg[time_key]
 
-    neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
-    all_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes])
-    singleton_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes
-                  if len(superGraph.neighbors((usrId, usr_type))) == 1])
-    non_singleton_usrs = all_usrs - singleton_usrs
+def findTimeIdForDateTime(time_key_to_date_time, date_time_for_this_usr):
+    time_id_for_date_time = -1
+    for time_id in time_key_to_date_time.keys():
+        if date_time_for_this_usr < time_key_to_date_time[time_id].date():
+            break
+        time_id_for_date_time = time_id
+    return time_id_for_date_time
 
-    non_singleton_usr_suspicousness = dict()
-    non_singleton_usr_non_suspicousness = dict()
-    non_singleton_usr_all_review_distribution = dict()
+def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readReviewsText=False, doPlot=False):
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
 
-    d_start = time_key_to_date_time[time_key]
+    time_key_start, time_key_end = time_key_wdw
 
-    for non_singleton_usr in non_singleton_usrs:
-        reviews_for_this_usr = sorted([superGraph.getReview(non_singleton_usr, bnssId) for (bnssId, bnss_type)
-                                       in superGraph.neighbors((non_singleton_usr, SIAUtil.USER))])
+    time_wise_non_singleton_usr_suspicousness = {key: dict()\
+                                                  for key in range(time_key_start, time_key_end)}
+    time_wise_non_singleton_usr_non_suspicousness = {key: dict()\
+                                                  for key in range(time_key_start, time_key_end)}
+    time_wise_four_grams_dict = {key: dict()\
+                                 for key in range(time_key_start, time_key_end)}
+    time_wise_three_grams_dict = {key: dict()\
+                                 for key in range(time_key_start, time_key_end)}
+    time_wise_two_grams_dict = {key: dict()\
+                                 for key in range(time_key_start, time_key_end)}
 
-        non_singleton_usr_all_review_distribution[non_singleton_usr] = {float(key): 0.0 for key in range(1, 6)}
+    time_wise_all_user_review_rating_distribution = {key:{float(key): 0.0 for key in range(1, 6)}\
+                                                      for key in range(time_key_start, time_key_end)}
+    time_wise_singleton_review_rating_distribution = {key:{float(key): 0.0 for key in range(1, 6)}\
+                                                      for key in range(time_key_start, time_key_end)}
+    time_wise_non_singleton_review_rating_distribution = {key:{float(key): 0.0 for key in range(1, 6)}\
+                                                      for key in range(time_key_start, time_key_end)}
 
-        non_singleton_usr_suspicousness[non_singleton_usr] = list()
+    time_wise_extreme_non_singleton_usrs = {key: 0\
+                                 for key in range(time_key_start, time_key_end)}
+    time_wise_non_extreme_non_singleton_usrs = {key: 0\
+                                 for key in range(time_key_start, time_key_end)}
 
-        non_singleton_usr_non_suspicousness[non_singleton_usr] = list()
-
-        for revw_for_usr in reviews_for_this_usr:
-            bnssId_for_this_review = revw_for_usr.getBusinessID()
-            if bnssKey == bnssId_for_this_review:
-                continue
-            non_singleton_usr_all_review_distribution[non_singleton_usr][revw_for_usr.getRating()] += 1.0
-
-            date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
-
-            time_id_for_date_time = -1
-            for time_id in time_key_to_date_time.keys():
-                if date_time_for_this_usr < time_key_to_date_time[time_id].date():
-                    break
-                time_id_for_date_time = time_id
-
-            if bnssId_for_this_review in suspicious_timestamps and \
-                            time_id_for_date_time in suspicious_timestamps[bnssId_for_this_review]:
-                non_singleton_usr_suspicousness[non_singleton_usr].append(
-                    (bnssId_for_this_review, time_id_for_date_time))
-            else:
-                non_singleton_usr_non_suspicousness[non_singleton_usr].append(
-                    (bnssId_for_this_review, time_id_for_date_time))
-
-    reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
-                                           in neighboring_usr_nodes],
-                                          key=lambda r: SIAUtil.getDateForReview(r))
-
-    four_games_dict = dict()
-    three_grams_dict = dict()
-    two_grams_dict = dict()
+    time_wise_review_time_rating = {float(key): {(time_key_to_date_time[time_key]\
+                                                 + datetime.timedelta(days=day_inc)).date(): 0.0\
+                                                 for time_key in range(time_key_start, time_key_end)
+                                                 for day_inc in range(0, 7)}
+                                               for key in range(1, 6)}
 
     def put_grams(grams, grams_dict):
         for gram in grams:
@@ -265,73 +293,119 @@ def findStatsForEverything(plotDir,  bnssKey, time_key, necessaryDs, readReviews
                 grams_dict[gram] = 0.0
             grams_dict[gram] += 1.0
 
-    review_time_rating = {float(key): {
-        (d_start+datetime.timedelta(days=i)).date(): 0.0 for i in range(0, 7)}
-                          for key in range(1, 6)}
-    all_user_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
-    singleton_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
-    non_singleton_review_rating_distribution = {float(key): 0.0 for key in range(1, 6)}
+    for time_key in range(time_key_start, time_key_end):
+        G = ctg[time_key]
 
-    for r in reviews_for_bnss_in_time_key:
-        if readReviewsText:
-            decoded_text = r.getReviewText().decode('UTF-8')
-            two_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 2)
-            three_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 3)
-            four_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 4)
+        neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
+        all_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes])
+        singleton_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes
+                      if len(superGraph.neighbors((usrId, usr_type))) == 1])
+        non_singleton_usrs = all_usrs - singleton_usrs
 
-            put_grams(two_grams, two_grams_dict)
-            put_grams(three_grams, three_grams_dict)
-            put_grams(four_grams, four_games_dict)
+        non_singleton_usr_suspicousness = time_wise_non_singleton_usr_suspicousness[time_key]
+        non_singleton_usr_non_suspicousness = time_wise_non_singleton_usr_non_suspicousness[time_key]
+        non_singleton_usr_all_review_distribution = dict()
 
-        all_user_review_rating_distribution[r.getRating()] += 1.0
-        if r.getUserId() in singleton_usrs:
-            singleton_review_rating_distribution[r.getRating()] += 1.0
-        else:
-            non_singleton_review_rating_distribution[r.getRating()] += 1.0
-        date_of_review = SIAUtil.getDateForReview(r)
-        review_time_rating[r.getRating()][date_of_review] += 1.0
+        for non_singleton_usr in non_singleton_usrs:
+            reviews_for_this_usr = sorted([superGraph.getReview(non_singleton_usr, bnssId) for (bnssId, bnss_type)
+                                           in superGraph.neighbors((non_singleton_usr, SIAUtil.USER))])
 
-    del neighboring_usr_nodes, all_usrs, non_singleton_usrs
+            non_singleton_usr_all_review_distribution[non_singleton_usr] = {float(key): 0.0 for key in range(1, 6)}
 
-    total_non_singleton_usrs = len(non_singleton_usr_all_review_distribution.keys())
-    extreme_non_singleton_usrs = 0
-    non_extreme_non_singleton_usrs = 0
+            non_singleton_usr_suspicousness[non_singleton_usr] = list()
 
-    for usrId in non_singleton_usr_all_review_distribution.keys():
-        rating_dist = non_singleton_usr_all_review_distribution[usrId]
-        if rating_dist[2.0] == 0 and rating_dist[3.0] == 0 and rating_dist[4.0] == 0:
-            extreme_non_singleton_usrs += 1
-    non_extreme_non_singleton_usrs = total_non_singleton_usrs - extreme_non_singleton_usrs
+            non_singleton_usr_non_suspicousness[non_singleton_usr] = list()
 
-    # print 'Review Distribution for Non Singleton User:'
-    # print sorted(non_singleton_usr_all_review_distribution.iteritems(),
-    #              key=lambda (usrId, distribution): non_singleton_usr_non_suspicousness[usrId], reverse=True)
-    #
-    # print 'Non Singleton User Suspiciousness:'
-    # print sorted(non_singleton_usr_suspicousness.iteritems(),
-    #              key=lambda (usrId, internal_items): len(internal_items), reverse=True)
-    #
-    # print 'Non Singleton User Non Suspiciousness:'
-    # print sorted(non_singleton_usr_non_suspicousness.iteritems(),
-    #              key=lambda (usrId, internal_items): len(internal_items), reverse=True)
+            for revw_for_usr in reviews_for_this_usr:
+                bnssId_for_this_review = revw_for_usr.getBusinessID()
+
+                if bnssKey == bnssId_for_this_review:
+                    continue
+
+                non_singleton_usr_all_review_distribution[non_singleton_usr][revw_for_usr.getRating()] += 1.0
+
+                date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+
+                time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                              date_time_for_this_usr)
+                if bnssId_for_this_review in suspicious_timestamps and \
+                                time_id_for_date_time in suspicious_timestamps[bnssId_for_this_review]:
+                    non_singleton_usr_suspicousness[non_singleton_usr].append(revw_for_usr)
+                else:
+                    non_singleton_usr_non_suspicousness[non_singleton_usr].append(
+                        revw_for_usr)
+
+        reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
+                                               in neighboring_usr_nodes],
+                                              key=lambda r: SIAUtil.getDateForReview(r))
+
+        four_grams_dict = time_wise_four_grams_dict[time_key]
+        three_grams_dict = time_wise_three_grams_dict[time_key]
+        two_grams_dict = time_wise_two_grams_dict[time_key]
+
+        all_user_review_rating_distribution = time_wise_all_user_review_rating_distribution[time_key]
+        singleton_review_rating_distribution = time_wise_singleton_review_rating_distribution[time_key]
+        non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
+
+        for r in reviews_for_bnss_in_time_key:
+            if readReviewsText:
+                decoded_text = r.getReviewText().decode('UTF-8')
+                two_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 2)
+                three_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 3)
+                four_grams = nltk.ngrams(nltk.word_tokenize(decoded_text), 4)
+
+                put_grams(two_grams, two_grams_dict)
+                put_grams(three_grams, three_grams_dict)
+                put_grams(four_grams, four_grams_dict)
+
+            all_user_review_rating_distribution[r.getRating()] += 1.0
+            if r.getUserId() in singleton_usrs:
+                singleton_review_rating_distribution[r.getRating()] += 1.0
+            else:
+                non_singleton_review_rating_distribution[r.getRating()] += 1.0
+            date_of_review = SIAUtil.getDateForReview(r)
+            time_wise_review_time_rating[r.getRating()][date_of_review] += 1.0
+
+
+        total_non_singleton_usrs = len(non_singleton_usrs)
+        extreme_non_singleton_usrs = 0
+
+
+        for usrId in non_singleton_usrs:
+            rating_dist = non_singleton_usr_all_review_distribution[usrId]
+            if rating_dist[2.0] == 0 and rating_dist[3.0] == 0 and rating_dist[4.0] == 0:
+                extreme_non_singleton_usrs += 1
+        non_extreme_non_singleton_usrs = total_non_singleton_usrs - extreme_non_singleton_usrs
+        time_wise_extreme_non_singleton_usrs[time_key] = extreme_non_singleton_usrs
+        time_wise_non_extreme_non_singleton_usrs[time_key] = non_extreme_non_singleton_usrs
 
     if readReviewsText:
-        print 'Two Grams'
-        print sorted(two_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
-        print 'Three Grams'
-        print sorted(three_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
-        print 'Four Grams'
-        print sorted(four_games_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
+        for time_key in range(time_key_start, time_key_end):
+            two_grams_dict = time_wise_two_grams_dict[time_key]
+            three_grams_dict = time_wise_three_grams_dict[time_key]
+            four_grams_dict = time_wise_four_grams_dict[time_key]
+            print '------------------------', time_key, '----------------------------------------'
+            print 'Two Grams'
+            print sorted(two_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
+            print 'Three Grams'
+            print sorted(three_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
+            print 'Four Grams'
+            print sorted(four_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
+            print '------------------------', time_key, '----------------------------------------'
 
     if doPlot:
-        imgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key))
-        if not os.path.exists(imgFolder):
-            os.mkdir(imgFolder)
-        plotReviewTimeRating(review_time_rating, imgFolder)
-        plotRatingDistribution(all_user_review_rating_distribution, imgFolder, title='All Review Rating Count')
-        plotRatingDistribution(singleton_review_rating_distribution, imgFolder, title='Singleton Review Rating Count')
-        plotRatingDistribution(non_singleton_review_rating_distribution, imgFolder,
-                               title='Non Singleton Review Rating Count')
-        plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs, non_extreme_non_singleton_usrs, imgFolder)
-        plotSuspiciousNessGraph(non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness,
-                                imgFolder, plot_non_suspicious=False)
+        bnssImgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key_start)\
+                                     + '_' + str(time_key_end))
+        plotAllStats(time_wise_non_singleton_usr_suspicousness,\
+                     time_wise_non_singleton_usr_non_suspicousness,\
+                     time_wise_four_grams_dict, time_wise_three_grams_dict,\
+                     time_wise_two_grams_dict,\
+                     time_wise_all_user_review_rating_distribution,\
+                     time_wise_singleton_review_rating_distribution,\
+                     time_wise_non_singleton_review_rating_distribution,\
+                     time_wise_extreme_non_singleton_usrs,\
+                     time_wise_non_extreme_non_singleton_usrs,\
+                     time_wise_review_time_rating,\
+                     time_key_start, time_key_end, time_key_to_date_time,\
+                     bnssImgFolder)
+

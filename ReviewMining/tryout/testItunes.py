@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy
 
 import AppUtil
-import EvidenceUtil
+import EvidenceUtil, RankHelper
 from anomaly_detection import AnomalyDetector
 from util import StatConstants
 
@@ -60,32 +60,25 @@ if __name__ == "__main__":
         sys.exit()
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
-    plotDir = os.path.join(os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it'), 'Experiments')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 
     # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
 
     # AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnsses_list=['284235722'])
 
-    # bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
-    # ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-    # RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
+#     bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
+#     ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
+#     RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
 
     # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
     #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
+    evidencePlotDir = os.path.join(plotDir, 'Experiments')
     readReviewsText = False
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
     suspicious_timestamp_ordered = suspicious_timestamp_ordered[70:80]
-
-    for suspicious_timestamp in suspicious_timestamp_ordered:
-        print '----------------------------------------------------------------------------------------'
-        bnss_key, wdw = suspicious_timestamp
-        idx1, idx2 = wdw
-        time_key = (idx1 + (idx2-1))/2
-        print 'Bnss', bnss_key, time_key
-        EvidenceUtil.findStatsForEverything(plotDir, bnss_key, time_key, necessary_ds, readReviewsText=readReviewsText,
-                                            doPlot=True)
-        tryBusinessMeasureExtractor(csvFolder,
-                                    os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it'),
-                                    doPlot=True, bnss_list=[bnss_key])
-        print '----------------------------------------------------------------------------------------'
+    bnss_key = '284819997'
+    time_key_wdw = (178, 185)
+    EvidenceUtil.findStatsForEverything(evidencePlotDir, bnss_key, time_key_wdw,
+                                         necessary_ds, readReviewsText=readReviewsText,
+                                         doPlot=True)
