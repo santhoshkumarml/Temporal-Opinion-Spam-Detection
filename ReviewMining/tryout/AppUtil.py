@@ -12,8 +12,7 @@ from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
 SCORES_LOG_FILE = 'scores_with_outliers.log'
-ITUNES_BNSS_STATS_FOLDER = 'bnss_stats'
-FLIPKART_BNSS_STATS_FOLDER = 'fk_bnss_stats'
+BNSS_STATS_FOLDER = 'bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
 
@@ -298,7 +297,8 @@ def detectOutliersUsingAlreadyGeneratedScores(all_scores, statistics_for_bnss, c
             chPtsOutlierIdxs = []
             if algo == StatConstants.LOCAL_AR:
                 windows = AnomalyDetector.getRangeIdxs(avg_idxs)
-                permitted_idxs = set([idx for idx in range(idx1, idx2+1) for idx1, idx2 in windows])
+                permitted_idxs = set([idx for idx1, idx2 in windows\
+                                      for idx in range(idx1, idx2 + 1)])
             else:
                 permitted_idxs = set([idx for idx in range(0, len(chPtsOutlierScores))])
             for idx in range(0, len(chPtsOutlierScores)):
@@ -332,3 +332,39 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
     if not os.path.exists(usrReviewLogDir):
         os.mkdir(usrReviewLogDir)
     logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
+
+def detectAnomaliesForBnsses(csvFolder, plotDir,\
+                             logStats=False, doPlot=False, timeLength = '1-W',\
+                             bnss_list = list()):
+    measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
+                             if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
+    lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
+    measuresToBeExtracted = [measure for measure in set(lead_signals).union(set(measuresToBeExtracted))]
+
+    bnss_stats_dir = os.path.join(plotDir, BNSS_STATS_FOLDER)
+    if len(bnss_list) == 0:
+        file_list_size = []
+        for root, dirs, files in os.walk(bnss_stats_dir):
+            for name in files:
+                file_list_size.append((name, os.path.getsize(os.path.join(bnss_stats_dir, name))))
+            file_list_size = sorted(file_list_size, key=lambda x: x[1], reverse=True)
+
+        bnssKeys = [file_name for file_name,
+                                  size in file_list_size]
+    else:
+        bnssKeys = bnss_list
+
+    for bnss_key in bnssKeys:
+        print '--------------------------------------------------------------------------------------------------------'
+        statistics_for_bnss = deserializeBnssStats(bnss_key,\
+                                                           os.path.join(plotDir,BNSS_STATS_FOLDER))
+
+        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength,
+                                                               find_outlier_idxs=True)
+        if doPlot:
+            plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
+                                  measuresToBeExtracted, timeLength)
+        if logStats:
+            logStats(bnss_key, plotDir, chPtsOutliers,\
+                     statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
+        print '--------------------------------------------------------------------------------------------------------'
