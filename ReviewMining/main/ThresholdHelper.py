@@ -3,7 +3,7 @@ import os
 from matplotlib import pyplot as plt
 
 from anomaly_detection import AnomalyDetector
-from tryout import AppUtil
+import AppUtil
 from util import StatConstants
 
 
