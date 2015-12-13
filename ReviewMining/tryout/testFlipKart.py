@@ -19,4 +19,4 @@ if __name__ == "__main__":
 #                                                                  bnss_list_start=0,
 #                                                                  bnss_list_end=500000,
 #                                                                  rdr=reader)
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=False, logStats=True)
+    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=False, dologStats=True)

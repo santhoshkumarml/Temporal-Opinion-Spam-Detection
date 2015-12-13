@@ -334,7 +334,7 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
     logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
 
 def detectAnomaliesForBnsses(csvFolder, plotDir,\
-                             logStats=False, doPlot=False, timeLength = '1-W',\
+                             dologStats=False, doPlot=False, timeLength = '1-W',\
                              bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -359,14 +359,14 @@ def detectAnomaliesForBnsses(csvFolder, plotDir,\
     for bnss_key in bnssKeys:
         print '--------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = deserializeBnssStats(bnss_key,\
-                                                           os.path.join(plotDir,BNSS_STATS_FOLDER))
+                                                   os.path.join(plotDir,BNSS_STATS_FOLDER))
 
         chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength,
-                                                               find_outlier_idxs=True)
+                                                               find_outlier_idxs=False)
         if doPlot:
             plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
                                   measuresToBeExtracted, timeLength)
-        if logStats:
+        if dologStats:
             logStats(bnss_key, plotDir, chPtsOutliers,\
                      statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
         print '--------------------------------------------------------------------------------------------------------'
