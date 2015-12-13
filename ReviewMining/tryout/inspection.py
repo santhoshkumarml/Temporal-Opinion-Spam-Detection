@@ -1,4 +1,4 @@
-import AppUtil
+from main import AppUtil
 import os
 from util import SIAUtil
 from util import GraphUtil

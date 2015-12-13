@@ -14,7 +14,7 @@ import numpy
 from lshash import LSHash
 
 import anomaly_detection.MITCusum as cm
-import tryout.AppUtil
+from main import AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
 from itunes_utils.ItunesDataReader import ItunesDataReader
@@ -297,7 +297,7 @@ def checkCusum():
     x[100:200] += numpy.arange(0, 4, 4/100)
     ta, tai, taf, amp = cm.detect_cusum(x, threshold=0.5)
     print ta, tai, taf, amp
-    
+
 def checkCusumCallRFromPy(x, shift = 1,stdev = None,decision_interval = 5, new_data = []):
     # x = numpy.random.randn(300)/5
     # x[100:200] += numpy.arange(0, 4, 4/100)
@@ -323,7 +323,7 @@ def checkCusumCallRFromPy(x, shift = 1,stdev = None,decision_interval = 5, new_d
     output = dict(out.items())
     output = {k:[val-1 for val in list(v)] for k,v in output.items()}
     return output['upper'],output['lower']
-    
+
 def checkJacDocHash(inputDirName):
     scr = YelpDataReader()
     usrIdToUsrDict, bnssIdToBnssDict, reviewIdToReviewDict = scr.readData(inputDirName)
@@ -409,8 +409,8 @@ def checkPlot():
 #         plt.ylabel('Damped oscillation' + str(i))
 #     plt.tight_layout()
     plt.show()
-    
-def checkPlot2():    
+
+def checkPlot2():
     fig = plt.figure()
     data = (0, 2, 3, 5, 5, 5, 9, 7, 8, 6, 6)
     ax = fig.add_subplot(1, 1, 1)
@@ -428,7 +428,7 @@ def checklshash():
 
 
 def checkRestaurant():
-    inputFileName = '/media/santhosh/Data/workspace/datalab/data/master.data'  
+    inputFileName = '/media/santhosh/Data/workspace/datalab/data/master.data'
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = dr.parseAndCreateObjects(inputFileName)
     #G = SuperGraph.createGraph(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict)
     for bnssKey in bnssIdToBusinessDict:
@@ -436,7 +436,7 @@ def checkRestaurant():
             print bnssIdToBusinessDict[bnssKey].getUrl()
 
 
-    
+
 def checkNewReader():
     #inputDirName = 'D:\\workspace\\datalab\\data\\NYC'
     #inputDirName = 'D:\\workspace\\datalab\\NYCYelpData2'
@@ -445,40 +445,40 @@ def checkNewReader():
     #\\2 Duck Goose.txt
     #\\Cafe Habana.txt
     rdr = YelpDataReader()
-    rdr.readData(inputDirName)    
+    rdr.readData(inputDirName)
     G = SuperGraph.createGraph(rdr.getUsrIdToUsrDict(), rdr.getBnssIdToBnssDict(), rdr.getReviewIdToReviewDict())
-    
+
     cc = sorted(networkx.connected_component_subgraphs(G, False), key=len, reverse=True)
-    
+
     for g in cc:
         cbnssNodes = [node for node in g.nodes() if node[1] == SIAUtil.PRODUCT]
         for node in cbnssNodes:
             bnss = rdr.getBnssIdToBnssDict()[node[0]]
             print bnss.getId(), len(g.neighbors(node))
         print '-----------------------------------'
-    
+
     bnssNodes = [node for node in G.nodes() if node[1] == SIAUtil.PRODUCT]
     bnssNodes = sorted(bnssNodes, reverse=True, key = lambda x: len(G.neighbors(x)))
     usrNodes = [node for node in G.nodes() if node[1] == SIAUtil.USER]
     usrNodes = sorted(usrNodes, reverse=True, key = lambda x: len(G.neighbors(x)))
     print len(bnssNodes), len(usrNodes)
-    
+
     for bnssNode in bnssNodes:
         bnss = rdr.getBnssIdToBnssDict()[bnssNode[0]]
         print bnss.getName(), len(G.neighbors(bnssNode))
-    
+
     print '=============================================================================='
-    
+
     for usrNode in usrNodes:
         usr = rdr.getUsrIdToUsrDict()[usrNode[0]]
         print usr.getName(), usr.getUsrExtra(), len(G.neighbors(usrNode))
-        
+
 #     for bnssKey in rdr.getBnssIdToBnssDict():
 #         if 'Halal Guys' in rdr.getBnssIdToBnssDict()[bnssKey].getName():
 #             print rdr.getBnssIdToBnssDict()[bnssKey].getName(), len(G.neighbors((bnssKey,SIAUtil.PRODUCT)))
 #     usrKeys = [usrKey for usrKey in rdr.getUsrIdToUsrDict()]
 #     usrKeys = sorted(usrKeys, reverse=True, key = lambda x: len(G.neighbors((x,SIAUtil.USER))))
-#     
+#
 #     for usrKey in usrKeys:
 #         neighbors = G.neighbors((usrKey,SIAUtil.USER))
 #         if len(neighbors) > 2 and len(neighbors)<10:
@@ -492,8 +492,8 @@ def checkNewReader():
 #                     print 'Rec', r.getBusinessID(), r.getTimeOfReview()
 #                 for r in not_rec_reviews:
 #                     print 'Not Rec', r.getBusinessID(), r.getTimeOfReview()
-     
-    
+
+
 def doIndexForRestaurants():
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/from ubuntu/zips'
     rdr = YelpDataReader()
@@ -510,8 +510,8 @@ def doIndexForRestaurants():
     result['bnss'] = restaurants
     with open(os.path.join(inputDirName, 'index.json'),'w') as f:
         json.dump(result, f)
-         
-        
+
+
 def checkBucketTree():
     bucketTree = measure_extractor.constructIntervalTree(60)
     print bucketTree
@@ -521,13 +521,13 @@ def checkBucketTree():
         begin,end,data = interval
         bucketTree.remove(interval)
         bucketTree[begin:end] = data+1.0
-        
+
     print bucketTree
-    
+
     rating_velocity_prob_dist = {(begin,end):(count_data/(6)) for (begin, end, count_data) in bucketTree}
-    
+
     print rating_velocity_prob_dist
-    
+
 def checkYelpAPI():
     inputDirName = '/home/santhosh'
     rdr = YelpDataReader()
@@ -571,17 +571,17 @@ def checkUsersWithOnlyNotRecommendedReviews():
                 break
         if hasOneRecommended:
             usersWithAleastOneRecReviews.add(usrId)
-    
+
     usersWithNotRecommendedReviewsAlone = allUserIds-usersWithAleastOneRecReviews
     usersWithMultipleReviewsAndNotRecommendedReviewsAlone =\
      usersWithNotRecommendedReviewsAlone-usersWithOnlyOneReview
-     
+
     print 'Total Users',len(allUserIds)
     print 'usersWithOnlyOneReview', len(usersWithOnlyOneReview)
     print 'usersWithAlteastOneRecReviews', len(usersWithAleastOneRecReviews)
-    print 'usersWithNotRecommendedReviewsAlone', len(usersWithNotRecommendedReviewsAlone)  
+    print 'usersWithNotRecommendedReviewsAlone', len(usersWithNotRecommendedReviewsAlone)
     print 'usersWithMultipleNotRecReviewsAlone',len(usersWithMultipleReviewsAndNotRecommendedReviewsAlone)
-        
+
 def checkBnss():
 #     inputDirName = 'D:\\workspace\\datalab\\data\\z'
     inputDirName = '/media/santhosh/Data/workspace/datalab/data/r'
@@ -592,16 +592,16 @@ def checkBnss():
 def plotDirCreation(inputFileName):
     import os
     inputDir = os.path.join(os.path.join(os.path.join(inputFileName, os.pardir),os.pardir), 'latest')
-    
-    
+
+
 def tryTemporalStatisticsForYelp():
     inputFileName = sys.argv[1]
     beforeDataReadTime = datetime.now()
     rdr = YelpDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(inputFileName)
-    
+
     afterDataReadTime = datetime.now()
-    
+
     print 'TimeTaken for Reading data:',afterDataReadTime-beforeDataReadTime
 
 
@@ -615,39 +615,39 @@ def setMemUsage():
 
     soft, hard = resource.getrlimit(rsrc)
     print 'Soft limit changed to :', soft
-    
 
-    
-    
-        
+
+
+
+
 def tryTemporalStatisticsForItunes():
-    
+
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
     rdr = ItunesDataReader()
     (usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict) = rdr.readData(csvFolder)
-    
+
     timeLength = '1-M'
-    
+
     superGraph,cross_time_graphs = GraphUtil.createGraphs(usrIdToUserDict,\
                                                            bnssIdToBusinessDict,\
                                                             reviewIdToReviewsDict, timeLength)
 
     plotDir = os.path.join(os.path.join(csvFolder, os.pardir), 'latest')
-      
+
     bnssKeys = [bnss_key for bnss_key,bnss_type in superGraph.nodes()\
-                 if bnss_type == SIAUtil.PRODUCT] 
-    
+                 if bnss_type == SIAUtil.PRODUCT]
+
     bnssKeys = sorted(bnssKeys, reverse=True, key = lambda x: len(superGraph.neighbors((x,SIAUtil.PRODUCT))))
-    
+
     bnssKeySet = set(bnssKeys[:1])
 
     bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength)
-    
+
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
-    
+
     total_time_slots = len(cross_time_graphs.keys())
-    
+
     PlotUtil.plotter(bnssKeySet, bnss_statistics, chPtsOutliers,\
                       bnssIdToBusinessDict, total_time_slots, plotDir)
 
