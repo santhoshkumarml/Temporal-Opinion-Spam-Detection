@@ -4,7 +4,7 @@ import pickle
 from datetime import datetime
 
 import nltk
-import numpy, RankHelper
+import numpy, RankHelper, EvidenceUtil
 
 from anomaly_detection import AnomalyDetector
 from itunes_utils.ItunesDataReader import ItunesDataReader
@@ -334,6 +334,23 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
     logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
 
 
+def doGatherEvidence(csvFolder, plotDir):
+    evidencePlotDir = os.path.join(plotDir, 'Experiments')
+    readReviewsText = False
+    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
+    bnss_key_time_wdw_list = [('284819997', (166, 171)),\
+                              ('284819997', (173, 178)),\
+                              ('319927587', (189, 194)),\
+                              ('404593641', (158, 163)),\
+                              ('412629178', (148, 153))]
+    for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
+        EvidenceUtil.findStatsForEverything(evidencePlotDir,\
+                                            bnss_key, time_key_wdw,\
+                                            necessary_ds,\
+                                            readReviewsText=readReviewsText,\
+                                            doPlot=True)
 
 def doRanking(plotDir):
     bnss_to_reviews_dict = readReviewsForBnssOrUser(plotDir)

@@ -3,9 +3,7 @@ import sys
 from datetime import datetime
 
 import AppUtil
-from anomaly_detection import AnomalyDetector
 from flipkart_utils import FlipkartDataReader
-from util import StatConstants
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
