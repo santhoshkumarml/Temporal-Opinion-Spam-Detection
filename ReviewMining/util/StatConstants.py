@@ -120,9 +120,17 @@ MEASURE_CHANGE_THRES_ITUNES = {'Youth Score': 0.20255295206730223,
 
 MEASURE_CHANGE_THRES_FLIPKART = {'Youth Score': 0.23658300730179033,
                                  'Ratio of Singletons': 0.21875451805457335,
-                                 'No of +ve Reviews': 4450.8215853828897,
+                                 'No of +ve Reviews': 111.90839697979619,
                                  'Entropy Gap Score': 0.17471480264981926,
                                  'Rating entropy': 0.66243004755941715,
-                                 'Non Cum No. of Reviews': 5738.4706919665268,
+                                 'Non Cum No. of Reviews': 153.16648400364605,
                                  'Ratio of First-timers': 0.22929189114336476,
-                                 'No of -ve Reviews': 29.736967296670624}
+                                 'No of -ve Reviews': 4.0325753330425069}
+# {'Youth Score': 0.23658300730179033,
+#                                  'Ratio of Singletons': 0.21875451805457335,
+#                                  'No of +ve Reviews': 4450.8215853828897,
+#                                  'Entropy Gap Score': 0.17471480264981926,
+#                                  'Rating entropy': 0.66243004755941715,
+#                                  'Non Cum No. of Reviews': 5738.4706919665268,
+#                                  'Ratio of First-timers': 0.22929189114336476,
+#                                  'No of -ve Reviews': 29.736967296670624}

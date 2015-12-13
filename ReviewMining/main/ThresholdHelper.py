@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from anomaly_detection import AnomalyDetector
 import AppUtil
 from util import StatConstants
+import numpy
 
 
 def doHistogramForMeasure(bins, algo, measure_key, scores):
@@ -16,9 +17,10 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     thr1 = AppUtil.getThreshold(scores, 0.20)
     thr2 = AppUtil.getThreshold(scores, 0.15)
     thr3 = AppUtil.getThreshold(scores, 0.10)
-    if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS,
+    if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS,
+                       StatConstants.NO_OF_NEGATIVE_REVIEWS,
                        StatConstants.NON_CUM_NO_OF_REVIEWS]:
-        ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
+        ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key, log=True)
     else:
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
 
@@ -45,6 +47,8 @@ def readScoresFromMeasureLog(plotDir, file_name):
             try:
                 exec(string)
             except:
+                print 'Not Parsable'
+                print string
                 continue
             avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
             diff_test_idxs = set()
@@ -83,11 +87,20 @@ def readScoresFromMeasureLog(plotDir, file_name):
 
 
 def getThresholdForDifferentMeasures(plotDir, doHist=False):
-    measure_scores = readScoresFromMeasureLog(plotDir, "measure_scores.log")
+    measure_scores = readScoresFromMeasureLog(plotDir, AppUtil.SCORES_LOG_FILE)
     result = dict()
-    measure_noise_threshold = {StatConstants.NO_OF_NEGATIVE_REVIEWS:10000 ,
-                               StatConstants.NON_CUM_NO_OF_REVIEWS:2652956,
-                               StatConstants.NO_OF_POSITIVE_REVIEWS:2652956}
+    measure_noise_threshold = {StatConstants.NO_OF_NEGATIVE_REVIEWS:373 ,
+                               StatConstants.NON_CUM_NO_OF_REVIEWS:12768,
+                               StatConstants.NO_OF_POSITIVE_REVIEWS:8962}
+# Itunes
+#     {StatConstants.NO_OF_NEGATIVE_REVIEWS:10000 ,
+#                                StatConstants.NON_CUM_NO_OF_REVIEWS:2652956,
+#                                StatConstants.NO_OF_POSITIVE_REVIEWS:2652956}
+
+# Flipkart
+#     {StatConstants.NO_OF_NEGATIVE_REVIEWS:373 ,
+#                                StatConstants.NON_CUM_NO_OF_REVIEWS:12768,
+#                                StatConstants.NO_OF_POSITIVE_REVIEWS:8962}
     for measure_key in measure_scores.keys():
         for algo in measure_scores[measure_key].keys():
             if(algo  == StatConstants.LOCAL_AR):
@@ -95,6 +108,13 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
             scores = measure_scores[measure_key][algo]
             if measure_key in measure_noise_threshold:
                 scores = [sc for sc in scores if sc < measure_noise_threshold[measure_key]]
+
+            if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS,
+                       StatConstants.NO_OF_NEGATIVE_REVIEWS,
+                       StatConstants.NON_CUM_NO_OF_REVIEWS]:
+                print measure_key
+                print numpy.histogram(scores, bins=400)
+
             thr = AppUtil.getThreshold(scores, 0.15)
             if doHist:
                 doHistogramForMeasure(20, algo, measure_key, scores)

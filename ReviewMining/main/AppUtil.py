@@ -2,8 +2,6 @@ import math
 import os
 import pickle
 from datetime import datetime
-
-import nltk
 import numpy, RankHelper, EvidenceUtil
 
 from anomaly_detection import AnomalyDetector
@@ -11,7 +9,8 @@ from itunes_utils.ItunesDataReader import ItunesDataReader
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
-SCORES_LOG_FILE = 'scores_with_outliers.log'
+SCORES_WITH_OUTLIERS_LOG_FILE = 'scores_with_outliers.log'
+SCORES_LOG_FILE = 'scores.log'
 BNSS_STATS_FOLDER = 'bnss_stats'
 USR_REVIEW_CNT_FILE = 'usr_review_cnt.txt'
 BNSS_REVIEW_CNT_FILE = 'bnss_review_cnt.txt'
@@ -248,8 +247,15 @@ def logReviewsForUsrBnss(csvFolder, plotDir, timeLength='1-W'):
         f.write(str(bnss_to_no_of_reviews_dict))
 
 
-def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
-    measure_log_file = open(os.path.join(plotDir, SCORES_LOG_FILE), 'a')
+def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey, find_outlier_idxs):
+    measure_log_file_name = ''
+
+    if find_outlier_idxs:
+        measure_log_file_name = SCORES_WITH_OUTLIERS_LOG_FILE
+    else:
+        measure_log_file_name = SCORES_LOG_FILE
+
+    measure_log_file = open(os.path.join(plotDir, measure_log_file_name), 'a')
     chPtsOutliers[StatConstants.BNSS_ID] = bnssKey
     chPtsOutliers[StatConstants.FIRST_TIME_KEY] = firstTimeKey
     measure_log_file.write(str(chPtsOutliers)+"\n")
@@ -369,6 +375,7 @@ def doRanking(plotDir):
 
 def detectAnomaliesForBnsses(csvFolder, plotDir, measure_change_thres,\
                              dologStats=False, doPlot=False, timeLength = '1-W',\
+                             find_outlier_idxs = True,\
                              bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -397,11 +404,12 @@ def detectAnomaliesForBnsses(csvFolder, plotDir, measure_change_thres,\
 
         chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss,measure_change_thres,
                                                                timeLength,
-                                                               find_outlier_idxs=False)
+                                                               find_outlier_idxs=find_outlier_idxs)
         if doPlot:
             plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
                                   measuresToBeExtracted, timeLength)
         if dologStats:
             logStats(bnss_key, plotDir, chPtsOutliers,\
-                     statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
+                     statistics_for_bnss[StatConstants.FIRST_TIME_KEY],\
+                     find_outlier_idxs)
         print '--------------------------------------------------------------------------------------------------------'

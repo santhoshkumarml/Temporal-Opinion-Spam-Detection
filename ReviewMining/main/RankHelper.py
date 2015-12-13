@@ -46,15 +46,18 @@ def tryNewRanking(plotDir, ranked_bnss, aux_info):
     for bnss_key, timeWindow in sorted_scores:
         print bnss_key, timeWindow, scores[(bnss_key, timeWindow)]
 
-def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, measures, magnitude_divider):
+def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows,\
+                                       measures, magnitude_divider):
     weighted_anomalies_for_window = dict()
     avg_anomaly_for_time_window = dict()
     max_anomaly_for_time_window = dict()
     ratio_of_anomalies_measure = dict()
     firstTimeKey = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
     if not magnitude_divider:
-        MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18, StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
-                             StatConstants.NO_OF_POSITIVE_REVIEWS:100000, StatConstants.NON_CUM_NO_OF_REVIEWS:100000}
+        MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18,
+                             StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
+                             StatConstants.NO_OF_POSITIVE_REVIEWS:100000,
+                             StatConstants.NON_CUM_NO_OF_REVIEWS:100000}
     else:
         MAGNITURE_DIVIDER = magnitude_divider
 
@@ -115,7 +118,7 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows, me
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
-    score_log_file = os.path.join(plotDir, AppUtil.SCORES_LOG_FILE)
+    score_log_file = os.path.join(plotDir, AppUtil.SCORES_WITH_OUTLIERS_LOG_FILE)
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
     lead_signals = [measure for measure in measuresToBeExtracted if measure in StatConstants.MEASURE_LEAD_SIGNALS]
