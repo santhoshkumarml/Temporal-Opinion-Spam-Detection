@@ -18,6 +18,13 @@ def checkAvgRatingValid(statistics_for_bnss):
         print 'Rating invalid', statistics_for_bnss[StatConstants.BNSS_ID]
         # print avg_rating
         # sys.exit()
+def doRanking(plotDir):
+    bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
+    ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
+    RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
+    RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info,\
+                               len(ranked_bnss), bnss_review_threshold=-1,\
+                               bnss_to_reviews_dict=bnss_to_reviews_dict)
 
 def doGatherEvidence(csvFolder, plotDir):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
@@ -36,7 +43,6 @@ def doGatherEvidence(csvFolder, plotDir):
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True)
-
 
 def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False, timeLength = '1-W', bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
@@ -72,7 +78,6 @@ def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False
             AppUtil.logStats(bnss_key, plotDir, chPtsOutliers, statistics_for_bnss[StatConstants.FIRST_TIME_KEY])
         print '--------------------------------------------------------------------------------------------------------'
 
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print 'Usage: python -m \"tryout.testItunes\" csvFolder'
@@ -80,14 +85,8 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
-
 #     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
-#     AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnsses_list=['284235722'])
-
-#     bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
-#     ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-#     RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
-
-#     RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
-#                                 bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
+#     AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,\
+#                                                      bnsses_list=['284235722'])
+#     doRanking(plotDir)
     doGatherEvidence(csvFolder, plotDir)
