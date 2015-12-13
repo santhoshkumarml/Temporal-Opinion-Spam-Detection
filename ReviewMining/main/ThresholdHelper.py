@@ -52,11 +52,11 @@ def readScoresFromMeasureLog(plotDir, file_name):
                 idx1, idx2 = AnomalyDetector.getRangeIdxs(idx)
                 for indx in range(idx1, idx2+1):
                     diff_test_idxs.add(indx)
-
             for measure_key in chPtsOutliers.keys():
-                if measure_key == StatConstants.AVERAGE_RATING \
-                        or measure_key == StatConstants.NO_OF_REVIEWS or \
-                                measure_key == 'BNSS_ID':
+                if measure_key == StatConstants.AVERAGE_RATING\
+                 or measure_key == StatConstants.NO_OF_REVIEWS or \
+                 measure_key == 'BNSS_ID' or\
+                 measure_key == StatConstants.FIRST_TIME_KEY:
                     continue
 
                 chPtsOutliersEntry = chPtsOutliers[measure_key]

@@ -6,9 +6,7 @@ Created on Feb 19, 2015
 
 from datetime import datetime
 from util import StatConstants
-import MITCusum
 import MyCusum
-from util import GraphUtil
 import scipy
 import math
 from statsmodels.tsa.ar_model import AR
@@ -16,10 +14,12 @@ import copy
 import numpy
 
 
-LIMITS = { StatConstants.RATING_ENTROPY: (0.0, None),\
-                           StatConstants.RATIO_OF_SINGLETONS: (0.0, 1.0),\
-                           StatConstants.RATIO_OF_FIRST_TIMERS: (0.0, 1.0), StatConstants.YOUTH_SCORE: (0.0, None),\
-                           StatConstants.ENTROPY_SCORE: (0.0, None), StatConstants.NON_CUM_NO_OF_REVIEWS :(0.0, None)}
+LIMITS = {StatConstants.RATING_ENTROPY: (0.0, None),
+          StatConstants.RATIO_OF_SINGLETONS: (0.0, 1.0),
+          StatConstants.RATIO_OF_FIRST_TIMERS: (0.0, 1.0),
+          StatConstants.YOUTH_SCORE: (0.0, None),
+          StatConstants.ENTROPY_SCORE: (0.0, None),
+          StatConstants.NON_CUM_NO_OF_REVIEWS :(0.0, None)}
 
 
 
@@ -53,7 +53,6 @@ def determineTimeWindows(avg_idxs, total_length):
     return diff_test_windows, diff_train_windows
 
 def logloss(real_val, pred_val):
-    import math
     return -math.log(math.exp(-0.5*(real_val-pred_val)**2)/math.sqrt(2*math.pi))
 
 
@@ -175,47 +174,47 @@ def calculateLogLoss(te_id_start, te_id_end, data, predicted_vals):
 
 
 
-def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
-    dimensions = 0
-    windows = None
-    numberOfReviewsInEachTimeStamp = dict()
-    firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
-    scores = dict()
-    changed_dimensions = dict()
-    for measure_key in StatConstants.MEASURES:
-        if measure_key not in statistics_for_bnss or measure_key not in chPtsOutliers:
-            continue
-        statistics = statistics_for_bnss[measure_key][firstTimeKey:]
-        for algo in chPtsOutliers[measure_key]:
-            chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key][algo]
-            if measure_key == StatConstants.AVERAGE_RATING:
-                    windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
-                    scores = {key:0.0 for key in windows}
-                    changed_dimensions = {key: set() for key in windows}
-            elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
-                    numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
-                                                        for idx1, idx2 in windows}
-            else:
-                if measure_key != StatConstants.NO_OF_REVIEWS:
-                    dimensions += 1
-                    if len(chOutlierIdxs) > 0:
-                        globalMaxima = numpy.amax(statistics)
-                        globalMinima = numpy.amin(statistics)
-                        for window in windows:
-                            idx1, idx2 = window
-                            if numpy.any(numpy.array([True for idx in chOutlierIdxs if idx in range(idx1,idx2)])):
-                                localMaxima = numpy.amax(statistics[idx1:idx2])
-                                localMinima = numpy.amin(statistics[idx1:idx2])
-                                score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
-                                scores[window] += score_for_window
-                                changed_dimensions[window].add(measure_key)
-    for window in windows:
-        scores[window] /= dimensions
-        if numberOfReviewsInEachTimeStamp[window] == 0:
-            scores[window] = 0
-        else:
-            scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
-    return scores, changed_dimensions
+# def calculateRankingUsingAnomalies(statistics_for_bnss, chPtsOutliers):
+#     dimensions = 0
+#     windows = None
+#     numberOfReviewsInEachTimeStamp = dict()
+#     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
+#     scores = dict()
+#     changed_dimensions = dict()
+#     for measure_key in StatConstants.MEASURES:
+#         if measure_key not in statistics_for_bnss or measure_key not in chPtsOutliers:
+#             continue
+#         statistics = statistics_for_bnss[measure_key][firstTimeKey:]
+#         for algo in chPtsOutliers[measure_key]:
+#             chOutlierIdxs, chOutlierScores = chPtsOutliers[measure_key][algo]
+#             if measure_key == StatConstants.AVERAGE_RATING:
+#                     windows = [getRangeIdxs(idx) for idx in chOutlierIdxs ]
+#                     scores = {key:0.0 for key in windows}
+#                     changed_dimensions = {key: set() for key in windows}
+#             elif measure_key == StatConstants.NON_CUM_NO_OF_REVIEWS:
+#                     numberOfReviewsInEachTimeStamp = {(idx1, idx2): (numpy.amax(statistics[idx1:idx2])-numpy.amin(statistics[idx1:idx2]))\
+#                                                         for idx1, idx2 in windows}
+#             else:
+#                 if measure_key != StatConstants.NO_OF_REVIEWS:
+#                     dimensions += 1
+#                     if len(chOutlierIdxs) > 0:
+#                         globalMaxima = numpy.amax(statistics)
+#                         globalMinima = numpy.amin(statistics)
+#                         for window in windows:
+#                             idx1, idx2 = window
+#                             if numpy.any(numpy.array([True for idx in chOutlierIdxs if idx in range(idx1,idx2)])):
+#                                 localMaxima = numpy.amax(statistics[idx1:idx2])
+#                                 localMinima = numpy.amin(statistics[idx1:idx2])
+#                                 score_for_window = (localMaxima - localMinima)/(globalMaxima - globalMinima)
+#                                 scores[window] += score_for_window
+#                                 changed_dimensions[window].add(measure_key)
+#     for window in windows:
+#         scores[window] /= dimensions
+#         if numberOfReviewsInEachTimeStamp[window] == 0:
+#             scores[window] = 0
+#         else:
+#             scores[window] *= math.log(numberOfReviewsInEachTimeStamp[window])
+#     return scores, changed_dimensions
 
 def squaredResidualError(actual_data, pred_data):
     return (actual_data-pred_data)**2
@@ -224,9 +223,7 @@ def makeARPredictions(data, params, idx, measure_key = None):
     order = len(params)
     val = 0
     for p in range(order):
-        # val += data[idx-(order - p - 1)] * params[p]
         val += data[idx-p-1] * params[p]
-    # val += numpy.random.normal(0, 1, 1)*math.exp(10**(-6))
 
     if measure_key in LIMITS:
         start_limit, end_limit = LIMITS[measure_key]
@@ -251,10 +248,9 @@ def doLocalARCrossValidation(data, tr_idx_start, tr_idx_end):
         error_dict[order] = error
     return min(error_dict.keys(), key=lambda key: error_dict[key])
 
-def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
-    thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
+def localAR(data, avg_idxs, measure_key, measure_change_thres, find_outlier_idxs = True):
+    thres = measure_change_thres[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
-    val_change_thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
 
     diff_test_windows, diff_train_windows = determineTimeWindows(avg_idxs, len(data))
     total_length = len(data)
@@ -295,7 +291,6 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
             train_error_scores.append(error)
 
         outies_scores.extend(train_error_scores)
-        # print len(train_error_scores), tr_idx_start, tr_idx_end, corr_start, corr_end, corr_end-corr_start+1, len(scores)
 
         test_pred = []
         test_error_scores = []
@@ -317,14 +312,6 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
                 else:
                     direction = StatConstants.NEUTRAL
 
-                # and diff>=val_change_thres
-
-                # import tryout.ScoreHistogram as sc
-                # if measure_key in sc.THRES and error > sc.THRES[measure_key]:
-                #     print '***************************************************************'
-                #     print data[i], pred, measure_key, error
-                #     print '***************************************************************'
-
                 if thres and error >= thres:
                     if needed_direction == StatConstants.BOTH or direction == needed_direction:
                         outierIds.append(i)
@@ -333,42 +320,39 @@ def localAR(data, avg_idxs, measure_key, find_outlier_idxs = True):
         outies_scores.extend(test_error_scores)
     return outierIds, outies_scores
 
-
-
-
-
-def twitterAnomalyDetection(dates, values):
-    import rpy2.robjects as robjects
-    from rpy2.robjects.packages import importr
-    importr("AnomalyDetection")
-    anomaly_detection = robjects.r['AnomalyDetectionTs']
-
-    # robjects.r('''
-    #     rdateFn <- function(d , m, y) {
-    #         dat <- paste(paste(toString(d),toString(m),sep="/"),toString(y), sep="/")
-    #         return(dat)
-    #     }
-    #     ''')
-    # rdateFn = robjects.globalenv['rdateFn']
-
-    date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
-    dataf = robjects.DataFrame(date_value_dict)
-    res = anomaly_detection(dataf, plot= True)
-    anoms_data_f = res[res.names.index('anoms')]
-    anoms_dates = set()
-    for d in anoms_data_f.rx2(1):
-        anoms_dates.add(datetime.fromtimestamp(d).date())
-    idxs = []
-    dates = [dates[i].date() for i in range(len(dates))]
-    for i in range(len(dates)):
-        if dates[i] in anoms_dates:
-            idxs.append(i)
-    values = numpy.atleast_1d(values).astype('int64')
-    return idxs
+# def twitterAnomalyDetection(dates, values):
+#     import rpy2.robjects as robjects
+#     from rpy2.robjects.packages import importr
+#     importr("AnomalyDetection")
+#     anomaly_detection = robjects.r['AnomalyDetectionTs']
+#
+#     # robjects.r('''
+#     #     rdateFn <- function(d , m, y) {
+#     #         dat <- paste(paste(toString(d),toString(m),sep="/"),toString(y), sep="/")
+#     #         return(dat)
+#     #     }
+#     #     ''')
+#     # rdateFn = robjects.globalenv['rdateFn']
+#
+#     date_value_dict = {'a':robjects.POSIXct(dates), 'b':robjects.IntVector(values)}
+#     dataf = robjects.DataFrame(date_value_dict)
+#     res = anomaly_detection(dataf, plot= True)
+#     anoms_data_f = res[res.names.index('anoms')]
+#     anoms_dates = set()
+#     for d in anoms_data_f.rx2(1):
+#         anoms_dates.add(datetime.fromtimestamp(d).date())
+#     idxs = []
+#     dates = [dates[i].date() for i in range(len(dates))]
+#     for i in range(len(dates)):
+#         if dates[i] in anoms_dates:
+#             idxs.append(i)
+#     values = numpy.atleast_1d(values).astype('int64')
+#     return idxs
 
 
 def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
-                                 statistics_for_measure, lead_signal_idxs, algo):
+                                 statistics_for_measure, lead_signal_idxs,\
+                                 algo, measure_change_thres):
     if algo == StatConstants.AR_UNIFYING:
         result = scipy.signal.argrelextrema(numpy.array(choutlierScores), numpy.greater)
         idxs = result[0]
@@ -398,8 +382,8 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
                 #print idx, new_idx
                 for indx in new_idx:
                     diff = math.fabs(statistics_for_measure[indx]-min(statistics_for_measure[idx1:indx+1]))
-                    if not StatConstants.MEASURE_CHANGE_THRES[measure_key] \
-                            or diff > StatConstants.MEASURE_CHANGE_THRES[measure_key]:
+                    if not measure_change_thres[measure_key] \
+                            or diff > measure_change_thres[measure_key]:
                         new_idxs.add(indx)
     elif StatConstants.MEASURE_DIRECTION[measure_key] == StatConstants.DECREASE:
         for idx in idxs:
@@ -416,12 +400,10 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
                 new_idx = scipy.signal.argrelextrema(numpy.array(statistics_for_measure[idx1:idx2]), numpy.less)
                 new_idx = new_idx[0]
                 new_idx = [idx1+indx for indx in new_idx]
-                #print idx,new_idx
                 for indx in new_idx:
                     diff = math.fabs(statistics_for_measure[indx]-max(statistics_for_measure[idx1:indx+1]))
-                    # print indx, diff
-                    if not StatConstants.MEASURE_CHANGE_THRES[measure_key] \
-                            or diff > StatConstants.MEASURE_CHANGE_THRES[measure_key]:
+                    if not measure_change_thres[measure_key] \
+                            or diff > measure_change_thres[measure_key]:
                         new_idxs.add(indx)
     else:
         for idx in idxs:
@@ -440,11 +422,8 @@ def compactChOutlierScoresAndIdx(choutlierIdxs, choutlierScores, measure_key,\
 
     return choutlierIdxs, choutlierScores
 
-# r - Coefficient of forgetting type AR model. 0 <r <1
-# order - Degree of forgetting type AR model
-# smooth - section length of time to be moving average smoothing the calculated outliers score
-
-def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier_idxs=True):
+def detectChPtsAndOutliers(statistics_for_bnss, measure_change_thres,
+                           timeLength = '1-M', find_outlier_idxs=True):
     beforeDetection = datetime.now()
     firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     lastKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
@@ -452,11 +431,6 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
     total_time_slots = len(statistics_for_bnss[StatConstants.AVERAGE_RATING])
     chPtsOutliers= dict()
     lead_signal_idxs = set()
-    GRANGER_MEASURES = [measure_key for measure_key in StatConstants.MEASURES_CHANGE_FINDERS
-                        if StatConstants.LOCAL_GRANGER in StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key]
-                        ]
-    isGrangerNeeded = False
-
     for measure_key in StatConstants.MEASURES:
         if measure_key in statistics_for_bnss:
             if measure_key == StatConstants.NO_OF_REVIEWS:
@@ -480,55 +454,29 @@ def detectChPtsAndOutliers(statistics_for_bnss, timeLength = '1-M', find_outlier
                             direction = StatConstants.DECREASE if d-data[didx-1] < 0 \
                                 else StatConstants.INCREASE if d-data[didx-1] >0 else StatConstants.NEUTRAL
                             needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
-                            thres = StatConstants.MEASURE_CHANGE_THRES[measure_key]
+                            thres = measure_change_thres[measure_key]
                             if thres and score >= thres:
                                 if needed_direction == StatConstants.BOTH or direction == needed_direction:
                                     chOutlierIdxs.append(didx)
                         change_scores.append(score)
                     chOutlierScores = change_scores
-
-                    # if find_outlier_idxs:
-                    #     chOutlierIdxs, chOutlierScores = compactChOutlierScoresAndIdx(chOutlierIdxs,
-                    #                                                                   chOutlierScores, measure_key,
-                    #                                                                   statistics_for_bnss[measure_key][firstKey:],
-                    #                                                                   lead_signal_idxs, algo)
                 elif algo == StatConstants.CUSUM:
-                    # chOutlierIdxs = MyCusum.detect_cusum(data, threshold=params, show=False)
                     chOutlierIdxs = MyCusum.run_cusum(data, threshold=params[0], magnitude=params[1])
-                    # if measure_key == StatConstants.AVERAGE_RATING:
-                    #     ta, tai, taf, amp = chOutlierIdxs
-                    #     chOutlierIdxs = [idx for idx in ta]
-                    #     chOutlierScores = []
-                        # lead_signal_idxs = set(ta)
-
-                elif algo == StatConstants.TWITTER_SEASONAL_ANOM_DETECTION:
-                    chOutlierIdxs = twitterAnomalyDetection(\
-                        GraphUtil.getDates(firstDateTime, range(firstKey, total_time_slots), timeLength)\
-                        ,data)
                 elif algo == StatConstants.LOCAL_AR:
-                    chOutlierIdxs, chOutlierScores = localAR(data, lead_signal_idxs, measure_key, find_outlier_idxs)
-
-                elif algo == StatConstants.LOCAL_GRANGER:
-                    isGrangerNeeded = True
-                    continue
+                    chOutlierIdxs, chOutlierScores = localAR(data, lead_signal_idxs,\
+                                                             measure_key, measure_change_thres, find_outlier_idxs)
 
                 if measure_key not in chPtsOutliers:
                     chPtsOutliers[measure_key] = dict()
 
                 if measure_key in StatConstants.MEASURE_LEAD_SIGNALS:
                     lead_signal_idxs = lead_signal_idxs.union(set(chOutlierIdxs))
-                    # print lead_signal_idxs
 
                 chPtsOutliers[measure_key][algo] = (chOutlierIdxs, chOutlierScores)
 
-    # if isGrangerNeeded:
-    #     test_outlier_scores, test_outlier_idxs = runLocalGranger(statistics_for_bnss, GRANGER_MEASURES,
-    #                                                              avg_idxs, find_outlier_idxs)
-    #     for measure_key in test_outlier_scores.keys():
-    #         chPtsOutliers[measure_key] = (test_outlier_idxs[measure_key], test_outlier_scores[measure_key])
-
     afterDetection = datetime.now()
-    print 'Time Taken For Anamoly Detection for Bnss Key', statistics_for_bnss[StatConstants.BNSS_ID],\
-        ':', afterDetection-beforeDetection
+    print 'Time Taken For Anamoly Detection for Bnss Key',\
+     statistics_for_bnss[StatConstants.BNSS_ID],\
+      ':', afterDetection-beforeDetection
 
     return chPtsOutliers

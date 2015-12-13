@@ -78,20 +78,21 @@ MEASURE_DIRECTION = {AVERAGE_RATING : BOTH, RATING_ENTROPY:DECREASE,\
                            ENTROPY_SCORE:DECREASE, MAX_TEXT_SIMILARITY:INCREASE, TF_IDF:BOTH,\
                      NO_OF_REVIEWS: INCREASE, NO_OF_POSITIVE_REVIEWS:INCREASE, NO_OF_NEGATIVE_REVIEWS:INCREASE}
 
-MEASURE_CHANGE_LOCAL_GRANGER_THRES = {AVERAGE_RATING : 0.5, RATING_ENTROPY: 0.25,\
-                           NON_CUM_NO_OF_REVIEWS:40000, RATIO_OF_SINGLETONS:0.16,\
-                           RATIO_OF_FIRST_TIMERS: 0.16, YOUTH_SCORE: 0.25,\
-                           ENTROPY_SCORE: 0.36, MAX_TEXT_SIMILARITY: None,\
-                                 TF_IDF: None, NO_OF_REVIEWS: None, NO_OF_POSITIVE_REVIEWS:None,
-                                 NO_OF_NEGATIVE_REVIEWS:None}
 
-MEASURE_CHANGE_THRES = {'Youth Score': 0.20255295206730223, 'Ratio of Singletons': 0.24039496091794749,
-                                 'No of +ve Reviews': 39432.770726578514, 'Entropy Gap Score': 0.26981230346376256,
-                                 'Rating entropy': 0.93762424754829699, 'Non Cum No. of Reviews': 43423.188618988795,
-                                 'Ratio of First-timers': 0.21045479159684069, 'No of -ve Reviews': 372.90525000682993}
+MEASURE_CHANGE_THRES_ITUNES = {'Youth Score': 0.20255295206730223,
+                               'Ratio of Singletons': 0.24039496091794749,
+                               'No of +ve Reviews': 39432.770726578514,
+                               'Entropy Gap Score': 0.26981230346376256,
+                               'Rating entropy': 0.93762424754829699,
+                               'Non Cum No. of Reviews': 43423.188618988795,
+                               'Ratio of First-timers': 0.21045479159684069,
+                               'No of -ve Reviews': 372.90525000682993}
 
-
-MEASURE_CHANGE_LOCAL_AR_THRES = {'Youth Score': 0.20255295206730223, 'Ratio of Singletons': 0.24039496091794749,
-                                 'No of +ve Reviews': 39432.770726578514, 'Entropy Gap Score': 0.26981230346376256,
-                                 'Rating entropy': 0.93762424754829699, 'Non Cum No. of Reviews': 43423.188618988795,
-                                 'Ratio of First-timers': 0.21045479159684069, 'No of -ve Reviews': 372.90525000682993}
+MEASURE_CHANGE_THRES_FLIPKART = {'Youth Score': 0.23658300730179033,
+                                 'Ratio of Singletons': 0.21875451805457335,
+                                 'No of +ve Reviews': 4450.8215853828897,
+                                 'Entropy Gap Score': 0.17471480264981926,
+                                 'Rating entropy': 0.66243004755941715,
+                                 'Non Cum No. of Reviews': 5738.4706919665268,
+                                 'Ratio of First-timers': 0.22929189114336476,
+                                 'No of -ve Reviews': 29.736967296670624}

@@ -4,6 +4,8 @@ from datetime import datetime
 
 import AppUtil
 from flipkart_utils import FlipkartDataReader
+import ThresholdHelper
+from util import StatConstants
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -17,4 +19,10 @@ if __name__ == "__main__":
 #                                                                  bnss_list_start=0,
 #                                                                  bnss_list_end=500000,
 #                                                                  rdr=reader)
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=False, dologStats=True)
+
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
+#                                      StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
+#                                      doPlot=False, dologStats=True)
+
+#     AppUtil.doRanking(plotDir)
+    print ThresholdHelper.getThresholdForDifferentMeasures(plotDir, doHist=True)

@@ -15,6 +15,10 @@ if __name__ == "__main__":
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 #         AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,\
 #                                                      bnsses_list=['284235722'])
-#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=True, dologStats=False)
+
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
+#                                      StatConstants.MEASURE_CHANGE_THRES_ITUNES,
+#                                      doPlot=False, dologStats=True)
+
 #     AppUtil.doRanking(plotDir)
     AppUtil.doGatherEvidence(csvFolder, plotDir)

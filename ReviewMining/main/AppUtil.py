@@ -258,10 +258,13 @@ def logStats(bnssKey, plotDir, chPtsOutliers, firstTimeKey):
     del chPtsOutliers[StatConstants.FIRST_TIME_KEY]
 
 
-def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength, find_outlier_idxs=True):
+def detectAnomaliesForBnss(bnssKey, statistics_for_current_bnss, timeLength,
+                           measure_change_thres, find_outlier_idxs=True):
     beforeAnomalyDetection = datetime.now()
 
-    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss, timeLength,
+    chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_current_bnss,
+                                                           measure_change_thres,
+                                                           timeLength,
                                                            find_outlier_idxs)
     afterAnomalyDetection = datetime.now()
 
@@ -284,7 +287,11 @@ def plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir, measure
     print 'Plot Generation Time for bnss:', bnss_key, 'in', afterPlotTime-beforePlotTime
 
 
-def detectOutliersUsingAlreadyGeneratedScores(all_scores, statistics_for_bnss, chPtsOutliers, bnssKey):
+def detectOutliersUsingAlreadyGeneratedScores(all_scores,
+                                              statistics_for_bnss,
+                                              chPtsOutliers,
+                                              measure_change_thres,
+                                              bnssKey):
     avg_idxs, avg_scores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
     for measure_key in chPtsOutliers.keys():
         all_algo_scores = chPtsOutliers[measure_key]
@@ -303,7 +310,7 @@ def detectOutliersUsingAlreadyGeneratedScores(all_scores, statistics_for_bnss, c
                 permitted_idxs = set([idx for idx in range(0, len(chPtsOutlierScores))])
             for idx in range(0, len(chPtsOutlierScores)):
                 if idx in permitted_idxs:
-                    if chPtsOutlierScores[idx] > StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]:
+                    if chPtsOutlierScores[idx] > measure_change_thres[measure_key]:
                         chPtsOutlierIdxs.append(idx)
             all_algo_scores[algo] = (chPtsOutlierIdxs, chPtsOutlierScores)
         chPtsOutliers[measure_key] = all_algo_scores
@@ -360,7 +367,7 @@ def doRanking(plotDir):
 #                                len(ranked_bnss), bnss_review_threshold=-1,\
 #                                bnss_to_reviews_dict=bnss_to_reviews_dict)
 
-def detectAnomaliesForBnsses(csvFolder, plotDir,\
+def detectAnomaliesForBnsses(csvFolder, plotDir, measure_change_thres,\
                              dologStats=False, doPlot=False, timeLength = '1-W',\
                              bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
@@ -388,7 +395,8 @@ def detectAnomaliesForBnsses(csvFolder, plotDir,\
         statistics_for_bnss = deserializeBnssStats(bnss_key,\
                                                    os.path.join(plotDir,BNSS_STATS_FOLDER))
 
-        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss, timeLength,
+        chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(statistics_for_bnss,measure_change_thres,
+                                                               timeLength,
                                                                find_outlier_idxs=False)
         if doPlot:
             plotBnssStats(bnss_key, statistics_for_bnss, chPtsOutliers, plotDir,
