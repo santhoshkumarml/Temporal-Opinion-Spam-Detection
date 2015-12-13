@@ -16,7 +16,6 @@ def doHistogramForMeasure(bins, algo, measure_key, scores):
     thr1 = AppUtil.getThreshold(scores, 0.20)
     thr2 = AppUtil.getThreshold(scores, 0.15)
     thr3 = AppUtil.getThreshold(scores, 0.10)
-    thr4 = AppUtil.getThreshold(scores, 0.05)
     if measure_key in [StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS,
                        StatConstants.NON_CUM_NO_OF_REVIEWS]:
         ax.hist(scores, bins, alpha=1.00, label=algo+' '+measure_key)
