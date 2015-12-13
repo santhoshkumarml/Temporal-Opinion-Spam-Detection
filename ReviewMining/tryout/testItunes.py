@@ -77,8 +77,10 @@ if __name__ == "__main__":
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
     suspicious_timestamp_ordered = suspicious_timestamp_ordered[70:80]
-    bnss_key = '284819997'
-    time_key_wdw = (166, 171)
-    EvidenceUtil.findStatsForEverything(evidencePlotDir, bnss_key, time_key_wdw,
-                                         necessary_ds, readReviewsText=readReviewsText,
-                                         doPlot=True)
+    bnss_key_time_wdw_list = [('284819997', (166, 171)), ('284819997', (173, 178)),\
+                              ('319927587', (189, 194)), ('404593641',(158, 163)),\
+                              ('412629178',(148, 153))]
+    for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
+        EvidenceUtil.findStatsForEverything(evidencePlotDir, bnss_key, time_key_wdw,
+                                             necessary_ds, readReviewsText=readReviewsText,
+                                             doPlot=True)
