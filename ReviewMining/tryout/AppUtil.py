@@ -4,7 +4,7 @@ import pickle
 from datetime import datetime
 
 import nltk
-import numpy
+import numpy, RankHelper
 
 from anomaly_detection import AnomalyDetector
 from itunes_utils.ItunesDataReader import ItunesDataReader
@@ -332,6 +332,16 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
     if not os.path.exists(usrReviewLogDir):
         os.mkdir(usrReviewLogDir)
     logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
+
+
+
+def doRanking(plotDir):
+    bnss_to_reviews_dict = readReviewsForBnssOrUser(plotDir)
+    ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
+    RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
+#     RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info,\
+#                                len(ranked_bnss), bnss_review_threshold=-1,\
+#                                bnss_to_reviews_dict=bnss_to_reviews_dict)
 
 def detectAnomaliesForBnsses(csvFolder, plotDir,\
                              dologStats=False, doPlot=False, timeLength = '1-W',\

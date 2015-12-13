@@ -154,9 +154,9 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = ['y', 'c', 'm', 'b', 'r']
     total_days = len(review_time_rating[1.0].keys())
-    ind = numpy.arange(0, total_days)
+    ind = numpy.arange(0, total_days*2, 2)
     width = 1.5
-    x_labels = [d.strftime('%m/%d/%y') for d in sorted(review_time_rating[1.0].keys())]
+    x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
     colr = 0
@@ -241,7 +241,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                                title='Non Singleton Review Rating Count')
         plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs, non_extreme_non_singleton_usrs, imgFolder)
         plotSuspiciousNessGraph(non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness,
-                                imgFolder, time_key_to_date_time, plot_non_suspicious=True)
+                                imgFolder, time_key_to_date_time, plot_non_suspicious=False)
     plotReviewTimeRating(time_wise_review_time_rating, bnssImgFolder)
 
 
@@ -312,7 +312,8 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
 
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
-
+        if (bnssKey, SIAUtil.PRODUCT) not in G:
+            continue
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
         all_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes])
         singleton_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes

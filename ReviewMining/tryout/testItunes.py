@@ -18,13 +18,6 @@ def checkAvgRatingValid(statistics_for_bnss):
         print 'Rating invalid', statistics_for_bnss[StatConstants.BNSS_ID]
         # print avg_rating
         # sys.exit()
-def doRanking(plotDir):
-    bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
-    ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
-    RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
-    RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info,\
-                               len(ranked_bnss), bnss_review_threshold=-1,\
-                               bnss_to_reviews_dict=bnss_to_reviews_dict)
 
 def doGatherEvidence(csvFolder, plotDir):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
@@ -53,6 +46,6 @@ if __name__ == "__main__":
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 #         AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,\
 #                                                      bnsses_list=['284235722'])
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=True, dologStats=False)
-#     doRanking(plotDir)
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir, doPlot=True, dologStats=False)
+#     AppUtil.doRanking(plotDir)
     doGatherEvidence(csvFolder, plotDir)
