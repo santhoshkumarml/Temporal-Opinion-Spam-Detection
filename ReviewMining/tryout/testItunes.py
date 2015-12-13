@@ -19,6 +19,25 @@ def checkAvgRatingValid(statistics_for_bnss):
         # print avg_rating
         # sys.exit()
 
+def doGatherEvidence(csvFolder, plotDir):
+    evidencePlotDir = os.path.join(plotDir, 'Experiments')
+    readReviewsText = False
+    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
+    bnss_key_time_wdw_list = [('284819997', (166, 171)),\
+                              ('284819997', (173, 178)),\
+                              ('319927587', (189, 194)),\
+                              ('404593641', (158, 163)),\
+                              ('412629178', (148, 153))]
+    for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
+        EvidenceUtil.findStatsForEverything(evidencePlotDir,\
+                                            bnss_key, time_key_wdw,\
+                                            necessary_ds,\
+                                            readReviewsText=readReviewsText,\
+                                            doPlot=True)
+
+
 def tryBusinessMeasureExtractor(csvFolder, plotDir, logStats=False, doPlot=False, timeLength = '1-W', bnss_list = list()):
     measuresToBeExtracted = [measure for measure in StatConstants.MEASURES \
                              if measure != StatConstants.MAX_TEXT_SIMILARITY and measure != StatConstants.TF_IDF]
@@ -62,25 +81,13 @@ if __name__ == "__main__":
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 
-    # tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
-
-    # AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnsses_list=['284235722'])
+#     tryBusinessMeasureExtractor(csvFolder, plotDir, doPlot=True, logStats=False)
+#     AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnsses_list=['284235722'])
 
 #     bnss_to_reviews_dict = AppUtil.readReviewsForBnssOrUser(plotDir)
 #     ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
 #     RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
 
-    # RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
-    #                             bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
-    evidencePlotDir = os.path.join(plotDir, 'Experiments')
-    readReviewsText = False
-    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
-    ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
-    suspicious_timestamp_ordered = suspicious_timestamp_ordered[70:80]
-    bnss_key_time_wdw_list = [('284819997', (166, 171)), ('284819997', (173, 178)),\
-                              ('319927587', (189, 194)), ('404593641',(158, 163)),\
-                              ('412629178',(148, 153))]
-    for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-        EvidenceUtil.findStatsForEverything(evidencePlotDir, bnss_key, time_key_wdw,
-                                             necessary_ds, readReviewsText=readReviewsText,
-                                             doPlot=True)
+#     RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info, len(ranked_bnss),
+#                                 bnss_review_threshold=-1, bnss_to_reviews_dict=bnss_to_reviews_dict)
+    doGatherEvidence(csvFolder, plotDir)
