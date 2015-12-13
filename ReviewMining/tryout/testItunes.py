@@ -78,7 +78,7 @@ if __name__ == "__main__":
     ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
     suspicious_timestamp_ordered = suspicious_timestamp_ordered[70:80]
     bnss_key = '284819997'
-    time_key_wdw = (178, 185)
+    time_key_wdw = (166, 171)
     EvidenceUtil.findStatsForEverything(evidencePlotDir, bnss_key, time_key_wdw,
                                          necessary_ds, readReviewsText=readReviewsText,
                                          doPlot=True)

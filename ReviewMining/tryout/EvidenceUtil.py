@@ -1,6 +1,6 @@
 import collections
 import datetime
-import os
+import os, math, random
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -26,7 +26,7 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                             imgFolder, time_key_to_date_time,
                             title='Suspicious Non Singleton User',
                             plot_non_suspicious=False):
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(24, 16))
     imgFile = os.path.join(imgFolder, title + '.png')
 
     g = nx.Graph()
@@ -68,15 +68,15 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
              for u,v,d in g.edges(data=True)])
 
     pos = dict()
-    i = 1
+    i = 0
     for node in usr_nodes:
         pos[node] = (1, i)
-        i += 1
+        i += 3
 
-    i = 1
+    i = 0
     for node in bnss_nodes:
-        pos[node] = (2, i)
-        i += 1
+        pos[node] = (4, i)
+        i += 3
 
     nx.draw_networkx_nodes(g, pos,
                            nodelist=list(usr_nodes),
@@ -104,7 +104,8 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
     nx.draw_networkx_labels(g, pos, labels=node_labels)
     # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, label_pos=0.3)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
+                                 label_pos= 0.3)
 
     plt.title(title)
     plt.axis('off')
@@ -148,14 +149,14 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
 
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(20, 12))
+    fig = plt.figure(figsize=(36, 10))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = ['y', 'c', 'm', 'b', 'r']
     total_days = len(review_time_rating[1.0].keys())
     ind = numpy.arange(0, total_days)
-    width = 0.35
-    x_labels = [d.strftime('%m/%d/%Y') for d in sorted(review_time_rating[1.0].keys())]
+    width = 1.5
+    x_labels = [d.strftime('%m/%d/%y') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
     colr = 0
@@ -240,7 +241,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                                title='Non Singleton Review Rating Count')
         plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs, non_extreme_non_singleton_usrs, imgFolder)
         plotSuspiciousNessGraph(non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness,
-                                imgFolder, time_key_to_date_time, plot_non_suspicious=False)
+                                imgFolder, time_key_to_date_time, plot_non_suspicious=True)
     plotReviewTimeRating(time_wise_review_time_rating, bnssImgFolder)
 
 
@@ -251,6 +252,22 @@ def findTimeIdForDateTime(time_key_to_date_time, date_time_for_this_usr):
             break
         time_id_for_date_time = time_id
     return time_id_for_date_time
+
+
+def printNGrams(time_key_start, time_key_end, time_wise_four_grams_dict,\
+                time_wise_three_grams_dict, time_wise_two_grams_dict):
+    for time_key in range(time_key_start, time_key_end):
+        two_grams_dict = time_wise_two_grams_dict[time_key]
+        three_grams_dict = time_wise_three_grams_dict[time_key]
+        four_grams_dict = time_wise_four_grams_dict[time_key]
+        print '------------------------', time_key, '----------------------------------------'
+        print 'Two Grams'
+        print sorted(two_grams_dict.iteritems(), key=lambda (gram, count):count, reverse=True)
+        print 'Three Grams'
+        print sorted(three_grams_dict.iteritems(), key=lambda (gram, count):count, reverse=True)
+        print 'Four Grams'
+        print sorted(four_grams_dict.iteritems(), key=lambda (gram, count):count, reverse=True)
+        print '------------------------', time_key, '----------------------------------------'
 
 def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readReviewsText=False, doPlot=False):
     ctg, superGraph, time_key_to_date_time,\
@@ -380,18 +397,8 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
         time_wise_non_extreme_non_singleton_usrs[time_key] = non_extreme_non_singleton_usrs
 
     if readReviewsText:
-        for time_key in range(time_key_start, time_key_end):
-            two_grams_dict = time_wise_two_grams_dict[time_key]
-            three_grams_dict = time_wise_three_grams_dict[time_key]
-            four_grams_dict = time_wise_four_grams_dict[time_key]
-            print '------------------------', time_key, '----------------------------------------'
-            print 'Two Grams'
-            print sorted(two_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
-            print 'Three Grams'
-            print sorted(three_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
-            print 'Four Grams'
-            print sorted(four_grams_dict.iteritems(), key=lambda (gram, count): count, reverse=True)
-            print '------------------------', time_key, '----------------------------------------'
+        printNGrams(time_key_start, time_key_end, time_wise_four_grams_dict,\
+                    time_wise_three_grams_dict, time_wise_two_grams_dict)
 
     if doPlot:
         bnssImgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key_start)\
