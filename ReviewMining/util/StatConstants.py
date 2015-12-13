@@ -24,19 +24,26 @@ ENTROPY_SCORE = 'Entropy Gap Score'
 RATING_DISTRIBUTION = 'Rating Distribution'
 MAX_TEXT_SIMILARITY = 'Max Text Similarity'
 TF_IDF = 'TF_IDF'
-MEASURES = [AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS, RATING_ENTROPY, NON_CUM_NO_OF_REVIEWS, \
-            RATIO_OF_SINGLETONS, RATIO_OF_FIRST_TIMERS, YOUTH_SCORE,\
+MEASURES = [AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS,
+            RATING_ENTROPY, NON_CUM_NO_OF_REVIEWS,
+            RATIO_OF_SINGLETONS, RATIO_OF_FIRST_TIMERS, YOUTH_SCORE,
             ENTROPY_SCORE, MAX_TEXT_SIMILARITY, NO_OF_REVIEWS, TF_IDF]
 
 # r  Coefficient of forgetting type AR model. 0 <r <1  -> Decay factor or low effect from old data
 # order Degree of forgetting type AR model  -> Ar model Degree
 # smooth  section length of time to be moving average smoothing the calculated outliers score  - T for moving average
 
-MEASURES_CHANGE_FINDER_PARAMS = {AVERAGE_RATING : (8, 0.5), RATING_ENTROPY:(0.2, 1, 3),\
-                           NON_CUM_NO_OF_REVIEWS:(0.2, 1, 3), NO_OF_POSITIVE_REVIEWS:(0.2, 1, 3),\
-                                 NO_OF_NEGATIVE_REVIEWS:(0.2, 1, 3), RATIO_OF_SINGLETONS:(0.5,1,3),\
-                           RATIO_OF_FIRST_TIMERS:(0.5,1,3), YOUTH_SCORE:(0.5,1,3),\
-                           ENTROPY_SCORE:(0.5,1,3), MAX_TEXT_SIMILARITY:(0.5,1,3), TF_IDF:(0.5, 1, 3),\
+MEASURES_CHANGE_FINDER_PARAMS = {AVERAGE_RATING : (8, 0.5),
+                                 RATING_ENTROPY:(0.2, 1, 3),
+                                 NON_CUM_NO_OF_REVIEWS:(0.2, 1, 3),
+                                 NO_OF_POSITIVE_REVIEWS:(0.2, 1, 3),
+                                 NO_OF_NEGATIVE_REVIEWS:(0.2, 1, 3),
+                                 RATIO_OF_SINGLETONS:(0.5,1,3),
+                                 RATIO_OF_FIRST_TIMERS:(0.5,1,3),
+                                 YOUTH_SCORE:(0.5,1,3),
+                                 ENTROPY_SCORE:(0.5,1,3),
+                                 MAX_TEXT_SIMILARITY:(0.5,1,3),
+                                 TF_IDF:(0.5, 1, 3),
                                  NO_OF_REVIEWS:(0.2, 1, 3)}
 
 CUSUM = 'CUSUM'
@@ -46,17 +53,26 @@ AR_UNIFYING = 'SDAR'
 TWITTER_SEASONAL_ANOM_DETECTION = 'Twitter Anomaly Detection in Time Series'
 
 
-MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM], NO_OF_POSITIVE_REVIEWS: [AR_UNIFYING],\
-                                  NO_OF_NEGATIVE_REVIEWS:[AR_UNIFYING], RATING_ENTROPY: [LOCAL_AR, AR_UNIFYING],\
-                           NON_CUM_NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING], RATIO_OF_SINGLETONS:[LOCAL_AR, AR_UNIFYING],\
-                           RATIO_OF_FIRST_TIMERS:[LOCAL_AR, AR_UNIFYING], YOUTH_SCORE:[LOCAL_AR, AR_UNIFYING],\
-                           ENTROPY_SCORE:[LOCAL_AR, AR_UNIFYING], MAX_TEXT_SIMILARITY:[LOCAL_AR, AR_UNIFYING],\
-                                  TF_IDF:[LOCAL_AR, AR_UNIFYING], NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING]}
+MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM],
+                                  NO_OF_POSITIVE_REVIEWS: [AR_UNIFYING],
+                                  NO_OF_NEGATIVE_REVIEWS:[AR_UNIFYING],
+                                  RATING_ENTROPY: [LOCAL_AR, AR_UNIFYING],
+                                  NON_CUM_NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING],
+                                  RATIO_OF_SINGLETONS:[LOCAL_AR, AR_UNIFYING],
+                                  RATIO_OF_FIRST_TIMERS:[LOCAL_AR, AR_UNIFYING],
+                                  YOUTH_SCORE:[LOCAL_AR, AR_UNIFYING],
+                                  ENTROPY_SCORE:[LOCAL_AR, AR_UNIFYING],
+                                  MAX_TEXT_SIMILARITY:[LOCAL_AR, AR_UNIFYING],
+                                  TF_IDF:[LOCAL_AR, AR_UNIFYING],
+                                  NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING]}
 
 MEASURE_LEAD_SIGNALS = {AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS}
 
 
-MEASURES_CHANGE_FINDERS = {key:(MEASURES_CHANGE_DETECTION_ALGO[key],MEASURES_CHANGE_FINDER_PARAMS[key]) for key in MEASURES}
+MEASURES_CHANGE_FINDERS = {key:
+                           (MEASURES_CHANGE_DETECTION_ALGO[key],
+                            MEASURES_CHANGE_FINDER_PARAMS[key])
+                            for key in MEASURES}
 
 DAY_GRANULARITY = 'days'
 HOUR_GRANULARITY = 'hours'
@@ -69,14 +85,28 @@ INCREASE = 'Increase'
 DECREASE = 'Decrease'
 NEUTRAL = 'NEUTRAL'
 
-MEASURE_PRIORITY = [AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS, NON_CUM_NO_OF_REVIEWS,
-                    ENTROPY_SCORE, RATING_ENTROPY, YOUTH_SCORE, RATIO_OF_FIRST_TIMERS, RATIO_OF_SINGLETONS]
+MEASURE_PRIORITY = [AVERAGE_RATING,
+                    NO_OF_POSITIVE_REVIEWS,
+                    NO_OF_NEGATIVE_REVIEWS,
+                    NON_CUM_NO_OF_REVIEWS,
+                    ENTROPY_SCORE,
+                    RATING_ENTROPY,
+                    YOUTH_SCORE,
+                    RATIO_OF_FIRST_TIMERS,
+                    RATIO_OF_SINGLETONS]
 
-MEASURE_DIRECTION = {AVERAGE_RATING : BOTH, RATING_ENTROPY:DECREASE,\
-                           NON_CUM_NO_OF_REVIEWS:INCREASE, RATIO_OF_SINGLETONS:INCREASE,\
-                           RATIO_OF_FIRST_TIMERS:INCREASE, YOUTH_SCORE:INCREASE,\
-                           ENTROPY_SCORE:DECREASE, MAX_TEXT_SIMILARITY:INCREASE, TF_IDF:BOTH,\
-                     NO_OF_REVIEWS: INCREASE, NO_OF_POSITIVE_REVIEWS:INCREASE, NO_OF_NEGATIVE_REVIEWS:INCREASE}
+MEASURE_DIRECTION = {AVERAGE_RATING : BOTH,
+                     RATING_ENTROPY:DECREASE,
+                     NON_CUM_NO_OF_REVIEWS:INCREASE,
+                     RATIO_OF_SINGLETONS:INCREASE,
+                     RATIO_OF_FIRST_TIMERS:INCREASE,
+                     YOUTH_SCORE:INCREASE,
+                     ENTROPY_SCORE:DECREASE,
+                     MAX_TEXT_SIMILARITY:INCREASE,
+                     TF_IDF:BOTH,
+                     NO_OF_REVIEWS: INCREASE,
+                     NO_OF_POSITIVE_REVIEWS:INCREASE,
+                     NO_OF_NEGATIVE_REVIEWS:INCREASE}
 
 
 MEASURE_CHANGE_THRES_ITUNES = {'Youth Score': 0.20255295206730223,
