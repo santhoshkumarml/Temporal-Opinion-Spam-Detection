@@ -354,6 +354,8 @@ def detectAnomaliesForBnsses(csvFolder, plotDir,\
     else:
         bnssKeys = bnss_list
 
+    print 'Running detectAnomalies for :', len(bnssKeys), ' Businesses'
+
     for bnss_key in bnssKeys:
         print '--------------------------------------------------------------------------------------------------------'
         statistics_for_bnss = deserializeBnssStats(bnss_key,\
