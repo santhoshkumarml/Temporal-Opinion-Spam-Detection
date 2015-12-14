@@ -21,10 +21,11 @@ if __name__ == "__main__":
 #                                                                  bnss_list_end=500000,
 #                                                                  rdr=reader)
 
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
-                                     StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
-                                     doPlot=False, dologStats=True,
-                                     find_outlier_idxs=True)
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
+#                                      StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
+#                                      doPlot=False, dologStats=False,
+#                                      find_outlier_idxs=True,
+#                                      bnss_list=['ecd74f2a61afc85595a908e4423feec2'])
 
-#     AppUtil.doRanking(plotDir)
+    AppUtil.doRanking(plotDir)
 #     print ThresholdHelper.getThresholdForDifferentMeasures(plotDir, doHist=True)

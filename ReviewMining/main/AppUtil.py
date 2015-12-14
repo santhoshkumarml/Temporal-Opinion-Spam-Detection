@@ -366,9 +366,9 @@ def doGatherEvidence(csvFolder, plotDir):
                                             doPlot=True)
 
 def doRanking(plotDir):
-    bnss_to_reviews_dict = readReviewsForBnssOrUser(plotDir)
     ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)
     RankHelper.tryNewRanking(plotDir, ranked_bnss, aux_info)
+#         bnss_to_reviews_dict = readReviewsForBnssOrUser(plotDir)
 #     RankHelper.printRankedBnss(bnss_first_time_dict, ranked_bnss, aux_info,\
 #                                len(ranked_bnss), bnss_review_threshold=-1,\
 #                                bnss_to_reviews_dict=bnss_to_reviews_dict)
