@@ -21,6 +21,9 @@ if __name__ == "__main__":
 #                                      doPlot=False, dologStats=True)
 
 #     AppUtil.doRanking(plotDir)
-    bnss_key_time_wdw_list = [('5f2c7517a7012640763148a38b1372b6',(71, 76)),
-                              ('8df49a65474732e4f63d378df4bd67e4',(93, 98))]
+    bnss_key_time_wdw_list = [('284819997', (166, 171)),\
+                              ('284819997', (173, 178)),\
+                              ('319927587', (189, 194)),\
+                              ('404593641', (158, 163)),\
+                              ('412629178', (148, 153))]
     AppUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list)
