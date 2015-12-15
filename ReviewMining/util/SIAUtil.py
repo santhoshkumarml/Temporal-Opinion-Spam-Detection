@@ -295,7 +295,6 @@ class review(SIALink):
 def getDateForReview(r):
     review_date = ''
     if isinstance(r.getTimeOfReview(), datetime):
-        print 'Yes Date Time'
         return r.getTimeOfReview().date()
 
     if isinstance(r.getTimeOfReview(), date):
