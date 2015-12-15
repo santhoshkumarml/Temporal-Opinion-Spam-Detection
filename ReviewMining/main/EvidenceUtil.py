@@ -246,8 +246,6 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
 
 
 def findTimeIdForDateTime(time_key_to_date_time, date_time_for_this_usr):
-    if isinstance(date_time_for_this_usr, datetime.datetime):
-        date_time_for_this_usr = date_time_for_this_usr.date()
     time_id_for_date_time = -1
     for time_id in time_key_to_date_time.keys():
         if date_time_for_this_usr < time_key_to_date_time[time_id].date():

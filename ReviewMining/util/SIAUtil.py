@@ -74,7 +74,7 @@ def init_COMP_POT():
                             output = 0.9#(1-2*EPISOLON)
                         else:
                             output =0.1#2*EPISOLON
-                            
+
                 COMP_POT[reviewType][userType][productType] = output
 
 init_COMP_POT()
@@ -91,7 +91,7 @@ class SIAObject(object):
         self.score = score
         self.messages = dict()
         self.nodeType = NODE_TYPE
-    
+
     def reset(self):
         self.messages.clear()
         self.score = (0.5,0.5)
@@ -106,7 +106,7 @@ class SIAObject(object):
             self.messages[node] = message
             hasChanged = True
         return hasChanged
-    
+
     def calculateAndSendMessagesToNeighBors(self, neighborsWithEdges):
         changedNeighbors = []
         for neighborWithEdge in neighborsWithEdges:
@@ -115,10 +115,10 @@ class SIAObject(object):
             if(neighbor.addMessages(self, message)):
                 changedNeighbors.append(neighbor)
         return changedNeighbors
-            
+
     def getScore(self):
         return self.score
-    
+
     def getNodeType(self):
         return self.nodeType
 
@@ -130,27 +130,27 @@ class SIAObject(object):
 class SIALink(object):
     def __init__(self, score=(0.5, 0.5)):
         self.score = score
-            
+
     def getScore(self):
         return self.score
-    
+
 class user(SIAObject):
     def __init__(self, _id, name, usrExtra ='',score=(0.5,0.5)):
         super(user, self).__init__(score, USER)
         self.id = _id
         self.name = name
         self.usrExtra = usrExtra
-    
+
     def getName(self):
         return self.name
-    
+
     def getId(self):
         return self.id
-    
+
     def getUsrExtra(self):
         return self.usrExtra
-    
-    
+
+
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
         (neighbor, edge) = neighborWithEdge
@@ -167,7 +167,7 @@ class user(SIAObject):
              (scoreAddition[0]+(COMP_POT[review.getReviewSentiment()][userType][PRODUCT_TYPE_BAD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]),\
              scoreAddition[1]+(COMP_POT[review.getReviewSentiment()][userType][PRODUCT_TYPE_GOOD]*self.score[userType]*allOtherNeighborMessageMultiplication[userType]))
         return scoreAddition
-    
+
     def calculateBeliefVals(self):
         allNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
@@ -188,30 +188,30 @@ class business(SIAObject):
         self.rating = rating
         self.url = url
         self.reviewCount = reviewCount
-        
+
     def setPriorScore(self):
         if self.rating:
             scorePositive = self.rating/5
             self.score = (1-scorePositive,scorePositive)
-                
+
     def getName(self):
         return self.name
-    
+
     def getId(self):
         return self.id
-    
+
     def getRating(self):
         return self.rating
-    
+
     def setRating(self, rating):
         self.rating = rating
-    
+
     def getUrl(self):
         return self.url
-    
+
     def getReviewCount(self):
         return self.reviewCount
-    
+
     def calculateMessageForNeighbor(self, neighborWithEdge):
         allOtherNeighborMessageMultiplication = (1,1)
         (neighbor, edge) = neighborWithEdge
@@ -228,7 +228,7 @@ class business(SIAObject):
              (scoreAddition[0]+(COMP_POT[review.getReviewSentiment()][USER_TYPE_FRAUD][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]),\
              scoreAddition[1]+(COMP_POT[review.getReviewSentiment()][USER_TYPE_HONEST][productType]*self.score[productType]*allOtherNeighborMessageMultiplication[productType]))
         return scoreAddition
-    
+
     def calculateBeliefVals(self):
         allNeighborMessageMultiplication = (1,1)
         for messageKey in self.messages.keys():
@@ -251,13 +251,13 @@ class review(SIALink):
         self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
-        
+
     def getRating(self):
         return self.rating
-    
+
     def getId(self):
         return self.id
-    
+
     def getReviewSentiment(self):
         if self.getRating()>3.0:
             return REVIEW_TYPE_POSITIVE
@@ -265,25 +265,25 @@ class review(SIALink):
             return REVIEW_TYPE_NEGATIVE
         else:
             return REVIEW_TYPE_NEUTRAL
-    
+
     def getUserId(self):
         return self.usrId
-          
+
     def getBusinessID(self):
         return self.bnId
-    
+
     def getTimeOfReview(self):
         return self.timeOfReview
-      
+
     def getReviewText(self):
         return self.text
-    
+
     def setReviewText(self, txt):
         self.text = txt
-    
+
     def isRecommended(self):
         return self.recommended
-    
+
     def calculateBeliefVals(self, user, business):
         self.score = user.getMessageFromNeighbor(business)
 
@@ -297,8 +297,8 @@ def getDateForReview(r):
     if isinstance(r.getTimeOfReview(), date):
         return r.getTimeOfReview()
     elif isinstance(r.getTimeOfReview(), datetime):
-        return r.getTimeOfReview()
-    
+        return r.getTimeOfReview().date()
+
     if '-' in r.getTimeOfReview():
         review_date = re.split('-', r.getTimeOfReview())
         review_date =  date(int(review_date[0]), int(review_date[1]), int(review_date[2]))
