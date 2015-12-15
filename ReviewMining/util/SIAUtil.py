@@ -294,10 +294,12 @@ class review(SIALink):
 
 def getDateForReview(r):
     review_date = ''
+    if isinstance(r.getTimeOfReview(), datetime):
+        print 'Yes Date Time'
+        return r.getTimeOfReview().date()
+
     if isinstance(r.getTimeOfReview(), date):
         return r.getTimeOfReview()
-    elif isinstance(r.getTimeOfReview(), datetime):
-        return r.getTimeOfReview().date()
 
     if '-' in r.getTimeOfReview():
         review_date = re.split('-', r.getTimeOfReview())
