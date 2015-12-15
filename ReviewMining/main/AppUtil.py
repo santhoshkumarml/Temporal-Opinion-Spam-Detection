@@ -347,17 +347,13 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
     logAllUsrOrBnssStats(csvFolder, usrReviewLogDir, node_type=SIAUtil.USER)
 
 
-def doGatherEvidence(csvFolder, plotDir):
+def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_wdw_list = list()):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
     readReviewsText = False
-    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText)
+    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText,
+                                               rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
-    bnss_key_time_wdw_list = [('284819997', (166, 171)),\
-                              ('284819997', (173, 178)),\
-                              ('319927587', (189, 194)),\
-                              ('404593641', (158, 163)),\
-                              ('412629178', (148, 153))]
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
                                             bnss_key, time_key_wdw,\

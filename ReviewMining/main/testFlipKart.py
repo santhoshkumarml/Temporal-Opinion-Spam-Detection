@@ -21,15 +21,24 @@ if __name__ == "__main__":
 #                                                                  bnss_list_end=500000,
 #                                                                  rdr=reader)
 
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
-                                     StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
-                                     doPlot=True, dologStats=False,
-                                     find_outlier_idxs=True,
-                                     bnss_list=['87b22ad1d4835e47811ab94b373f4969',
-                                                'f1d442030d7e75ff158db782c1589fa6',
-                                                '1e769f599d3a5cb07ae3f9e8fa6db471',
-                                                '407b36eb9e12338d84225ed2a14e5bde',
-                                                '5f2c7517a7012640763148a38b1372b6'])
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
+#                                      StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
+#                                      doPlot=True, dologStats=False,
+#                                      find_outlier_idxs=True,
+#                                      bnss_list=['87b22ad1d4835e47811ab94b373f4969',
+#                                                 'f1d442030d7e75ff158db782c1589fa6',
+#                                                 '1e769f599d3a5cb07ae3f9e8fa6db471',
+#                                                 '407b36eb9e12338d84225ed2a14e5bde',
+#                                                 '5f2c7517a7012640763148a38b1372b6',
+#                                                 '8df49a65474732e4f63d378df4bd67e4'])
 
 #     AppUtil.doRanking(plotDir)
 #     print ThresholdHelper.getThresholdForDifferentMeasures(plotDir, doHist=True)
+    bnss_key_time_wdw_list = [('284819997', (166, 171)),\
+                                  ('284819997', (173, 178)),\
+                                  ('319927587', (189, 194)),\
+                                  ('404593641', (158, 163)),\
+                                  ('412629178', (148, 153))]
+    AppUtil.doGatherEvidence(csvFolder, plotDir,
+                             rdr=reader,
+                             bnss_key_time_wdw_list=bnss_key_time_wdw_list)

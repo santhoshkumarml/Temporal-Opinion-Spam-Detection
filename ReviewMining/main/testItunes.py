@@ -21,4 +21,6 @@ if __name__ == "__main__":
 #                                      doPlot=False, dologStats=True)
 
 #     AppUtil.doRanking(plotDir)
-    AppUtil.doGatherEvidence(csvFolder, plotDir)
+    bnss_key_time_wdw_list = [('5f2c7517a7012640763148a38b1372b6',(71, 76)),
+                              ('8df49a65474732e4f63d378df4bd67e4',(93, 98))]
+    AppUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list)

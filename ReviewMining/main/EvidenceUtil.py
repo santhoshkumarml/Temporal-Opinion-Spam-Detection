@@ -185,7 +185,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
     suspicious_timestamps = dict()
     suspicious_timestamp_ordered = list()
-    with open('/home/santhosh/logs/out_all_features_mul_reviews.log') as f:
+    with open(os.path.join(csvFolder, 'out_all_features_mul_reviews.log')) as f:
         lines = f.readlines()
         for line in lines:
             bnss_key, idx1, idx2, score = line.strip().split()
