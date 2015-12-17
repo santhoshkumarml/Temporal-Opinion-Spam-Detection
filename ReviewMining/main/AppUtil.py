@@ -360,6 +360,14 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True)
+def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
+    necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True,
+                                               rdr=rdr)
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
+    del ctg, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered
+    EvidenceUtil.sortAndPrintReviewsInfo(plotDir, superGraph)
+
 
 def doRanking(plotDir):
     ranked_bnss, bnss_first_time_dict, aux_info = RankHelper.rankAllAnomalies(plotDir)

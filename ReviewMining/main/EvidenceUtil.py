@@ -1,6 +1,6 @@
 import collections
 import datetime
-import os, math, random
+import os, math, random, operator, pandas as pd
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -20,6 +20,34 @@ def make_autopct(values):
         val = int(round(pct*total/100.0))
         return '{v:d}'.format(p=pct, v=val)
     return my_autopct
+
+
+def sortAndPrintReviewsInfo(plotDir, superGraph):
+
+    bnss_ids = []
+    usr_ids = []
+    dates = []
+    txts = []
+    for reviewId in superGraph.getReviewIds():
+        r = superGraph.getReviewFromReviewId(reviewId)
+        txt = str(r.getReviewText())
+        if not txt or txt == '':
+            continue
+        bnss_id = str(r.getBusinessID())
+        usr_id = str(r.getUserId())
+        d = SIAUtil.getDateForReview(r).strftime('%m/%d/%y')
+        bnss_ids.append(bnss_id)
+        usr_ids.append(usr_id)
+        dates.append(d)
+        txts.append(txt)
+    d = {'bnss': bnss_ids, 'usr': usr_ids, 'dates': dates, 'text': txts}
+    df = pd.DataFrame(d)
+    df.info()
+    with open(os.path.join(plotDir, 'sorted_reviews.csv'), 'w') as f:
+        print 'Started The File Write'
+        df.to_csv(f, escapechar='\\', columns=['bnss', 'usr', 'dates', 'text'])
+        print 'Finished The File Write'
+
 
 def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                             non_singleton_usr_non_suspicousness,
