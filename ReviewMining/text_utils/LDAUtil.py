@@ -1,15 +1,18 @@
 __author__ = 'santhosh'
 
-import nltk
-import TextConstants
-import stop_words
 import gensim
+import nltk
+import stop_words
+
+import TextConstants
+
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 en_stop = stop_words.get_stop_words('en')
+tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
+p_stemmer = nltk.stem.porter.PorterStemmer()
 
 def tokenizeReviewText(review_text):
-    tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
     raw = review_text.lower()
     review_text_tokens = tokenizer.tokenize(raw)
     return review_text_tokens
@@ -19,7 +22,6 @@ def removeStopWordsForReview(review_text_tokens):
     return stopped_tokens
 
 def performStemmingforReview(review_text_stopped_tokens):
-    p_stemmer = nltk.stem.porter.PorterStemmer()
     stemmed_tokens = [p_stemmer.stem(i) for i in review_text_stopped_tokens]
     return stemmed_tokens
 
@@ -33,4 +35,15 @@ def performLDA(corpus, dictionary):
                                                num_topics=3,
                                                id2word = dictionary,
                                                passes=20)
-    print(ldamodel.print_topics(num_topics=3, num_words=3))
+    print(ldamodel.print_topics(num_topics=3, num_words=1))
+
+def performLDAOnReviews(reviews):
+    review_texts = [revw.getReviewText() for revw in reviews]
+    texts = []
+    for review_text in review_texts:
+        tokens = tokenizeReviewText(review_text)
+        tokens = removeStopWordsForReview(tokens)
+        tokens = performStemmingforReview(tokens)
+        texts.append(tokens)
+    corpus, dictionary = createDocumentWordMatrix(texts)
+    performLDA(corpus, dictionary)
