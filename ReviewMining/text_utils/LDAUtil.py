@@ -30,14 +30,14 @@ def createDocumentWordMatrix(texts):
     corpus = [dictionary.doc2bow(text) for text in texts]
     return corpus, dictionary
 
-def performLDA(corpus, dictionary):
+def performLDA(corpus, dictionary, num_words=1):
     ldamodel = gensim.models.ldamodel.LdaModel(corpus,
                                                num_topics=3,
                                                id2word = dictionary,
                                                passes=20)
-    return ldamodel.print_topics(num_topics=3, num_words=2)
+    return ldamodel.print_topics(num_topics=3, num_words=num_words)
 
-def performLDAOnReviews(reviews):
+def performLDAOnReviews(reviews, num_words=1):
     review_texts = [revw.getReviewText() for revw in reviews]
     texts = []
     for review_text in review_texts:
@@ -46,4 +46,4 @@ def performLDAOnReviews(reviews):
         tokens = performStemmingforReview(tokens)
         texts.append(tokens)
     corpus, dictionary = createDocumentWordMatrix(texts)
-    return performLDA(corpus, dictionary)
+    return performLDA(corpus, dictionary, num_words=num_words)
