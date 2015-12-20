@@ -349,17 +349,19 @@ def doLogUsrAndBnssReview(csvFolder, plotDir):
 
 def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_wdw_list = list()):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
-    readReviewsText = False
+    readReviewsText = True
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText,
                                                rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-        EvidenceUtil.findStatsForEverything(evidencePlotDir,\
-                                            bnss_key, time_key_wdw,\
-                                            necessary_ds,\
-                                            readReviewsText=readReviewsText,\
-                                            doPlot=True)
+        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds)
+#         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
+#                                             bnss_key, time_key_wdw,\
+#                                             necessary_ds,\
+#                                             readReviewsText=readReviewsText,\
+#                                             doPlot=True)
+
 def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True,
                                                rdr=rdr)
