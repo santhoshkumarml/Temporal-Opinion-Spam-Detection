@@ -450,7 +450,7 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
                      time_key_start, time_key_end, time_key_to_date_time,\
                      bnssImgFolder)
 
-def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_words=1):
+def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_topics=3, num_words=1):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
@@ -464,17 +464,16 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_
         reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
-        if len(reviews_for_bnss_in_time_key):
-            print 'All Reviews for the week - ',
-            LDAUtil.performLDAOnReviews(reviews_for_bnss_in_time_key, num_words=num_words)
+        if len(reviews_for_bnss_in_time_key) > 0:
+            print 'All Reviews for the week - ', LDAUtil.performLDAOnReviews(reviews_for_bnss_in_time_key, num_topics=num_topics, num_words=num_words)
 
         pos_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() >= 4.0]
         neg_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() <= 2.0]
 
         if len(pos_reviews) > 0:
-            print 'Positive Reviews -', LDAUtil.performLDAOnReviews(pos_reviews, num_words=num_words)
+            print 'Positive Reviews -', LDAUtil.performLDAOnReviews(pos_reviews, num_topics=num_topics, num_words=num_words)
 
         if len(neg_reviews) > 0:
-            print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews, num_words=num_words)
+            print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews, num_topics=num_topics, num_words=num_words)
         print '---------------------------------------------------------------------------\n'
     print '-------------------------------------------------------------------------------\n'

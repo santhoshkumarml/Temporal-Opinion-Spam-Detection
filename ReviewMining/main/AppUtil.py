@@ -355,7 +355,8 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds)
+        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
+                                                num_topics=5, num_words=1)
 #         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
 #                                             bnss_key, time_key_wdw,\
 #                                             necessary_ds,\
