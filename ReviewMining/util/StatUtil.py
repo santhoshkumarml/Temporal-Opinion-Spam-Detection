@@ -1,15 +1,17 @@
-import math
-
 __author__ = 'santhosh'
-import StatConstants
-import numpy
-from intervaltree import IntervalTree
-from text_utils import ShingleUtil
-from util import SIAUtil
-from util import GraphUtil
-import nltk
 
-nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
+from intervaltree import IntervalTree
+import math
+import nltk
+import numpy
+
+import StatConstants
+from text_utils import ShingleUtil
+from text_utils import TextConstants
+from util import GraphUtil
+from util import SIAUtil
+
+nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
 def entropyFn(probability_dict):
     entropy = 0

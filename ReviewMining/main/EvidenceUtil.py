@@ -6,12 +6,13 @@ import os, math, random, operator, pandas as pd
 
 import AppUtil
 from itunes_utils.ItunesDataReader import ItunesDataReader
+from text_utils import TextConstants
 import matplotlib.pyplot as plt
 import networkx as nx
 from util import GraphUtil, SIAUtil
 
 
-nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
+nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
 
 def make_autopct(values):
