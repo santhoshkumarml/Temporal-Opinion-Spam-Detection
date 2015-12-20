@@ -26,6 +26,7 @@ def performStemmingforReview(review_text_stopped_tokens):
 def createDocumentWordMatrix(texts):
     dictionary = gensim.corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
+    return corpus, dictionary
 
 def performLDA(corpus, dictionary):
     ldamodel = gensim.models.ldamodel.LdaModel(corpus,
