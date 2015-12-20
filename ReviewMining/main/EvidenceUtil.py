@@ -476,5 +476,5 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_
 
         if len(neg_reviews) > 0:
             print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews, num_words=num_words)
-        print '---------------------------------------------------------------------------'
-    print '-------------------------------------------------------------------------------'
+        print '---------------------------------------------------------------------------\n'
+    print '-------------------------------------------------------------------------------\n'
