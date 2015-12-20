@@ -35,7 +35,7 @@ def performLDA(corpus, dictionary):
                                                num_topics=3,
                                                id2word = dictionary,
                                                passes=20)
-    return ldamodel.print_topics(num_topics=3, num_words=1)
+    return ldamodel.print_topics(num_topics=3, num_words=2)
 
 def performLDAOnReviews(reviews):
     review_texts = [revw.getReviewText() for revw in reviews]

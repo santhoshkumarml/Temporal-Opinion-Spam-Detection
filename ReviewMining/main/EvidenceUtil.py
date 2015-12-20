@@ -454,21 +454,25 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
-    print '------------------------ Bnss Key', bnssKey, '----------------------------------'
+    print '------------------------ Bnss Key', bnssKey, '---------------------------------'
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
             continue
-        print '------------------------ Time Key', time_key, '----------------------------------'
+        print '------------------------ Time Key', time_key, '----------------------------'
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
         reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
+        if len(reviews_for_bnss_in_time_key):
+            print 'All Reviews for the week - ', LDAUtil.performLDAOnReviews(reviews_for_bnss_in_time_key)
+
         pos_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() >= 4.0]
         neg_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() <= 2.0]
         if len(pos_reviews) > 0:
-            print 'Positive Reviews', LDAUtil.performLDAOnReviews(pos_reviews)
+            print 'Positive Reviews -', LDAUtil.performLDAOnReviews(pos_reviews)
+
         if len(neg_reviews) > 0:
-            print 'Negative Reviews', LDAUtil.performLDAOnReviews(neg_reviews)
-        print '----------------------------------------------------------'
-    print '---------------------------------------------------------------------'
+            print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews)
+        print '---------------------------------------------------------------------------'
+    print '-------------------------------------------------------------------------------'
