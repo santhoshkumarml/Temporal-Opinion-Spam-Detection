@@ -454,7 +454,7 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
-    print '------------------------ Bnss Key', bnssKey, '---------------------------------'
+    print '------------------------ Bnss Key', bnssKey, '---------------------------------\n'
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
