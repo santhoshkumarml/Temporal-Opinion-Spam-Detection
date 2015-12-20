@@ -1,15 +1,15 @@
 import collections
 import datetime
-import os, math, random, operator, pandas as pd
-
-import matplotlib.pyplot as plt
-import networkx as nx
 import nltk
 import numpy
+import os, math, random, operator, pandas as pd
 
 import AppUtil
 from itunes_utils.ItunesDataReader import ItunesDataReader
+import matplotlib.pyplot as plt
+import networkx as nx
 from util import GraphUtil, SIAUtil
+
 
 nltk.data.path.append('/media/santhosh/Data/workspace/nltk_data')
 
@@ -259,7 +259,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
         if not os.path.exists(imgFolder):
                 os.makedirs(imgFolder)
         all_user_review_rating_distribution = time_wise_all_user_review_rating_distribution[time_key]
-        singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
+        singleton_review_rating_distribution = time_wise_singleton_review_rating_distribution[time_key]
         non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
         extreme_non_singleton_usrs, non_extreme_non_singleton_usrs = time_wise_extreme_non_singleton_usrs[time_key], time_wise_non_extreme_non_singleton_usrs[time_key]
         non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness = time_wise_non_singleton_usr_suspicousness[time_key], time_wise_non_singleton_usr_non_suspicousness[time_key]
@@ -297,6 +297,12 @@ def printNGrams(time_key_start, time_key_end, time_wise_four_grams_dict,\
         print sorted(four_grams_dict.iteritems(), key=lambda (gram, count):count, reverse=True)
         print '------------------------', time_key, '----------------------------------------'
 
+def put_grams(grams, grams_dict):
+    for gram in grams:
+        if gram not in grams_dict:
+            grams_dict[gram] = 0.0
+        grams_dict[gram] += 1.0
+
 def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readReviewsText=False, doPlot=False):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
@@ -331,12 +337,6 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
                                                  for time_key in range(time_key_start, time_key_end)
                                                  for day_inc in range(0, 7)}
                                                for key in range(1, 6)}
-
-    def put_grams(grams, grams_dict):
-        for gram in grams:
-            if gram not in grams_dict:
-                grams_dict[gram] = 0.0
-            grams_dict[gram] += 1.0
 
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
@@ -412,10 +412,13 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
             date_of_review = SIAUtil.getDateForReview(r)
             time_wise_review_time_rating[r.getRating()][date_of_review] += 1.0
 
+        time_wise_all_user_review_rating_distribution[time_key] = all_user_review_rating_distribution
+        time_wise_singleton_review_rating_distribution[time_key] = singleton_review_rating_distribution
+        time_wise_non_singleton_review_rating_distribution[time_key] = non_singleton_review_rating_distribution
+
 
         total_non_singleton_usrs = len(non_singleton_usrs)
         extreme_non_singleton_usrs = 0
-
 
         for usrId in non_singleton_usrs:
             rating_dist = non_singleton_usr_all_review_distribution[usrId]

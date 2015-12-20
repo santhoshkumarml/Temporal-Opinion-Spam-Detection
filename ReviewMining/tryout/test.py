@@ -18,7 +18,7 @@ from main import AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
 from itunes_utils.ItunesDataReader import ItunesDataReader
-from lsh import ShingleUtil
+from text_utils import ShingleUtil
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph

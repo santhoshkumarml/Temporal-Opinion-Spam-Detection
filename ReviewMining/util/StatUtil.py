@@ -4,7 +4,7 @@ __author__ = 'santhosh'
 import StatConstants
 import numpy
 from intervaltree import IntervalTree
-from lsh import ShingleUtil
+from text_utils import ShingleUtil
 from util import SIAUtil
 from util import GraphUtil
 import nltk
