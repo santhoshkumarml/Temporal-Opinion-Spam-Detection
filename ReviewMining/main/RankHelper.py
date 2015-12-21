@@ -52,7 +52,6 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows,\
     avg_anomaly_for_time_window = dict()
     max_anomaly_for_time_window = dict()
     ratio_of_anomalies_measure = dict()
-    firstTimeKey = chPtsOutliers[StatConstants.FIRST_TIME_KEY]
     if not magnitude_divider:
         MAGNITURE_DIVIDER = {StatConstants.ENTROPY_SCORE:18,
                              StatConstants.NO_OF_NEGATIVE_REVIEWS:100000,\
@@ -112,9 +111,6 @@ def extractFeaturesForRankingAnomalies(bnss_key, chPtsOutliers, test_windows,\
             max_anomaly_for_time_window[window] = 0.0
             weighted_anomalies_for_window[window] = 0.0
             ratio_of_anomalies_measure[window] = 0.0
-        # if measures_changed > 4 and bnss_key=='319927587':
-        #     idx1, idx2 = window
-        #     print bnss_key, (idx1 + firstTimeKey, idx2 + firstTimeKey)
     return ratio_of_anomalies_measure, weighted_anomalies_for_window, avg_anomaly_for_time_window, max_anomaly_for_time_window
 
 def rankAllAnomalies(plotDir):
