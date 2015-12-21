@@ -5,7 +5,7 @@ import sys
 
 from util.itunes_utils.ItunesDataReader import ItunesDataReader
 import matplotlib.pyplot as plt
-from temporal_statistics import measure_extractor
+from temporal_statistics import test_measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from anomaly_detection import AnomalyDetector
 import scipy
@@ -17,7 +17,7 @@ import changefinder
 
 def generateStatsAndPlots(bnssIdToBusinessDict, bnssKeySet, cross_time_graphs, plotDir, reviewIdToReviewsDict,
                           superGraph, timeLength, toBeUsedMeasures, total_time_slots, usrIdToUserDict):
-    bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, \
+    bnss_statistics = test_measure_extractor.extractMeasures(usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict, \
                                                         superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength,
                                                         toBeUsedMeasures)
     for bnssKey in bnssKeySet:

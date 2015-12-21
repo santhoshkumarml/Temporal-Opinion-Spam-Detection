@@ -19,7 +19,7 @@ from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
 from util.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import ShingleUtil
-from temporal_statistics import measure_extractor
+from temporal_statistics import test_measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
 from util.yelp_utils import dataReader as dr
@@ -513,11 +513,11 @@ def doIndexForRestaurants():
 
 
 def checkBucketTree():
-    bucketTree = measure_extractor.constructIntervalTree(60)
+    bucketTree = test_measure_extractor.constructIntervalTree(60)
     print bucketTree
     inputData = [1,4,4,4,8,16,32]
     for i in inputData:
-        interval = measure_extractor.getBucketIntervalForBucketTree(bucketTree, i)
+        interval = test_measure_extractor.getBucketIntervalForBucketTree(bucketTree, i)
         begin,end,data = interval
         bucketTree.remove(interval)
         bucketTree[begin:end] = data+1.0
@@ -641,7 +641,7 @@ def tryTemporalStatisticsForItunes():
 
     bnssKeySet = set(bnssKeys[:1])
 
-    bnss_statistics = measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
+    bnss_statistics = test_measure_extractor.extractMeasures(usrIdToUserDict,bnssIdToBusinessDict,reviewIdToReviewsDict,\
                      superGraph, cross_time_graphs, plotDir, bnssKeySet, timeLength)
 
     chPtsOutliers = AnomalyDetector.detectChPtsAndOutliers(bnss_statistics)
