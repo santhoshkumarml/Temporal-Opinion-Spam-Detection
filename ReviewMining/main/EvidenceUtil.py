@@ -456,7 +456,8 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
                      time_key_start, time_key_end, time_key_to_date_time,\
                      bnssImgFolder)
 
-def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_topics=3, num_words=1):
+def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
+                              necessaryDs, num_topics=3, num_words=1):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
