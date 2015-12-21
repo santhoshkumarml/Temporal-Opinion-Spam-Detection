@@ -56,7 +56,7 @@ def makeARPredictions(data, params, idx):
     return val
 
 def localAR(data, avg_idxs, measure_key):
-    thres = StatConstants.MEASURE_CHANGE_LOCAL_AR_THRES[measure_key]
+    thres = StatConstants.MEASURE_CHANGE_THRES_ITUNES[measure_key]
     needed_direction = StatConstants.MEASURE_DIRECTION[measure_key]
     diff_test_windows = [getRangeIdxs(idx) for idx in sorted(avg_idxs)]
     diff_train_windows = []

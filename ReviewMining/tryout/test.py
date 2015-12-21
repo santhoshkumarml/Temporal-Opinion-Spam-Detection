@@ -17,13 +17,13 @@ import anomaly_detection.MITCusum as cm
 from main import AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
-from itunes_utils.ItunesDataReader import ItunesDataReader
-from text_utils import ShingleUtil
+from util.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.text_utils import ShingleUtil
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from util.GraphUtil import SuperGraph, TemporalGraph
-from yelp_utils import dataReader as dr
-from yelp_utils.YelpDataReader import YelpDataReader
+from util.yelp_utils import dataReader as dr
+from util.yelp_utils.YelpDataReader import YelpDataReader
 
 __author__ = 'santhosh'
 

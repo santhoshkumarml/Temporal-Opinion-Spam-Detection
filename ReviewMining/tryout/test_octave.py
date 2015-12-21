@@ -3,10 +3,6 @@ from oct2py import octave
 from oct2py import Oct2Py
 import numpy
 import os
-
-import DATA
-import SynData
-
 from statsmodels.tsa.ar_model import AR
 from statsmodels.tsa.arima_model import ARMA
 
@@ -34,8 +30,6 @@ def plotSeriesWithScores(real_vals, predicted_vals):
         ymin = min((min(r_val), min(p_val)))
 
         ax1 = fig.add_subplot(r, 1, s+1)
-
-        plt.ylabel(DATA.labels[s])
         # plt.yticks(numpy.arange(ymin, ymax, 0.2))
         ax1.plot(r_val, 'b')
 
@@ -58,7 +52,6 @@ def plotSeries(data):
         ymin = min(r_val)
 
         ax1 = fig.add_subplot(r, 1, s+1)
-        plt.ylabel(DATA.labels[s])
         plt.ylim((ymin,ymax))
         ax1.plot(r_val, 'b')
 
@@ -196,10 +189,10 @@ def plotCoeffMatrix(coeffMatrix):
         ymin = min(r_val)
 
         ax1 = fig.add_subplot(series, 1, s+1)
-        plt.ylabel(DATA.labels[s])
+        #plt.ylabel(DATA.labels[s])
         plt.ylim((ymin,ymax))
 
-        plt.xticks([f for f  in range(len(DATA.labels))],[f for f  in DATA.labels])
+        #plt.xticks([f for f  in range(len(DATA.labels))],[f for f  in DATA.labels])
 
         ax1.plot(r_val, 'b')
 
@@ -239,21 +232,3 @@ def runLocalGranger(data, tr_id_start, tr_id_end, te_id_start, te_id_end):
 # real_vals = data[:,range(te_id_start-1,te_id_end)]
 #
 # plotSeriesWithScores(real_vals, predicted_vals)
-
-
-
-data = DATA.getData2()
-
-tr_id_start = 1
-tr_id_end = 22
-te_id_start = 23
-te_id_end = 28
-
-
-# tr_id_start = 1
-# tr_id_end = 31
-# te_id_start = 32
-# te_id_end = 37
-
-
-runLocalAR(data, tr_id_start, tr_id_end, te_id_start, te_id_end)

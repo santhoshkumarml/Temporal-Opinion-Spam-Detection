@@ -5,12 +5,13 @@ import numpy
 import os, math, random, operator, pandas as pd
 
 import AppUtil
-from itunes_utils.ItunesDataReader import ItunesDataReader
 import matplotlib.pyplot as plt
 import networkx as nx
-from text_utils import TextConstants
 from util import GraphUtil, SIAUtil
-from text_utils import LDAUtil
+from util.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.text_utils import LDAUtil
+from util.text_utils import TextConstants
+
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 

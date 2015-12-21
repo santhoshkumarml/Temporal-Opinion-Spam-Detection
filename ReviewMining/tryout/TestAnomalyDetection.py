@@ -3,7 +3,7 @@ import os
 from os.path import join
 import sys
 
-from itunes_utils.ItunesDataReader import ItunesDataReader
+from util.itunes_utils.ItunesDataReader import ItunesDataReader
 import matplotlib.pyplot as plt
 from temporal_statistics import measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants

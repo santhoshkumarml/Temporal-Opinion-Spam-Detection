@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy, RankHelper, EvidenceUtil
 
 from anomaly_detection import AnomalyDetector
-from itunes_utils.ItunesDataReader import ItunesDataReader
+from util.itunes_utils.ItunesDataReader import ItunesDataReader
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
 
