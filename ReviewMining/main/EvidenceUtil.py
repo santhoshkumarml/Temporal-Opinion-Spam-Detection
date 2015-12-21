@@ -265,14 +265,20 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
         non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
         extreme_non_singleton_usrs, non_extreme_non_singleton_usrs = time_wise_extreme_non_singleton_usrs[time_key], time_wise_non_extreme_non_singleton_usrs[time_key]
         non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness = time_wise_non_singleton_usr_suspicousness[time_key], time_wise_non_singleton_usr_non_suspicousness[time_key]
-        plotRatingDistribution(all_user_review_rating_distribution, imgFolder, title='All Review Rating Count')
-        plotRatingDistribution(singleton_review_rating_distribution, imgFolder, title='Singleton Review Rating Count')
+        plotRatingDistribution(all_user_review_rating_distribution, imgFolder,
+                               title='All Review Rating Count')
+        plotRatingDistribution(singleton_review_rating_distribution, imgFolder,
+                               title='Singleton Review Rating Count')
         plotRatingDistribution(non_singleton_review_rating_distribution, imgFolder,
                                title='Non Singleton Review Rating Count')
-        plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs, non_extreme_non_singleton_usrs, imgFolder)
-        plotSuspiciousNessGraph(non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness,
-                                imgFolder, time_key_to_date_time, plot_non_suspicious=False)
-    plotReviewTimeRating(time_wise_review_time_rating, bnssImgFolder)
+        plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs,
+                                        non_extreme_non_singleton_usrs, imgFolder)
+        plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
+                                non_singleton_usr_non_suspicousness,
+                                imgFolder, time_key_to_date_time,
+                                plot_non_suspicious=False)
+    plotReviewTimeRating(time_wise_review_time_rating,
+                         bnssImgFolder)
 
 
 def findTimeIdForDateTime(time_key_to_date_time, date_time_for_this_usr):
@@ -465,15 +471,21 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw, necessaryDs, num_
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
         if len(reviews_for_bnss_in_time_key) > 0:
-            print 'All Reviews for the week - ', LDAUtil.performLDAOnReviews(reviews_for_bnss_in_time_key, num_topics=num_topics, num_words=num_words)
+            print 'All Reviews for the week - ', LDAUtil.performLDAOnReviews(reviews_for_bnss_in_time_key,
+                                                                             num_topics=num_topics,
+                                                                             num_words=num_words)
 
         pos_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() >= 4.0]
         neg_reviews = [revw for revw in reviews_for_bnss_in_time_key if revw.getRating() <= 2.0]
 
         if len(pos_reviews) > 0:
-            print 'Positive Reviews -', LDAUtil.performLDAOnReviews(pos_reviews, num_topics=num_topics, num_words=num_words)
+            print 'Positive Reviews -', LDAUtil.performLDAOnReviews(pos_reviews,
+                                                                    num_topics=num_topics,
+                                                                    num_words=num_words)
 
         if len(neg_reviews) > 0:
-            print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews, num_topics=num_topics, num_words=num_words)
-        print '---------------------------------------------------------------------------\n'
+            print 'Negative Reviews -', LDAUtil.performLDAOnReviews(neg_reviews,
+                                                                    num_topics=num_topics,
+                                                                    num_words=num_words)
+        print '--------------------------------------------------------------------------------\n'
     print '-------------------------------------------------------------------------------\n'
