@@ -12,9 +12,7 @@ from text_utils import TextConstants
 from util import GraphUtil, SIAUtil
 from text_utils import LDAUtil
 
-
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
-
 
 def make_autopct(values):
     def my_autopct(pct):
@@ -23,9 +21,7 @@ def make_autopct(values):
         return '{v:d}'.format(p=pct, v=val)
     return my_autopct
 
-
 def sortAndPrintReviewsInfo(plotDir, superGraph):
-
     bnss_ids = []
     usr_ids = []
     dates = []
@@ -259,7 +255,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
     for time_key in range(time_key_start, time_key_end):
         imgFolder = os.path.join(bnssImgFolder, str(time_key))
         if not os.path.exists(imgFolder):
-                os.makedirs(imgFolder)
+            os.makedirs(imgFolder)
         all_user_review_rating_distribution = time_wise_all_user_review_rating_distribution[time_key]
         singleton_review_rating_distribution = time_wise_singleton_review_rating_distribution[time_key]
         non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
