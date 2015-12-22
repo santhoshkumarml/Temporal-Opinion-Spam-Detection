@@ -11,8 +11,9 @@ from util import GraphUtil, SIAUtil
 from util.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import LDAUtil
 from util.text_utils import TextConstants
+import matplotlib
 
-
+matplotlib.use('Agg')
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
 def make_autopct(values):
