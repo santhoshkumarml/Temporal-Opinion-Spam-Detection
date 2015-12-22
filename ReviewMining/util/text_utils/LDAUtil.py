@@ -38,11 +38,12 @@ def performLDAOnReviews(reviews, num_topics=3, num_words=1):
     review_text_containing_reviews = [review_text for review_text in review_texts if review_text and review_text != '']
     if len(review_text_containing_reviews) == 0:
         print 'No Reviews with review texts'
-    texts = []
-    for review_text in review_texts:
-        tokens = tokenizeReviewText(review_text)
-        stopped_tokens = removeStopWordsForReview(tokens)
-        stemmed_tokens = performStemmingforReview(stopped_tokens)
-        texts.append(stemmed_tokens)
-    corpus, dictionary = createDocumentWordMatrix(texts)
-    return performLDA(corpus, dictionary, num_topics=num_topics, num_words=num_words)
+    else:
+        texts = []
+        for review_text in review_texts:
+            tokens = tokenizeReviewText(review_text)
+            stopped_tokens = removeStopWordsForReview(tokens)
+            stemmed_tokens = performStemmingforReview(stopped_tokens)
+            texts.append(stemmed_tokens)
+        corpus, dictionary = createDocumentWordMatrix(texts)
+        return performLDA(corpus, dictionary, num_topics=num_topics, num_words=num_words)
