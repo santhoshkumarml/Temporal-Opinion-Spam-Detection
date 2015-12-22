@@ -85,14 +85,14 @@ class FlipkartDataReader(object):
             'Products:', len(self.bnssIdToBnssDict.keys()), \
             'Reviews:', len(self.reviewIdToReviewDict.keys())
 
-        textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
-                                if not self.reviewIdToReviewDict[review_id].getReviewText()])
-        for review_id in textLessReviewId:
-            del self.reviewIdToReviewDict[review_id]
-        print 'Removing text less reviews'
-
-        print 'Users:', len(self.usrIdToUsrDict.keys()), \
-            'Products:', len(self.bnssIdToBnssDict.keys()), \
-            'Reviews:', len(self.reviewIdToReviewDict.keys())
+#         textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
+#                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
+#         for review_id in textLessReviewId:
+#             del self.reviewIdToReviewDict[review_id]
+#         print 'Removing text less reviews'
+#
+#         print 'Users:', len(self.usrIdToUsrDict.keys()), \
+#             'Products:', len(self.bnssIdToBnssDict.keys()), \
+#             'Reviews:', len(self.reviewIdToReviewDict.keys())
 
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
