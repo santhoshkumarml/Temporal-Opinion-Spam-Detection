@@ -5,7 +5,7 @@ import sys
 
 from util.itunes_utils.ItunesDataReader import ItunesDataReader
 import matplotlib.pyplot as plt
-from temporal_statistics import test_measure_extractor
+import test_measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
 from anomaly_detection import AnomalyDetector
 import scipy

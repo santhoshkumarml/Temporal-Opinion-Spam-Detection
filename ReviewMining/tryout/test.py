@@ -13,7 +13,6 @@ import networkx
 import numpy
 from lshash import LSHash
 
-import anomaly_detection.MITCusum as cm
 from main import AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
