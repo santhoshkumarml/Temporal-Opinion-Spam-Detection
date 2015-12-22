@@ -349,6 +349,7 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
         if (bnssKey, SIAUtil.PRODUCT) not in G:
             continue
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
+        print 'Neighbor Length:', bnssKey, str(time_key), len(neighboring_usr_nodes)
         all_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes])
         singleton_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes
                       if len(superGraph.neighbors((usrId, usr_type))) == 1])
@@ -434,9 +435,9 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
         time_wise_extreme_non_singleton_usrs[time_key] = extreme_non_singleton_usrs
         time_wise_non_extreme_non_singleton_usrs[time_key] = non_extreme_non_singleton_usrs
 
-    if readReviewsText:
-        printNGrams(time_key_start, time_key_end, time_wise_four_grams_dict,\
-                    time_wise_three_grams_dict, time_wise_two_grams_dict)
+#     if readReviewsText:
+#         printNGrams(time_key_start, time_key_end, time_wise_four_grams_dict,\
+#                     time_wise_three_grams_dict, time_wise_two_grams_dict)
 
     if doPlot:
         bnssImgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key_start)\
