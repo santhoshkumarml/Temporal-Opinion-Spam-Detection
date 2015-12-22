@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
-import statsmodels.api as sm
 import numpy as np
-import scipy as sp
-import math
-
-
-
 
 class DTO():
     def __init__(self, nh=8, p=0.125, lh=0.000195, rh=0.005,\
@@ -45,26 +39,6 @@ class DTO():
 
         self.whichHs[whichH] += 1
 
-        # if score > 5:
-        #     print threshold, {idx: (self.q[idx], self.whichHs[idx]) for idx in range(self.nh)}
-        #     print self.a+((self.b-self.a)*(whichH-1)/(self.nh-2)),self.a+((self.b-self.a)*(whichH)/(self.nh-2)),\
-        #         score, l, threshold
-
-        # if len(self.scores) > 100 and len(self.scores)<105:
-        #     print l
-        #     import matplotlib.pyplot as plt
-        #     plt.yticks([a+((b-a)*idx/(self.nh-2)) for idx in range(self.nh)])
-        #     plt.plot(self.scores,'ro')
-        #     plt.show()
-        #     plt.plot(self.q, 'ro')
-        #     plt.show()
-
-        #
-        # print len(self.scores), whichH, threshold, self.scores[-1], a+((b-a)*(whichH-1)/(self.nh-2)), a+((b-a)*whichH/(self.nh-2))
-        # if len(self.scores) == 101:
-        #     print [a+((b-a)*(idx+1)/(self.nh-2)) for idx in range(self.nh)]
-        #     print self.scores
-
         for idx in range(self.nh):
             if idx == whichH:
                 self.q[idx] = (1-self.rh)*self.q[idx]+self.rh
@@ -75,8 +49,6 @@ class DTO():
 
         for idx in range(self.nh):
             self.q[idx] = (self.q[idx]+self.lh)/norm_constant
-
-        # print score, threshold, whichH, self.q
 
         if score > threshold:
             return True
@@ -130,7 +102,7 @@ class _SDAR_1Dim(object):
         for i in range(1,self._order):
             self._c[i] = (1-self._r)*self._c[i]+self._r * (x-self._mu) * (term[-i]-self._mu)
         self._c[0] = (1-self._r)*self._c[0]+self._r * (x-self._mu)*(x-self._mu)
-        what,e = LevinsonDurbin(self._c,self._order)
+        what, e = LevinsonDurbin(self._c,self._order)
         xhat = np.dot(-what[1:],(term[::-1]  - self._mu))+self._mu
         self._sigma = (1-self._r)*self._sigma + self._r * (x-xhat) * (x-xhat)
         # return -math.log(math.exp(-0.5 *(x-xhat)**2/self._sigma)/((2 * math.pi)**0.5 * self._sigma**0.5))
@@ -169,8 +141,7 @@ class ChangeFinderSinglepass(object):
             score = self._sdar_first.update(x,self._ts)
             self._add_one(score, self._first_scores, self._smooth)
         self._add_one(x,self._ts, self._order)
-        second_target = None
-        if len(self._first_scores) == self._smooth:#平滑化
+        if len(self._first_scores) == self._smooth:
             score = self._smoothing(self._first_scores)
             return score
         else:
