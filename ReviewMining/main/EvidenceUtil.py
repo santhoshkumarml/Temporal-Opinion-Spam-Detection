@@ -184,26 +184,24 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     fig = plt.figure(figsize=(36, 10))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title + '.png')
-    colors = ['y', 'c', 'm', 'b', 'r']
+    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
     ind = numpy.arange(0, total_days*2, 2)
     width = 1.5
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
-    colr = 0
     for rating_key in sorted(review_time_rating.keys()):
         val = review_time_rating[rating_key]
         od = collections.OrderedDict(sorted(val.items()))
         val = numpy.array(od.values())
         if btm is None:
-            p = ax.bar(ind, val, width, color=colors[colr])
+            p = ax.bar(ind, val, width, color=colors[rating_key])
             btm = val
         else:
-            p = ax.bar(ind, val, width, color=colors[colr], bottom=btm)
+            p = ax.bar(ind, val, width, color=colors[rating_key], bottom=btm)
             btm = numpy.array([btm[i] + val[i] for i in range(0, total_days)])
 
-        colr += 1
         pS.append(p)
 
     plt.ylabel(title)
