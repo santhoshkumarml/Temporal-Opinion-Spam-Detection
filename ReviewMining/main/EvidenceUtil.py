@@ -100,15 +100,15 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
     pos = dict()
 
-    usr_node_iter = 0
+    usr_node_iter = bnss_nodes_len
     for node in usr_nodes:
         pos[node] = (1, usr_node_iter)
-        usr_node_iter += usr_nodes_len
+        usr_node_iter += bnss_nodes_len
 
-    bnss_nodes_iter = 0
+    bnss_nodes_iter = usr_nodes_len
     for node in bnss_nodes:
         pos[node] = (4, bnss_nodes_iter)
-        bnss_nodes_iter += bnss_nodes_len
+        bnss_nodes_iter += usr_nodes_len
 
     nx.draw_networkx_nodes(g, pos,
                            nodelist=list(usr_nodes),
