@@ -351,7 +351,6 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
         if (bnssKey, SIAUtil.PRODUCT) not in G:
             continue
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
-        print 'Neighbor Length:', bnssKey, str(time_key), len(neighboring_usr_nodes)
         all_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes])
         singleton_usrs = set([usrId for usrId, usr_type in neighboring_usr_nodes
                       if len(superGraph.neighbors((usrId, usr_type))) == 1])
