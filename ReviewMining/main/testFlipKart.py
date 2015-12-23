@@ -4,7 +4,7 @@ import sys
 
 import AppUtil
 import ThresholdHelper
-from util.flipkart_utils import FlipkartDataReader
+from util.data_reader_utils.flipkart_utils import FlipkartDataReader
 from util import StatConstants
 
 

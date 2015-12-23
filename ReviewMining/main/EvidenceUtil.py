@@ -8,7 +8,7 @@ import AppUtil
 import matplotlib.pyplot as plt
 import networkx as nx
 from util import GraphUtil, SIAUtil
-from util.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import LDAUtil
 from util.text_utils import TextConstants
 import matplotlib

@@ -3,7 +3,7 @@ import os
 from os.path import join
 import sys
 
-from util.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
 import matplotlib.pyplot as plt
 import test_measure_extractor
 from util import SIAUtil, PlotUtil, GraphUtil, StatConstants

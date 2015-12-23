@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
+__author__ = 'santhosh'
+
 from __future__ import division
 
-import json
-import os
-import sys
+import changefinder
 from datetime import date
 from datetime import datetime, timedelta
-
-import changefinder
-import matplotlib.pyplot as plt
+import json
+from lshash import LSHash
 import networkx
 import numpy
-from lshash import LSHash
+import os
+import sys
 
-from main import AppUtil
 from anomaly_detection import AnomalyDetector
 from anomaly_detection import MyCusum
-from util.itunes_utils.ItunesDataReader import ItunesDataReader
-from util.text_utils import ShingleUtil
-from temporal_statistics import test_measure_extractor
-from util import SIAUtil, PlotUtil, GraphUtil, StatConstants
+import matplotlib.pyplot as plt
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr
+import test_measure_extractor
+from util import SIAUtil, PlotUtil, GraphUtil, StatConstants, StatUtil
 from util.GraphUtil import SuperGraph, TemporalGraph
-from util.yelp_utils import dataReader as dr
-from util.yelp_utils.YelpDataReader import YelpDataReader
-
-__author__ = 'santhosh'
+from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.yelp_utils import dataReader as dr
+from util.data_reader_utils.yelp_utils.YelpDataReader import YelpDataReader
+from util.text_utils import ShingleUtil
+from main import AppUtil
 
 def checkGraphUtils():
     csvFolder = '/media/santhosh/Data/workspace/datalab/data/Itunes'
@@ -80,8 +81,6 @@ def datesFormatinPlots():
     fig.autofmt_xdate()
     plt.show()
 def checkDataFrame():
-    import rpy2.robjects as robjects
-    from rpy2.robjects.packages import importr
     importr("AnomalyDetection")
     anomaly_detection = robjects.r['AnomalyDetectionTs']
 
@@ -151,8 +150,6 @@ def checkDataFrame():
     plt.show()
 
 def checkR():
-    import rpy2.robjects as robjects
-    from rpy2.robjects.packages import importr
     data=[3.32919255,3.64074074,3.84269663,3.90813648,4.00207039,4.12747875
             ,4.17529039,4.2212766,4.24964639,4.22222222,4.22419725,4.2175552
             ,4.23211606,4.24624765,4.25167936,4.25248166,4.2575,4.25680787
@@ -291,17 +288,15 @@ def testCFForSomeMeasures():
         ax2.plot(range(len(data[i])),data[i],'r')
     plt.show()
 
-def checkCusum():
-    x = numpy.random.randn(300)/5
-    x[100:200] += numpy.arange(0, 4, 4/100)
-    ta, tai, taf, amp = cm.detect_cusum(x, threshold=0.5)
-    print ta, tai, taf, amp
+# def checkCusum():
+#     x = numpy.random.randn(300)/5
+#     x[100:200] += numpy.arange(0, 4, 4/100)
+#     ta, tai, taf, amp = cm.detect_cusum(x, threshold=0.5)
+#     print ta, tai, taf, amp
 
 def checkCusumCallRFromPy(x, shift = 1,stdev = None,decision_interval = 5, new_data = []):
     # x = numpy.random.randn(300)/5
     # x[100:200] += numpy.arange(0, 4, 4/100)
-    import rpy2.robjects as robjects
-    from rpy2.robjects.packages import importr
     qcc = importr("qcc")
     data = robjects.vectors.FloatVector(x)
     robjects.r('''
@@ -512,11 +507,11 @@ def doIndexForRestaurants():
 
 
 def checkBucketTree():
-    bucketTree = test_measure_extractor.constructIntervalTree(60)
+    bucketTree = StatUtil.constructIntervalTree(60)
     print bucketTree
     inputData = [1,4,4,4,8,16,32]
     for i in inputData:
-        interval = test_measure_extractor.getBucketIntervalForBucketTree(bucketTree, i)
+        interval = StatUtil.getBucketIntervalForBucketTree(bucketTree, i)
         begin,end,data = interval
         bucketTree.remove(interval)
         bucketTree[begin:end] = data+1.0
@@ -604,16 +599,16 @@ def tryTemporalStatisticsForYelp():
     print 'TimeTaken for Reading data:',afterDataReadTime-beforeDataReadTime
 
 
-def setMemUsage():
-    import resource
-    rsrc = resource.RLIMIT_DATA
-    soft, hard = resource.getrlimit(rsrc)
-    print 'Soft limit starts as  :', soft
-
-    resource.setrlimit(rsrc, (4194304, hard)) #limit to one kilobyte
-
-    soft, hard = resource.getrlimit(rsrc)
-    print 'Soft limit changed to :', soft
+# def setMemUsage():
+#     import resource
+#     rsrc = resource.RLIMIT_DATA
+#     soft, hard = resource.getrlimit(rsrc)
+#     print 'Soft limit starts as  :', soft
+#
+#     resource.setrlimit(rsrc, (4194304, hard)) #limit to one kilobyte
+#
+#     soft, hard = resource.getrlimit(rsrc)
+#     print 'Soft limit changed to :', soft
 
 
 
@@ -758,19 +753,19 @@ def testCumsumWithData():
             ,4.21015052,4.21015052,4.21015052,4.21015052,4.21015052,4.21015052
             ,4.21015052,4.21015052,4.21015052,4.21015052,4.21015052,4.21015052]
 
-    ta, tai, taf, amp = cm.detect_cusum(data,threshold=0.5,show=True)
-    #runChangeFinder(data,show=True)
-    print ta, tai, taf, amp
-    fig = plt.figure(figsize=(20,20))
-    ax1 = fig.add_subplot(1, 1, 1)
-    ax1.plot(range(0,len(data)),data)
-    plt.ylim((1,5))
-    plt.yticks(numpy.arange(1,5.5,0.5))
-    for i in range(len(ta)):
-        alarm_time_idx = ta[i]
-        alarm_start_idx = tai[i]
-        ax1.axvline(x=alarm_time_idx,linewidth=2, color='r')
-    plt.show()
+#     ta, tai, taf, amp = cm.detect_cusum(data,threshold=0.5,show=True)
+#     #runChangeFinder(data,show=True)
+#     print ta, tai, taf, amp
+#     fig = plt.figure(figsize=(20,20))
+#     ax1 = fig.add_subplot(1, 1, 1)
+#     ax1.plot(range(0,len(data)),data)
+#     plt.ylim((1,5))
+#     plt.yticks(numpy.arange(1,5.5,0.5))
+#     for i in range(len(ta)):
+#         alarm_time_idx = ta[i]
+#         alarm_start_idx = tai[i]
+#         ax1.axvline(x=alarm_time_idx,linewidth=2, color='r')
+#     plt.show()
 
 
 
@@ -862,13 +857,13 @@ def testAVGplot():
 
     data = [data6]
     #data = [numpy.concatenate([numpy.random.normal(3.5,0.1,100),numpy.random.normal(4.1,0.2,100)])]
-    for d in data:
-        d = numpy.atleast_1d(d).astype('float64')
-        ta, tai, tapi, tani = cm.detect_cusum(d,threshold=0.5, show=False)
-        print d
-        # up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
-        # changes = sorted(up+low)
-        plotCusumChanges(d,ta)
+#     for d in data:
+#         d = numpy.atleast_1d(d).astype('float64')
+#         ta, tai, tapi, tani = cm.detect_cusum(d,threshold=0.5, show=False)
+#         print d
+#         # up,low = checkCusumCallRFromPy(d,0.5,new_data=[])
+#         # changes = sorted(up+low)
+#         plotCusumChanges(d,ta)
 
 def checkCusum2():
     changes = []
@@ -916,11 +911,11 @@ def checkCusum2():
     print detection_times
     plotCusumChanges(x, changes, detection_times)
 
-def testSpc():
-     import spc
-     s = spc.Spc([1, 2, 3, 3, 2, 1, 3, 8], spc.CHART_X_MR_MR)
-     s.get_stats()
-     print s.get_violating_points()
+# def testSpc():
+#      import spc
+#      s = spc.Spc([1, 2, 3, 3, 2, 1, 3, 8], spc.CHART_X_MR_MR)
+#      s.get_stats()
+#      print s.get_violating_points()
 
 def testCusum1():
     data = [ 1.91079812,2.19664269,2.27588424,2.2967706, 2.3353566, 2.38813638
@@ -938,7 +933,7 @@ def testCusum1():
 
 
 def testCusum():
-    import os, testItunes
+    import os
     csvFolder = sys.argv[1]
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), '1')
     bnss_stats_dir = os.path.join(plotDir, 'bnss_stats')
@@ -957,7 +952,7 @@ def testCusum():
     #'371405542', '363590051', '327586041', '412629178'
     # bnssKeys = ['385786751']
     for bnss_key in bnssKeys:
-        statistics_for_bnss = tryout.AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
+        statistics_for_bnss = AppUtil.deserializeBnssStats(bnss_key, bnss_stats_dir)
         firstKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
         lastKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
         data = statistics_for_bnss[StatConstants.AVERAGE_RATING][firstKey:lastKey+1]
