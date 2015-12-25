@@ -186,7 +186,8 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
-    ind = numpy.arange(0, total_days*2, 2)
+    indxs = numpy.arange(0, total_days * 2, 2)
+    week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
     width = 1.5
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
@@ -196,17 +197,18 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
         od = collections.OrderedDict(sorted(val.items()))
         val = numpy.array(od.values())
         if btm is None:
-            p = ax.bar(ind, val, width, color=colors[rating_key])
+            p = ax.bar(indxs, val, width, color=colors[rating_key])
             btm = val
         else:
-            p = ax.bar(ind, val, width, color=colors[rating_key], bottom=btm)
+            p = ax.bar(indxs, val, width, color=colors[rating_key], bottom=btm)
             btm = numpy.array([btm[i] + val[i] for i in range(0, total_days)])
 
         pS.append(p)
-
+    for idx in week_indxs:
+        ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=2, color='g')
     plt.ylabel(title)
     plt.title(title)
-    plt.xticks(ind + width/2., x_labels)
+    plt.xticks(indxs + width/2., x_labels)
     plt.legend([p[0] for p in pS], range(1, 6))
     plt.savefig(imgFile, bbox_inches='tight')
     plt.close()
