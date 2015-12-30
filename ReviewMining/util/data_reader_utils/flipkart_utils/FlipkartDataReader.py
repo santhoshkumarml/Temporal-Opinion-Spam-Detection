@@ -76,6 +76,7 @@ class FlipkartDataReader(object):
                 review_text = str(review_text)
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
+                skipped_rows.append(tup)
                 skippedData += 1
 
         afterDataReadTime = datetime.now()
