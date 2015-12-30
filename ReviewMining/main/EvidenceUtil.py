@@ -11,9 +11,8 @@ from util import GraphUtil, SIAUtil
 from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import LDAUtil
 from util.text_utils import TextConstants
-import matplotlib
+import phrase_wise_rev_pn
 
-matplotlib.use('Agg')
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
 def make_autopct(values):
@@ -492,3 +491,21 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
                                                                     num_words=num_words)
         print '--------------------------------------------------------------------------------\n'
     print '-------------------------------------------------------------------------------\n'
+
+
+def peformPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs, phrase):
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
+    time_key_start, time_key_end = time_key_wdw
+    for time_key in range(time_key_start, time_key_end):
+        G = ctg[time_key]
+        if (bnssKey, SIAUtil.PRODUCT) not in G:
+            continue
+        fdr = os.path.join(os.path.join(plotDir, bnssKey), str(time_key))
+        if not os.path.exists(fdr):
+            os.makedirs(fdr)
+        neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
+        reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
+                                               in neighboring_usr_nodes],
+                                              key=lambda r: SIAUtil.getDateForReview(r))
+        phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrase, fdr)
