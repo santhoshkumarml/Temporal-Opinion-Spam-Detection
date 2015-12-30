@@ -15,8 +15,12 @@ def writeReviewTextInFile(reviews, review_file_name, fdr):
             f.write(revw.getReviewText())
             f.write('\n')
 
-def runPhraseFilterAndSeperate(reviews, phrase, fdr):
-    filtered_reviews = [revw for revw in reviews if phrase in revw.getReviewText()]
+def runPhraseFilterAndSeperate(reviews, phrases, fdr):
+    filtered_reviews =[]
+    for phrase in phrases:
+        for revw in reviews:
+            if phrase in revw.getReviewText():
+                filtered_reviews.append(revw)
     pos_filtered_reviews = [revw for revw in filtered_reviews if revw.getRating()>=4.0]
     neg_filtered_reviews = [revw for revw in filtered_reviews if revw.getRating()<=2.0]
     writeReviewTextInFile(filtered_reviews, ALL_REVIEWS_FILE, fdr)

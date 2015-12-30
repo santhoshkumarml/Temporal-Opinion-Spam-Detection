@@ -496,9 +496,12 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
     print '-------------------------------------------------------------------------------\n'
 
 
-def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs, phrase):
+def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs,
+                                     phrase, similar_phrases = set()):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
+    phrases = similar_phrases
+    phrases.add(phrase)
     time_key_start, time_key_end = time_key_wdw
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
@@ -511,4 +514,4 @@ def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryD
         reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
-        phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrase, fdr)
+        phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrases, fdr)

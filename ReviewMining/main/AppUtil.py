@@ -337,7 +337,6 @@ def readScoreFromScoreLogForBnss(string):
 
 
 def doLogUsrAndBnssReview(csvFolder, plotDir):
-    from util import SIAUtil
     bnssReviewLogDir = os.path.join(plotDir, 'bnss_review_logs')
     usrReviewLogDir = os.path.join(plotDir, 'usr_review_logs')
     if not os.path.exists(bnssReviewLogDir):
@@ -355,17 +354,40 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                                rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
+
+    bnss_phrases = dict()
+    phrases = ['news', 'game', 'version', 'download', 'ign'] #284819997
+    similar_phrases_dict = dict()
+    bnss_phrases['284819997'] = (phrases, similar_phrases_dict)
+
+    phrases = ['whip', 'BBG', 'version', 'download'] #319927587
+    similar_phrases_dict = {'BBG': ['Big Bang Theory']}
+    bnss_phrases['319927587'] = (phrases, similar_phrases_dict)
+
+    phrases = ['funny', 'version', 'download'] #412629178
+    similar_phrases_dict = dict()
+    bnss_phrases['412629178'] = (phrases, similar_phrases_dict)
+
+    phrases = ['version', 'download'] #404593641
+    similar_phrases_dict = dict()
+    bnss_phrases['404593641'] = (phrases, similar_phrases_dict)
+
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-#         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
-#                                                 num_topics=5, num_words=1)
-#         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
-#                                             bnss_key, time_key_wdw,\
-#                                             necessary_ds,\
-#                                             readReviewsText=readReviewsText,\
-#                                             doPlot=True)
-        phrases = ['news', 'game', 'version', 'download', 'ign']
+        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
+                                                num_topics=5, num_words=1)
+        EvidenceUtil.findStatsForEverything(evidencePlotDir,\
+                                            bnss_key, time_key_wdw,\
+                                            necessary_ds,\
+                                            readReviewsText=readReviewsText,\
+                                            doPlot=True)
+        phrases, similar_phrases_dict = bnss_phrases[bnss_key]
+
         for phrase in phrases:
-            EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
+            if phrase in similar_phrases_dict:
+                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
+                                                           necessary_ds, phrase, set(similar_phrases_dict[phrase]))
+            else:
+                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
                                                            necessary_ds, phrase)
 
 def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
