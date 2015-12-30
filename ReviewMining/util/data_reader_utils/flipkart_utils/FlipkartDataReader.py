@@ -65,7 +65,7 @@ class FlipkartDataReader(object):
         skipped_rows = []
         for tup in df2.itertuples():
             if len(list(tup)) != 12:
-                skipped_rows.append(tup)
+                skipped_rows.append(str(tup))
                 skippedData += 1
                 continue
             index, primary_idx, bnss_id, user_id, review_id,\
@@ -76,7 +76,7 @@ class FlipkartDataReader(object):
                 review_text = str(review_text)
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
-                skipped_rows.append(tup)
+                skipped_rows.append(str(tup))
                 skippedData += 1
 
         afterDataReadTime = datetime.now()
