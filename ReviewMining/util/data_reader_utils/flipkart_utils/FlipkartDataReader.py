@@ -62,8 +62,10 @@ class FlipkartDataReader(object):
         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object,
                               error_bad_lines=False)
+        skipped_rows = []
         for tup in df2.itertuples():
             if len(list(tup)) != 12:
+                skipped_rows.append(tup)
                 skippedData += 1
                 continue
             index, primary_idx, bnss_id, user_id, review_id,\
@@ -84,7 +86,10 @@ class FlipkartDataReader(object):
         print 'Users:', len(self.usrIdToUsrDict.keys()), \
             'Products:', len(self.bnssIdToBnssDict.keys()), \
             'Reviews:', len(self.reviewIdToReviewDict.keys())
-
+        with open('skipped_rows.log', 'w') as skipped_file:
+            for tup in skipped_rows:
+                skipped_file.write(tup)
+                skipped_file.write('\n')
 #         textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
 #                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
 #         for review_id in textLessReviewId:
