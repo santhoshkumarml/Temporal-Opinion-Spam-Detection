@@ -1,5 +1,6 @@
-__author__ = 'santhosh'
-
+'''
+@author: santhosh
+'''
 import math
 import os
 

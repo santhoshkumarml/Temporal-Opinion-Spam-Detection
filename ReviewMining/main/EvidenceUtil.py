@@ -1,3 +1,6 @@
+'''
+@author: santhosh
+'''
 import collections
 import datetime
 import nltk
@@ -493,7 +496,7 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
     print '-------------------------------------------------------------------------------\n'
 
 
-def peformPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs, phrase):
+def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs, phrase):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
@@ -501,7 +504,7 @@ def peformPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
             continue
-        fdr = os.path.join(os.path.join(plotDir, bnssKey), str(time_key))
+        fdr = os.path.join(os.path.join(os.path.join(plotDir, bnssKey), str(time_key)), str(phrase))
         if not os.path.exists(fdr):
             os.makedirs(fdr)
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))

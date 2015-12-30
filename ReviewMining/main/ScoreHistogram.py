@@ -1,4 +1,6 @@
-__author__ = 'santhosh'
+'''
+@author: santhosh
+'''
 
 import matplotlib.pyplot as plt
 import numpy

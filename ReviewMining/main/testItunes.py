@@ -21,10 +21,10 @@ if __name__ == "__main__":
 #                                      doPlot=False, dologStats=True)
 
 #     AppUtil.doRanking(plotDir)
-    bnss_key_time_wdw_list = [('284819997', (166,171)),\
-                              ('284819997', (173, 178)),\
-                              ('319927587', (189, 194)),\
-                              ('404593641', (158, 163)),\
-                              ('412629178', (148, 153))]
+    bnss_key_time_wdw_list = [('284819997', (166,171)),
+                              ('284819997', (173, 178))]
+#                               ('319927587', (189, 194)),
+#                               ('404593641', (158, 163)),
+#                               ('412629178', (148, 153))]
     AppUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=bnss_key_time_wdw_list)
 #     AppUtil.printSortedReviews(csvFolder, plotDir)
