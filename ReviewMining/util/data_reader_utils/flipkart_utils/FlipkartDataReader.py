@@ -87,6 +87,7 @@ class FlipkartDataReader(object):
             'Products:', len(self.bnssIdToBnssDict.keys()), \
             'Reviews:', len(self.reviewIdToReviewDict.keys())
         with open('skipped_rows.log', 'w') as skipped_file:
+            print 'Skipped Rows', len(skipped_rows)
             for tup in skipped_rows:
                 skipped_file.write(tup)
                 skipped_file.write('\n')
