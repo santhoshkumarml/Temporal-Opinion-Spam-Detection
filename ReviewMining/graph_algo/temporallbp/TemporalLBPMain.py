@@ -1,16 +1,19 @@
-from __future__ import division
 '''
 Created on Nov 25, 2014
 
 @author: Santhosh Kumar
 '''
-import util.SIAUtil as SIAUtil
-from graph_algo.lbp.LBP import LBP
+
+from __future__ import division
+
 from copy import deepcopy, copy
 from datetime import datetime
-from threading import Thread
 import sys
+from threading import Thread
+
+from graph_algo.lbp.LBP import LBP
 from util import OldGraphUtil
+from util import SIAUtil
 from util.OldGraphUtil import TimeBasedGraph
 
 ###################################################Parallelize LBP Run Using Thread######################################################
@@ -28,8 +31,11 @@ class LBPRunnerThread(Thread):
     def runLBP(self):
         threadedLBP = LBP(self.graph)
         threadedLBP.doBeliefPropagationIterative(self.limit)
-        (fakeUsers, honestUsers, unclassifiedUsers, badProducts, goodProducts, unclassifiedProducts, fakeReviewEdges, realReviewEdges, unclassifiedReviewEdges) = \
-            threadedLBP.calculateBeliefVals()
+
+        (fakeUsers, honestUsers, unclassifiedUsers, badProducts,
+         goodProducts, unclassifiedProducts, fakeReviewEdges,
+         realReviewEdges, unclassifiedReviewEdges) = threadedLBP.calculateBeliefVals()
+
         self.to_be_removed_usr_bnss_edges = set([(threadedLBP.getEdgeDataForNodes(*edge).getUserId(),\
                                                        threadedLBP.getEdgeDataForNodes(*edge).getBusinessID())\
                              for edge in fakeReviewEdges])

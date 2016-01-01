@@ -4,10 +4,7 @@
 '''
  Loopy Belief Propagation
 '''
-
-from math import fabs
-
-import util.SIAUtil as SIAUtil
+from util import SIAUtil
 
 
 class LBP(object):
@@ -17,7 +14,7 @@ class LBP(object):
 #         for product in self.graph.nodes():
 #             if product.getNodeType() == PRODUCT:
 #                 product.normalizeMessages()
-#     
+#
 #     def normalizeUserMessages(self):
 #         for user in self.graph.nodes():
 #             if user.getNodeType() == USER:
@@ -25,21 +22,21 @@ class LBP(object):
     def getUser(self, userId):
         user = self.graph.getUser(userId)
         return user
-    
+
     def getBusiness(self,businessID):
         business = self.graph.getBusiness(businessID)
         return business
-    
+
     def getEdgeDataForNodes(self,user,business):
         return self.graph.get_edge_data(user,business)[SIAUtil.REVIEW_EDGE_DICT_CONST]
-    
+
     def getReviewIdsForUsrBnssId(self, usrId, bnssId):
         return self.getEdgeDataForNodes(self.getUser(usrId), self.getBusiness(bnssId)).getId()
-    
+
     def getNeighborWithEdges(self, siaObject):
         return [(neighbor,self.graph.get_edge_data(siaObject, neighbor)) \
-                for neighbor in self.graph.neighbors(siaObject)] 
-        
+                for neighbor in self.graph.neighbors(siaObject)]
+
     #DON't USE - will reach max recursion limit
     def doBeliefPropagationRecursive(self, limit):
         changedProducts = []
@@ -49,18 +46,18 @@ class LBP(object):
                 if user.getNodeType() == SIAUtil.USER:
                     changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
                     changedProducts.extend(changedNodes)
-            
+
             for product in self.graph.nodes():
                 if product.getNodeType() == SIAUtil.PRODUCT:
                     changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
                     changedUsers.extend(changedNodes)
-            
+
             noOfChangedProducts = len(changedProducts)
             noOfChangedUsers = len(changedUsers)
             totalNoOfChangedNodes = noOfChangedProducts+noOfChangedUsers
             if not (totalNoOfChangedNodes==0):
                 self.doBeliefPropagation(limit-1)
-                
+
     def doBeliefPropagationIterative(self, limit):
         while not (limit==0):
             changedProducts = []
@@ -69,24 +66,24 @@ class LBP(object):
                 if user.getNodeType() == SIAUtil.USER:
                     changedNodes = user.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(user))
                     changedProducts.extend(changedNodes)
-            
+
             for product in self.graph.nodes():
                 if product.getNodeType() == SIAUtil.PRODUCT:
                     changedNodes = product.calculateAndSendMessagesToNeighBors(self.getNeighborWithEdges(product))
                     changedUsers.extend(changedNodes)
-                    
+
             noOfChangedProducts = len(changedProducts)
             noOfChangedUsers = len(changedUsers)
             totalNoOfChangedNodes = noOfChangedProducts+noOfChangedUsers
-            
-            #print 'changedNodes In This Iteration', totalNoOfChangedNodes 
+
+            #print 'changedNodes In This Iteration', totalNoOfChangedNodes
             if (totalNoOfChangedNodes==0):
                 break
-            
+
             limit-=1
-            
-                
-            
+
+
+
     def calculateBeliefVals(self):
         fakeUsers = []
         honestUsers = []
@@ -97,7 +94,7 @@ class LBP(object):
         unclassifiedUsers = []
         unclassifiedProducts = []
         unclassifiedReviews = []
-        
+
         for siaObject in self.graph.nodes():
             siaObject.calculateBeliefVals();
             beliefVal = siaObject.getScore()
@@ -115,7 +112,7 @@ class LBP(object):
                     unclassifiedProducts.append(siaObject)
                 else:
                     goodProducts.append(siaObject)
-                    
+
         for edge in self.graph.edges():
             review = self.graph.get_edge_data(*edge)[SIAUtil.REVIEW_EDGE_DICT_CONST]
             review.calculateBeliefVals(*edge)
