@@ -30,9 +30,11 @@ class FlipkartDataReader(object):
         df1 = pandas.read_csv(os.path.join(reviewFolder, RATING_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object)
         for tup in df1.itertuples():
-            idx, review_id, bnss_id, user_id, rating, creation_time_stamp, last_modified_time = tup
+            idx, review_id, bnss_id, user_id, rating,\
+            creation_time_stamp, last_modified_time = tup
             review_id, bnss_id, user_id, rating, creation_time_stamp = \
-                review_id, bnss_id, user_id, float(rating), datetime.strptime(creation_time_stamp, '%Y-%m-%d %H:%M:%S')
+                review_id, bnss_id, user_id, float(rating),\
+                datetime.strptime(creation_time_stamp, '%Y-%m-%d %H:%M:%S')
 
             if bnss_id not in self.bnssIdToBnssDict:
                 self.bnssIdToBnssDict[bnss_id] = SIAUtil.business(bnss_id, bnss_id)
@@ -85,8 +87,10 @@ class FlipkartDataReader(object):
         print 'Users:', len(self.usrIdToUsrDict.keys()), \
             'Products:', len(self.bnssIdToBnssDict.keys()), \
             'Reviews:', len(self.reviewIdToReviewDict.keys())
-#         textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
-#                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
+        textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
+                                if not self.reviewIdToReviewDict[review_id].getReviewText() or\
+                                 self.reviewIdToReviewDict[review_id].getReviewText() == ''])
+        print 'No Text Reviews:', len(textLessReviewId)
 #         for review_id in textLessReviewId:
 #             del self.reviewIdToReviewDict[review_id]
 #         print 'Removing text less reviews'

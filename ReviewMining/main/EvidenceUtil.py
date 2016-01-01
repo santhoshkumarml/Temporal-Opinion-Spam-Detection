@@ -94,8 +94,7 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                 usr_nodes.add(usrId)
                 node_labels[usrId] = usrId
 
-    edge_labels=dict([((u,v,),d['edge'])
-             for u,v,d in g.edges(data=True)])
+    edge_labels=dict([((u,v,),d['edge']) for u,v,d in g.edges(data=True)])
 
     usr_nodes_len = len(usr_nodes)
     bnss_nodes_len = len(bnss_nodes)
