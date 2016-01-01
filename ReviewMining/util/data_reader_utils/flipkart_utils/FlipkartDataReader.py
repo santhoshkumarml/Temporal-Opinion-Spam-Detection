@@ -1,4 +1,6 @@
-__author__ = 'santhosh'
+'''
+@author: santhosh
+'''
 import os
 from datetime import datetime
 
@@ -25,7 +27,6 @@ class FlipkartDataReader(object):
 
     def readData(self, reviewFolder, readReviewsText=False):
         beforeDataReadTime = datetime.now()
-        RATING_CSV_COLS = [REVIEW_ID, BNSS_ID, USER_ID, RATING, CREATE_TIMESTAMP]
         df1 = pandas.read_csv(os.path.join(reviewFolder, RATING_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object)
         for tup in df1.itertuples():
@@ -62,10 +63,8 @@ class FlipkartDataReader(object):
         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
                               escapechar='\\', skiprows=1, header=None, dtype=object,
                               error_bad_lines=False)
-        skipped_rows = []
         for tup in df2.itertuples():
             if len(list(tup)) != 12:
-                skipped_rows.append(str(tup))
                 skippedData += 1
                 continue
             index, primary_idx, bnss_id, user_id, review_id,\
@@ -76,7 +75,6 @@ class FlipkartDataReader(object):
                 review_text = str(review_text)
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
-                skipped_rows.append(str(tup))
                 skippedData += 1
 
         afterDataReadTime = datetime.now()
@@ -87,11 +85,6 @@ class FlipkartDataReader(object):
         print 'Users:', len(self.usrIdToUsrDict.keys()), \
             'Products:', len(self.bnssIdToBnssDict.keys()), \
             'Reviews:', len(self.reviewIdToReviewDict.keys())
-        with open('skipped_rows.log', 'w') as skipped_file:
-            print 'Skipped Rows', len(skipped_rows)
-            for tup in skipped_rows:
-                skipped_file.write(tup)
-                skipped_file.write('\n')
 #         textLessReviewId = set([review_id for review_id in self.reviewIdToReviewDict \
 #                                 if not self.reviewIdToReviewDict[review_id].getReviewText()])
 #         for review_id in textLessReviewId:

@@ -4,10 +4,10 @@ Created on Dec 15, 2014
 @author: santhosh
 '''
 import networkx as nx
-import SIAUtil
-from GraphUtil import SuperGraph
+from util import SIAUtil
+from util.GraphUtil import SuperGraph
 from datetime import datetime
-from yelp_utils import YelpDataReader
+from util.data_reader_utils.yelp_utils import YelpDataReader
 import sys
 
 if __name__ == '__main__':
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 #             userToDegreeDict[node] = len(G.neighbors(node))
 #         else:
 #             businessToDegreeDict[node] = len(G.neighbors(node))
-#     
+#
 #     for user in userToDegreeDict.keys():
 #         print user.getId(),' ',userToDegreeDict[i]
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     print'----------------------Business to Neighbors Degree----------------------------------------------------------'
 #     for business in businessToDegreeDict.keys():
 #         print business.getName(),' ',businessToDegreeDict[i]
-    
+
     businessDegreeDistribution = [len(G.neighbors(node)) for node in G.nodes() if node[1] == SIAUtil.PRODUCT]
     businessDegreeDistribution = sorted(businessDegreeDistribution, reverse=True)
     print businessDegreeDistribution
