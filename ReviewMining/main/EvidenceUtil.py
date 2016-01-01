@@ -495,7 +495,7 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
     print '-------------------------------------------------------------------------------\n'
 
 
-def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryDs,
+def performPhraseFilteringOnBusiness(plotDir, bnssKey, time_key_wdw, necessaryDs,
                                      phrase, similar_phrases = set()):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
@@ -514,3 +514,31 @@ def performPhraseFilteringOnBusiness(plotDir,  bnssKey, time_key_wdw, necessaryD
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
         phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrases, fdr)
+
+
+def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
+    ctg, superGraph, time_key_to_date_time,\
+     suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
+    time_key_start, time_key_end = time_key_wdw
+    text_to_times = dict()
+    all_review_text = [superGraph.getReviewFromReviewId(revwId).getReviewText()\
+                        for revwId in superGraph.getReviewIds()]
+    for time_key in range(time_key_start, time_key_end):
+        G = ctg[time_key]
+        if (bnssKey, SIAUtil.PRODUCT) not in G:
+            continue
+        neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
+        reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
+                                               in neighboring_usr_nodes],
+                                              key=lambda r: SIAUtil.getDateForReview(r))
+
+        for revw in reviews_for_bnss_in_time_key:
+            review_text = revw.getReviewText()
+            if review_text not in text_to_times:
+                count = all_review_text.count(review_text)
+                if count > 1:
+                    text_to_times[review_text] = count
+    print text_to_times
+
+
+

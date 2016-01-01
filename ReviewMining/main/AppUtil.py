@@ -380,12 +380,16 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True)
+        EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
+                                           necessary_ds)
         phrases, similar_phrases_dict = bnss_phrases[bnss_key]
 
         for phrase in phrases:
             if phrase in similar_phrases_dict:
-                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
-                                                           necessary_ds, phrase, set(similar_phrases_dict[phrase]))
+                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key,
+                                                              time_key_wdw,
+                                                              necessary_ds, phrase,
+                                                              set(similar_phrases_dict[phrase]))
             else:
                 EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
                                                            necessary_ds, phrase)
