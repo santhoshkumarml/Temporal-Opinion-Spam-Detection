@@ -1,12 +1,12 @@
 '''
 @author: santhosh
 '''
-import os
 from datetime import datetime
-
+import os, csv
 import pandas
 
 from util import SIAUtil
+
 
 REVIEW_ID = 'Id'
 BNSS_ID = 'property_id'
@@ -62,22 +62,43 @@ class FlipkartDataReader(object):
             return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
 
         skippedData = 0
-        df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
-                              escapechar='\\', skiprows=1, header=None, dtype=object,
-                              error_bad_lines=False)
-        for tup in df2.itertuples():
-            if len(list(tup)) != 12:
-                skippedData += 1
-                continue
-            index, primary_idx, bnss_id, user_id, review_id,\
-            review_text, title, vertical, last_modified_time,\
-            creation_time_stamp, first_to_review, certififed_buyer = tup
+        review_buffer = []
+        with open(os.path.join(reviewFolder, REVIEW_CSV), 'rb') as csvfile:
+            reviewFileReader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=',', quotechar='"')
+            for row in reviewFileReader:
+                if len(row) > 0:
+                    review_buffer = review_buffer + row
+                    try:
+                        int(row[-2])
+                        int(row[-1])
+                        revw = review_buffer[:4]
+                        review_text = ' '.join(review_buffer[4:-2][:-1])
+                        review_id = revw[3]
+                        review_buffer = []
+                        if review_id != 'NULL' and review_id in self.reviewIdToReviewDict:
+                            review_text = str(review_text)
+                            self.reviewIdToReviewDict[review_id].setReviewText(review_text)
+                        else:
+                            skippedData += 1
+                    except:
+                        pass
+#         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
+#                               escapechar='\\', skiprows=1, header=None, dtype=object,
+#                               error_bad_lines=False)
+#         for tup in df2.itertuples():
+#             if len(list(tup)) != 12:
+#                 skippedData += 1
+#                 continue
+#             index, primary_idx, bnss_id, user_id, review_id,\
+#             review_text, title, vertical, last_modified_time,\
+#             creation_time_stamp, first_to_review, certififed_buyer = tup
+#
+#             if review_id in self.reviewIdToReviewDict:
+#                 review_text = str(review_text)
+#                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
+#             else:
+#                 skippedData += 1
 
-            if review_id in self.reviewIdToReviewDict:
-                review_text = str(review_text)
-                self.reviewIdToReviewDict[review_id].setReviewText(review_text)
-            else:
-                skippedData += 1
 
         afterDataReadTime = datetime.now()
 
