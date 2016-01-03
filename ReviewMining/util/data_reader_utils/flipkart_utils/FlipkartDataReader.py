@@ -61,7 +61,9 @@ class FlipkartDataReader(object):
 
             return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
 
-        skippedData = 0
+        skippedDataWithNullReviewId = 0
+        skippedDataWithoutReviewId = 0
+        read_review_text_cnt = 0
         review_buffer = []
         with open(os.path.join(reviewFolder, REVIEW_CSV), 'rb') as csvfile:
             reviewFileReader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=',', quotechar='"')
@@ -75,11 +77,15 @@ class FlipkartDataReader(object):
                         review_text = ' '.join(review_buffer[4:-2][:-1])
                         review_id = revw[3]
                         review_buffer = []
+                        read_review_text_cnt += 1
                         if review_id != 'NULL' and review_id in self.reviewIdToReviewDict:
                             review_text = str(review_text)
                             self.reviewIdToReviewDict[review_id].setReviewText(review_text)
                         else:
-                            skippedData += 1
+                            if review_id != 'NULL':
+                                skippedDataWithNullReviewId += 1
+                            else:
+                                skippedDataWithoutReviewId += 1
                     except:
                         pass
 #         df2 = pandas.read_csv(os.path.join(reviewFolder, REVIEW_CSV),
@@ -103,7 +109,8 @@ class FlipkartDataReader(object):
         afterDataReadTime = datetime.now()
 
         print 'Data Read Time:', (afterDataReadTime - beforeDataReadTime)
-        print 'Skipped Count:', skippedData
+        print 'Read Count:', read_review_text_cnt, 'Skipped Count:',\
+        skippedDataWithNullReviewId, skippedDataWithoutReviewId
 
         print 'Users:', len(self.usrIdToUsrDict.keys()), \
             'Products:', len(self.bnssIdToBnssDict.keys()), \
