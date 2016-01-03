@@ -516,6 +516,15 @@ def performPhraseFilteringOnBusiness(plotDir, bnssKey, time_key_wdw, necessaryDs
         phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrases, fdr)
 
 
+def sort_text_cnt(key1, key2):
+    text1, cnt1 = key1
+    text2, cnt2 = key2
+    if cnt1 > cnt2: return 1
+    elif cnt1 < cnt2: return -1
+    elif text1 < text2: return 1
+    elif text1 == text2: return 0
+    return -1
+
 def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
@@ -539,14 +548,5 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
                 if count > 1:
                     text_to_times[review_text] = count
 
-    def func_sort(key1, key2):
-        text1, cnt1 = key1
-        text2, cnt2 = key2
-        if cnt1 > cnt2:
-            return True
-        elif cnt1 < cnt2:
-            return False
-        return True if text1 > text2 else False
-
-    for item in sorted(text_to_times.iteritems(), cmp=func_sort, reverse=True):
+    for item in sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True):
         print item
