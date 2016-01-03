@@ -43,5 +43,8 @@ def performLDAOnReviews(reviews, num_topics=3, num_words=1):
         texts.append(stemmed_tokens)
     if len(texts) == 0:
         print 'No Reviews with review texts'
-    corpus, dictionary = createDocumentWordMatrix(texts)
-    return performLDA(corpus, dictionary, num_topics=num_topics, num_words=num_words)
+    try:
+        corpus, dictionary = createDocumentWordMatrix(texts)
+        return performLDA(corpus, dictionary, num_topics=num_topics, num_words=num_words)
+    except ValueError as e:
+        return 'No Data to LDA'
