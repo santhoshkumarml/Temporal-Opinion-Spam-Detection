@@ -16,6 +16,7 @@ from util.text_utils import LDAUtil
 from util.text_utils import TextConstants
 import phrase_wise_rev_pn
 
+
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
 def make_autopct(values):
@@ -49,6 +50,8 @@ def sortAndPrintReviewsInfo(plotDir, superGraph):
         print 'Started The File Write'
         df.to_csv(f, escapechar='\\', columns=['bnss', 'usr', 'dates', 'text'])
         print 'Finished The File Write'
+
+
 
 
 def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,

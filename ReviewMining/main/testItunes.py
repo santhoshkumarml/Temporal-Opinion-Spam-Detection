@@ -7,6 +7,7 @@ import sys
 
 import AppUtil
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print 'Usage: python -m \"tryout.testItunes\" csvFolder'
