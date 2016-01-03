@@ -522,8 +522,8 @@ def sort_text_cnt(key1, key2):
     if cnt1 > cnt2: return 1
     elif cnt1 < cnt2: return -1
     elif text1 < text2: return 1
-    elif text1 == text2: return 0
-    return -1
+    elif text1 > text2: return -1
+    return 0
 
 def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
     ctg, superGraph, time_key_to_date_time,\
