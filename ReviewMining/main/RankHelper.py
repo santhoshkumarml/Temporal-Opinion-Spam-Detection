@@ -147,9 +147,14 @@ def rankAllAnomalies(plotDir):
             if StatConstants.BNSS_ID not in chPtsOutliers:
                 continue
             bnss_key = chPtsOutliers[StatConstants.BNSS_ID]
-            avg_idxs, chOutlierScores = chPtsOutliers[StatConstants.AVERAGE_RATING][StatConstants.CUSUM]
-            diff_test_windows = [AnomalyDetector.getRangeIdxs(idx) for idx in sorted(avg_idxs)]
-
+            lead_idxs = set()
+            for lead_signal in lead_signals:
+                lead_indxs, chOutlierScores = chPtsOutliers[lead_signal][StatConstants.MEASURES_CHANGE_DETECTION_ALGO[lead_signal][0]]
+                lead_idxs.update(lead_indxs)
+            diff_test_windows = [AnomalyDetector.getRangeIdxs(idx) for idx in sorted(lead_idxs)]
+            if bnss_key == '284819997':
+                print lead_idxs
+                print diff_test_windows
             f1, f2, f3, f4 = \
                 extractFeaturesForRankingAnomalies(bnss_key,
                                                    chPtsOutliers,
