@@ -538,8 +538,15 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
                 count = all_review_text.count(review_text)
                 if count > 1:
                     text_to_times[review_text] = count
-    for item in sorted(text_to_times.iteritems(), key=lambda (text, cnt) : cnt):
+
+    def func_sort(key1, key2):
+        text1, cnt1 = key1
+        text2, cnt2 = key2
+        if cnt1 > cnt2:
+            return True
+        elif cnt1 < cnt2:
+            return False
+        return True if text1 > text2 else False
+
+    for item in sorted(text_to_times.iteritems(), cmp=func_sort, reverse=True):
         print item
-
-
-
