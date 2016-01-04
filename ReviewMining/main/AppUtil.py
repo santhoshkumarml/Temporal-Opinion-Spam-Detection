@@ -379,27 +379,27 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
         all_review_text[txt].add(revw.getUserId())
 
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
-                                                num_topics=5, num_words=1)
-        EvidenceUtil.findStatsForEverything(evidencePlotDir,\
-                                            bnss_key, time_key_wdw,\
-                                            necessary_ds,\
-                                            readReviewsText=readReviewsText,\
-                                            doPlot=True)
+#         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
+#                                                 num_topics=5, num_words=1)
+#         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
+#                                             bnss_key, time_key_wdw,\
+#                                             necessary_ds,\
+#                                             readReviewsText=readReviewsText,\
+#                                             doPlot=True)
         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
                                            necessary_ds, all_review_text)
 
-        phrases, similar_phrases_dict = bnss_phrases[bnss_key]
-
-        for phrase in phrases:
-            if phrase in similar_phrases_dict:
-                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key,
-                                                              time_key_wdw,
-                                                              necessary_ds, phrase,
-                                                              set(similar_phrases_dict[phrase]))
-            else:
-                EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
-                                                           necessary_ds, phrase)
+#         phrases, similar_phrases_dict = bnss_phrases[bnss_key]
+#
+#         for phrase in phrases:
+#             if phrase in similar_phrases_dict:
+#                 EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key,
+#                                                               time_key_wdw,
+#                                                               necessary_ds, phrase,
+#                                                               set(similar_phrases_dict[phrase]))
+#             else:
+#                 EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
+#                                                            necessary_ds, phrase)
 
 def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True,
