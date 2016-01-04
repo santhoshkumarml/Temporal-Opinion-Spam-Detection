@@ -525,13 +525,13 @@ def sort_text_cnt(key1, key2):
     elif text1 > text2: return -1
     return 0
 
-def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
+def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_review_text):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
     text_to_times = dict()
-    all_review_text = [superGraph.getReviewFromReviewId(revwId).getReviewText()\
-                        for revwId in superGraph.getReviewIds()]
+    text_to_usr_ids = dict()
+
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
@@ -544,9 +544,23 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs):
         for revw in reviews_for_bnss_in_time_key:
             review_text = revw.getReviewText()
             if review_text not in text_to_times:
-                count = all_review_text.count(review_text)
+                r_usr_ids = all_review_text[review_text]
+                count = len(r_usr_ids)
                 if count > 1:
                     text_to_times[review_text] = count
+                if len(nltk.word_tokenize(review_text.decode('utf-8'))) >= 4:
+                    text_to_usr_ids[review_text] = [ (usr_id, len(superGraph.neighbors((usr_id, SIAUtil.USER))))
+                                                     for usr_id in r_usr_ids]
 
-    for item in sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True):
+    sorted_items = sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True)
+    for item in sorted_items:
         print item
+    print '**********************************'
+    for item in sorted_items:
+        txt = item[0]
+        if txt in text_to_usr_ids:
+            print '------------------------------'
+            print txt
+            print sorted(text_to_usr_ids[txt], key = lambda (usr_id, cnt): cnt)
+            print '------------------------------'
+    print '**********************************'

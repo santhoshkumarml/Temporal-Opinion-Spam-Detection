@@ -4,7 +4,7 @@ Created on Dec 30, 2015
 @author: santhosh
 '''
 import os
-from wordcloud.wordcloud import WordCloud
+from wordcloud.wordcloud import WordCloud, STOPWORDS
 
 import matplotlib.pyplot as plt
 
@@ -13,18 +13,13 @@ POS_REVW_FILE = 'pos_reviews'
 NEG_REVW_FILE = 'neg_reviews'
 ALL_REVIEWS_FILE = 'all_reviews'
 
-def plotWordCloud(texts, title, imgFolder):
+def plotWordCloud(revws, title, imgFolder):
     imgFile = os.path.join(imgFolder, title + '.png')
     # Generate a word cloud image
-    text = ' '.join(texts)
-    wordcloud = WordCloud().generate(text)
+    text = ' '.join([revw.getReviewText() for revw in revws])
 
-    # Display the generated image:
-    # the matplotlib way:
-    plt.imshow(wordcloud)
-    plt.axis("off")
-
-    wordcloud = WordCloud(max_font_size=40, relative_scaling=.5).generate(text)
+    wordcloud = WordCloud(max_font_size=40, relative_scaling=.5,
+                          stopwords=STOPWORDS).generate(text)
     plt.figure()
     plt.imshow(wordcloud)
     plt.axis("off")
@@ -37,7 +32,8 @@ def writeReviewTextInFile(reviews, review_file_name, fdr):
         for revw in reviews:
             f.write(revw.getReviewText())
             f.write('\n')
-    plotWordCloud(reviews, review_file_name, fdr)
+    if len(reviews) > 0:
+        plotWordCloud(reviews, review_file_name, fdr)
 
 def runPhraseFilterAndSeperate(reviews, phrases, fdr):
     filtered_reviews =[]

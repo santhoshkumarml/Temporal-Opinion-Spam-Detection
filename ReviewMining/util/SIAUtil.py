@@ -1,17 +1,16 @@
 '''
 Created on Nov 3, 2014
 
-@author: Santhosh Kumar Manavasi Lakshminarayanan, Sarath Rami
+@author: santhosh
 '''
-'''
-Node Types
-'''
-
 from datetime import date, datetime
 import numpy
 import re
 
 
+'''
+Node Types
+'''
 USER = 'USER'
 PRODUCT = 'PRODUCT'
 
@@ -41,11 +40,7 @@ REVIEW_TYPE_POSITIVE = 1
 REVIEW_TYPE_NEUTRAL = 2
 
 REVIEW_EDGE_DICT_CONST = 'review'
-'''
-Compatibility Potential
-'''
-EPISOLON = 10**-1
-#COMP_POT = [[[0.0 for productType in PRODUCT_TYPES] for userType in USER_TYPES] for reviewType in REVIEW_TYPES]
+EPISOLON = 10 ** -1
 COMP_POT = numpy.zeros(shape=(2,2,2),dtype=numpy.float32)
 def init_COMP_POT():
     for reviewType in REVIEW_TYPES:
@@ -76,15 +71,6 @@ def init_COMP_POT():
                             output =0.1#2*EPISOLON
 
                 COMP_POT[reviewType][userType][productType] = output
-
-init_COMP_POT()
-# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][0][1]*0.5),(COMP_POT[0][1][0]*0.5)+(COMP_POT[0][1][1]*0.5))
-# print ((COMP_POT[0][0][0]*0.5)+(COMP_POT[0][1][0]*0.5),(COMP_POT[0][0][1]*0.5)+(COMP_POT[0][1][1]*0.5))
-# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][0][1]*0.5),(COMP_POT[1][1][0]*0.5)+(COMP_POT[1][1][1]*0.5))
-# print ((COMP_POT[1][0][0]*0.5)+(COMP_POT[1][1][0]*0.5),(COMP_POT[1][0][1]*0.5)+(COMP_POT[1][1][1]*0.5))
-'''
-  SIAObject to be used as Graph node
-'''
 
 class SIAObject(object):
     def __init__(self, score=(0.5, 0.5), NODE_TYPE=USER):
@@ -309,3 +295,4 @@ def getDateForReview(r):
     return review_date
 
 
+init_COMP_POT()

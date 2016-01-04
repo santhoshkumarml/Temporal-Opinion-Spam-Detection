@@ -42,10 +42,8 @@ def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
         with open(bnss_file_name, 'w') as f:
             pickle.dump(statistics_for_bnss, f)
 
-
 def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
-
 
 def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
     # Read data
@@ -372,6 +370,14 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     similar_phrases_dict = dict()
     bnss_phrases['404593641'] = (phrases, similar_phrases_dict)
 
+    all_review_text = dict()
+    for revwId in superGraph.getReviewIds():
+        revw = superGraph.getReviewFromReviewId(revwId)
+        txt = revw.getReviewText()
+        if txt not in all_review_text:
+            all_review_text[txt] = set()
+        all_review_text[txt].add(revw.getUserId())
+
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
                                                 num_topics=5, num_words=1)
@@ -381,7 +387,8 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             readReviewsText=readReviewsText,\
                                             doPlot=True)
         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
-                                           necessary_ds)
+                                           necessary_ds, all_review_text)
+
         phrases, similar_phrases_dict = bnss_phrases[bnss_key]
 
         for phrase in phrases:
