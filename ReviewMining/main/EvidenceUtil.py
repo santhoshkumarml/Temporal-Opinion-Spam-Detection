@@ -531,6 +531,7 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
     time_key_start, time_key_end = time_key_wdw
     text_to_times = dict()
     text_to_usr_ids = dict()
+    print '----------------------------------------', bnssKey, time_key_wdw, '---------------------------------------------------'
 
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
@@ -548,7 +549,6 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
                 count = len(r_usr_ids)
                 if count > 1:
                     text_to_times[review_text] = count
-                if len(nltk.word_tokenize(review_text.decode('utf-8'))) >= 4:
                     text_to_usr_ids[review_text] = [ (usr_id, len(superGraph.neighbors((usr_id, SIAUtil.USER))))
                                                      for usr_id in r_usr_ids]
 
@@ -564,3 +564,4 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
             print sorted(text_to_usr_ids[txt], key = lambda (usr_id, cnt): cnt)
             print '------------------------------'
     print '**********************************'
+    print '------------------------------------------------------------------------------------------------'
