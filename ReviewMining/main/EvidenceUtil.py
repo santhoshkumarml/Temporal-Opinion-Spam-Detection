@@ -371,7 +371,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
         plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                                 non_singleton_usr_non_suspicousness,
                                 imgFolder, time_key_to_date_time,
-                                plot_non_suspicious=True)
+                                plot_non_suspicious=False)
     plotReviewTimeRating(time_wise_review_time_rating,
                          bnssImgFolder)
 
@@ -641,32 +641,33 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
         for revw in reviews_for_bnss_in_time_key:
             review_text = revw.getReviewText()
             if review_text not in text_to_review_ids:
-                if review_text not in all_review_text_to_review_id:
+                if review_text not in all_review_text_to_review_id or review_text == '':
                     print 'Cannot find review text', review_text
                     continue
                 review_ids = all_review_text_to_review_id[review_text]
-                if len(review_ids) > 1 and len(nltk.word_tokenize(review_text.decode('UTF-8'))) >= 2:
+                if len(review_ids) > 1:
                     text_to_review_ids[review_text] = review_ids
 
     imgFolder = os.path.join(bnssImgFolder, 'text_graph')
     if not os.path.exists(imgFolder):
         os.makedirs(imgFolder)
 
+    sorted_items = sorted(text_to_review_ids.iteritems(), cmp=sort_text_cnt, reverse=True)
+    print '**********************************'
+    for item in sorted_items:
+        txt, review_ids = item
+        print txt, len(review_ids)
+    print '**********************************'
 
     for text in text_to_review_ids:
         review_ids = text_to_review_ids[text]
-        title = text[:100]
+        title = text[:100].replace('/','-')
         num = 1
         while os.path.exists(os.path.join(imgFolder, title)):
-            title = title + '_' + num
+            title = title + '_' + str(num)
             num += 1
         plotGraphForReviewText(review_ids, superGraph, imgFolder, title, text, time_key_to_date_time)
 
-#     sorted_items = sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True)
-#     print '**********************************'
-#     for item in sorted_items:
-#         print item
-#     print '**********************************'
 #     for item in sorted_items:
 #         txt = item[0]
 #         if txt in text_to_usr_ids:
@@ -675,4 +676,4 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
 #             print sorted(text_to_usr_ids[txt], key = lambda (usr_id, cnt): cnt)
 #             print '------------------------------'
 #     print '**********************************'
-#     print '------------------------------------------------------------------------------------------------'
+    print '------------------------------------------------------------------------------------------------'
