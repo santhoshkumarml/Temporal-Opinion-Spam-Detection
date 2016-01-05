@@ -183,8 +183,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     modified_data, 'g', label=measure_key)
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
-                # print measure_key, algo, chOutlierIdxs
-                diff_test_idxs = set()
                 if len(chPtsOutlierScores) > 0:
 
                     max_score = -float('inf')
@@ -197,7 +195,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                             min_score = min((min_score, min(scs)))
 
                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
-                                       StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
+                                       StatConstants.NO_OF_POSITIVE_REVIEWS,
+                                       StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                         max_score += 1
                         min_score += 1
 
@@ -232,11 +231,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                             else:
                                 ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
                                  'r', label='Outlier Scores')
-
-
-                # if measure_key == StatConstants.YOUTH_SCORE:
-                #     print firstTimeKey, algo, chPtsOutlierScores[105-firstTimeKey:116 -firstTimeKey]
-                #     print data[105-firstTimeKey:116 -firstTimeKey], len(data), len(chPtsOutlierScores)
 
                 if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
                     for idx in sorted(avg_idxs):
