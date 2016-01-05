@@ -16,16 +16,11 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
-#         AppUtil.extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir,\
-#                                                      bnsses_list=['284235722'])
 
-    bnss_list = ['284819997', '319927587', '404593641', '412629178']
-    AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
-                                     StatConstants.MEASURE_CHANGE_THRES_ITUNES,
-                                     doPlot=True, dologStats=True, bnss_list=bnss_list)
-
-#     AppUtil.doRanking(plotDir)\(180, 185), (187, 192)
-#     AppUtil.printSortedReviews(csvFolder, plotDir)
+#     bnss_list = ['284819997', '319927587', '404593641', '412629178']
+#     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
+#                                      StatConstants.MEASURE_CHANGE_THRES_ITUNES,
+#                                      doPlot=True, dologStats=True, bnss_list=bnss_list)
 
     bnss_key_time_wdw_list = [('284819997', (166,171)),
                               ('284819997', (173, 178)),
@@ -34,5 +29,5 @@ if __name__ == "__main__":
                               ('319927587', (189, 194)),
                               ('404593641', (158, 163)),
                               ('412629178', (148, 153))]
-#     AppUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=bnss_key_time_wdw_list)
+    AppUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=bnss_key_time_wdw_list)
 
