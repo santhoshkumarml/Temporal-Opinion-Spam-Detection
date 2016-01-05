@@ -18,7 +18,7 @@ import matplotlib.dates as mdates
 
 # def plotReviewTimeVelocity(bnss_statistics, bnssIdToBusinessDict,\
 #                         bnss_key, total_time_slots, inputDir, clr):
-#     
+#
 #     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
 #     LABELS = [str(i)+"-"+str(i+1)+" days" for i in range(total_time_slots)]
 #     plt.figure(figsize=(20,20))
@@ -43,12 +43,12 @@ import matplotlib.dates as mdates
 def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     bnss_name = bnssIdToBusinessDict[bnss_key].getName()
-    
+
     chPtsOutliersForBnss = dict()
-    
+
     if bnss_key in chPtsOutliers:
         chPtsOutliersForBnss = chPtsOutliers[bnss_key]
-    
+
     plot = 1
     plt.figure(figsize=(20,20))
     for measure_key in StatConstants.MEASURES:
@@ -62,13 +62,13 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
         step = 1
         if total_time_slots>70:
             step = total_time_slots/100
-           
+
         plt.xticks(range(bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY],total_time_slots, step))
         plt.ylabel(measure_key)
         if measure_key == StatConstants.AVERAGE_RATING:
             plt.ylim((1,5))
             plt.yticks(range(1,6))
-            
+
         if measure_key == StatConstants.MAX_TEXT_SIMILARITY:
             maxSimilarity = numpy.amax(bnss_statistics[bnss_key][measure_key])
             plt.ylim(ymin = 1,ymax = maxSimilarity+1)
@@ -78,13 +78,13 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                 clr+'o-',\
                 label= "bnss")
                 #align="center")
-                
+
         if measure_key in chPtsOutliersForBnss:
             change_idx = chPtsOutliersForBnss[measure_key]
             for idx in change_idx:
-                firstKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY] 
+                firstKey = bnss_statistics[bnss_key][StatConstants.FIRST_TIME_KEY]
                 idx = firstKey+idx
-                    
+
                 print bnss_key, measure_key, idx
                 ax.axvline(x=idx,\
                             ymin= bnss_statistics[bnss_key][measure_key][idx]/max(bnss_statistics[bnss_key][measure_key][firstKey:]),\
@@ -106,8 +106,8 @@ def plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
 def plotBnssStatistics(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict,\
                         bnss_key, total_time_slots, inputDir, clr):
     plotAllOtherMeasures(bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, bnss_key, total_time_slots, inputDir, clr)
-    
-    
+
+
 def plotter(bnssKeySet, bnss_statistics, chPtsOutliers, bnssIdToBusinessDict, total_time_slots, plotDir):
     colors = ['g', 'c', 'b', 'm', 'y', 'k']
     beforePlot = datetime.now()
@@ -133,6 +133,12 @@ def plotAny(a):
 
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, avg_idxs, timeLength = '1-M'):
     plot = 1
+    # firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
+    # total_time_slots = lastTimeKey-firstTimeKey+1
+
+    toBeUsedMeasures = [measure for measure in StatConstants.MEASURE_PRIORITY if measure in toBeUsedMeasures]
+    max_algo_len = max([len(StatConstants.MEASURES_CHANGE_DETECTION_ALGO[measure_key])\
+                         for measure_key in toBeUsedMeasures ])
     fig = plt.figure(figsize=(20, 20))
     step = 10
 
@@ -140,10 +146,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
     xticks = range(firstTimeKey, lastTimeKey+1, step)
-    # firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
-    # total_time_slots = lastTimeKey-firstTimeKey+1
-
-    toBeUsedMeasures = [measure for measure in StatConstants.MEASURE_PRIORITY if measure in toBeUsedMeasures]
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -153,11 +155,11 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
         if chPtsOutliersForBnss:
             algoList = chPtsOutliersForBnss[measure_key].keys()
 
-            if len(algoList) == 1:
-                algoList = [algo for algo in algoList] + [algo for algo in algoList]
+            if len(algoList) != max_algo_len and len(algoList) == 1:
+                algoList = [algoList[0] for algo_iter in range(max_algo_len)]
 
             for algo in algoList:
-                ax1 = fig.add_subplot(len(toBeUsedMeasures), 2, plot)
+                ax1 = fig.add_subplot(len(toBeUsedMeasures), max_algo_len, plot)
                 plt.title(algo)
                 plt.xlabel('Date')
 
