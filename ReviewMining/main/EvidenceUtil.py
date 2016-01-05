@@ -641,7 +641,7 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
         for revw in reviews_for_bnss_in_time_key:
             review_text = revw.getReviewText()
             if review_text not in text_to_review_ids:
-                if review_text not in all_review_text_to_review_id or review_text == '':
+                if review_text not in all_review_text_to_review_id:
                     print 'Cannot find review text', review_text
                     continue
                 review_ids = all_review_text_to_review_id[review_text]

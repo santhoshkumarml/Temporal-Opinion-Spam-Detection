@@ -375,7 +375,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     for revwId in superGraph.getReviewIds():
         revw = superGraph.getReviewFromReviewId(revwId)
         txt = revw.getReviewText()
-        if txt not in all_review_text_to_review_id:
+        if txt not in all_review_text_to_review_id or txt == '':
             all_review_text_to_review_id[txt] = set()
         all_review_text_to_review_id[txt].add(revw.getId())
 
