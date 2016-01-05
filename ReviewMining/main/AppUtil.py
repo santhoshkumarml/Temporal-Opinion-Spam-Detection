@@ -370,13 +370,14 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     similar_phrases_dict = dict()
     bnss_phrases['404593641'] = (phrases, similar_phrases_dict)
 
-    all_review_text = dict()
+    all_review_text_to_review_id = dict()
+
     for revwId in superGraph.getReviewIds():
         revw = superGraph.getReviewFromReviewId(revwId)
         txt = revw.getReviewText()
-        if txt not in all_review_text:
-            all_review_text[txt] = set()
-        all_review_text[txt].add(revw.getUserId())
+        if txt not in all_review_text_to_review_id:
+            all_review_text_to_review_id[txt] = set()
+        all_review_text_to_review_id[txt].add(revw.getId())
 
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
 #         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
@@ -387,7 +388,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
 #                                             readReviewsText=readReviewsText,\
 #                                             doPlot=True)
         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
-                                           necessary_ds, all_review_text)
+                                           necessary_ds, all_review_text_to_review_id)
 
 #         phrases, similar_phrases_dict = bnss_phrases[bnss_key]
 #

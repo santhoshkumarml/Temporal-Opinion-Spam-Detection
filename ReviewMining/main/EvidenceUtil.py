@@ -246,6 +246,98 @@ def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, tim
 
     return ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered
 
+def plotGraphForReviewText(review_ids, superGraph, imgFolder, title, text, time_key_to_date_time):
+    fig = plt.figure(figsize=(24, 16))
+    imgFile = os.path.join(imgFolder, title + '.png')
+
+    g = nx.Graph()
+    bnss_nodes = set()
+    singleton_usr_nodes = set()
+    non_singleton_usr_nodes = set()
+
+    node_labels = dict()
+
+    for revwId in review_ids:
+        revw = superGraph.getReviewFromReviewId(revwId)
+        bnss_id_for_revw = revw.getBusinessID()
+        usrId = revw.getUserId()
+        date_time_for_this_usr = SIAUtil.getDateForReview(revw)
+
+        time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                      date_time_for_this_usr)
+        bnss_nodes.add(bnss_id_for_revw)
+        g.add_edge(usrId, bnss_id_for_revw, {'edge': (revw.getRating(), time_id_for_date_time)})
+
+        node_labels[bnss_id_for_revw] = bnss_id_for_revw
+        if len(superGraph.neighbors((usrId, SIAUtil.USER))) == 1:
+            singleton_usr_nodes.add(usrId)
+        else:
+            non_singleton_usr_nodes.add(usrId)
+        node_labels[usrId] = usrId
+
+    edge_labels=dict([((u,v,),d['edge']) for u,v,d in g.edges(data=True)])
+
+    usr_nodes_len = len(singleton_usr_nodes) + len(non_singleton_usr_nodes)
+    bnss_nodes_len = len(bnss_nodes)
+
+    pos = dict()
+
+    usr_node_iter = bnss_nodes_len
+
+    for node in singleton_usr_nodes:
+        pos[node] = (1, usr_node_iter)
+        usr_node_iter += bnss_nodes_len
+
+    for node in non_singleton_usr_nodes:
+        pos[node] = (1, usr_node_iter)
+        usr_node_iter += bnss_nodes_len
+
+    bnss_nodes_iter = usr_nodes_len
+    for node in bnss_nodes:
+        pos[node] = (4, bnss_nodes_iter)
+        bnss_nodes_iter += usr_nodes_len
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(singleton_usr_nodes),
+                           node_color='b',
+                           node_size=500,
+                           alpha=0.8)
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(non_singleton_usr_nodes),
+                           node_color='g',
+                           node_size=500,
+                           alpha=0.8)
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(bnss_nodes),
+                           node_color='m',
+                           node_size=500,
+                           alpha=0.8)
+
+    nx.draw_networkx_edges(g, pos,
+                       edgelist=[(superGraph.getReviewFromReviewId(revwId).getUserId(),
+                                  superGraph.getReviewFromReviewId(revwId).getBusinessID())
+                                 for revwId in review_ids],
+                       alpha=0.5, edge_color='r')
+
+    nx.draw_networkx_labels(g, pos, labels=node_labels)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
+                                 label_pos= 0.3)
+
+    plt.title(title)
+    ax = plt.gca()
+
+    ax.text(0.95, 0.01, text,
+        verticalalignment='bottom', horizontalalignment='right',
+        transform=ax.transAxes,
+        color='black', fontsize=15)
+
+    plt.axis('off')
+    plt.savefig(imgFile)
+    plt.close()
+
+
 
 def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                   time_wise_non_singleton_usr_non_suspicousness,\
@@ -279,7 +371,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
         plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                                 non_singleton_usr_non_suspicousness,
                                 imgFolder, time_key_to_date_time,
-                                plot_non_suspicious=False)
+                                plot_non_suspicious=True)
     plotReviewTimeRating(time_wise_review_time_rating,
                          bnssImgFolder)
 
@@ -517,25 +609,29 @@ def performPhraseFilteringOnBusiness(plotDir, bnssKey, time_key_wdw, necessaryDs
 
 
 def sort_text_cnt(key1, key2):
-    text1, cnt1 = key1
-    text2, cnt2 = key2
+    text1, review_ids1 = key1
+    text2, review_ids2 = key2
+    cnt1, cnt2 = len(review_ids1), len(review_ids2)
     if cnt1 > cnt2: return 1
     elif cnt1 < cnt2: return -1
     elif text1 < text2: return 1
     elif text1 > text2: return -1
     return 0
 
-def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_review_text):
+def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_review_text_to_review_id):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
-    text_to_times = dict()
-    text_to_usr_ids = dict()
+    text_to_review_ids = dict()
+    bnssImgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key_start)\
+                                     + '_' + str(time_key_end))
+#     text_to_usr_ids = dict()
     print '----------------------------------------', bnssKey, time_key_wdw, '---------------------------------------------------'
 
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
+            print 'No Reviews for Bnss in', time_key
             continue
         neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
         reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
@@ -544,24 +640,39 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
 
         for revw in reviews_for_bnss_in_time_key:
             review_text = revw.getReviewText()
-            if review_text not in text_to_times:
-                r_usr_ids = all_review_text[review_text]
-                count = len(r_usr_ids)
-                if count > 1:
-                    text_to_times[review_text] = count
-                    text_to_usr_ids[review_text] = [ (usr_id, len(superGraph.neighbors((usr_id, SIAUtil.USER))))
-                                                     for usr_id in r_usr_ids]
+            if review_text not in text_to_review_ids:
+                if review_text not in all_review_text_to_review_id:
+                    print 'Cannot find review text', review_text
+                    continue
+                review_ids = all_review_text_to_review_id[review_text]
+                if len(review_ids) > 1 and len(nltk.word_tokenize(review_text.decode('UTF-8'))) >= 2:
+                    text_to_review_ids[review_text] = review_ids
 
-    sorted_items = sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True)
-    for item in sorted_items:
-        print item
-    print '**********************************'
-    for item in sorted_items:
-        txt = item[0]
-        if txt in text_to_usr_ids:
-            print '------------------------------'
-            print txt
-            print sorted(text_to_usr_ids[txt], key = lambda (usr_id, cnt): cnt)
-            print '------------------------------'
-    print '**********************************'
-    print '------------------------------------------------------------------------------------------------'
+    imgFolder = os.path.join(bnssImgFolder, 'text_graph')
+    if not os.path.exists(imgFolder):
+        os.makedirs(imgFolder)
+
+
+    for text in text_to_review_ids:
+        review_ids = text_to_review_ids[text]
+        title = text[:100]
+        num = 1
+        while os.path.exists(os.path.join(imgFolder, title)):
+            title = title + '_' + num
+            num += 1
+        plotGraphForReviewText(review_ids, superGraph, imgFolder, title, text, time_key_to_date_time)
+
+#     sorted_items = sorted(text_to_times.iteritems(), cmp=sort_text_cnt, reverse=True)
+#     print '**********************************'
+#     for item in sorted_items:
+#         print item
+#     print '**********************************'
+#     for item in sorted_items:
+#         txt = item[0]
+#         if txt in text_to_usr_ids:
+#             print '------------------------------'
+#             print txt
+#             print sorted(text_to_usr_ids[txt], key = lambda (usr_id, cnt): cnt)
+#             print '------------------------------'
+#     print '**********************************'
+#     print '------------------------------------------------------------------------------------------------'
