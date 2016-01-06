@@ -3,20 +3,6 @@
 
  This is a work from  [Data Analytics Techniques Algorithms (DATA) Lab] (http://www3.cs.stonybrook.edu/~datalab/index.html) of [Computer Science Department](http://www.cs.stonybrook.edu/) at [Stony Brook](http://www.stonybrook.edu/) under Professor [Leman Akoglu] (http://www3.cs.stonybrook.edu/~leman/) by [Santhosh Kumar Manavasi Lakshminarayanan] (https://sites.google.com/a/cs.stonybrook.edu/smanavasilak/) and  [Junting Ye] (http://www3.cs.stonybrook.edu/~juyye/)
 
-
-### Algorithm:
-
-
-#### STEP 1: 
-    
-
-#### STEP 2:
-    
-
-#### STEP 3:
-    
-
-
 ### USAGE:
 
 ### CONTRIBUTORS:
