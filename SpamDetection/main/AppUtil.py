@@ -384,6 +384,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
         all_review_text_to_review_id[txt].add(revw.getId())
 
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
+        print '-----------------', bnss_key, time_key_wdw, '-------------------------------------------'
 #         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
 #                                                 num_topics=5, num_words=1)
 #         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
@@ -405,6 +406,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
             else:
                 EvidenceUtil.performPhraseFilteringOnBusiness(evidencePlotDir, bnss_key, time_key_wdw,
                                                            necessary_ds, phrase)
+        print '----------------------------------------------------------------------------------------'
 
 def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True,

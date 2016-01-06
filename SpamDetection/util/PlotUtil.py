@@ -131,6 +131,15 @@ def plotAny(a):
     plt.show()
 
 
+def plotTimeSeries(ax, x, y, label):
+    ax.plot(x, y, 'g', label=label, linewidth=1.5)
+
+def plotOutlierScores(ax, x, y):
+    ax.plot(x, y, 'r', label='Outlier Scores', linewidth=1.5)
+
+def plotOutlierLine(ax, x):
+    ax.axvline(x=x, color='b', linewidth=1.5)
+
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures, avg_idxs, timeLength = '1-M'):
     plot = 1
     # firstDateTime = statistics_for_bnss[StatConstants.FIRST_DATE_TIME]
@@ -146,6 +155,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
     xticks = range(firstTimeKey, lastTimeKey+1, step)
+
+#     f, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, sharex=True)
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -179,8 +190,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     modified_data = [d+1 for d in data]
                     ax1.set_yscale('log')
 
-                ax1.plot(firstDimensionValues,\
-                    modified_data, 'g', label=measure_key)
+                plotTimeSeries(ax1, firstDimensionValues, modified_data, measure_key)
 
                 chOutlierIdxs, chPtsOutlierScores = chPtsOutliersForBnss[measure_key][algo]
                 if len(chPtsOutlierScores) > 0:
@@ -219,18 +229,16 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                         ax2.set_yscale('log')
                                     else:
                                         plot_scores.append(scores[indx])
-                                ax2.plot(x, plot_scores, 'r')
+                                plotOutlierScores(ax2, x, plot_scores)
                         else:
                             if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                                 scores = chPtsOutlierScores
                                 scores = [scores[indx]+1 for indx in range(len(scores))]
                                 ax2.set_yscale('log')
-                                ax2.plot(range(firstTimeKey, firstTimeKey+len(scores)), scores,
-                                 'r', label='Outlier Scores')
+                                plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey+len(scores)), scores)
                             else:
-                                ax2.plot(range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores,
-                                 'r', label='Outlier Scores')
+                                plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)), chPtsOutlierScores)
 
                 if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
                     for idx in sorted(avg_idxs):
@@ -239,10 +247,10 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                         outlier_idx < idx2 and idx1 <= outlier_idx < len(chPtsOutlierScores)]
                         if len(outlier_idxs) > 0:
                             outlier_idx = min(outlier_idxs, key= lambda outlier_idx : math.fabs(idx-outlier_idx))
-                            ax1.axvline(x=firstDimensionValues[outlier_idx], linewidth=1.5, color='b')
+                            plotOutlierLine(ax1, firstDimensionValues[outlier_idx])
                 else:
                     for idx in chOutlierIdxs:
-                        ax1.axvline(x=firstDimensionValues[idx], linewidth=1.5, color='b')
+                        plotOutlierLine(ax1, firstDimensionValues[idx])
                 plot += 1
         else:
             ax1 = fig.add_subplot(len(toBeUsedMeasures), 1, plot)
@@ -258,18 +266,16 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 plt.ylim((1,5))
                 plt.yticks(range(1,6))
 
-
-            ax1.plot(firstDimensionValues,\
-                data, 'g', label=measure_key)
+            plotTimeSeries(ax1, firstDimensionValues, data, measure_key)
 
             chOutlierIdxs, chPtsOutlierScores = [], []
             if len(chPtsOutlierScores) > 0:
                 ax2 = ax1.twinx()
-                ax2.plot(range(firstTimeKey, firstTimeKey + len(chPtsOutlierScores)), chPtsOutlierScores,
-                     'r', label='Outlier Scores')
+                plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey+len(chPtsOutlierScores)),
+                                  chPtsOutlierScores)
 
             for idx in chOutlierIdxs:
-                ax1.axvline(x=firstDimensionValues[idx], linewidth=2, color='b')
+                plotOutlierLine(ax1, firstDimensionValues[idx])
 
     art = []
     plt.tight_layout()

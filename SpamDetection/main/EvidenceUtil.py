@@ -556,7 +556,7 @@ def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
     time_key_start, time_key_end = time_key_wdw
-    print '------------------------ Bnss Key', bnssKey, '---------------------------------\n'
+    print '------------------------ LDA ---------------------------------\n'
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]
         if (bnssKey, SIAUtil.PRODUCT) not in G:
@@ -591,7 +591,7 @@ def performPhraseFilteringOnBusiness(plotDir, bnssKey, time_key_wdw, necessaryDs
                                      phrase, similar_phrases = set()):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
-    phrases = similar_phrases
+    phrases = set(similar_phrases)
     phrases.add(phrase)
     time_key_start, time_key_end = time_key_wdw
     for time_key in range(time_key_start, time_key_end):
@@ -626,7 +626,7 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
     bnssImgFolder = os.path.join(plotDir, bnssKey + '_' + str(time_key_start)\
                                      + '_' + str(time_key_end))
 #     text_to_usr_ids = dict()
-    print '----------------------------------------', bnssKey, time_key_wdw, '---------------------------------------------------'
+    print '----------------------------------------DUPLICATE COUNT---------------------------------------------------'
 
     for time_key in range(time_key_start, time_key_end):
         G = ctg[time_key]

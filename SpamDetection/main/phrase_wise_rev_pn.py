@@ -39,10 +39,15 @@ def runPhraseFilterAndSeperate(reviews, phrases, fdr):
     filtered_reviews =[]
     for phrase in phrases:
         for revw in reviews:
-            if phrase in revw.getReviewText():
+            if phrase.lower() in revw.getReviewText().lower():
                 filtered_reviews.append(revw)
     pos_filtered_reviews = [revw for revw in filtered_reviews if revw.getRating()>=4.0]
     neg_filtered_reviews = [revw for revw in filtered_reviews if revw.getRating()<=2.0]
+    print '-----------------------------------------------'
+    print phrases
+    for r in filtered_reviews:
+        print r.getReviewText()
+    print '-----------------------------------------------'
     writeReviewTextInFile(filtered_reviews, ALL_REVIEWS_FILE, fdr)
     writeReviewTextInFile(pos_filtered_reviews, POS_REVW_FILE, fdr)
     writeReviewTextInFile(neg_filtered_reviews, NEG_REVW_FILE, fdr)
