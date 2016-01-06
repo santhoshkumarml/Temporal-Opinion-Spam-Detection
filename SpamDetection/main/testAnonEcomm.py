@@ -8,7 +8,7 @@ import sys
 
 import AppUtil
 import ThresholdHelper
-from util.data_reader_utils.flipkart_utils import FlipkartDataReader
+from util.data_reader_utils.anon_ecomm_utils import AnonEcommDataReader
 from util import StatConstants
 
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
         print 'Usage: python -m \"tryout.testFlipkKart\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
-    reader = FlipkartDataReader.FlipkartDataReader()
+    reader = AnonEcommDataReader.AnonEcommDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,

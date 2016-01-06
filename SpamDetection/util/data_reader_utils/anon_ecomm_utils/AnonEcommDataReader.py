@@ -19,7 +19,7 @@ REVIEW_TEXT = 'text'
 RATING_CSV = 'ProductRatings_processed.csv'
 REVIEW_CSV = 'ProductReviews_processed.csv'
 
-class FlipkartDataReader(object):
+class AnonEcommDataReader(object):
     def __init__(self):
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}
