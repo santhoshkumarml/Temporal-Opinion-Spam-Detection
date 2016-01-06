@@ -375,13 +375,13 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     for revwId in superGraph.getReviewIds():
         revw = superGraph.getReviewFromReviewId(revwId)
         txt = revw.getReviewText()
-        if txt not in all_review_text_to_review_id or txt == '':
+        if txt not in all_review_text_to_review_id:
             all_review_text_to_review_id[txt] = set()
         all_review_text_to_review_id[txt].add(revw.getId())
 
     for bnss_key, time_key_wdw in bnss_key_time_wdw_list:
-        EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
-                                                num_topics=5, num_words=1)
+#         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
+#                                                 num_topics=5, num_words=1)
 #         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
 #                                             bnss_key, time_key_wdw,\
 #                                             necessary_ds,\

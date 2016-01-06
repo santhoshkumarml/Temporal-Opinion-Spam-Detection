@@ -645,7 +645,7 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
                     print 'Cannot find review text', review_text
                     continue
                 review_ids = all_review_text_to_review_id[review_text]
-                if len(review_ids) > 1:
+                if len(review_ids) > 1 and len(nltk.word_tokenize(review_text.decode('UTF-8'))) >= 2:
                     text_to_review_ids[review_text] = review_ids
     print len(text_to_review_ids), len(reviews_for_bnss_in_time_key)
     imgFolder = os.path.join(bnssImgFolder, 'text_graph')

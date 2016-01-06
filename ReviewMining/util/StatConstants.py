@@ -66,7 +66,21 @@ MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM],
                                   TF_IDF:[LOCAL_AR, AR_UNIFYING],
                                   NO_OF_REVIEWS: [LOCAL_AR, AR_UNIFYING]}
 
+# MEASURES_CHANGE_DETECTION_ALGO = {AVERAGE_RATING : [CUSUM],
+#                                   NO_OF_POSITIVE_REVIEWS: [AR_UNIFYING],
+#                                   NO_OF_NEGATIVE_REVIEWS:[AR_UNIFYING],
+#                                   RATING_ENTROPY: [LOCAL_AR],
+#                                   NON_CUM_NO_OF_REVIEWS: [LOCAL_AR],
+#                                   RATIO_OF_SINGLETONS:[LOCAL_AR],
+#                                   RATIO_OF_FIRST_TIMERS:[LOCAL_AR],
+#                                   YOUTH_SCORE:[LOCAL_AR],
+#                                   ENTROPY_SCORE:[LOCAL_AR],
+#                                   MAX_TEXT_SIMILARITY:[LOCAL_AR],
+#                                   TF_IDF:[LOCAL_AR],
+#                                   NO_OF_REVIEWS: [LOCAL_AR]}
+
 MEASURE_LEAD_SIGNALS = {AVERAGE_RATING, NO_OF_POSITIVE_REVIEWS, NO_OF_NEGATIVE_REVIEWS}
+# MEASURE_LEAD_SIGNALS = {AVERAGE_RATING}
 
 
 MEASURES_CHANGE_FINDERS = {key:
