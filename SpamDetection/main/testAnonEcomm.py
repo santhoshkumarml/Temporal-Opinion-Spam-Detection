@@ -14,7 +14,7 @@ from util import StatConstants
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print 'Usage: python -m \"tryout.testFlipkKart\" csvFolder'
+        print 'Usage: python -m \"tryout.testAnonEcomm\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
     reader = AnonEcommDataReader.AnonEcommDataReader()
