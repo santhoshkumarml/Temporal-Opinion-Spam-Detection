@@ -228,12 +228,12 @@ class business(SIAObject):
                 (self.score[PRODUCT_TYPE_GOOD]*allNeighborMessageMultiplication[PRODUCT_TYPE_GOOD])/normalizingValue)
 
 class review(SIALink):
-    def __init__(self, _id, usrId, bnId, rating, timeOfReview, txt='', recommended=True):
+    def __init__(self, _id, usrId, bnssId, rating, timeOfReview, txt='', recommended=True):
         super(review, self).__init__()
         self.id = _id
         self.rating = rating
         self.usrId = usrId
-        self.bnId = bnId
+        self.bnssId = bnssId
         self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
@@ -257,7 +257,7 @@ class review(SIALink):
         return self.usrId
 
     def getBusinessID(self):
-        return self.bnId
+        return self.bnssId
 
     def getTimeOfReview(self):
         return self.timeOfReview
@@ -278,7 +278,7 @@ class review(SIALink):
         self.score = user.getMessageFromNeighbor(business)
 
     def toString(self):
-        final_str = 'Review by Usr:' + self.usrId + ' on Bnss:' + self.bnId + ' Rating:' + str(self.rating) + ' Review Time:' + \
+        final_str = 'Review by Usr:' + self.usrId + ' on Bnss:' + self.bnssId + ' Rating:' + str(self.rating) + ' Review Time:' + \
                str(getDateForReview(self)) + '\n Review Comment:' + str(self.getReviewText())
         if self.extra != None:
             final_str = final_str + '\n' + 'Extra Info:' + str(self.extra)

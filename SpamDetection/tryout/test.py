@@ -72,7 +72,10 @@ if __name__ == "__main__":
         if revw.getBusinessID() in bnss_set and revw.getReviewText() != '':
             with open(os.path.join(revwLogFolder, revw.getBusinessID()), 'a') as f:
                 f.write('----------------------------------------------------------\n')
-                f.write(revw.toString())
+                try:
+                    f.write(revw.toString())
+                except:
+                    print revw.toString(), type(revw.toString())
                 f.write('\n')
                 f.write('----------------------------------------------------------\n')
 
