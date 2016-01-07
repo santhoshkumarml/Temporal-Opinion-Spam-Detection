@@ -77,18 +77,19 @@ class AnonEcommDataReader(object):
                         review_text = ' '.join(review_buffer[4:-6])
                         review_id = revw[3]
                         review_buffer = []
+                        extra_info = {'title' : review_buffer[-6],
+                                      'category' : review_buffer[-5],
+                                      'last_modified_time' : review_buffer[-4],
+                                      'creation_time_stamp' : review_buffer[-3],
+                                      'first_to_review' : review_buffer[-2],
+                                      'certififed_buyer' : review_buffer[-1]}
                         read_review_text_cnt += 1
                         if review_id != 'NULL' and review_id in self.reviewIdToReviewDict:
                             review_text = str(review_text)
                             self.reviewIdToReviewDict[review_id].setReviewText(review_text)
-                            self.reviewIdToReviewDict[review_id].setExtra({'title' : review_buffer[-6],
-                                                                           'category' : review_buffer[-5],
-                                                                           'last_modified_time' : review_buffer[-4],
-                                                                           'creation_time_stamp' : review_buffer[-3],
-                                                                           'first_to_review' : review_buffer[-2],
-                                                                           'certififed_buyer' : review_buffer[-1]})
+                            self.reviewIdToReviewDict[review_id].setExtra(extra_info)
                         else:
-                            if review_id != 'NULL':
+                            if review_id == 'NULL':
                                 skippedDataWithNullReviewId += 1
                             else:
                                 skippedDataWithoutReviewId += 1
