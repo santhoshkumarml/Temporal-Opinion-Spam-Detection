@@ -58,7 +58,7 @@ if __name__ == "__main__":
     for revwId in reviewIdToReviewsDict.keys():
         revw = reviewIdToReviewsDict[revwId]
         if revw.getBusinessID() in bnss_set:
-            with open(os.path.join(revwLogFolder, revw.getBusinessID()), 'w') as f:
+            with open(os.path.join(revwLogFolder, revw.getBusinessID()), 'a') as f:
                 f.write('----------------------------------------------------------\n')
                 f.write(revw.getReviewText())
                 f.write('\n')
