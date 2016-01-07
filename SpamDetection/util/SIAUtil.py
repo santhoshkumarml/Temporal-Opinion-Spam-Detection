@@ -237,6 +237,7 @@ class review(SIALink):
         self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
+        self.extra = dict()
 
     def getRating(self):
         return self.rating
@@ -266,6 +267,9 @@ class review(SIALink):
 
     def setReviewText(self, txt):
         self.text = txt
+
+    def setExtra(self, extra_info):
+        self.extra = extra_info
 
     def isRecommended(self):
         return self.recommended
