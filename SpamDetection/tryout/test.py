@@ -42,15 +42,17 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
 
-    bnss_set = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
-                    'f04bc4093557a51a3fdde40ef92464c9', 'beaa44a68be8aa0858cbe3e83a23964a',
-                    'dc9d0a3389e58f134ff9dc0435e18962'])
+#     bnss_set = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
+#                     'f04bc4093557a51a3fdde40ef92464c9', 'beaa44a68be8aa0858cbe3e83a23964a',
+#                     'dc9d0a3389e58f134ff9dc0435e18962']) #fb57b2749835facf54d9c73f0d9a8d4c
+
+    bnss_set = set(['fb57b2749835facf54d9c73f0d9a8d4c'])
     rdr = AnonEcommDataReader()
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = AppUtil.readData(csvFolder,
                                                                                     readReviewsText=True,
                                                                                     rdr=rdr)
     del bnssIdToBusinessDict, usrIdToUserDict
-    revwLogFolder = os.path.join(os.path.join(plotDir, 'bnss_revw'), 'fb57b2749835facf54d9c73f0d9a8d4c')
+    revwLogFolder = os.path.join(os.path.join(plotDir, 'bnss_revw'), '8edd789d64c7279592057487ff5bb264')
 
     if not os.path.exists(revwLogFolder):
         os.makedirs(revwLogFolder)
