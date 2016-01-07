@@ -40,13 +40,23 @@ if __name__ == "__main__":
         print 'Usage: python -m \"tryout.test\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
+
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
 
-    bnss_set = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
+    bnss_set1 = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
                     'f04bc4093557a51a3fdde40ef92464c9', 'beaa44a68be8aa0858cbe3e83a23964a',
-                    'dc9d0a3389e58f134ff9dc0435e18962', 'fb57b2749835facf54d9c73f0d9a8d4c']) #fb57b2749835facf54d9c73f0d9a8d4c
+                    'dc9d0a3389e58f134ff9dc0435e1a962', 'fb57b2749835facf54d9c73f0d9a8d4c']) #fb57b2749835facf54d9c73f0d9a8d4c, 8edd789d64c7279592057487ff5bb26
 
-#     bnss_set = set(['fb57b2749835facf54d9c73f0d9a8d4c'])
+    bnss_set2 = set(['8256464cc62ac60780732f469c31ed93', 'a81540b49865cac9dc0b4c4a069e2f65',
+                    'e4bbdc5b36c01ec46070ead21fd4ef0b', 'cb21ab81ffc3230896eac3538751d79c',
+                    'c116413510bda494fb021f4b7dcdab13', 'b030c6c50bd7ce01135fffa638e74a9b',
+                    '6158e8725c8f9fd9dec469088512cd6a', '112262aec34dc24c5b2e9bf91346a5ed',
+                    'ebc30981f0f18aeaee44c403e459cf01',
+                    'b030c6c50bd7ce01135fffa638e74a9b', '6158e8725c8f9fd9dec469088512cd6a',
+                    'fafc1f6a28f02bf1dc8b655c9706e184'
+                    'a9856cb97ebd363a0581d08f27f8b379'])#a9856cb97ebd363a0581d08f27f8b379
+    bnss_set = bnss_set1 | bnss_set2
+
     rdr = AnonEcommDataReader()
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = AppUtil.readData(csvFolder,
                                                                                     readReviewsText=True,
