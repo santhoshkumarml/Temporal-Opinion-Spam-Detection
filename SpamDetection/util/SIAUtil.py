@@ -282,6 +282,7 @@ class review(SIALink):
                str(getDateForReview(self)) + '\n Review Comment:' + str(self.getReviewText())
         if self.extra != None:
             final_str = final_str + '\n' + 'Extra Info:' + str(self.extra)
+        return final_str
 
 
 def getDateForReview(r):
