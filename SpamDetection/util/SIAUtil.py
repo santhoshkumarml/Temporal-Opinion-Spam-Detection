@@ -237,7 +237,7 @@ class review(SIALink):
         self.timeOfReview = timeOfReview
         self.text = txt
         self.recommended = recommended
-        self.extra = dict()
+        self.extra = None
 
     def getRating(self):
         return self.rating
@@ -278,8 +278,10 @@ class review(SIALink):
         self.score = user.getMessageFromNeighbor(business)
 
     def toString(self):
-        return 'Review by Usr:'+self.usrId+ ' on Bnss:'+ self.bnId+' Rating:'+str(self.rating)+' Review Time:'+\
-               str(getDateForReview(self))+' Review Comment:'+ str(self.getReviewText())
+        final_str = 'Review by Usr:' + self.usrId + ' on Bnss:' + self.bnId + ' Rating:' + str(self.rating) + ' Review Time:' + \
+               str(getDateForReview(self)) + '\n Review Comment:' + str(self.getReviewText())
+        if self.extra != None:
+            final_str = final_str + '\n' + 'Extra Info:' + str(self.extra)
 
 
 def getDateForReview(r):

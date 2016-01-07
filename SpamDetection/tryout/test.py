@@ -42,27 +42,27 @@ if __name__ == "__main__":
     csvFolder = sys.argv[1]
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
 
-#     bnss_set = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
-#                     'f04bc4093557a51a3fdde40ef92464c9', 'beaa44a68be8aa0858cbe3e83a23964a',
-#                     'dc9d0a3389e58f134ff9dc0435e18962']) #fb57b2749835facf54d9c73f0d9a8d4c
+    bnss_set = set(['8edd789d64c7279592057487ff5bb264', 'd2c9f8c737d5d402593917a618d47821',
+                    'f04bc4093557a51a3fdde40ef92464c9', 'beaa44a68be8aa0858cbe3e83a23964a',
+                    'dc9d0a3389e58f134ff9dc0435e18962', 'fb57b2749835facf54d9c73f0d9a8d4c']) #fb57b2749835facf54d9c73f0d9a8d4c
 
-    bnss_set = set(['fb57b2749835facf54d9c73f0d9a8d4c'])
+#     bnss_set = set(['fb57b2749835facf54d9c73f0d9a8d4c'])
     rdr = AnonEcommDataReader()
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = AppUtil.readData(csvFolder,
                                                                                     readReviewsText=True,
                                                                                     rdr=rdr)
     del bnssIdToBusinessDict, usrIdToUserDict
-    revwLogFolder = os.path.join(os.path.join(plotDir, 'bnss_revw'), '8edd789d64c7279592057487ff5bb264')
+    revwLogFolder = os.path.join(plotDir, 'bnss_revw')
 
     if not os.path.exists(revwLogFolder):
         os.makedirs(revwLogFolder)
 
     for revwId in reviewIdToReviewsDict.keys():
         revw = reviewIdToReviewsDict[revwId]
-        if revw.getBusinessID() in bnss_set:
+        if revw.getBusinessID() in bnss_set and revw.getReviewText() != '':
             with open(os.path.join(revwLogFolder, revw.getBusinessID()), 'a') as f:
                 f.write('----------------------------------------------------------\n')
-                f.write(revw.getReviewText())
+                f.write(revw.toString())
                 f.write('\n')
                 f.write('----------------------------------------------------------\n')
 
