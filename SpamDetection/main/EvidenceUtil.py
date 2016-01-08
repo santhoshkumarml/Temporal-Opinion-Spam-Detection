@@ -187,9 +187,9 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
-    indxs = numpy.arange(0, total_days * 2, 2)
+    indxs = numpy.arange(0, total_days * 1, 1)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 1.5
+    width = 1.0
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
