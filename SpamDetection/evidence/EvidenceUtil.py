@@ -5,16 +5,14 @@ import collections
 import datetime
 import nltk
 import numpy
-import os, math, random, operator, pandas as pd
+import os, math, pandas as pd
 
-import AppUtil
 import matplotlib.pyplot as plt
 import networkx as nx
 import phrase_wise_rev_pn
-from util import GraphUtil, SIAUtil
+from util import GraphUtil, SIAUtil, PlotUtil
 from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
-from util.text_utils import LDAUtil
-from util.text_utils import TextConstants
+from util.text_utils import LDAUtil, TextConstants
 
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
@@ -142,9 +140,7 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
     plt.title(title)
     plt.axis('off')
-    plt.savefig(imgFile)
-    # plt.show()
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 
 def plotRatingDistribution(review_rating_distribution, imgFolder,
@@ -159,8 +155,7 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
         autopct=make_autopct(fracs), shadow=False, startangle=90)
     plt.title(title, bbox={'facecolor': '0.8', 'pad': 5})
     plt.legend()
-    plt.savefig(imgFile, bbox_inches='tight')
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 
 def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
@@ -177,19 +172,18 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
     plt.title(title)
     plt.xticks([0.10, 0.60], x_labels)
     plt.legend()
-    plt.savefig(imgFile, bbox_inches='tight')
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(18, 6))
+    fig = plt.figure(figsize=(16, 4))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
     indxs = numpy.arange(0, total_days * 1, 1)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 1.0
+    width = 0.5
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
@@ -211,8 +205,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     plt.title(title)
     plt.xticks(indxs + width/2., x_labels)
     plt.legend([p[0] for p in pS], range(1, 6))
-    plt.savefig(imgFile, bbox_inches='tight')
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
@@ -334,8 +327,7 @@ def plotGraphForReviewText(review_ids, superGraph, imgFolder, title, text, time_
         color='black', fontsize=15)
 
     plt.axis('off')
-    plt.savefig(imgFile)
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 
 

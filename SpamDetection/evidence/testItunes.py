@@ -37,11 +37,11 @@ def tryPlotting():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print 'Usage: python -m \"tryout.test\" csvFolder'
+        print 'Usage: python -m \"evidence.test\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
 
-    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
+    plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'it')
 
 #     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
 #     bnss_key_time_wdw_list = [('284235722', (140, 142)),

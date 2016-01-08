@@ -7,6 +7,7 @@ import os
 from wordcloud.wordcloud import WordCloud, STOPWORDS
 
 import matplotlib.pyplot as plt
+from util import PlotUtil
 
 
 POS_REVW_FILE = 'pos_reviews'
@@ -24,8 +25,7 @@ def plotWordCloud(revws, title, imgFolder):
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.title(title)
-    plt.savefig(imgFile)
-    plt.close()
+    PlotUtil.savePlot(imgFile)
 
 def writeReviewTextInFile(reviews, review_file_name, fdr):
     with open(os.path.join(fdr, review_file_name + '.txt'), 'w') as f:
