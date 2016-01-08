@@ -182,7 +182,7 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
 
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(36, 10))
+    fig = plt.figure(figsize=(18, 6))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title + '.png')
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
