@@ -3,17 +3,19 @@
 
  This is a work from  [Data Analytics Techniques Algorithms (DATA) Lab] (http://www3.cs.stonybrook.edu/~datalab/index.html) of [Computer Science Department](http://www.cs.stonybrook.edu/) at [Stony Brook University](http://www.stonybrook.edu/) under Professor [Leman Akoglu] (http://www3.cs.stonybrook.edu/~leman/) by [Santhosh Kumar Manavasi Lakshminarayanan] (https://sites.google.com/a/cs.stonybrook.edu/smanavasilak/) and  [Junting Ye] (http://www3.cs.stonybrook.edu/~juyye/)
 
-### DataSet:
+##DataSet:
 	We used an Itunes Dataset and an anonymous popular ecommerce website review dataset. For Data please contact Professor [Leman Akoglu] (http://www3.cs.stonybrook.edu/~leman/)
 
-### USAGE:
+##USAGE:
 	To Run the system with Itunes Data : python -m "main.testItunes" csvFolder
 
 	For Any other dataset, consumers can create their own data reader utility similar to Temporal-Opinion-Spam-Detection/SpamDetection/util/data_reader_utils/itunes_utils/ItunesDataReader.py and run the system by following steps:
-#### STEP 1:
-	Generate and save statisitcs by calling extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()) in main.AppUtil
-#### STEP 2:
-	Detect Anomalies by calling the function detectAnomaliesForBnsses(csvFolder, plotDir, threshold, doPlot=True, dologStats=True) in main.AppUtil
+	
+##STEP 1:
+	Generate and save statisitcs using the function extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()) in main.AppUtil
+
+## STEP 2:
+	Detect Anomalies by using the function detectAnomaliesForBnsses(csvFolder, plotDir, threshold, doPlot=True, dologStats=True) in main.AppUtil
 
 
 ### CONTRIBUTORS:
