@@ -10,7 +10,7 @@ import CommonUtil
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print 'Usage: python -m \"evidence.test\" csvFolder'
+        print 'Usage: python -m \"evidence.testAnonEcomm\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
 
