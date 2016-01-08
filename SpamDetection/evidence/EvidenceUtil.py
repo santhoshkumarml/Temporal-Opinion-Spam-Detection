@@ -13,6 +13,7 @@ import phrase_wise_rev_pn
 from util import GraphUtil, SIAUtil, PlotUtil
 from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import LDAUtil, TextConstants
+from main import AppUtil
 
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)

@@ -7,33 +7,6 @@ Created on Jan 6, 2016
 from main import AppUtil
 from datetime import datetime
 import sys, os
-import matplotlib.pyplot as plt
-import numpy
-
-
-def tryPlotting():
-    fig, axarr = plt.subplots(9, 2, figsize=(20, 20))
-    for x in range(9):
-        for y in range(2):
-            ax = axarr[x][y]
-            ax.plot(numpy.random.normal((2*x)+y, 0.2, 150), color='g')
-            if y == 1:
-                ax.set_xticklabels([])
-            position = ax.get_position()
-            left = position.x0
-            top = position.y0
-            right = position.x0 + position.width
-            bottom = position.y0 + position.height
-
-            ax.text(0.5*(left + right), 0.5*(bottom + top), 'text',
-                            horizontalalignment='center',
-                            verticalalignment='center',
-                            fontsize=10, color='red',
-                            transform=ax.transAxes)
-
-
-    fig.subplots_adjust(wspace=0.05, hspace=1)
-    plt.show()
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

@@ -38,8 +38,3 @@ if __name__ == "__main__":
 #                                 ('fb57b2749835facf54d9c73f0d9a8d4c', (32, 37)),
 #                                  ('8edd789d64c7279592057487ff5bb264', (31, 36)),
 #                                   ('a9856cb97ebd363a0581d08f27f8b379', (30, 35))]
-    bnss_key_time_wdw_list = [('fb57b2749835facf54d9c73f0d9a8d4c', (34, 36)),
-                                 ('8edd789d64c7279592057487ff5bb264', (34, 36))]
-    AppUtil.doGatherEvidence(csvFolder, plotDir,
-                             rdr=reader,
-                             bnss_key_time_wdw_list=bnss_key_time_wdw_list)

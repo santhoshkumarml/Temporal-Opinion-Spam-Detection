@@ -5,10 +5,11 @@ Created on Jan 10, 2015
 '''
 
 from matplotlib.backends.backend_pdf import PdfPages
-import os, math
+import os, math, numpy
 
 from anomaly_detection import AnomalyDetector
 import matplotlib.pyplot as plt
+import matplotlib
 from util import StatConstants
 
 
@@ -50,6 +51,19 @@ def plotLabelAsText(ax, txt):
                     fontsize=13, color='black',
                     transform=ax.transAxes)
 
+
+def limitYTicks(ax):
+    ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=5))
+
+def limitYTicksForLog(ax):
+    ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(numticks=5))
+#
+#     yticks = ax.get_yticks()
+#     if len(yticks) > 5:
+#         indx_inc = len(yticks) / 5
+#         ytick_indx = [i for i in numpy.arange(0, len(yticks), indx_inc)]
+#         ax.set_yticks([yticks[i] for i in ytick_indx])
+
 def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toBeUsedMeasures,
                          avg_idxs, timeLength = '1-M'):
     plot, step = 0, 10
@@ -63,7 +77,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
     xticks = range(firstTimeKey, lastTimeKey+1, step)
 
-    imgFile = os.path.join(inputDir, statistics_for_bnss[StatConstants.BNSS_ID]+"_stat") + '.pdf'
+    imgFile = os.path.join(os.path.join(inputDir, 'plots'), statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")
 
     fig, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, figsize=(17, 13), sharex='col', sharey='row')
 
@@ -98,16 +112,18 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 setFontSizeForAxes(ax1)
                 plotLabelAsText(ax1, measure_key)
 
-                if measure_key == StatConstants.AVERAGE_RATING:
-                    ax1.set_ylim((1, 5))
-                    ax1.set_yticks(range(1, 6))
-
                 modified_data = data
                 if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                    StatConstants.NO_OF_POSITIVE_REVIEWS,
                                    StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                     modified_data = [d+1 for d in data]
                     ax1.set_yscale('log')
+                    limitYTicksForLog(ax1)
+                elif measure_key == StatConstants.AVERAGE_RATING:
+                    ax1.set_ylim((1, 5))
+                    ax1.set_yticks(range(1, 6))
+                else:
+                    limitYTicks(ax1)
 
                 plotTimeSeries(ax1, firstDimensionValues, modified_data, measure_key)
 
@@ -168,6 +184,14 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey + len(scores)), scores)
                             else:
                                 plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey + len(chPtsOutlierScores)), chPtsOutlierScores)
+
+                    if algo_indx == 1:
+                        if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
+                                       StatConstants.NO_OF_POSITIVE_REVIEWS,
+                                       StatConstants.NO_OF_NEGATIVE_REVIEWS]:
+                            limitYTicksForLog(ax2)
+                        else:
+                            limitYTicks(ax2)
 
                 if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
                     for idx in sorted(avg_idxs):
