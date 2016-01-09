@@ -18,6 +18,11 @@ from main import AppUtil
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
+TIME_WISE_RATING = 'Time Wise Rating Count'
+RATING_DISTRIBUTION = 'Rating Distribution'
+EXTREMITY_OF_NON_SINGLETON_USERS = 'Extremity of Non Singleton Users'
+SUSPICIOUSNESS_GRAPH = 'Suspicious Non Singleton User'
+
 def make_autopct(values):
     def my_autopct(pct):
         total = sum(values)
@@ -160,7 +165,7 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
 
 
 def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
-                                    title='Extremity of Non SingletonUsr'):
+                                    title='Extremity of Non Singleton Users'):
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(1, 1, 1)
     width = 0.20
@@ -174,7 +179,6 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
     plt.xticks([0.10, 0.60], x_labels)
     plt.legend()
     PlotUtil.savePlot(imgFile)
-
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
     fig = plt.figure(figsize=(18, 8))
@@ -344,7 +348,7 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                   time_wise_non_extreme_non_singleton_usrs,\
                   time_wise_review_time_rating,\
                   time_key_start, time_key_end, time_key_to_date_time,\
-                  bnssImgFolder):
+                  bnssImgFolder, statsToPlot = []):
     for time_key in range(time_key_start, time_key_end):
         imgFolder = os.path.join(bnssImgFolder, str(time_key))
         if not os.path.exists(imgFolder):
@@ -354,20 +358,24 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
         non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
         extreme_non_singleton_usrs, non_extreme_non_singleton_usrs = time_wise_extreme_non_singleton_usrs[time_key], time_wise_non_extreme_non_singleton_usrs[time_key]
         non_singleton_usr_suspicousness, non_singleton_usr_non_suspicousness = time_wise_non_singleton_usr_suspicousness[time_key], time_wise_non_singleton_usr_non_suspicousness[time_key]
-        plotRatingDistribution(all_user_review_rating_distribution, imgFolder,
-                               title='All Review Rating Count')
-        plotRatingDistribution(singleton_review_rating_distribution, imgFolder,
-                               title='Singleton Review Rating Count')
-        plotRatingDistribution(non_singleton_review_rating_distribution, imgFolder,
-                               title='Non Singleton Review Rating Count')
-        plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs,
-                                        non_extreme_non_singleton_usrs, imgFolder)
-        plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
-                                non_singleton_usr_non_suspicousness,
-                                imgFolder, time_key_to_date_time,
-                                plot_non_suspicious=False)
-    plotReviewTimeRating(time_wise_review_time_rating,
-                         bnssImgFolder)
+        if RATING_DISTRIBUTION in statsToPlot:
+            plotRatingDistribution(all_user_review_rating_distribution, imgFolder,
+                                   title='All Review Rating Count')
+            plotRatingDistribution(singleton_review_rating_distribution, imgFolder,
+                                   title='Singleton Review Rating Count')
+            plotRatingDistribution(non_singleton_review_rating_distribution, imgFolder,
+                                   title='Non Singleton Review Rating Count')
+        if EXTREMITY_OF_NON_SINGLETON_USERS in statsToPlot:
+            plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs,
+                                            non_extreme_non_singleton_usrs, imgFolder)
+        if SUSPICIOUSNESS_GRAPH in statsToPlot:
+            plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
+                                    non_singleton_usr_non_suspicousness,
+                                    imgFolder, time_key_to_date_time,
+                                    plot_non_suspicious=False)
+    if TIME_WISE_RATING in statsToPlot:
+        plotReviewTimeRating(time_wise_review_time_rating,
+                             bnssImgFolder)
 
 
 def findTimeIdForDateTime(time_key_to_date_time, date_time_for_this_usr):
@@ -400,7 +408,8 @@ def put_grams(grams, grams_dict):
             grams_dict[gram] = 0.0
         grams_dict[gram] += 1.0
 
-def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readReviewsText=False, doPlot=False):
+def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readReviewsText=False,
+                            doPlot=False, statsToPlot = []):
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
 
