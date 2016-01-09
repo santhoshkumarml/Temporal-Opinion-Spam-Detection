@@ -7,6 +7,7 @@ import os
 
 import EvidenceUtil
 from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
+import sys
 
 
 def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_wdw_list = list()):
@@ -14,6 +15,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
     readReviewsText = False
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText,
                                                rdr=rdr)
+    sys.exit()
     ctg, superGraph, time_key_to_date_time,\
      suspicious_timestamps, suspicious_timestamp_ordered = necessary_ds
 
@@ -57,7 +59,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True,
-                                            statsToPlot = [EvidenceUtil.RATING_DISTRIBUTION])
+                                            statsToPlot = [EvidenceUtil.TIME_WISE_RATING])
 #         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
 #                                            necessary_ds, all_review_text_to_review_id)
 
