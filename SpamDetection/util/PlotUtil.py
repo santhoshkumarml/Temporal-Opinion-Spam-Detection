@@ -33,7 +33,7 @@ def savePlot(imgFileName, isPdf=True):
     plt.close()
 
 
-def setFontSizeForAxes(ax, font_size=18):
+def setFontSizeForAxes(ax, font_size=20):
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label]
                                   + ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(font_size)
@@ -78,7 +78,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
     imgFile = os.path.join(os.path.join(inputDir, 'plots'), statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")
 
-    fig, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, figsize=(20, 18), sharex='col', sharey='row')
+    fig, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, figsize=(22, 20), sharex='col')
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -116,7 +116,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                    StatConstants.NO_OF_POSITIVE_REVIEWS,
                                    StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                     modified_data = [d+1 for d in data]
+
                     ax1.set_yscale('log')
+
                     limitYTicksForLog(ax1)
                 elif measure_key == StatConstants.AVERAGE_RATING:
                     ax1.set_ylim((1, 5))
@@ -150,9 +152,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     ax2.set_ylim((min_score, max_score + 0.01))
                     setFontSizeForAxes(ax2)
 
-                    if algo_indx == 0:
-                        ax2.set_yticklabels([])
-
                     scores = chPtsOutlierScores
                     if len(scores) > 0:
                         if algo == StatConstants.LOCAL_AR:
@@ -167,8 +166,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                     if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
                                        StatConstants.NO_OF_POSITIVE_REVIEWS, StatConstants.NO_OF_NEGATIVE_REVIEWS]:
                                         plot_scores.append(scores[indx]+1)
-                                        if algo_indx == 1:
-                                            ax2.set_yscale('log')
+                                        ax2.set_yscale('log')
                                     else:
                                         plot_scores.append(scores[indx])
                                 plotOutlierScores(ax2, x, plot_scores)
@@ -180,20 +178,18 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 scores = [scores[indx]+1 for indx in range(len(scores))]
 
                                 ax2.set_yscale('log')
-                                if algo_indx == 0:
-                                    ax2.set_yticklabels([])
+
 
                                 plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey + len(scores)), scores)
                             else:
                                 plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey + len(chPtsOutlierScores)), chPtsOutlierScores)
 
-                    if algo_indx == 1:
-                        if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
-                                       StatConstants.NO_OF_POSITIVE_REVIEWS,
-                                       StatConstants.NO_OF_NEGATIVE_REVIEWS]:
-                            limitYTicksForLog(ax2)
-                        else:
-                            limitYTicks(ax2)
+                    if measure_key in [StatConstants.NON_CUM_NO_OF_REVIEWS,
+                                   StatConstants.NO_OF_POSITIVE_REVIEWS,
+                                   StatConstants.NO_OF_NEGATIVE_REVIEWS]:
+                        limitYTicksForLog(ax2)
+                    else:
+                        limitYTicks(ax2)
 
                 if measure_key not in StatConstants.MEASURE_LEAD_SIGNALS:
                     for idx in sorted(avg_idxs):
@@ -210,7 +206,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         plot += 1
 
-    fig.subplots_adjust(hspace=0.17, wspace=0.035)
+    fig.subplots_adjust(hspace=0.17, wspace=0.2)
 
     print statistics_for_bnss[StatConstants.BNSS_ID] + " stats are logged to " + imgFile
 
