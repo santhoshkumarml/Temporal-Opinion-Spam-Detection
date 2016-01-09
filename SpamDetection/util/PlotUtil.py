@@ -22,7 +22,7 @@ def plotOutlierScores(ax, x, y):
 def plotOutlierLine(ax, x):
     ax.axvline(x=x, color='b', linewidth=1.5)
 
-def savePlot(imgFileName, isPdf=False):
+def savePlot(imgFileName, isPdf=True):
     if isPdf:
         imgFileName = imgFileName + ".pdf"
         with PdfPages(imgFileName) as pdf:

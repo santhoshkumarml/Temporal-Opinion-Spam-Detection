@@ -14,6 +14,7 @@ from util import GraphUtil, SIAUtil, PlotUtil
 from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
 from util.text_utils import LDAUtil, TextConstants
 from main import AppUtil
+import matplotlib
 
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
@@ -152,13 +153,25 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 def plotRatingDistribution(review_rating_distribution, imgFolder,
                            title='Rating Distribution'):
     fig = plt.figure(figsize=(10, 6))
-    ax = plt.axes([0.1, 0.1, 0.8, 0.8])
-    imgFile = os.path.join(imgFolder, title + '.png')
-    labels = review_rating_distribution.keys()
-    fracs = review_rating_distribution.values()
 
-    ax.pie(fracs, labels=labels,
-        autopct=make_autopct(fracs), shadow=False, startangle=90)
+    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
+
+    ax = plt.axes([0.1, 0.1, 0.8, 0.8])
+    imgFile = os.path.join(imgFolder, title)
+
+    refined_review_rating_distribution = {key: review_rating_distribution[key] for key in review_rating_distribution if review_rating_distribution[key] > 0}
+
+    labels = refined_review_rating_distribution.keys()
+    colors = [colors[label] for label in labels]
+    labels = [int(label) for label in labels]
+    fracs = refined_review_rating_distribution.values()
+
+
+
+    ax.pie(fracs, labels=labels, autopct=make_autopct(fracs), shadow=False, startangle=90, colors=colors)
+
+    matplotlib.rcParams['font.size'] = 15.0
+
     plt.title(title, bbox={'facecolor': '0.8', 'pad': 5})
     plt.legend()
     PlotUtil.savePlot(imgFile)
@@ -552,7 +565,7 @@ def findStatsForEverything(plotDir,  bnssKey, time_key_wdw, necessaryDs, readRev
                      time_wise_non_extreme_non_singleton_usrs,\
                      time_wise_review_time_rating,\
                      time_key_start, time_key_end, time_key_to_date_time,\
-                     bnssImgFolder)
+                     bnssImgFolder, statsToPlot=statsToPlot)
 
 def performLDAOnPosNegReviews(plotDir,  bnssKey, time_key_wdw,
                               necessaryDs, num_topics=3, num_words=1):

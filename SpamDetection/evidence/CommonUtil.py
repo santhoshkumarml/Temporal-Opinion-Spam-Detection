@@ -51,15 +51,13 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
         print '-----------------', bnss_key, time_key_wdw, '-------------------------------------------'
 #         EvidenceUtil.performLDAOnPosNegReviews(plotDir, bnss_key, time_key_wdw, necessary_ds,
 #                                                 num_topics=5, num_words=1)
+#         [EvidenceUtil.RATING_DISTRIBUTION, EvidenceUtil.TIME_WISE_RATING, EvidenceUtil.SUSPICIOUSNESS_GRAPH, EvidenceUtil.EXTREMITY_OF_NON_SINGLETON_USERS]
         EvidenceUtil.findStatsForEverything(evidencePlotDir,\
                                             bnss_key, time_key_wdw,\
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True,
-                                            statsToPlot = [EvidenceUtil.RATING_DISTRIBUTION,
-                                                           EvidenceUtil.TIME_WISE_RATING,
-                                                           EvidenceUtil.SUSPICIOUSNESS_GRAPH,
-                                                           EvidenceUtil.EXTREMITY_OF_NON_SINGLETON_USERS])
+                                            statsToPlot = [EvidenceUtil.RATING_DISTRIBUTION])
 #         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
 #                                            necessary_ds, all_review_text_to_review_id)
 
