@@ -177,9 +177,9 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
 
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(16, 4))
+    fig = plt.figure(figsize=(18, 8))
     ax = fig.add_subplot(1, 1, 1)
-    imgFile = os.path.join(imgFolder, title + '.png')
+    imgFile = os.path.join(imgFolder, title)
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
     indxs = numpy.arange(0, total_days * 1, 1)
@@ -203,10 +203,11 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     for idx in week_indxs:
         ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=2, color='g')
     plt.ylabel(title)
-    plt.title(title)
+#     plt.title(title)
     plt.xticks(indxs + width/2., x_labels)
     plt.legend([p[0] for p in pS], range(1, 6))
-    PlotUtil.savePlot(imgFile)
+    PlotUtil.setFontSizeForAxes(plt.gca(), font_size=24)
+    PlotUtil.savePlot(imgFile, isPdf=True)
 
 
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):

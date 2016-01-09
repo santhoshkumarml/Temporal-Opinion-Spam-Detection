@@ -33,7 +33,7 @@ def savePlot(imgFileName, isPdf=False):
     plt.close()
 
 
-def setFontSizeForAxes(ax, font_size=13):
+def setFontSizeForAxes(ax, font_size=18):
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label]
                                   + ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(font_size)
@@ -48,7 +48,7 @@ def plotLabelAsText(ax, txt):
     ax.text(0.5*(left + right), 0.5*(bottom + top), txt,
                     horizontalalignment='center',
                     verticalalignment='center',
-                    fontsize=13, color='black',
+                    fontsize=18, color='black',
                     transform=ax.transAxes)
 
 
@@ -75,11 +75,10 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
     firstTimeKey = statistics_for_bnss[StatConstants.FIRST_TIME_KEY]
     lastTimeKey = statistics_for_bnss[StatConstants.LAST_TIME_KEY]
     firstDimensionValues = range(firstTimeKey, lastTimeKey+1)
-    xticks = range(firstTimeKey, lastTimeKey+1, step)
 
     imgFile = os.path.join(os.path.join(inputDir, 'plots'), statistics_for_bnss[StatConstants.BNSS_ID]+"_stat")
 
-    fig, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, figsize=(17, 13), sharex='col', sharey='row')
+    fig, axarr = plt.subplots(len(toBeUsedMeasures), max_algo_len, figsize=(20, 18), sharex='col', sharey='row')
 
     for measure_key in toBeUsedMeasures:
         if measure_key not in statistics_for_bnss or measure_key == StatConstants.NO_OF_REVIEWS:
@@ -96,6 +95,7 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                 algo = algoList[algo_indx]
                 ax1 = axarr[plot][algo_indx]
 
+
                 if plot == 0:
                     if algo_indx == 0:
                         ax1.set_title('Global')
@@ -106,7 +106,6 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     ax1.set_xlabel('Week')
 
                 ax1.set_xlim(firstTimeKey, lastTimeKey)
-                ax1.set_xticks(xticks)
 
 
                 setFontSizeForAxes(ax1)
@@ -124,6 +123,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                     ax1.set_yticks(range(1, 6))
                 else:
                     limitYTicks(ax1)
+
+                ax1.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=15))
 
                 plotTimeSeries(ax1, firstDimensionValues, modified_data, measure_key)
 
@@ -178,8 +179,9 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
                                 scores = chPtsOutlierScores
                                 scores = [scores[indx]+1 for indx in range(len(scores))]
 
-                                if algo_indx == 1:
-                                    ax2.set_yscale('log')
+                                ax2.set_yscale('log')
+                                if algo_indx == 0:
+                                    ax2.set_yticklabels([])
 
                                 plotOutlierScores(ax2, range(firstTimeKey, firstTimeKey + len(scores)), scores)
                             else:
@@ -208,8 +210,8 @@ def plotMeasuresForBnss(statistics_for_bnss, chPtsOutliersForBnss, inputDir, toB
 
         plot += 1
 
-    fig.subplots_adjust(hspace=0.17, wspace=0.030)
+    fig.subplots_adjust(hspace=0.17, wspace=0.035)
 
     print statistics_for_bnss[StatConstants.BNSS_ID] + " stats are logged to " + imgFile
 
-    savePlot(imgFile)
+    savePlot(imgFile, isPdf=True)
