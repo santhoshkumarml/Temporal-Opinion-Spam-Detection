@@ -57,7 +57,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True,
-                                            statsToPlot = [EvidenceUtil.RATING_DISTRIBUTION])
+                                            statsToPlot = [EvidenceUtil.TIME_WISE_RATING])
 #         EvidenceUtil.performDuplicateCount(evidencePlotDir, bnss_key, time_key_wdw,
 #                                            necessary_ds, all_review_text_to_review_id)
 

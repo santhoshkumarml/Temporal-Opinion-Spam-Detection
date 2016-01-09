@@ -29,6 +29,9 @@ if __name__ == "__main__":
                             ('284819997', (180, 185)), ('284819997', (187, 192)),
                             ('319927587', (189, 194)), ('404593641', (158, 163)),
                             ('412629178', (148, 153)), ('284235722', (147,152))]
+
+    bnss_key_time_wdw_list = [('284819997', (166, 169))]
+
 #     bnss_key_time_wdw_list = [('284819997', (167, 169))]
     CommonUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=bnss_key_time_wdw_list)
 

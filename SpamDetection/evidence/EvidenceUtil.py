@@ -152,7 +152,7 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
 def plotRatingDistribution(review_rating_distribution, imgFolder,
                            title='Rating Distribution'):
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(15, 15))
 
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
 
@@ -170,7 +170,7 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
 
     ax.pie(fracs, labels=labels, autopct=make_autopct(fracs), shadow=False, startangle=90, colors=colors)
 
-    matplotlib.rcParams['font.size'] = 15.0
+    matplotlib.rcParams['font.size'] = 24.0
 
     plt.title(title, bbox={'facecolor': '0.8', 'pad': 5})
     plt.legend()
@@ -179,7 +179,7 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
 
 def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
                                     title='Extremity of Non Singleton Users'):
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(18, 8))
     ax = fig.add_subplot(1, 1, 1)
     width = 0.20
     imgFile = os.path.join(imgFolder, title + '.png')
@@ -194,14 +194,14 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
     PlotUtil.savePlot(imgFile)
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(18, 8))
+    fig = plt.figure(figsize=(26, 10))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title)
     colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
-    indxs = numpy.arange(0, total_days * 1, 1)
+    indxs = numpy.arange(0, total_days * 2, 2)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 0.5
+    width = 1.8
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
@@ -217,13 +217,15 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
             btm = numpy.array([btm[i] + val[i] for i in range(0, total_days)])
 
         pS.append(p)
+
     for idx in week_indxs:
         ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=2, color='g')
+
     plt.ylabel(title)
 #     plt.title(title)
     plt.xticks(indxs + width/2., x_labels)
     plt.legend([p[0] for p in pS], range(1, 6))
-    PlotUtil.setFontSizeForAxes(plt.gca(), font_size=24)
+    PlotUtil.setFontSizeForAxes(plt.gca(), font_size=21)
     PlotUtil.savePlot(imgFile, isPdf=True)
 
 
