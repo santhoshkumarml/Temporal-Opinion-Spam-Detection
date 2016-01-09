@@ -6,6 +6,7 @@ Created on Jan 8, 2016
 import os, sys
 
 import CommonUtil
+from util.data_reader_utils.anon_ecomm_utils.AnonEcommDataReader import AnonEcommDataReader
 
 
 if __name__ == "__main__":
@@ -21,4 +22,4 @@ if __name__ == "__main__":
                             ('fb57b2749835facf54d9c73f0d9a8d4c', (32, 37)),
                              ('8edd789d64c7279592057487ff5bb264', (31, 36)),
                               ('a9856cb97ebd363a0581d08f27f8b379', (30, 35))]
-    CommonUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=anomalous_bnss_key_time_wdw_list)
+    CommonUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=anomalous_bnss_key_time_wdw_list, rdr=AnonEcommDataReader())
