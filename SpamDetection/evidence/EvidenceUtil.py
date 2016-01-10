@@ -206,7 +206,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     total_days = len(review_time_rating[1.0].keys())
     indxs = numpy.arange(0, total_days * 4, 4)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 3.6
+    width = 3.9
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
@@ -229,19 +229,19 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     plt.ylabel(title)
 #     plt.title(title)
     plt.xticks(indxs + width/2., x_labels)
-    plt.legend([p[0] for p in pS], range(1, 6), prop={'size':50})
+    plt.legend([p[0] for p in pS], range(1, 6), prop={'size':50}, loc='best')
 #     fontsize = 30, handlelength=6, borderpad=1, labelspacing=2
 
 #     params = {'legend.fontsize': 20}
 #     plt.rcParams.update(params)
 
     for item in (ax.get_xticklabels()):
-        item.set_fontsize(30)
+        item.set_fontsize(32)
 
     for item in (ax.get_yticklabels()):
-        item.set_fontsize(36)
+        item.set_fontsize(60)
 
-    ax.yaxis.label.set_fontsize(28)
+    ax.yaxis.label.set_fontsize(45)
 
     plt.tight_layout()
 
