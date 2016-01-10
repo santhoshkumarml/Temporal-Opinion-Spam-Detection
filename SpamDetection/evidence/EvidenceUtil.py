@@ -67,11 +67,9 @@ def plotSusGraph(non_singleton_usr_suspicousness,
     fig = plt.figure(figsize=(24, 16))
     imgFile = os.path.join(imgFolder, title + '.png')
 
-    print '===================================================================================================================='
-    print non_singleton_usr_suspicousness
-    print '===================================================================================================================='
-    print time_key_to_date_time
-    print '===================================================================================================================='
+
+    pickle.dump(non_singleton_usr_suspicousness, os.path.join(imgFolder, 'non_singleton_usr_suspicousness.pkl'))
+    pickle.dump(time_key_to_date_time, os.path.join(imgFolder, 'time_key_to_date_time.pkl'))
     sys.exit()
     g = nx.Graph()
     bnss_nodes = set()
@@ -484,10 +482,11 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
             plotExtremityForNonSingletonUsr(extreme_non_singleton_usrs,
                                             non_extreme_non_singleton_usrs, imgFolder)
         if SUSPICIOUSNESS_GRAPH in statsToPlot:
-            plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
-                                    non_singleton_usr_non_suspicousness,
-                                    imgFolder, time_key_to_date_time,
-                                    plot_non_suspicious=False)
+            plotSusGraph(non_singleton_usr_suspicousness,
+                          non_singleton_usr_non_suspicousness,
+                          imgFolder, time_key_to_date_time,
+                          plot_non_suspicious=False)
+
     if TIME_WISE_RATING in statsToPlot:
         if not os.path.exists(bnssImgFolder):
             os.makedirs(bnssImgFolder)
