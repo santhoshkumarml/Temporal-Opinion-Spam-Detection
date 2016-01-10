@@ -16,6 +16,9 @@ from util.text_utils import LDAUtil, TextConstants
 from main import AppUtil
 import matplotlib
 
+import pickle
+import sys
+
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
 
@@ -55,6 +58,83 @@ def sortAndPrintReviewsInfo(plotDir, superGraph):
         print 'Started The File Write'
         df.to_csv(f, escapechar='\\', columns=['bnss', 'usr', 'dates', 'text'])
         print 'Finished The File Write'
+
+def plotSusGraph(non_singleton_usr_suspicousness,
+                 non_singleton_usr_non_suspicousness,
+                            imgFolder, time_key_to_date_time,
+                            title='Suspicious Non Singleton User',
+                            plot_non_suspicious=False):
+    fig = plt.figure(figsize=(24, 16))
+    imgFile = os.path.join(imgFolder, title + '.png')
+
+    print '===================================================================================================================='
+    print non_singleton_usr_suspicousness
+    print '===================================================================================================================='
+    print time_key_to_date_time
+    print '===================================================================================================================='
+    sys.exit()
+    g = nx.Graph()
+    bnss_nodes = set()
+    usr_nodes = set()
+
+    node_labels = dict()
+
+    for usrId in non_singleton_usr_suspicousness.keys():
+        for revw_for_usr in non_singleton_usr_suspicousness[usrId]:
+            bnss_id_for_revw = revw_for_usr.getBusinessID()
+            date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+
+            time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                          date_time_for_this_usr)
+            bnss_nodes.add(bnss_id_for_revw)
+            g.add_edge(usrId, bnss_id_for_revw, {'edge': (revw_for_usr.getRating(), time_id_for_date_time)})
+
+            node_labels[bnss_id_for_revw] = bnss_id_for_revw
+            usr_nodes.add(usrId)
+            node_labels[usrId] = usrId
+
+    edge_labels=dict([((u,v,),d['edge']) for u,v,d in g.edges(data=True)])
+
+    usr_nodes_len = len(usr_nodes)
+    bnss_nodes_len = len(bnss_nodes)
+
+    pos = dict()
+
+    usr_node_iter = bnss_nodes_len
+    for node in usr_nodes:
+        pos[node] = (1, usr_node_iter)
+        usr_node_iter += bnss_nodes_len
+
+    bnss_nodes_iter = usr_nodes_len
+    for node in bnss_nodes:
+        pos[node] = (4, bnss_nodes_iter)
+        bnss_nodes_iter += usr_nodes_len
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(usr_nodes),
+                           node_color='b',
+                           node_size=500,
+                           alpha=0.8)
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(bnss_nodes),
+                           node_color='m',
+                           node_size=500,
+                           alpha=0.8)
+
+    nx.draw_networkx_edges(g, pos,
+                       edgelist=[(usrId, revw_for_usr.getBusinessID())
+                                 for usrId in non_singleton_usr_suspicousness.keys()
+                                 for revw_for_usr in non_singleton_usr_suspicousness[usrId]],
+                       alpha=0.5, edge_color='r', width=1.0)
+
+
+    # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
+                                 label_pos= 0.3)
+
+    plt.title(title)
+    plt.axis('off')
+    PlotUtil.savePlot(imgFile)
 
 def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
                             non_singleton_usr_non_suspicousness,
