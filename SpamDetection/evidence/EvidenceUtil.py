@@ -67,9 +67,10 @@ def plotSusGraph(non_singleton_usr_suspicousness,
     fig = plt.figure(figsize=(24, 16))
     imgFile = os.path.join(imgFolder, title + '.png')
 
-
-    pickle.dump(non_singleton_usr_suspicousness, os.path.join(imgFolder, 'non_singleton_usr_suspicousness.pkl'))
-    pickle.dump(time_key_to_date_time, os.path.join(imgFolder, 'time_key_to_date_time.pkl'))
+    with open('non_singleton_usr_suspicousness.pkl') as f:
+        pickle.dump(non_singleton_usr_suspicousness, f)
+    with open('time_key_to_date_time.pkl') as f:
+        pickle.dump(time_key_to_date_time, f)
     sys.exit()
     g = nx.Graph()
     bnss_nodes = set()
