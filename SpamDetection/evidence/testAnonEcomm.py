@@ -30,4 +30,6 @@ if __name__ == "__main__":
     anomalous_bnss_key_time_wdw_list = [('8df49a65474732e4f63d378df4bd67e4', (94, 97)),
                                         ('fb57b2749835facf54d9c73f0d9a8d4c', (34, 37)),
                                         ('8edd789d64c7279592057487ff5bb264', (34, 37))]
+    #Sus Graph
+    anomalous_bnss_key_time_wdw_list = [('fb57b2749835facf54d9c73f0d9a8d4c', (34, 37))]
     CommonUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=anomalous_bnss_key_time_wdw_list, rdr=AnonEcommDataReader())
