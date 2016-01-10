@@ -158,7 +158,7 @@ class TemporalGraph(networkx.Graph):
                                                                               datetime.min.time()))
             time_key+=1
 
-        print minDate, maxDate, len(cross_time_graphs.keys())
+        print 'Start Date:', minDate, 'End Date:', maxDate, 'Total Time Ticks:', len(cross_time_graphs.keys())
 
         for reviewKey in parent_reviews.iterkeys():
             review = parent_reviews[reviewKey]

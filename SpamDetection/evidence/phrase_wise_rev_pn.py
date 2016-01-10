@@ -21,14 +21,17 @@ def plotWordCloud(revws, title, imgFolder):
 
     wordcloud = WordCloud(max_font_size=40, relative_scaling=.5,
                           stopwords=STOPWORDS).generate(text)
-    plt.figure()
+    plt.figure(figsize=(20, 20))
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.title(title)
-    PlotUtil.savePlot(imgFile)
+    plt.tight_layout()
+    PlotUtil.savePlot(imgFile, isPdf=False)
 
 def writeReviewTextInFile(reviews, review_file_name, fdr):
-    with open(os.path.join(fdr, review_file_name + '.txt'), 'w') as f:
+    log_file = os.path.join(fdr, review_file_name + '.txt')
+    print 'Logging in Log File', log_file
+    with open(log_file, 'w') as f:
         for revw in reviews:
             f.write(revw.getReviewText())
             f.write('\n')
@@ -51,3 +54,12 @@ def runPhraseFilterAndSeperate(reviews, phrases, fdr):
     writeReviewTextInFile(filtered_reviews, ALL_REVIEWS_FILE, fdr)
     writeReviewTextInFile(pos_filtered_reviews, POS_REVW_FILE, fdr)
     writeReviewTextInFile(neg_filtered_reviews, NEG_REVW_FILE, fdr)
+
+
+def runOnAllReviews(reviews, fdr):
+    pos_reviews = [revw for revw in reviews if revw.getRating()>=4.0]
+    neg_reviews = [revw for revw in reviews if revw.getRating()<=2.0]
+
+    writeReviewTextInFile(reviews, ALL_REVIEWS_FILE, fdr)
+    writeReviewTextInFile(pos_reviews, POS_REVW_FILE, fdr)
+    writeReviewTextInFile(neg_reviews, NEG_REVW_FILE, fdr)

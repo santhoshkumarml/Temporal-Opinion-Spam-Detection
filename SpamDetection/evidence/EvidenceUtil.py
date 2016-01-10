@@ -15,6 +15,7 @@ from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReade
 from util.text_utils import LDAUtil, TextConstants
 from main import AppUtil
 import matplotlib
+from tensorflow.python.ops.gen_nn_ops import lrn
 
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
@@ -152,9 +153,9 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
 def plotRatingDistribution(review_rating_distribution, imgFolder,
                            title='Rating Distribution'):
-    fig = plt.figure(figsize=(15, 15))
+    fig = plt.figure(figsize=(20, 20))
 
-    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
+    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'g', 5.0:'r'}
 
     ax = plt.axes([0.1, 0.1, 0.8, 0.8])
     imgFile = os.path.join(imgFolder, title)
@@ -166,14 +167,18 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
     labels = [int(label) for label in labels]
     fracs = refined_review_rating_distribution.values()
 
+    patches, texts, autotexts = ax.pie(fracs, labels=labels, autopct=make_autopct(fracs), shadow=False, startangle=90, colors=colors, labeldistance=1.15, pctdistance= 0.8)
 
+    for text in texts:
+        text.set_fontsize(36)
 
-    ax.pie(fracs, labels=labels, autopct=make_autopct(fracs), shadow=False, startangle=90, colors=colors)
+    for text in autotexts:
+        text.set_fontsize(50)
 
-    matplotlib.rcParams['font.size'] = 24.0
+    plt.title(title, fontsize=40)
 
-    plt.title(title, bbox={'facecolor': '0.8', 'pad': 5})
-    plt.legend()
+    plt.legend(prop={'size':36})
+
     PlotUtil.savePlot(imgFile)
 
 
@@ -190,18 +195,18 @@ def plotExtremityForNonSingletonUsr(extreme_usrs, non_extreme_usrs, imgFolder,
     plt.ylabel('Count')
     plt.title(title)
     plt.xticks([0.10, 0.60], x_labels)
-    plt.legend()
+    plt.legend(prop={'size':50})
     PlotUtil.savePlot(imgFile)
 
 def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating Count'):
-    fig = plt.figure(figsize=(26, 10))
+    fig = plt.figure(figsize=(32, 16))
     ax = fig.add_subplot(1, 1, 1)
     imgFile = os.path.join(imgFolder, title)
-    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'b', 5.0:'r'}
+    colors = {1.0:'y', 2.0:'c', 3.0:'m', 4.0:'g', 5.0:'r'}
     total_days = len(review_time_rating[1.0].keys())
-    indxs = numpy.arange(0, total_days * 2, 2)
+    indxs = numpy.arange(0, total_days * 4, 4)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 1.8
+    width = 3.6
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
@@ -219,14 +224,29 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
         pS.append(p)
 
     for idx in week_indxs:
-        ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=2, color='g')
+        ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=3, color='g')
 
     plt.ylabel(title)
 #     plt.title(title)
     plt.xticks(indxs + width/2., x_labels)
-    plt.legend([p[0] for p in pS], range(1, 6))
-    PlotUtil.setFontSizeForAxes(plt.gca(), font_size=21)
+    plt.legend([p[0] for p in pS], range(1, 6), prop={'size':50})
+#     fontsize = 30, handlelength=6, borderpad=1, labelspacing=2
+
+#     params = {'legend.fontsize': 20}
+#     plt.rcParams.update(params)
+
+    for item in (ax.get_xticklabels()):
+        item.set_fontsize(30)
+
+    for item in (ax.get_yticklabels()):
+        item.set_fontsize(36)
+
+    ax.yaxis.label.set_fontsize(28)
+
+    plt.tight_layout()
+
     PlotUtil.savePlot(imgFile, isPdf=True)
+
 
 
 def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
@@ -366,8 +386,9 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                   bnssImgFolder, statsToPlot = []):
     for time_key in range(time_key_start, time_key_end):
         imgFolder = os.path.join(bnssImgFolder, str(time_key))
-        if not os.path.exists(imgFolder):
-            os.makedirs(imgFolder)
+        if RATING_DISTRIBUTION in statsToPlot or SUSPICIOUSNESS_GRAPH in statsToPlot:
+            if not os.path.exists(imgFolder):
+                os.makedirs(imgFolder)
         all_user_review_rating_distribution = time_wise_all_user_review_rating_distribution[time_key]
         singleton_review_rating_distribution = time_wise_singleton_review_rating_distribution[time_key]
         non_singleton_review_rating_distribution = time_wise_non_singleton_review_rating_distribution[time_key]
@@ -389,6 +410,8 @@ def plotAllStats(time_wise_non_singleton_usr_suspicousness,\
                                     imgFolder, time_key_to_date_time,
                                     plot_non_suspicious=False)
     if TIME_WISE_RATING in statsToPlot:
+        if not os.path.exists(bnssImgFolder):
+            os.makedirs(bnssImgFolder)
         plotReviewTimeRating(time_wise_review_time_rating,
                              bnssImgFolder)
 
@@ -623,8 +646,28 @@ def performPhraseFilteringOnBusiness(plotDir, bnssKey, time_key_wdw, necessaryDs
         reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
                                                in neighboring_usr_nodes],
                                               key=lambda r: SIAUtil.getDateForReview(r))
-        phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrases, fdr)
+    phrase_wise_rev_pn.runPhraseFilterAndSeperate(reviews_for_bnss_in_time_key, phrases, fdr)
 
+
+def performWordCloudOnAllReviewsInTimeWindow(plotDir, bnssKey, time_key_wdw, necessaryDs):
+    ctg, superGraph, time_key_to_date_time, suspicious_timestamps, suspicious_timestamp_ordered = necessaryDs
+    time_key_start, time_key_end = time_key_wdw
+    fdr = os.path.join(os.path.join(plotDir, bnssKey + '_' + str(time_key_wdw)))
+    reviews = []
+    for time_key in range(time_key_start, time_key_end):
+        G = ctg[time_key]
+        if (bnssKey, SIAUtil.PRODUCT) not in G:
+            continue
+
+        if not os.path.exists(fdr):
+            os.makedirs(fdr)
+
+        neighboring_usr_nodes = G.neighbors((bnssKey, SIAUtil.PRODUCT))
+        reviews_for_bnss_in_time_key = sorted([G.getReview(usrId, bnssKey) for (usrId, usr_type)
+                                               in neighboring_usr_nodes],
+                                              key=lambda r: SIAUtil.getDateForReview(r))
+        reviews.extend(reviews_for_bnss_in_time_key)
+    phrase_wise_rev_pn.runOnAllReviews(reviews, fdr)
 
 def sort_text_cnt(key1, key2):
     text1, review_ids1 = key1
