@@ -3,13 +3,19 @@ Created on Jan 8, 2016
 
 @author: santhosh
 '''
-import os, sys
+import numpy
+import os, sys, pickle
 
 import CommonUtil
+from evidence import EvidenceUtil
 from util.data_reader_utils.anon_ecomm_utils.AnonEcommDataReader import AnonEcommDataReader
 
 
 if __name__ == "__main__":
+
+    for i in numpy.arange(20, 80, 5):
+        EvidenceUtil.tryPlotForFB(size=i)
+
     if len(sys.argv) != 2:
         print 'Usage: python -m \"evidence.testAnonEcomm\" csvFolder'
         sys.exit()

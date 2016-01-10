@@ -67,11 +67,6 @@ def plotSusGraph(non_singleton_usr_suspicousness,
     fig = plt.figure(figsize=(24, 16))
     imgFile = os.path.join(imgFolder, title + '.png')
 
-    with open('non_singleton_usr_suspicousness.pkl', 'wb') as f:
-        pickle.dump(non_singleton_usr_suspicousness, f)
-    with open('time_key_to_date_time.pkl', 'wb') as f:
-        pickle.dump(time_key_to_date_time, f)
-    sys.exit()
     g = nx.Graph()
     bnss_nodes = set()
     usr_nodes = set()
@@ -221,8 +216,9 @@ def plotSuspiciousNessGraph(non_singleton_usr_suspicousness,
 
     nx.draw_networkx_labels(g, pos, labels=node_labels)
     # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
-                                 label_pos= 0.3)
+    for edge_label in edge_labels:
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
+                                     label_pos= 0.3)
 
     plt.title(title)
     plt.axis('off')
@@ -817,3 +813,96 @@ def performDuplicateCount(plotDir, bnssKey, time_key_wdw, necessaryDs, all_revie
 #             print '------------------------------'
 #     print '**********************************'
     print '------------------------------------------------------------------------------------------------'
+
+
+import random, numpy, datetime
+
+def tryPlotForFB(size=40):
+    non_singleton_usr_suspicousness = pickle.load(open('/media/santhosh/Data/workspace/datalab/data/stats/fk/non_singleton_usr_suspicousness.pkl'))
+    bnss_to_reviews = dict()
+    time_key_to_date_time = pickle.load(open('/media/santhosh/Data/workspace/datalab/data/stats/fk/time_key_to_date_time.pkl'))
+    g = nx.Graph()
+    bnss_nodes = set()
+    usr_nodes = set()
+    node_labels = dict()
+#     for usrId in non_singleton_usr_suspicousness.keys():
+#         for revw_for_usr in non_singleton_usr_suspicousness[usrId]:
+#             bnss_id_for_revw = revw_for_usr.getBusinessID()
+#             date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+#
+#             time_id_for_date_time = EvidenceUtil.findTimeIdForDateTime(time_key_to_date_time,\
+#                                                           date_time_for_this_usr)
+#
+#             if bnss_id_for_revw not in bnss_to_reviews:
+#                 bnss_to_reviews[bnss_id_for_revw] = []
+#
+#             bnss_to_reviews[bnss_id_for_revw].add((usrId, revw_for_usr.getRating(), time_id_for_date_time))
+    non_singleton_usr_suspicousness_ids = [usrId for usrId in non_singleton_usr_suspicousness.keys()][:size]
+
+    for usrId in non_singleton_usr_suspicousness_ids:
+        for revw_for_usr in non_singleton_usr_suspicousness[usrId]:
+            bnss_id_for_revw = revw_for_usr.getBusinessID()
+            date_time_for_this_usr = SIAUtil.getDateForReview(revw_for_usr)
+
+            time_id_for_date_time = findTimeIdForDateTime(time_key_to_date_time,\
+                                                          date_time_for_this_usr)
+            bnss_nodes.add(bnss_id_for_revw)
+            g.add_edge(usrId, bnss_id_for_revw, {'edge': (revw_for_usr.getRating(), time_id_for_date_time)})
+
+            node_labels[bnss_id_for_revw] = bnss_id_for_revw[:2]
+            usr_nodes.add(usrId)
+            node_labels[usrId] = usrId[:2]
+
+    edge_labels=dict([((u,v,),d['edge']) for u,v,d in g.edges(data=True)])
+
+    usr_nodes_len = len(usr_nodes)
+    bnss_nodes_len = len(bnss_nodes)
+
+    pos = dict()
+
+    usr_node_iter = bnss_nodes_len
+    for node in usr_nodes:
+        pos[node] = (1, usr_node_iter)
+        usr_node_iter += bnss_nodes_len
+
+    bnss_nodes_iter = usr_nodes_len
+    for node in bnss_nodes:
+        pos[node] = (10, bnss_nodes_iter)
+        bnss_nodes_iter += usr_nodes_len
+#     X, Y = nx.algorithms.bipartite.sets(g)
+#     pos = dict()
+#     pos.update((n, (1, i)) for i, n in enumerate(X) ) # put nodes from X at x=1
+#     pos.update((n, (100, i)) for i, n in enumerate(Y) ) # put nodes from Y at x=2
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(usr_nodes),
+                           node_color='b',
+                           node_size=200,
+                           alpha=0.8)
+
+    nx.draw_networkx_nodes(g, pos,
+                           nodelist=list(bnss_nodes),
+                           node_color='m',
+                           node_size=3400,
+                           alpha=0.8)
+
+    nx.draw_networkx_edges(g, pos,
+                       edgelist=[(usrId, revw_for_usr.getBusinessID())
+                                 for usrId in non_singleton_usr_suspicousness_ids
+                                 for revw_for_usr in non_singleton_usr_suspicousness[usrId]],
+                       alpha=0.5, edge_color='red', width=1.5)
+
+
+    nx.draw_networkx_labels(g, pos, labels=node_labels)
+    # nx.draw_networkx_edges(g, pos, width=1.0, alpha=0.5)
+#     nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels,\
+#                                  label_pos= 0.3)
+    for edge_label in edge_labels:
+        current_labels = {edge_label: edge_labels[edge_label]}
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=current_labels, font_size=50,
+                                     label_pos= numpy.random.choice(numpy.arange(0.1, 0.9, 0.25)))
+
+    plt.title('Suspicious Non Singleton User Graph', fontsize=60)
+    plt.axis('off')
+    fig = plt.gcf().set_size_inches(50, 50)
+    PlotUtil.savePlot('/home/santhosh/logs/susicious_' + str(size) , isPdf=True)
