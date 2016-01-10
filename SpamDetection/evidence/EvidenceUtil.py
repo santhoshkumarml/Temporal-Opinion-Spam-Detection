@@ -224,7 +224,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
         pS.append(p)
 
     for idx in week_indxs:
-        ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=3, color='g')
+        ax.axvline(x=idx, ymin=0, ymax=1000000, linewidth=3, color='black')
 
     plt.ylabel(title)
 #     plt.title(title)
