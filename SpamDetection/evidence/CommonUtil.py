@@ -11,7 +11,7 @@ from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReade
 
 def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_wdw_list = list()):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
-    readReviewsText = False
+    readReviewsText = True
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText,
                                                rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\
@@ -34,7 +34,7 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True,
-                                            statsToPlot = [EvidenceUtil.TIME_WISE_RATING])
+                                            statsToPlot = [EvidenceUtil.SUSPICIOUSNESS_GRAPH])
 #         EvidenceUtil.performWordCloudOnAllReviewsInTimeWindow(evidencePlotDir, bnss_key, time_key_wdw, necessary_ds)
 
         print '----------------------------------------------------------------------------------------'
