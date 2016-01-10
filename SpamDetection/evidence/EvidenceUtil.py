@@ -15,7 +15,6 @@ from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReade
 from util.text_utils import LDAUtil, TextConstants
 from main import AppUtil
 import matplotlib
-from tensorflow.python.ops.gen_nn_ops import lrn
 
 
 nltk.data.path.append(TextConstants.NLTK_DATA_PATH)
