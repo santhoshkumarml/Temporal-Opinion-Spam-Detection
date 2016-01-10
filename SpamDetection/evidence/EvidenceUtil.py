@@ -205,7 +205,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
     total_days = len(review_time_rating[1.0].keys())
     indxs = numpy.arange(0, total_days * 4, 4)
     week_indxs = [idx for idx in indxs if ((idx % 7) == 0)]
-    width = 3.9
+    width = 3.8
     x_labels = [d.strftime('%m/%d') for d in sorted(review_time_rating[1.0].keys())]
     pS = []
     btm = None
@@ -235,7 +235,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
 #     plt.rcParams.update(params)
 
     for item in (ax.get_xticklabels()):
-        item.set_fontsize(32)
+        item.set_fontsize(31)
 
     for item in (ax.get_yticklabels()):
         item.set_fontsize(60)
