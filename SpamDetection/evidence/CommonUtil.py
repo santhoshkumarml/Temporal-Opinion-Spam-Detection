@@ -6,12 +6,12 @@ Created on Jan 8, 2016
 import os
 
 import EvidenceUtil
-from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.swm_utils.SWMDataReader import SWMDataReader
 
 
-def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_wdw_list = list()):
+def doGatherEvidence(csvFolder, plotDir, rdr=SWMDataReader(), bnss_key_time_wdw_list = list()):
     evidencePlotDir = os.path.join(plotDir, 'Experiments')
-    readReviewsText = True
+    readReviewsText = False
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=readReviewsText,
                                                rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\
@@ -34,12 +34,12 @@ def doGatherEvidence(csvFolder, plotDir, rdr=ItunesDataReader(), bnss_key_time_w
                                             necessary_ds,\
                                             readReviewsText=readReviewsText,\
                                             doPlot=True,
-                                            statsToPlot = [EvidenceUtil.SUSPICIOUSNESS_GRAPH])
+                                            statsToPlot = [EvidenceUtil.RATING_DISTRIBUTION])
 #         EvidenceUtil.performWordCloudOnAllReviewsInTimeWindow(evidencePlotDir, bnss_key, time_key_wdw, necessary_ds)
 
         print '----------------------------------------------------------------------------------------'
 
-def printSortedReviews(csvFolder, plotDir, rdr=ItunesDataReader()):
+def printSortedReviews(csvFolder, plotDir, rdr=SWMDataReader()):
     necessary_ds = EvidenceUtil.getNecessaryDs(csvFolder, readReviewsText=True,
                                                rdr=rdr)
     ctg, superGraph, time_key_to_date_time,\

@@ -96,12 +96,10 @@ def getThresholdForDifferentMeasures(plotDir, doHist=False):
     measure_noise_threshold = {StatConstants.NO_OF_NEGATIVE_REVIEWS:373 ,
                                StatConstants.NON_CUM_NO_OF_REVIEWS:12768,
                                StatConstants.NO_OF_POSITIVE_REVIEWS:8962}
-# Itunes
 #     {StatConstants.NO_OF_NEGATIVE_REVIEWS:10000 ,
 #                                StatConstants.NON_CUM_NO_OF_REVIEWS:2652956,
 #                                StatConstants.NO_OF_POSITIVE_REVIEWS:2652956}
 
-# Flipkart
 #     {StatConstants.NO_OF_NEGATIVE_REVIEWS:373 ,
 #                                StatConstants.NON_CUM_NO_OF_REVIEWS:12768,
 #                                StatConstants.NO_OF_POSITIVE_REVIEWS:8962}

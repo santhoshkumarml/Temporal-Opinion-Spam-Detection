@@ -20,16 +20,14 @@ if __name__ == "__main__":
     reader = AnonEcommDataReader.AnonEcommDataReader()
     currentDateTime = datetime.now().strftime('%d-%b--%H:%M')
     plotDir = os.path.join(os.path.join(os.path.join(csvFolder, os.pardir), 'stats'), 'fk')
+    bnss_list=['a9856cb97ebd363a0581d08f27f8b379', '8edd789d64c7279592057487ff5bb264',
+               '8df49a65474732e4f63d378df4bd67e4', '5f2c7517a7012640763148a38b1372b6',
+               '5f2c7517a7012640763148a38b1372b6', 'fb57b2749835facf54d9c73f0d9a8d4c']
     AppUtil.detectAnomaliesForBnsses(csvFolder, plotDir,
-                                     StatConstants.MEASURE_CHANGE_THRES_FLIPKART,
+                                     StatConstants.MEASURE_CHANGE_THRES_ANON_ECOMM,
                                      doPlot=True, dologStats=False,
                                      find_outlier_idxs=True,
-                                     bnss_list=['a9856cb97ebd363a0581d08f27f8b379',
-                                                '8edd789d64c7279592057487ff5bb264',
-                                                '8df49a65474732e4f63d378df4bd67e4',
-                                                '5f2c7517a7012640763148a38b1372b6',
-                                                '5f2c7517a7012640763148a38b1372b6',
-                                                'fb57b2749835facf54d9c73f0d9a8d4c'])
+                                     )
 
 #     AppUtil.doRanking(plotDir)
 #     print ThresholdHelper.getThresholdForDifferentMeasures(plotDir, doHist=True)

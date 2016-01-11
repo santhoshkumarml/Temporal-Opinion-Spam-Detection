@@ -10,7 +10,7 @@ import pickle
 from anomaly_detection import AnomalyDetector
 from statistics import business_statistics_generator
 from util import GraphUtil, SIAUtil, StatConstants, PlotUtil
-from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.swm_utils.SWMDataReader import SWMDataReader
 
 
 SCORES_WITH_OUTLIERS_LOG_FILE = 'scores_with_outliers.log'
@@ -32,7 +32,7 @@ def getThreshold(data, percent):
     std = numpy.std(data)
     return (m + (determinKForPercent(percent)*std))
 
-def readData(csvFolder,readReviewsText=False, rdr = ItunesDataReader()):
+def readData(csvFolder,readReviewsText=False, rdr = SWMDataReader()):
     (usrIdToUserDict, bnssIdToBusinessDict, reviewIdToReviewsDict) = rdr.readData(csvFolder, readReviewsText)
     return bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict
 
@@ -46,7 +46,7 @@ def serializeBnssStats(bnss_key, plotDir, statistics_for_bnss):
 def deserializeBnssStats(bnss_key, statsDir):
     return pickle.load(open(os.path.join(statsDir, bnss_key)))
 
-def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
+def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=SWMDataReader()):
     # Read data
     bnssIdToBusinessDict, reviewIdToReviewsDict, usrIdToUserDict = readData(csvFolder, rdr=rdr)
     # Construct Graphs
@@ -65,7 +65,7 @@ def readAndGenerateStatistics(csvFolder, plotDir, timeLength = '1-W', rdr=Itunes
     return bnssKeys, cross_time_graphs, measuresToBeExtracted
 
 
-def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataReader()):
+def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=SWMDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
     print 'Data Read'
     bnssKeys = bnssKeys[:6000]
@@ -89,7 +89,7 @@ def doSerializeAllBnss(csvFolder, plotDir, timeLength = '1-W', rdr=ItunesDataRea
 
 def extractAndSerializeBnssStatisticsForBnss(csvFolder, plotDir, bnss_list_start=-1,
                                              bnss_list_end=-1, bnsses_list=list(),
-                                             timeLength = '1-W', rdr=ItunesDataReader()):
+                                             timeLength = '1-W', rdr=SWMDataReader()):
     bnssKeys, cross_time_graphs, measuresToBeExtracted = readAndGenerateStatistics(csvFolder, plotDir, rdr=rdr)
     bnss_list = list()
 

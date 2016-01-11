@@ -11,7 +11,7 @@ import CommonUtil
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print 'Usage: python -m \"evidence.testItunes\" csvFolder'
+        print 'Usage: python -m \"evidence.testSWM\" csvFolder'
         sys.exit()
     csvFolder = sys.argv[1]
 
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     bnss_key_time_wdw_list = [('284819997', (75, 166)), ('284819997', (168, 169)),
                               ('284819997', (175, 176)), ('284819997', (182, 183)),
                               ('284819997', (189, 190)), ('319927587', (191, 192))]
+    bnss_key_time_wdw_list = [('284819997', (189, 190))]
 
 #     bnss_key_time_wdw_list = [('284819997', (167, 169))]
     CommonUtil.doGatherEvidence(csvFolder, plotDir, bnss_key_time_wdw_list=bnss_key_time_wdw_list)

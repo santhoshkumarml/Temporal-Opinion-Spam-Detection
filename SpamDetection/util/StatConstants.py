@@ -123,7 +123,7 @@ MEASURE_DIRECTION = {AVERAGE_RATING : BOTH,
                      NO_OF_NEGATIVE_REVIEWS:INCREASE}
 
 
-MEASURE_CHANGE_THRES_ITUNES = {'Youth Score': 0.20255295206730223,
+MEASURE_CHANGE_THRES_SWM = {'Youth Score': 0.20255295206730223,
                                'Ratio of Singletons': 0.24039496091794749,
                                'No of +ve Reviews': 39432.770726578514,
                                'Entropy Gap Score': 0.26981230346376256,
@@ -132,7 +132,7 @@ MEASURE_CHANGE_THRES_ITUNES = {'Youth Score': 0.20255295206730223,
                                'Ratio of First-timers': 0.21045479159684069,
                                'No of -ve Reviews': 372.90525000682993}
 
-MEASURE_CHANGE_THRES_FLIPKART = {'Youth Score': 0.23658300730179033,
+MEASURE_CHANGE_THRES_ANON_ECOMM = {'Youth Score': 0.23658300730179033,
                                  'Ratio of Singletons': 0.21875451805457335,
                                  'No of +ve Reviews': 111.90839697979619,
                                  'Entropy Gap Score': 0.17471480264981926,

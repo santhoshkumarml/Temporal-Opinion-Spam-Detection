@@ -12,10 +12,6 @@ from util.data_reader_utils.anon_ecomm_utils.AnonEcommDataReader import AnonEcom
 
 
 if __name__ == "__main__":
-
-    for i in numpy.arange(20, 80, 5):
-        EvidenceUtil.tryPlotForFB(size=i)
-
     if len(sys.argv) != 2:
         print 'Usage: python -m \"evidence.testAnonEcomm\" csvFolder'
         sys.exit()

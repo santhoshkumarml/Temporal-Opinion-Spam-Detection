@@ -20,7 +20,7 @@ META_USER_NAME = 'username'
 META_STARS = 'stars'
 META_BNSS_VERSION = 'version'
 META_DATE  = 'date'
-META_HELPFUL_VOTES ='Helpful Votes' 
+META_HELPFUL_VOTES ='Helpful Votes'
 META_TOTAL_VOTES = 'Total Votes'
 META_TIMESTAMP = 'Timestamp'
 META_COLS = [META_BNSS_ID,  META_REVIEW_ID, META_USER_ID, META_USER_NAME, \
@@ -33,15 +33,15 @@ META_IDX_DICT = {META_COLS[i]:i for i in range(len(META_COLS))}
 BNSS_ID = 'bnss_id'
 REVIEW_ID = 'review_id'
 TITLE = 'title'
-CONTENT = 'content' 
+CONTENT = 'content'
 COLS = [BNSS_ID, REVIEW_ID, TITLE, CONTENT]
 
 REVW_IDX_DICT = {COLS[i]:i for i in range(len(COLS))}
 
-META_FILE = 'itunes3_reviews_meta.csv'
-REVIEW_FILE = 'itunes3_reviews_text.csv'
+META_FILE = 'swm_reviews_meta.csv'
+REVIEW_FILE = 'swm_reviews_text.csv'
 
-class ItunesDataReader:
+class SWMDataReader:
     def __init__(self):
         self.usrIdToUsrDict = {}
         self.bnssIdToBnssDict = {}
@@ -93,7 +93,7 @@ class ItunesDataReader:
                 print 'Already Read Meta - ReviewId:', review_id
 
             self.reviewIdToReviewDict[review_id] = revw
-        
+
         print 'Users:', len(self.usrIdToUsrDict.keys()),\
             'Products:', len(self.bnssIdToBnssDict.keys()),\
             'Reviews:', len(self.reviewIdToReviewDict.keys())
@@ -101,10 +101,10 @@ class ItunesDataReader:
         print 'Skipped Lines:', skippedMeta
 
         # return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
-    
+
         if not readReviewsText:
             return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
-        
+
         df2 = pd.read_csv(reviewFile,escapechar='\\', header=None,
                           dtype=object, error_bad_lines=False)
         review_ids = []
@@ -133,18 +133,18 @@ class ItunesDataReader:
                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
             else:
                 skippedData += 1
-        
+
         print 'Data lines', df2.shape[0], len(review_ids)
-            
+
         afterDataReadTime = datetime.now()
-        
+
         print 'Data Read Time:', (afterDataReadTime - beforeDataReadTime)
         print 'Skipped Count:', skippedMeta, skippedData
-        
+
         print 'Users:', len(self.usrIdToUsrDict.keys()),\
             'Products:', len(self.bnssIdToBnssDict.keys()),\
             'Reviews:', len(self.reviewIdToReviewDict.keys())
-        
+
         # textLessReviewIds = set([review_id for review_id in self.reviewIdToReviewDict
         #                         if not self.reviewIdToReviewDict[review_id].getReviewText()])
         # for review_id in textLessReviewIds:
@@ -155,37 +155,37 @@ class ItunesDataReader:
         # print 'Users:', len(self.usrIdToUsrDict.keys()),\
         #     'Products:', len(self.bnssIdToBnssDict.keys()),\
         #     'Reviews:', len(self.reviewIdToReviewDict.keys())
-         
+
         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)
 
-        
+
 #     def readDataWithPandas(self, reviewFolder):
 #         reviewMetaFile = join(reviewFolder, META_FILE)
-#         
+#
 #         df1 = pd.read_csv(reviewMetaFile,escapechar='\\',header=None,\
 #                               dtype=object)
-#         
+#
 #         df1 =  df1.dropna(axis=0, how='all')
-#         
+#
 #         reviewFile = join(reviewFolder, REVIEW_FILE)
-#         
+#
 #         df2 = pd.read_csv(reviewFile,escapechar='\\',header=None,\
 #                               dtype=object, names = COLS)
-#          
+#
 #         df2 = df2.dropna(axis=0, how='all')
 #         print df1.describe()
-#         
+#
 #         for index,row in df1.iterrows():
 #             print index
 #             print row
 #             break
-#         
+#
 #         for row in df1.itertuples():
 #             print row
 #             break
-#         
+#
 #         sys.exit()
-#      
+#
 #         for row in df1.itertuples():
 #             print row
 #             row = row[0]
@@ -195,9 +195,9 @@ class ItunesDataReader:
 #             review_id = row[META_IDX_DICT[META_REVIEW_ID]]
 #             stars = row[META_IDX_DICT[META_STARS]]
 #             review_date = row[META_IDX_DICT[META_DATE]]
-#             
+#
 #             review_id = (bnss_id, review_id)
-#             
+#
 #             try :
 #                 date_object = dateutil.parser.parse(review_date)
 #                 date_object = date_object.date()
@@ -211,23 +211,23 @@ class ItunesDataReader:
 #                 e = sys.exc_info()[0]
 #                 print e
 #                 continue
-#             
+#
 #             if bnss_id not in self.bnssIdToBnssDict:
 #                 self.bnssIdToBnssDict[bnss_id] = business(bnss_id, bnss_id)
 #             bnss = self.bnssIdToBnssDict[bnss_id]
-#             
+#
 #             if user_id not in self.usrIdToUsrDict:
-#                 self.usrIdToUsrDict[user_id] = user(user_id, user_name)    
+#                 self.usrIdToUsrDict[user_id] = user(user_id, user_name)
 #             usr = self.usrIdToUsrDict[user_id]
-#             
-#             
+#
+#
 #             revw = review(review_id, usr.getId(), bnss.getId(), stars, date_object)
-#             
+#
 #             if review_id in self.reviewIdToReviewDict:
 #                 print 'already there',review_id
-#                 
+#
 #             self.reviewIdToReviewDict[review_id] = revw
-#         
+#
 #         with open(reviewFile,mode= 'rU') as f:
 #             lines = csv.reader(f, escapechar='\\')
 #             for row in lines:
@@ -245,7 +245,7 @@ class ItunesDataReader:
 #                 if review_id not in self.reviewIdToReviewDict:
 #                     print 'Not Read Meta Data - ReviewId:', review_id
 #                     skippedData+=1
-#                     continue        
+#                     continue
 #                 self.reviewIdToReviewDict[review_id].setReviewText(review_text)
 #
 #         for row2 in df2.itertuples():
@@ -256,8 +256,8 @@ class ItunesDataReader:
 #             if review_id not in self.reviewIdToReviewDict:
 #                 #print 'Not Present', review_id
 #                 continue
-#                 
+#
 #             self.reviewIdToReviewDict[review_id].setReviewText(review_text)
-#         
-#         
+#
+#
 #         return (self.usrIdToUsrDict, self.bnssIdToBnssDict, self.reviewIdToReviewDict)

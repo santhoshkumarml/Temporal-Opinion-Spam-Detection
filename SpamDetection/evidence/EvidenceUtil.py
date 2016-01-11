@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import phrase_wise_rev_pn
 from util import GraphUtil, SIAUtil, PlotUtil
-from util.data_reader_utils.itunes_utils.ItunesDataReader import ItunesDataReader
+from util.data_reader_utils.swm_utils.SWMDataReader import SWMDataReader
 from util.text_utils import LDAUtil, TextConstants
 from main import AppUtil
 import matplotlib
@@ -31,6 +31,8 @@ def make_autopct(values):
     def my_autopct(pct):
         total = sum(values)
         val = int(round(pct*total/100.0))
+        if val == 0:
+            return ''
         return '{v:d}'.format(p=pct, v=val)
     return my_autopct
 
@@ -234,7 +236,7 @@ def plotRatingDistribution(review_rating_distribution, imgFolder,
     ax = plt.axes([0.1, 0.1, 0.8, 0.8])
     imgFile = os.path.join(imgFolder, title)
 
-    refined_review_rating_distribution = {key: review_rating_distribution[key] for key in review_rating_distribution if review_rating_distribution[key] > 0}
+    refined_review_rating_distribution = {key: review_rating_distribution[key] for key in review_rating_distribution}
 
     labels = refined_review_rating_distribution.keys()
     colors = [colors[label] for label in labels]
@@ -323,7 +325,7 @@ def plotReviewTimeRating(review_time_rating, imgFolder, title='Time Wise Rating 
 
 
 
-def getNecessaryDs(csvFolder, rdr=ItunesDataReader(), readReviewsText=False, timeLength='1-W'):
+def getNecessaryDs(csvFolder, rdr=SWMDataReader(), readReviewsText=False, timeLength='1-W'):
     suspicious_timestamps = dict()
     suspicious_timestamp_ordered = list()
     with open(os.path.join(csvFolder, 'out_all_features_mul_reviews.log')) as f:
